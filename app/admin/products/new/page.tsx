@@ -37,6 +37,7 @@ export default function NewProductPage() {
     isTopSeller: false,
     isActive: true,
     isOutOfStockVisible: true,
+    priceType: "FIXED" as "FIXED" | "NEGOTIABLE",
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -365,6 +366,21 @@ export default function NewProductPage() {
           </div>
         </div>
 
+        {/* অর্ডার পদ্ধতি: ওয়েবসাইটে সরাসরি অর্ডার নাকি শুধু WhatsApp/ফোনে */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">অর্ডার পদ্ধতি *</label>
+          <select
+            name="priceType"
+            value={form.priceType}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 bg-white"
+          >
+            <option value="FIXED">নির্দিষ্ট দাম — ওয়েবসাইটে Add to Cart/অর্ডার বাটন থাকবে</option>
+            <option value="NEGOTIABLE">শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের বাচ্চা)</option>
+          </select>
+        </div>
+        </div>
+
         {/* Options */}
         <div className="flex gap-6 mb-8">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -428,6 +444,6 @@ export default function NewProductPage() {
         </div>
 
       </div>
-    </div>
   )
 }
+

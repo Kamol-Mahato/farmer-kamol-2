@@ -54,6 +54,7 @@ export async function POST(request: Request) {
       isTopSeller,
       isActive,
       isOutOfStockVisible,
+      priceType,
     } = body
 
     if (!name || !slug || !pricePerUnit || !stockQty) {
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
         isTopSeller,
         isActive,
         isOutOfStockVisible,
+        priceType: priceType || "FIXED",
         // ✅ একাধিক ছবি থাকলে সবগুলো সেভ হবে, প্রথমটা isPrimary হিসেবে মার্ক হবে
         // SEO/AI এর জন্য প্রতিটা ছবির আলাদা alt-friendly নাম তৈরির ভিত্তি হিসেবে নাম+ক্রম রাখা হলো
         images: (imageUrls && imageUrls.length > 0)
