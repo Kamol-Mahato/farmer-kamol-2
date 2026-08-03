@@ -77,9 +77,11 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const btnRef = useRef<HTMLAnchorElement>(null)
+  const imgWrapRef = useRef<HTMLDivElement>(null)
   const [bounced, setBounced] = useState(false)
   const [added, setAdded] = useState(false)
   const [imgIndex, setImgIndex] = useState(0)
+  const [imgVisible, setImgVisible] = useState(false)
   const isOutOfStock = product.stockQty <= 0
   const images = product.images?.length > 0 ? product.images : [{ imageUrl: "/placeholder.jpg" }]
   const mainImage = images[imgIndex]?.imageUrl || "/placeholder.jpg"
@@ -104,6 +106,20 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
     if (btnRef.current) observer.observe(btnRef.current)
     return () => observer.disconnect()
   }, [bounced])
+
+  useEffect(() => {
+    const imgObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setImgVisible(true)
+          imgObserver.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+    if (imgWrapRef.current) imgObserver.observe(imgWrapRef.current)
+    return () => imgObserver.disconnect()
+  }, [])
 
   function handleAddToCart() {
     // ✅ key: "farmer_kamol_cart" — সব জায়গায় একই
@@ -138,13 +154,15 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition">
       <div>
         <Link href={`/shop/${product.slug}`}>
-        <div className="relative aspect-square w-full bg-gray-50 overflow-hidden mb-3">
+        <div ref={imgWrapRef} className="relative aspect-square w-full bg-gray-50 overflow-hidden mb-3">
         <Image
               src={mainImage}
               alt={`${product.name} - ছবি ${imgIndex + 1}`}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover group-hover:scale-135 transition duration-300"
+              className={`object-cover group-hover:scale-135 transition-all duration-700 ease-out ${
+                imgVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
             />
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
