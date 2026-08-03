@@ -60,6 +60,9 @@ _pp = os.path.join(BASE_DIR, "ffmpeg", "bin", "ffprobe.exe")
 FFMPEG_BIN:  str = _pf if os.path.exists(_pf) else "ffmpeg"
 FFPROBE_BIN: str = _pp if os.path.exists(_pp) else "ffprobe"
 
+# AI ভয়েস ডিনয়েজ (RNNoise) — মডেল ফাইল থাকলেই কাজ করবে, না থাকলে auto স্কিপ
+RNNOISE_MODEL_PATH: str = os.path.join(BASE_DIR, "models", "rnnoise", "voice.rnnn")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # VIDEO RENDER PROFILES
 # ─────────────────────────────────────────────────────────────────────────────
@@ -242,6 +245,8 @@ def init_session_state() -> None:
         "nvenc_available": None,
         "vidstab_available": None,
         # Global audio settings
+        # ০. AI নয়েজ রিমুভাল (RNNoise) — সম্পূর্ণ অফলাইন, বিনামূল্যে
+        "vo_rnnoise":        True,    # ডিফল্ট ON — মডেল ফাইল না থাকলে auto স্কিপ হবে
         "vo_eq_enable":      True,
         "vo_noise_gate":     True,
         "vo_loudnorm":       True,
@@ -683,6 +688,12 @@ def build_voiceover_audio_filter(settings: dict) -> str:
     যথাক্রমে build_clip_audio_filter() ও render command এ প্রযোজ্য হয়।
     """
     parts = []
+    # ধাপ ০ — AI Noise Removal (RNNoise / arnndn) — সবার আগে, raw audio এর
+    # উপর কাজ করলে সবচেয়ে ভালো ফল দেয়। মডেল ফাইল না থাকলে স্কিপ হবে,
+    # বাকি সব classic filter স্বাভাবিকভাবে চলবে।
+    if settings.get("vo_rnnoise") and os.path.exists(RNNOISE_MODEL_PATH):
+        _escaped_model = ffmpeg_escape_font_path(RNNOISE_MODEL_PATH)
+        parts.append(f"arnndn=m='{_escaped_model}'")
 
     # ধাপ ১ — Band-pass (High + Low pass combo)
     # মানুষের কণ্ঠের কার্যকর রেঞ্জ (80Hz–8000Hz) এর বাইরের সবকিছু কেটে ফেলে।
@@ -2408,6 +2419,7 @@ def export_settings_preset() -> dict:
         "transition_type", "global_speed", "bg_music_enable", "bg_music_volume",
         "selected_bangla_font",
         "vo_eq_enable", "vo_noise_gate", "vo_loudnorm", "vo_ducking",
+        "vo_rnnoise",
         "vo_loudnorm_twopass", "vo_limiter", "vo_limiter_level",
         "vo_lcut", "vo_pitch_correct", "vo_aac_320",
         "vo_echo", "vo_echo_delay", "vo_echo_decay",
@@ -3099,6 +3111,21 @@ def render_ui() -> None:
         st.divider()
 
         # ── Pro Audio Settings ────────────────────────────────────────────────
+        st.markdown("### 🤖 AI নয়েজ রিমুভাল (RNNoise)")
+        st.caption("সম্পূর্ণ ফ্রি, অফলাইনে চলে — কোনো ইন্টারনেট/API লাগে না")
+        _rnnoise_ready = os.path.exists(RNNOISE_MODEL_PATH)
+        st.session_state["vo_rnnoise"] = st.toggle(
+            "০. 🤖 AI Deep-Learning Denoise (RNNoise)",
+            value=st.session_state["vo_rnnoise"],
+            disabled=not _rnnoise_ready,
+            help=(
+                "RNN-ভিত্তিক AI মডেল দিয়ে background noise আলাদা করে — মাঠের "
+                "বাতাস/দূরের শব্দে classic filter এর চেয়ে ভালো ফল দেয়। সম্পূর্ণ "
+                "অফলাইন, কোনো cost নেই."
+                + ("" if _rnnoise_ready else " ⚠️ models/rnnoise/voice.rnnn পাওয়া যায়নি — বন্ধ আছে।")
+            )
+        )
+        st.divider()
         st.markdown("### 🎚️ প্রো অডিও ফিচার")
         st.caption("Voiceover এর জন্য প্রযোজ্য")
 
@@ -4266,6 +4293,7 @@ def render_ui() -> None:
             st.warning("⬅️ আগে ক্লিপ আপলোড করুন")
 
         audio_settings = {
+            "vo_rnnoise":       st.session_state["vo_rnnoise"],
             "vo_eq_enable":     st.session_state["vo_eq_enable"],
             "vo_loudnorm":      st.session_state["vo_loudnorm"],
             "vo_loudnorm_twopass": st.session_state["vo_loudnorm_twopass"],
@@ -4535,6 +4563,7 @@ def render_ui() -> None:
 | ৭.৩ | Audio Fade In | {'✅ ' + str(st.session_state['audio_fade_in_sec']) + 's' if st.session_state['audio_fade_in_enable'] else '❌ বন্ধ'} |
 | ৭.৪ | Audio Fade Out | {'✅ ' + str(st.session_state['audio_fade_out_sec']) + 's' if st.session_state['audio_fade_out_enable'] else '❌ বন্ধ'} |
 | ৭.৫ | YouTube Chapter Export | {'✅ চালু' if st.session_state.get('chapter_export_enable') else '❌ বন্ধ'} |
+| ০ | AI Denoise (RNNoise) | {'✅ চালু' if audio_settings.get('vo_rnnoise') and os.path.exists(RNNOISE_MODEL_PATH) else '❌ বন্ধ/মডেল নেই'} |
 | ৭ | Vocal EQ | {'✅' if audio_settings['vo_eq_enable'] else '❌'} |
 | ৮ | Loudnorm | {'✅ Two-Pass' if audio_settings.get('vo_loudnorm_twopass') and audio_settings['vo_loudnorm'] else ('✅ Single-Pass' if audio_settings['vo_loudnorm'] else '❌')} EBU R128 -16 LUFS |
 | ৮.৫ | Peak Limiter | {'✅ সিলিং ' + str(audio_settings.get('vo_limiter_level', 0.95)) if audio_settings.get('vo_limiter') else '❌ বন্ধ'} |
