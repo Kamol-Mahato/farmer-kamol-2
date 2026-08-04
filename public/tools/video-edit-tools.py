@@ -273,6 +273,10 @@ def init_session_state() -> None:
         # ১২. Hum Removal — বৈদ্যুতিক যন্ত্রের 50/60Hz গুনগুন শব্দ কাটে
         "vo_hum_removal":    False,   # ডিফল্ট OFF — শুধু generator/motor থাকলে দরকার
         "vo_hum_freq":       50,      # 50Hz (বাংলাদেশ/ভারত standard) বা 60Hz (US)
+        # AI Denoise (afftdn) এর backup/extra adaptive denoise — RNNoise না থাকলে/
+        # আরও নয়েজি হলে কাজে লাগে। ডিফল্ট OFF — RNNoise ইতিমধ্যে থাকলে সাধারণত দরকার নেই।
+        "vo_afftdn":         False,
+        "vo_afftdn_amount":  12.0,    # Noise reduction (dB), 5–25 রেঞ্জ
         # ১৩. Stereo Widening — কণ্ঠ/audio কে প্রশস্ত শোনায়
         "vo_stereo_widen":   False,   # ডিফল্ট OFF — subtle effect, ঐচ্ছিক
         "vo_widen_amount":   1.3,     # 1.0 = কোনো পরিবর্তন নেই, 2.0 = সর্বোচ্চ প্রশস্ত
@@ -728,6 +732,12 @@ def build_voiceover_audio_filter(settings: dict) -> str:
     # ধাপ ৪ — De-clicker: প্লোসিভ (প-ফ-ব) ও মাউথ ক্লিক শব্দ মসৃণ করে
     if settings.get("vo_declicker"):
         parts.append("adeclick=window=55:overlap=75:arorder=2:threshold=2")
+        # ধাপ ৪.৫ — Adaptive Noise-Print Denoise (afftdn, track_noise মোড)
+    # নয়েজ প্রোফাইল আলাদা করে sample নিতে হয় না — tn=1 দিলে ক্রমাগত
+    # ব্যাকগ্রাউন্ড নয়েজ auto-track করে বিয়োগ করে। RNNoise এর backup/extra।
+    if settings.get("vo_afftdn"):
+        nr = float(settings.get("vo_afftdn_amount", 12.0))
+        parts.append(f"afftdn=nr={nr:.1f}:nf=-25:tn=1")
 
     # ধাপ ৫ — Vocal EQ — স্টুডিও সাউন্ডের জন্য
     if settings.get("vo_eq_enable"):
@@ -1832,7 +1842,10 @@ def apply_lcut_voiceover_mix(
         filter_complex = (
             f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
             f"[1:a]volume=1.0[vo];"
-            f"[2:a]volume={bg_music_volume:.2f}[bgm];"
+            f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
+            # Real sidechain ducking — কথা বললেই music auto নিচে নামবে,
+            # চুপ থাকলে normal ভলিউমে ফিরবে (static % ভলিউম-এর বদলে)
+            f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
             f"[va][vo][bgm]amix=inputs=3:duration=first:dropout_transition=2[aout_raw]"
         )
     else:
@@ -2427,6 +2440,7 @@ def export_settings_preset() -> dict:
         "vo_bandpass", "vo_bandpass_low", "vo_bandpass_high",
         "vo_wind_filter", "vo_wind_cutoff",
         "vo_hum_removal", "vo_hum_freq",
+        "vo_afftdn", "vo_afftdn_amount",
         "vo_multiband", "vo_agc",
         "vo_exciter", "vo_exciter_amount",
         "vo_stereo_widen", "vo_widen_amount",
@@ -3260,6 +3274,19 @@ def render_ui() -> None:
                 options=[50, 60],
                 index=[50, 60].index(st.session_state["vo_hum_freq"]),
                 help="বাংলাদেশ/ভারতে সাধারণত 50Hz। আমেরিকান যন্ত্রপাতি হলে 60Hz।"
+            )
+            st.session_state["vo_afftdn"] = st.toggle(
+            "🧪 Adaptive Denoise (afftdn) — Extra/Backup",
+            value=st.session_state["vo_afftdn"],
+            help="RNNoise এর backup — মডেল ফাইল না থাকলে বা extra নয়েজি ফুটেজে ON করুন। "
+                 "RNNoise এর সাথে একসাথে ON রাখলে ভয়েস কিছুটা 'রোবটিক' শোনাতে পারে।"
+        )
+        if st.session_state["vo_afftdn"]:
+            st.session_state["vo_afftdn_amount"] = st.slider(
+                "Denoise Strength (dB)",
+                min_value=5.0, max_value=25.0,
+                value=float(st.session_state["vo_afftdn_amount"]),
+                step=1.0
             )
 
         st.divider()
@@ -4321,6 +4348,8 @@ def render_ui() -> None:
             "vo_wind_cutoff":     st.session_state["vo_wind_cutoff"],
             "vo_hum_removal":     st.session_state["vo_hum_removal"],
             "vo_hum_freq":        st.session_state["vo_hum_freq"],
+            "vo_afftdn":          st.session_state["vo_afftdn"],
+            "vo_afftdn_amount":   st.session_state["vo_afftdn_amount"],
             # ১৪-১৭. কণ্ঠ পলিশ
             "vo_multiband":       st.session_state["vo_multiband"],
             "vo_agc":             st.session_state["vo_agc"],
