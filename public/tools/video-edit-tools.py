@@ -322,6 +322,12 @@ def init_session_state() -> None:
         "transition_whoosh_volume":     0.4,    # 0.0–1.0
         # Global speed (1.1 – 2.0)
         "global_speed":     DEFAULT_SPEED,
+        # Global Stabilization (Deshake) — speed এর মতোই, নতুন ক্লিপে auto apply হবে
+        "global_stabilize_enable":    False,
+        "global_stabilize_mode":      "light",   # "strong" (ধীর, শক্তিশালী) বা "light" (দ্রুত)
+        "global_stabilize_smoothing": 15,
+        "global_stabilize_shakiness": 5,
+        "global_stabilize_zoom":      0.0,
         # Background Music (voiceover থেকে আলাদা)
         "bg_music_enable":  False,
         "bg_music_volume":  0.12,   # 12% — voiceover এর নিচে থাকবে
@@ -2875,35 +2881,184 @@ def render_ui() -> None:
 
     st.markdown("""
     <style>
-    .stApp { background-color: #111; }
-    .clip-row {
-        background: #1a2a1a; border-left: 3px solid #4CAF50;
-        padding: 0.5rem 1rem; margin: 0.2rem 0;
-        border-radius: 0 8px 8px 0; font-size: 0.85rem;
+    :root {
+        --shd-bg:         #0d1210;
+        --shd-panel:      #161d16;
+        --shd-panel-alt:  #1c261c;
+        --shd-border:     #2a3a2a;
+        --shd-text:       #eef2ee;
+        --shd-text-dim:   #9fb0a0;
+        --shd-green:      #1b5e20;
+        --shd-green-light:#2e7d32;
+        --shd-gold:       #d9a441;
     }
-    .badge-nvenc { background:#1b5e20; color:#a5d6a7; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .badge-sw    { background:#4a2c00; color:#ffcc80; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .badge-err   { background:#5c0011; color:#ffcdd2; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+
+    /* ── বেস টেক্সট রিসেট — dark theme এ কোনো টেক্সট চোখে না পড়ার আসল ফিক্স ──
+       Streamlit এর প্রতিটা native widget (selectbox/radio/toggle/slider/
+       input) নিজস্ব ভেতরের রঙ ব্যবহার করে, যেটা আমাদের কাস্টম dark
+       background এর সাথে contrast miss করছিল। এখানে পুরো app এর ভেতরে
+       ডিফল্ট টেক্সট রঙ একটা readable হালকা শেডে সেট করে দিচ্ছি, তারপর
+       নিচে badge/heading এর মতো নির্দিষ্ট জায়গায় আলাদা রঙ override হচ্ছে। */
+    .stApp, .stApp * { color: var(--shd-text); }
+    .stApp { background-color: var(--shd-bg); }
+
+    /* Selectbox/Multiselect dropdown এর option list — এটা .stApp এর বাইরে,
+       document body তে আলাদা portal হিসেবে রেন্ডার হয়, তাই আলাদা global
+       selector লাগে, নাহলে dropdown খুললে ভেতরের অপশন টেক্সট দেখা যেত না। */
+    [data-baseweb="popover"], [data-baseweb="popover"] *,
+    [data-baseweb="menu"],    [data-baseweb="menu"] *,
+    ul[role="listbox"],       ul[role="listbox"] * {
+        background-color: var(--shd-panel) !important;
+        color: var(--shd-text) !important;
+    }
+    [data-baseweb="popover"] li:hover,
+    ul[role="listbox"] li:hover { background-color: var(--shd-panel-alt) !important; }
+
+    /* সব widget এর লেবেল (selectbox/slider/radio/toggle/input শিরোনাম) */
+    [data-testid="stWidgetLabel"] p { color: var(--shd-text) !important; font-weight: 500; }
+
+    /* Text/Number input বক্স */
+    .stTextInput input, .stTextArea textarea, .stNumberInput input {
+        color: var(--shd-text) !important;
+        background-color: var(--shd-panel-alt) !important;
+        border: 1px solid var(--shd-border) !important;
+        border-radius: 6px !important;
+    }
     .stTextInput input::placeholder,
     .stTextArea textarea::placeholder,
     .stNumberInput input::placeholder {
-        color: #d8e0e5 !important;
-        opacity: 0.9 !important;
-    }
-    [data-testid="stCaptionContainer"], 
-    [data-testid="stCaptionContainer"] *,
-    .stCaption, .stCaption *, small {
-        color: #b0bec5 !important;
+        color: var(--shd-text-dim) !important;
         opacity: 1 !important;
     }
+
+    /* Selectbox নিজের বক্স */
+    [data-baseweb="select"] > div {
+        background-color: var(--shd-panel-alt) !important;
+        border-color: var(--shd-border) !important;
+        color: var(--shd-text) !important;
+    }
+
+    /* Slider এর সংখ্যা bubble ও tick label */
+    [data-testid="stThumbValue"] { color: var(--shd-gold) !important; font-weight: 700; }
+    [data-testid="stTickBar"] p  { color: var(--shd-text-dim) !important; }
+
+    /* Radio/Checkbox লেবেল */
+    [data-testid="stRadio"] label p,
+    [data-testid="stCheckbox"] label p { color: var(--shd-text) !important; }
+
+    /* Toggle — চালু থাকলে gold accent */
+    [data-testid="stToggle"] div[role="switch"][aria-checked="true"] {
+        background-color: var(--shd-gold) !important;
+    }
+
+    /* Info/Success/Warning/Error বক্সের ভেতরের টেক্সট */
+    [data-testid="stAlert"] p, [data-testid="stAlert"] span { color: var(--shd-text) !important; }
+
+    /* পাইপলাইন সারসংক্ষেপ টেবিলের টেক্সট/বর্ডার */
+    [data-testid="stMarkdownContainer"] table,
+    [data-testid="stMarkdownContainer"] th,
+    [data-testid="stMarkdownContainer"] td { color: var(--shd-text) !important; border-color: var(--shd-border) !important; }
+
+    /* File uploader dropzone — কার্ডের মতো */
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: var(--shd-panel-alt) !important;
+        border: 1px dashed var(--shd-border) !important;
+        border-radius: 10px;
+    }
+
+    /* Caption — মূল টেক্সট থেকে একটু dim, কিন্তু readable */
+    [data-testid="stCaptionContainer"],
+    [data-testid="stCaptionContainer"] *,
+    .stCaption, .stCaption *, small {
+        color: var(--shd-text-dim) !important;
+        opacity: 1 !important;
+    }
+
+    .clip-row {
+        background: var(--shd-panel-alt); border-left: 3px solid var(--shd-green-light);
+        padding: 0.5rem 1rem; margin: 0.2rem 0;
+        border-radius: 0 8px 8px 0; font-size: 0.85rem;
+    }
+    .badge-nvenc { background:#1b5e20; color:#a5d6a7 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+    .badge-sw    { background:#4a2c00; color:#ffcc80 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+    .badge-err   { background:#5c0011; color:#ffcdd2 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+
     #MainMenu {visibility:hidden;} footer {visibility:hidden;}
+    [data-testid="stToolbar"] { visibility: hidden !important; }
+    [data-testid="stDecoration"] { display: none !important; }
+
+    /* Sidebar — CapCut এর left panel এর মতো একটু গাঢ় শেড */
+    [data-testid="stSidebar"] {
+        background-color: var(--shd-panel);
+        border-right: 1px solid var(--shd-border);
+    }
+    [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+        color: var(--shd-gold) !important;
+        font-weight: 700;
+    }
+
+    /* Headings */
+    h1, h2, h3 { color: var(--shd-text) !important; }
+    hr { border-color: var(--shd-border) !important; }
+
+    /* Expander → CapCut এর মতো card panel */
+    [data-testid="stExpander"] {
+        background: var(--shd-panel);
+        border: 1px solid var(--shd-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    [data-testid="stExpander"] summary {
+        font-weight: 600;
+        color: var(--shd-text) !important;
+    }
+    [data-testid="stExpander"] summary:hover { background-color: var(--shd-panel-alt); }
+
+    /* Tabs (যদি ভবিষ্যতে ব্যবহার হয়) — CapCut এর pill tab এর মতো */
+    [data-testid="stTabs"] button { color: var(--shd-text-dim) !important; border-radius: 6px 6px 0 0; }
+    [data-testid="stTabs"] button[aria-selected="true"] {
+        color: var(--shd-gold) !important;
+        border-bottom: 2px solid var(--shd-gold) !important;
+    }
+
+    /* Buttons */
+    .stButton button {
+        border-radius: 8px;
+        border: 1px solid var(--shd-green-light);
+        color: var(--shd-text) !important;
+        background-color: var(--shd-panel-alt);
+        transition: all 0.15s ease;
+    }
+    .stButton button p { color: inherit !important; }
+    .stButton button:hover {
+        border-color: var(--shd-gold);
+        color: var(--shd-gold) !important;
+    }
+    .stButton button[kind="primary"] {
+        background: linear-gradient(135deg, var(--shd-green), var(--shd-green-light));
+        border: none;
+        font-weight: 700;
+        color: #ffffff !important;
+    }
+    .stButton button[kind="primary"]:hover {
+        background: linear-gradient(135deg, var(--shd-green-light), var(--shd-gold));
+    }
+
+    /* Progress bar */
+    .stProgress > div > div { background-color: var(--shd-gold) !important; }
     </style>
     """, unsafe_allow_html=True)
 
     # ── Header ────────────────────────────────────────────────────────────────
     c1, c2 = st.columns([4, 1])
     with c1:
-        st.markdown("## 🌾 Shadhinata Farm Video Automation Tool v2.0")
+        st.markdown(
+            "<h2 style='margin-bottom:0;color:#e8f5e9;'>"
+            "🌾 <span style='color:#d9a441;'>Shadhinata Farm</span> Video Automation Tool "
+            "<span style='font-size:0.6em;color:#7a8a7a;'>v2.0</span></h2>",
+            unsafe_allow_html=True,
+        )
         st.caption("Offline · FFmpeg NVENC · Bangla Unicode · 60FPS · Pro Audio")
     with c2:
         if st.session_state["nvenc_available"] is None:
@@ -3105,6 +3260,32 @@ def render_ui() -> None:
         )
         st.session_state["global_speed"] = global_speed
         st.caption(f"বর্তমান: **{global_speed}×** গতি")
+
+        st.divider()
+
+        # ── Global Stabilization ─────────────────────────────────────────────
+        st.markdown("### 📹 ডিফল্ট Stabilization (কাঁপুনি কমানো)")
+        global_stab_enable = st.toggle(
+            "সব নতুন ক্লিপে auto stabilize চালু করুন",
+            value=st.session_state["global_stabilize_enable"],
+            help="Speed এর মতোই — চালু রাখলে নতুন আপলোড করা প্রতিটা ক্লিপে auto stabilization বসে যাবে",
+        )
+        st.session_state["global_stabilize_enable"] = global_stab_enable
+
+        if global_stab_enable:
+            global_stab_mode = st.radio(
+                "মোড",
+                options=["light", "strong"],
+                index=["light", "strong"].index(st.session_state["global_stabilize_mode"]),
+                horizontal=True,
+                help="Light = দ্রুত, single-pass। Strong = দুই-পাস vidstab, শক্তিশালী কিন্তু অনেক ধীর।",
+            )
+            st.session_state["global_stabilize_mode"] = global_stab_mode
+            st.caption(
+                "⚠️ Strong মোড প্রতিটা ক্লিপে ২-পাস প্রসেসিং করে — সব ক্লিপে auto চালু রাখলে "
+                "রেন্ডার অনেক ধীর হবে। বেশি ক্লিপ থাকলে Light রাখাই ভালো, শুধু বেশি কাঁপা ক্লিপে "
+                "ম্যানুয়ালি Strong করে দিন।"
+            )
 
         st.divider()
 
@@ -3710,11 +3891,11 @@ def render_ui() -> None:
                     "zoom_style":        "none",
                     "zoom_strength":     1.0,
                     # Stabilizer (Deshake, ঐচ্ছিক, প্রতি ক্লিপে আলাদা)
-                    "stabilize_enable":     False,
-                    "stabilize_smoothing":  15,   # 5–50, বেশি = মসৃণ কিন্তু বেশি crop
-                    "stabilize_shakiness":  5,    # 1–10, ইনপুট কতটা কাঁপা ধরা হবে
-                    "stabilize_zoom":       0.0,  # 0–20%, crop পূরণ করতে অতিরিক্ত zoom
-                    "stabilize_mode":       "strong",  # "strong" (vidstab) বা "light" (deshake)
+                    "stabilize_enable":     st.session_state["global_stabilize_enable"],
+                    "stabilize_smoothing":  st.session_state["global_stabilize_smoothing"],
+                    "stabilize_shakiness":  st.session_state["global_stabilize_shakiness"],
+                    "stabilize_zoom":       st.session_state["global_stabilize_zoom"],
+                    "stabilize_mode":       st.session_state["global_stabilize_mode"],
                     # Rotate/Mirror (ঐচ্ছিক, প্রতি ক্লিপে আলাদা)
                     "rotate_degrees":       0,     # 0, 90, 180, 270
                     "mirror_enable":        False,
