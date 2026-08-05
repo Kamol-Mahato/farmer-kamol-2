@@ -166,6 +166,22 @@ def probe_duration(filepath: str) -> float:
     return 0.0
 
 
+def probe_has_audio(filepath: str) -> bool:
+    """FFprobe দিয়ে চেক করে ফাইলে audio stream আছে কিনা (mute করা ক্লিপে থাকে না)।"""
+    cmd = [
+        FFPROBE_BIN, "-v", "error",
+        "-select_streams", "a",
+        "-show_entries", "stream=index",
+        "-of", "csv=p=0",
+        filepath,
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return bool(result.stdout.strip())
+    except Exception as e:
+        log.warning(f"ffprobe audio-check failed: {e}")
+        return False
+
 def run_ffmpeg(cmd: list, description: str = "") -> tuple[bool, str]:
     """
     FFmpeg command চালায়।
@@ -1492,6 +1508,8 @@ def apply_transitions(
         return True
 
     durations = [probe_duration(p) for p in clip_paths]
+    # প্রথম ক্লিপ চেক করেই বোঝা যাবে — mute_all থাকলে সবগুলোই audio-বিহীন হবে
+    has_audio = probe_has_audio(clip_paths[0])
     filter_parts = []
     input_args   = []
     for p in clip_paths:
@@ -1506,7 +1524,7 @@ def apply_transitions(
 
     cumulative = 0.0
     cur_v = "[0:v]"
-    cur_a = "[0:a]"
+    cur_a = "[0:a]" if has_audio else None
 
     # ১. Adaptive Duration হলে প্রতিটা কাট পয়েন্টের জন্য আলাদা duration,
     # নাহলে সবগুলোতে একই XFADE_DURATION ব্যবহার হবে।
@@ -1524,8 +1542,6 @@ def apply_transitions(
         cumulative += durations[i]
         offset = max(0.0, cumulative - this_xfade_dur)
         out_v  = f"[vx{i}]"
-        out_a_raw = f"[ax{i}raw]"
-        out_a  = f"[ax{i}]"
 
         # Video xfade — নির্বাচিত transition type, adaptive duration সহ
         filter_parts.append(
@@ -1536,50 +1552,47 @@ def apply_transitions(
             f"{out_v}"
         )
 
-        # ২. Audio Crossfade — curve parameter সহ (linear এর বদলে tri/qsin)
-        filter_parts.append(
-            f"{cur_a}[{i+1}:a]acrossfade="
-            f"d={this_xfade_dur}:c1={audio_curve}:c2={audio_curve}"
-            f"{out_a_raw}"
-        )
+        # ২. Audio Crossfade — ক্লিপে audio না থাকলে (mute_all অবস্থায়)
+        # এই পুরো ধাপটা স্কিপ হবে, নাহলে "Stream specifier ':a' matches
+        # no streams" এরর দিত।
+        if has_audio:
+            out_a_raw = f"[ax{i}raw]"
+            out_a  = f"[ax{i}]"
+            filter_parts.append(
+                f"{cur_a}[{i+1}:a]acrossfade="
+                f"d={this_xfade_dur}:c1={audio_curve}:c2={audio_curve}"
+                f"{out_a_raw}"
+            )
 
-        # ৩. Auto-Level Matching — এই কাট পয়েন্টের দুই পাশের ক্লিপের
-        # loudness ফারাক বেশি হলে (>3 LUFS), দুর্বল দিকটার volume সামান্য
-        # adjust করে সমান শোনানোর চেষ্টা করি।
-        current_a_label = out_a_raw
-        if auto_level_match and clip_loudness[i] is not None and clip_loudness[i + 1] is not None:
-            diff = clip_loudness[i + 1] - clip_loudness[i]
-            if abs(diff) > 3.0:
-                # diff পজিটিভ মানে পরের ক্লিপ জোরে — তাই crossfaded অংশে
-                # একটা mild compensating gain apply করি (±3dB এর মধ্যে,
-                # অতিরিক্ত correction distortion তৈরি করতে পারে তাই capped)
-                correction_db = max(-3.0, min(3.0, -diff / 2))
-                filter_parts.append(f"{current_a_label}volume={correction_db:.1f}dB{out_a}")
-                current_a_label = out_a
+            # ৩. Auto-Level Matching — এই কাট পয়েন্টের দুই পাশের ক্লিপের
+            # loudness ফারাক বেশি হলে (>3 LUFS), দুর্বল দিকটার volume সামান্য
+            # adjust করে সমান শোনানোর চেষ্টা করি।
+            current_a_label = out_a_raw
+            if auto_level_match and clip_loudness[i] is not None and clip_loudness[i + 1] is not None:
+                diff = clip_loudness[i + 1] - clip_loudness[i]
+                if abs(diff) > 3.0:
+                    correction_db = max(-3.0, min(3.0, -diff / 2))
+                    filter_parts.append(f"{current_a_label}volume={correction_db:.1f}dB{out_a}")
+                    current_a_label = out_a
+                else:
+                    filter_parts.append(f"{current_a_label}anull{out_a}")
+                    current_a_label = out_a
             else:
                 filter_parts.append(f"{current_a_label}anull{out_a}")
                 current_a_label = out_a
-        else:
-            filter_parts.append(f"{current_a_label}anull{out_a}")
-            current_a_label = out_a
+
+            cur_a = current_a_label
 
         cur_v = out_v
-        cur_a = current_a_label
         cumulative -= this_xfade_dur
 
-    # ৪. Transition Whoosh SFX — প্রতিটা কাট পয়েন্টে whoosh sound মিশিয়ে
-    # দিই, চূড়ান্ত audio track এর সাথে mix করে। Whoosh এর precise timing
-    # প্রতিটা transition offset অনুযায়ী adelay দিয়ে বসানো হয়।
-    whoosh_input_start_idx = n  # ইনপুট ইনডেক্স যেখান থেকে whoosh instances শুরু হবে
-    if whoosh_sfx_path:
-        # প্রতিটা transition point এর জন্য একটা করে whoosh instance লাগবে,
-        # কারণ প্রতিটাতে আলাদা timing offset প্রয়োজন।
+    # ৪. Transition Whoosh SFX — audio না থাকলে এটাও প্রযোজ্য না
+    whoosh_input_start_idx = n
+    if whoosh_sfx_path and has_audio:
         n_transitions = n - 1
         for _ in range(n_transitions):
             input_args += ["-i", whoosh_sfx_path]
 
-        # প্রতিটা whoosh কে তার transition offset এ delay করে মূল audio
-        # track এর সাথে mix করি।
         whoosh_cumulative = 0.0
         whoosh_mix_inputs = [cur_a]
         for i in range(n_transitions):
@@ -1610,18 +1623,27 @@ def apply_transitions(
     bitrate  = profile["bitrate"] if not is_preview else "3M"
     enc_opts = ["-preset", "p4", "-rc", "vbr", "-cq", "20"] if not is_preview else ["-preset", "fast", "-crf", "26"]
 
+    map_args = ["-map", cur_v]
+    if has_audio:
+        map_args += ["-map", cur_a]
+    audio_out_opts = ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"] if has_audio else ["-an"]
+
     cmd = (
         [FFMPEG_BIN, "-y"] + input_args
         + ["-filter_complex", filter_complex]
-        + ["-map", cur_v, "-map", cur_a]
+        + map_args
         + ["-c:v", encoder, "-b:v", bitrate, "-r", str(TARGET_FPS), "-pix_fmt", "yuv420p"]
         + enc_opts
-        + ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"]
+        + audio_out_opts
         + [output_path]
     )
 
     success, err = run_ffmpeg(cmd, "transitions concat")
-    if not success and ("nvenc" in err.lower() or "no capable devices" in err.lower()):
+    # শুধু তখনই SW fallback ট্রাই করব যখন আসলেই NVENC ব্যবহার হয়েছিল —
+    # নাহলে libx264 (preview) কমান্ডও ভুলভাবে "ঠিক" করতে গিয়ে ভেঙে যাচ্ছিল।
+    if not success and "h264_nvenc" in cmd and (
+        "nvenc" in err.lower() or "no capable devices" in err.lower() or "cannot load nvcuda" in err.lower()
+    ):
         success, _ = run_ffmpeg(nvenc_to_sw_fallback(cmd), "transitions concat SW")
     return success
 
@@ -1833,27 +1855,44 @@ def apply_lcut_voiceover_mix(
     jcut_ms = int(JCUT_OFFSET * 1000)
     audio_bitrate = "320k" if audio_settings.get("vo_aac_320") else "192k"
 
+    # ভিডিও ক্লিপে নিজস্ব audio stream আছে কিনা চেক (mute/silent ক্লিপে থাকে না) —
+    # না থাকলে [0:a] filter এ পাঠালে FFmpeg "matches no streams" এরর দেয়।
+    has_clip_audio = probe_has_audio(video_path)
+
     inputs = [FFMPEG_BIN, "-y", "-i", video_path, "-i", voiceover_path]
 
     if bg_music_path:
         # -stream_loop -1 দিয়ে music ভিডিওর চেয়ে ছোট হলেও loop করে পুরো ভিডিও জুড়ে বাজবে
         inputs += ["-stream_loop", "-1", "-i", bg_music_path]
 
-        filter_complex = (
-            f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
-            f"[1:a]volume=1.0[vo];"
-            f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
-            # Real sidechain ducking — কথা বললেই music auto নিচে নামবে,
-            # চুপ থাকলে normal ভলিউমে ফিরবে (static % ভলিউম-এর বদলে)
-            f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
-            f"[va][vo][bgm]amix=inputs=3:duration=first:dropout_transition=2[aout_raw]"
-        )
+        if has_clip_audio:
+            filter_complex = (
+                f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
+                f"[1:a]volume=1.0[vo];"
+                f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
+                # Real sidechain ducking — কথা বললেই music auto নিচে নামবে,
+                # চুপ থাকলে normal ভলিউমে ফিরবে (static % ভলিউম-এর বদলে)
+                f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
+                f"[va][vo][bgm]amix=inputs=3:duration=first:dropout_transition=2[aout_raw]"
+            )
+        else:
+            # ক্লিপে audio নেই → শুধু voiceover + bg music মিক্স হবে (va layer বাদ)
+            filter_complex = (
+                f"[1:a]volume=1.0[vo];"
+                f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
+                f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
+                f"[vo][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout_raw]"
+            )
     else:
-        filter_complex = (
-            f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
-            f"[1:a]volume=1.0[vo];"
-            f"[va][vo]amix=inputs=2:duration=longest:dropout_transition=2[aout_raw]"
-        )
+        if has_clip_audio:
+            filter_complex = (
+                f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
+                f"[1:a]volume=1.0[vo];"
+                f"[va][vo]amix=inputs=2:duration=longest:dropout_transition=2[aout_raw]"
+            )
+        else:
+            # ক্লিপে audio নেই, bg music-ও নেই → voiceover-ই একমাত্র audio, মিক্সের দরকার নেই
+            filter_complex = f"[1:a]volume=1.0[aout_raw]"
 
     # Fade In/Out — mixed audio এর উপর প্রয়োগ হয়
     fade_parts = []
@@ -2845,7 +2884,18 @@ def render_ui() -> None:
     .badge-nvenc { background:#1b5e20; color:#a5d6a7; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
     .badge-sw    { background:#4a2c00; color:#ffcc80; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
     .badge-err   { background:#5c0011; color:#ffcdd2; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .audio-feat  { background:#0d1f0d; border:1px solid #2d4a2d; border-radius:8px; padding:0.8rem; margin:0.3rem 0; }
+    .stTextInput input::placeholder,
+    .stTextArea textarea::placeholder,
+    .stNumberInput input::placeholder {
+        color: #d8e0e5 !important;
+        opacity: 0.9 !important;
+    }
+    [data-testid="stCaptionContainer"], 
+    [data-testid="stCaptionContainer"] *,
+    .stCaption, .stCaption *, small {
+        color: #b0bec5 !important;
+        opacity: 1 !important;
+    }
     #MainMenu {visibility:hidden;} footer {visibility:hidden;}
     </style>
     """, unsafe_allow_html=True)
