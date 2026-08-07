@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { verifyAdminOrAgent } from "@/lib/adminAuth"
 
 const MAX_HERO_VIDEOS = 4
 
 // ✅ বর্তমানে হিরো রোটেশনে কোন কোন ভিডিও আছে, ক্রম অনুযায়ী
 export async function GET() {
+  const isAuthorized = await verifyAdminOrAgent()
+if (!isAuthorized) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+}
   try {
     const heroVideos = await prisma.youtubeVideo.findMany({
       where: { heroOrder: { not: null } },
@@ -21,6 +26,10 @@ export async function GET() {
 
 // ✅ একটা ভিডিওকে হিরো রোটেশনে যোগ করা (সর্বোচ্চ ৪টা পর্যন্ত)
 export async function POST(req: Request) {
+  const isAuthorized = await verifyAdminOrAgent()
+if (!isAuthorized) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+}
   try {
     const { videoId } = await req.json()
     const current = await prisma.youtubeVideo.findMany({
@@ -50,6 +59,10 @@ export async function POST(req: Request) {
 
 // ✅ হিরো রোটেশন থেকে সরিয়ে দেওয়া, বাকিদের ক্রম আবার সাজানো (গ্যাপ যেন না থাকে)
 export async function DELETE(req: Request) {
+  const isAuthorized = await verifyAdminOrAgent()
+if (!isAuthorized) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+}
   try {
     const { videoId } = await req.json()
     await prisma.youtubeVideo.update({
@@ -74,6 +87,10 @@ export async function DELETE(req: Request) {
 
 // ✅ ক্রম উপরে/নিচে সরানো (পাশের ভিডিওর সাথে heroOrder swap)
 export async function PATCH(req: Request) {
+  const isAuthorized = await verifyAdminOrAgent()
+if (!isAuthorized) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+}
   try {
     const { videoId, direction } = await req.json()
     const target = await prisma.youtubeVideo.findUnique({ where: { id: videoId } })
@@ -85,7 +102,7 @@ export async function PATCH(req: Request) {
     if (!neighbor) {
       return NextResponse.json({ error: "আর সরানো যাবে না" }, { status: 400 })
     }
-        await prisma.$transaction([
+      await prisma.$transaction([
       prisma.youtubeVideo.update({ where: { id: target.id }, data: { heroOrder: neighborOrder } }),
       prisma.youtubeVideo.update({ where: { id: neighbor.id }, data: { heroOrder: target.heroOrder } }),
     ])

@@ -69,6 +69,8 @@ export async function PUT(request: Request) {
 
     revalidatePath("/")
     revalidatePath("/en")
+    revalidatePath("/media/video")
+    revalidatePath("/en/media/video")
     return NextResponse.json(settings)
   } catch (error) {
     console.error("SYSTEM SETTINGS PUT ERROR:", error)
