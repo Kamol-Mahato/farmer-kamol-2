@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
+import { getSavePercent } from "@/lib/pricing"
 
 type Product = {
   id: number
@@ -75,6 +76,7 @@ function TopSellerCard({ product }: { product: Product }) {
   const locale = getLocaleFromPath(pathname)
   const [added, setAdded] = useState(false)
   const isOutOfStock = product.stockQty <= 0
+  const savePercent = getSavePercent(product.pricePerUnit, product.discountPrice)
   const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg"
 
   function handleAddToCart() {
@@ -87,7 +89,7 @@ function TopSellerCard({ product }: { product: Product }) {
       cart.push({
         id: product.id,
         name: product.name,
-        price: product.pricePerUnit,
+        price: savePercent !== null ? (product.discountPrice as number) : product.pricePerUnit,
         unit: product.unit,
         image: mainImage,
         quantity: 1,
@@ -113,6 +115,11 @@ function TopSellerCard({ product }: { product: Product }) {
             sizes="(max-width: 768px) 65vw, 400px"
             className="object-cover group-hover:scale-135 transition duration-300"
           />
+          {savePercent !== null && !isOutOfStock && (
+            <span className="absolute top-1.5 left-1.5 z-10 bg-red-600 text-white text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-full shadow">
+              {savePercent}% সেভ
+            </span>
+          )}
           {isOutOfStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <span className="bg-red-500 text-white px-2 py-1 rounded-full text-[10px] font-bold">
@@ -139,8 +146,13 @@ function TopSellerCard({ product }: { product: Product }) {
           <div className="flex items-baseline gap-1 flex-wrap">
           <span className="text-xs text-black font-bold">মূল্য</span>
             <span className="text-sm md:text-xl font-extrabold text-black">
-              ৳ {product.pricePerUnit}
+              ৳ {savePercent !== null ? product.discountPrice : product.pricePerUnit}
             </span>
+            {savePercent !== null && (
+              <span className="text-[9px] md:text-xs text-gray-400 line-through">
+                ৳ {product.pricePerUnit}
+              </span>
+            )}
             <span className="text-[9px] md:text-xs text-gray-400">/ {product.unit}</span>
           </div>
         </div>

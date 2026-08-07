@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useRef, useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
+import { getSavePercent } from "@/lib/pricing"
 
 type Product = {
   id: number
@@ -83,6 +84,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
   const [imgIndex, setImgIndex] = useState(0)
   const [imgVisible, setImgVisible] = useState(false)
   const isOutOfStock = product.stockQty <= 0
+  const savePercent = getSavePercent(product.pricePerUnit, product.discountPrice)
   const images = product.images?.length > 0 ? product.images : [{ imageUrl: "/placeholder.jpg" }]
   const mainImage = images[imgIndex]?.imageUrl || "/placeholder.jpg"
   function prevImg(e: React.MouseEvent) {
@@ -132,7 +134,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
       cart.push({
         id: product.id,
         name: product.name,
-        price: product.pricePerUnit,
+        price: savePercent !== null ? (product.discountPrice as number) : product.pricePerUnit,
         unit: product.unit,
         image: mainImage,
         quantity: 1,
@@ -164,6 +166,11 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
                 imgVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             />
+            {savePercent !== null && !isOutOfStock && (
+              <span className="absolute top-1.5 left-1.5 z-10 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow">
+                {savePercent}% সেভ
+              </span>
+            )}
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
@@ -220,11 +227,16 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
           <span className="text-[10px] md:text-xs bg-green-600 font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
             প্রতি {product.unit}
           </span>
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-1 flex-wrap">
           <span className="text-xs text-black font-bold">মূল্য</span>
             <span className="text-lg md:text-xl font-extrabold text-black">
-              ৳ {product.pricePerUnit}
+              ৳ {savePercent !== null ? product.discountPrice : product.pricePerUnit}
             </span>
+            {savePercent !== null && (
+              <span className="text-xs md:text-sm text-gray-400 line-through">
+                ৳ {product.pricePerUnit}
+              </span>
+            )}
           </div>
         </div>
         </div>

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { translateUnit } from "@/lib/unitTranslate"
+import { getSavePercent } from "@/lib/pricing"
 
 type Product = {
   id: number
@@ -127,6 +128,7 @@ export default function HeroSlider({
   function renderProductSlide(p: Product, key: number | string, extraClass: string) {
     const imageUrl = p.images?.[0]?.imageUrl || "/uploads/1781611130414-modhu.jpg"
     const displayName = p.nameEn || p.name
+    const savePercent = getSavePercent(p.pricePerUnit, p.discountPrice)
     return (
       <div key={key} className={`absolute inset-0 ${extraClass}`}>
         <Image
@@ -136,10 +138,20 @@ export default function HeroSlider({
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover"
         />
+        {savePercent !== null && (
+          <span className="absolute top-1.5 left-1.5 z-10 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow">
+            {savePercent}% Save
+          </span>
+        )}
         <div className="absolute bottom-0 right-0 bg-white/60 backdrop-blur-sm px-1.5 py-0.5 md:px-2 md:py-1 rounded-tl-2xl flex flex-col items-end gap-0.5 md:gap-1 text-right">
           <h3 className="text-xs md:text-base font-bold text-green-900">{displayName}</h3>
           <p className="text-black text-[10px] md:text-xs font-semibold">{translateUnit(p.unit)}</p>
-          <p className="text-black text-sm md:text-lg font-extrabold">৳ {p.pricePerUnit}</p>
+          <div className="flex items-baseline gap-1">
+            {savePercent !== null && (
+              <span className="text-[10px] md:text-xs text-gray-500 line-through">৳ {p.pricePerUnit}</span>
+            )}
+            <p className="text-black text-sm md:text-lg font-extrabold">৳ {savePercent !== null ? p.discountPrice : p.pricePerUnit}</p>
+          </div>
           <Link
             href={`/en/order?productId=${p.id}`}
             className="bg-yellow-400 hover:bg-yellow-300 text-green-900 px-3 py-1 md:px-6 md:py-2 rounded-xl font-bold text-[10px] md:text-xs transition text-center mt-1"
