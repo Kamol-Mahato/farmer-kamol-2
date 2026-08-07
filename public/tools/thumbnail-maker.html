@@ -449,6 +449,29 @@ textarea.prop-textarea:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <div class="section">
+      <div class="section-title">🚀 Pro Tools (হাতে থাম্বনেইল)</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="btn btn-primary" onclick="addYtText('yellow')" style="justify-content:center;background:linear-gradient(90deg,#f1c40f,#e67e22);color:#000;">🅈 YouTube টেক্সট (হলুদ)</button>
+        <button class="btn btn-ghost" onclick="addYtText('white')" style="justify-content:center;border-color:#f1c40f;color:#f1c40f;">🅈 YouTube টেক্সট (সাদা)</button>
+        <button class="btn btn-ghost" onclick="addYtText('red')" style="justify-content:center;border-color:#e74c3c;color:#e74c3c;">🅈 YouTube টেক্সট (লাল)</button>
+        <button class="btn btn-ghost" onclick="addYtText('arch')" style="justify-content:center;border-color:#3498db;color:#3498db;">⌒ Half-round / আর্চ টেক্সট</button>
+        <button class="btn btn-ghost" onclick="addYtText('arch')" style="justify-content:center;border-color:#3498db;color:#3498db;">⌒ Half-round / আর্চ টেক্সট</button>
+        <button class="btn btn-ghost" id="eyedropperBtn" onclick="toggleEyedropper()" style="justify-content:center;">🎨 Eyedropper (রং তোলো)</button>
+        <button class="btn btn-ghost" id="softBrushBtn" onclick="toggleSoftBrush()" style="justify-content:center;">🖌 Soft Brush</button>
+        <div id="softBrushOpts" style="display:none;padding:8px;background:var(--panel2);border-radius:8px;font-size:11px;">
+          <div class="prop-row"><span class="prop-label">Size</span><input type="range" min="8" max="120" value="36" id="sbSize" style="flex:1;" oninput="document.getElementById('sbSizeN').textContent=this.value"><span id="sbSizeN">36</span></div>
+          <div class="prop-row"><span class="prop-label">Hard</span><input type="range" min="0" max="100" value="20" id="sbHard" style="flex:1;" oninput="document.getElementById('sbHardN').textContent=this.value"><span id="sbHardN">20</span></div>
+          <div class="prop-row"><span class="prop-label">Color</span><input type="color" id="sbColor" value="#ffffff"></div>
+          <div class="prop-row"><span class="prop-label">Opacity</span><input type="range" min="5" max="100" value="70" id="sbOp" style="flex:1;" oninput="document.getElementById('sbOpN').textContent=this.value"><span id="sbOpN">70</span></div>
+          <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="clearSoftBrushLayer()">🗑 Brush লেয়ার মুছো</button>
+        </div>
+        <button class="btn btn-ghost" onclick="applyTemplate('personLeft')" style="justify-content:center;">📐 Template: Person বামে</button>
+        <button class="btn btn-ghost" onclick="toggleLogoLock()" id="logoLockBtn" style="justify-content:center;">🔒 Logo Lock: OFF</button>
+        <button class="btn btn-ghost" onclick="matchImageColor()" style="justify-content:center;">🎚 Match Color (ইমেজ→BG)</button>
+      </div>
+    </div>
+
     <div class="section" style="flex:1;">
       <div class="section-title">Layers <span style="color:var(--text2);font-size:9px;font-weight:400;">(drag to reorder)</span></div>
       <div class="layer-list" id="layerList"><div style="color:var(--text2);font-size:11px;text-align:center;padding:10px;">No layers yet</div></div>
@@ -933,9 +956,11 @@ function applyZoom(){
 function changeZoom(d){zoom=Math.max(0.08,Math.min(3,zoom+d));applyZoom();}
 function fitZoom(){
   const a=document.getElementById('canvasArea');
-  const availW=a.clientWidth-40;
-  const availH=a.clientHeight-40;
+  const availW=Math.max(100, a.clientWidth-40);
+  const availH=Math.max(100, a.clientHeight-40);
   zoom=Math.min(availW/CW, availH/CH);
+  // অতিরিক্ত ছোট হলেও ন্যূনতম দেখা যাবে; বড় হলে ১০০% এ ক্যাপ
+  zoom=Math.max(0.05, Math.min(1.5, zoom));
   applyZoom();
 }
 
@@ -1015,11 +1040,14 @@ function calcTextSize(el){
 }
 
 function addText(){
+  // কাস্টম সাইজেও মাঝামাঝি দেখা যাবে
+  const fs=Math.max(24, Math.round(Math.min(CW,CH)*0.08));
   const el={
     id:++idCounter,type:'text',
-    x:120,y:140,w:500,h:100,
+    x:Math.round(CW*0.1), y:Math.round(CH*0.15),
+    w:Math.round(CW*0.8), h:Math.round(fs*1.5),
     text:'টেক্সট লিখুন',
-    fontSize:64,fontFamily:'Hind Siliguri',
+    fontSize:fs,fontFamily:'Hind Siliguri',
     color:'#ffffff',bold:true,italic:false,
     align:'left',opacity:1,
     shadow:false,shadowColor:'#000000',shadowBlur:15,shadowOffsetX:4,shadowOffsetY:4,
@@ -1061,8 +1089,14 @@ function addImage(input, targetShapeId=null){
       saveState();selectElement(maskShape.id);updateLayers();render();
     }else{
       const ratio=img.width/img.height;
-      const w=Math.min(500,img.width),h=w/ratio;
-      const el={id:++idCounter,type:'image',x:200,y:160,w,h,img,imgW:img.width,imgH:img.height,opacity:1,rotation:0,brightness:100,contrast:100,saturation:100,lockRatio:true};
+      // ক্যানভাসের ৭০% এর মধ্যে ফিট + মাঝে বসাও (কাস্টম সাইজে বাইরে যাবে না)
+      let w=Math.min(CW*0.7, img.width);
+      let h=w/ratio;
+      if(h>CH*0.7){ h=CH*0.7; w=h*ratio; }
+      w=Math.max(20,w); h=Math.max(20,h);
+      const x=Math.round((CW-w)/2);
+      const y=Math.round((CH-h)/2);
+      const el={id:++idCounter,type:'image',x,y,w,h,img,imgW:img.width,imgH:img.height,opacity:1,rotation:0,brightness:100,contrast:100,saturation:100,lockRatio:true};
       elements.push(el);
       saveState();selectElement(el.id);updateLayers();render();
     }
@@ -1367,6 +1401,24 @@ ${isMob?'':'<div class="section-title" style="margin-bottom:6px;">Text</div><tex
   <div class="style-btn ${el.wrapText?'active':''}" onclick="toggleWrapText()">↩ Wrap</div>
   <div class="style-btn" onclick="updateProp('text',getSelected().text.toUpperCase())">ALL CAPS</div>
 </div>
+<div class="section-title" style="margin:10px 0 6px;">⚡ YouTube Presets</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;">
+  <button class="btn btn-ghost" style="font-size:10px;padding:6px;" onclick="applyYtPreset('yellow')">হলুদ+কালো স্ট্রক</button>
+  <button class="btn btn-ghost" style="font-size:10px;padding:6px;" onclick="applyYtPreset('white')">সাদা+কালো স্ট্রক</button>
+  <button class="btn btn-ghost" style="font-size:10px;padding:6px;" onclick="applyYtPreset('red')">লাল গ্লো</button>
+  <button class="btn btn-ghost" style="font-size:10px;padding:6px;" onclick="applyYtPreset('gradient')">গ্রেডিয়েন্ট হলুদ</button>
+</div>
+<div class="style-grid" style="margin-bottom:8px;">
+  <div class="style-btn ${el.glow?'active':''}" onclick="toggleProp('glow')">Glow</div>
+  <div class="style-btn ${el.doubleStroke?'active':''}" onclick="toggleProp('doubleStroke')">2×Stroke</div>
+  <div class="style-btn ${el.gradientFill?'active':''}" onclick="toggleProp('gradientFill')">Gradient</div>
+</div>
+${el.glow?`<div class="prop-row"><span class="prop-label">Glow C.</span>${makeColorPicker('glowColor',el.glowColor||'#f1c40f')}</div>
+<div class="prop-row"><span class="prop-label">Glow Blur</span>${rangeBox('glowBlur',4,60,1,el.glowBlur??28)}</div>`:''}
+${el.doubleStroke?`<div class="prop-row"><span class="prop-label">Outer C.</span>${makeColorPicker('doubleStrokeColor',el.doubleStrokeColor||'#000000')}</div>
+<div class="prop-row"><span class="prop-label">Outer W.</span>${rangeBox('doubleStrokeWidth',4,24,1,el.doubleStrokeWidth??10)}</div>`:''}
+${el.gradientFill?`<div class="prop-row"><span class="prop-label">Grad 1</span>${makeColorPicker('gradColor1',el.gradColor1||'#f1c40f')}</div>
+<div class="prop-row"><span class="prop-label">Grad 2</span>${makeColorPicker('gradColor2',el.gradColor2||'#e67e22')}</div>`:''}
 ${el.shadow?`
 <div class="prop-row"><span class="prop-label">Shadow C.</span>${makeColorPicker('shadowColor',el.shadowColor||'#000000')}</div>
 <div class="prop-row"><span class="prop-label">Blur</span>${rangeBox('shadowBlur',0,60,1,el.shadowBlur??15)}</div>
@@ -1456,9 +1508,12 @@ ${(!el.curveMode||el.curveMode==='none')?'':`<div class="prop-row"><span class="
 <div class="section-title" style="margin:10px 0 6px;">🎛 Adjustments</div>
 <div class="prop-row"><span class="prop-label">Opacity</span>${rangeBox('opacity',0,1,0.01,el.opacity)}</div>
 <div class="prop-row"><span class="prop-label">Rotate</span>${rangeBox('rotation',-180,180,1,el.rotation||0)}</div>
-<div class="prop-row"><span class="prop-label">Bright.</span>${rangeBox('brightness',0,200,1,el.brightness)}</div>
-<div class="prop-row"><span class="prop-label">Contrast</span>${rangeBox('contrast',0,200,1,el.contrast)}</div>
-<div class="prop-row"><span class="prop-label">Saturate</span>${rangeBox('saturation',0,200,1,el.saturation)}</div>
+<div class="prop-row"><span class="prop-label">Bright.</span>${rangeBox('brightness',0,200,1,el.brightness??100)}</div>
+<div class="prop-row"><span class="prop-label">Contrast</span>${rangeBox('contrast',0,200,1,el.contrast??100)}</div>
+<div class="prop-row"><span class="prop-label">Saturate</span>${rangeBox('saturation',0,200,1,el.saturation??100)}</div>
+<div class="prop-row"><span class="prop-label">Feather</span>${rangeBox('feather',0,80,1,el.feather||0)}</div>
+<button class="btn btn-ghost" style="width:100%;margin:6px 0;font-size:11px;" onclick="matchImageColor()">🎚 Match Color to BG</button>
+<button class="btn btn-ghost" style="width:100%;margin-bottom:6px;font-size:11px;" onclick="applyImagePreset && applyImagePreset('warm')">🌡 Warm preset</button>
 
 <div class="section-title" style="margin:10px 0 6px;">Order</div>
 <div style="display:flex;gap:6px;">
@@ -1675,6 +1730,10 @@ function _renderAll(c, W=CW, H=CH){
   renderBg(c,W,H);
   elements.filter(el=>el.type!=='logo').forEach(el=>drawElement(c,el));
   elements.filter(el=>el.type==='logo').forEach(el=>drawElement(c,el));
+  // Soft brush overlay (Pro Tools)
+  if(typeof _softBrushCanvas!=='undefined' && _softBrushCanvas){
+    try{ c.drawImage(_softBrushCanvas, 0, 0, W, H); }catch(e){}
+  }
   c.restore();
 }
 
@@ -2138,12 +2197,36 @@ function drawElement(c,el){
       drawCurvedText(c,el);
     }else{
       c.textAlign=el.align||'left';c.textBaseline='top';
-      // Stroke আগে draw করি (text এর নিচে)
+      // Outer glow (behind everything)
+      if(el.glow){
+        c.save();
+        c.shadowColor=el.glowColor||'#f1c40f';
+        c.shadowBlur=el.glowBlur??28;
+        c.shadowOffsetX=0;c.shadowOffsetY=0;
+        c.fillStyle=el.glowColor||'#f1c40f';
+        lines.forEach((line,i)=>c.fillText(line,xPos,el.y+i*lineH));
+        c.restore();
+      }
+      // Double stroke — outer thick stroke first
+      if(el.doubleStroke&&el.doubleStrokeWidth>0){
+        c.strokeStyle=el.doubleStrokeColor||'#000000';
+        c.lineWidth=(el.doubleStrokeWidth||10)*2;
+        c.lineJoin='round';c.miterLimit=2;
+        if(el.shadow){
+          c.shadowColor=el.shadowColor||'#000';
+          c.shadowBlur=el.shadowBlur??18;
+          c.shadowOffsetX=el.shadowOffsetX??5;
+          c.shadowOffsetY=el.shadowOffsetY??5;
+        }
+        lines.forEach((line,i)=>c.strokeText(line,xPos,el.y+i*lineH));
+        c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetX=0;c.shadowOffsetY=0;
+      }
+      // Primary stroke
       if(el.stroke&&el.strokeWidth>0){
         c.strokeStyle=el.strokeColor||'#000000';
         c.lineWidth=el.strokeWidth*2;
         c.lineJoin='round';
-        if(el.shadow){
+        if(el.shadow && !el.doubleStroke){
           c.shadowColor=el.shadowColor||'#000';
           c.shadowBlur=el.shadowBlur??15;
           c.shadowOffsetX=el.shadowOffsetX??4;
@@ -2152,15 +2235,23 @@ function drawElement(c,el){
         lines.forEach((line,i)=>c.strokeText(line,xPos,el.y+i*lineH));
         c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetX=0;c.shadowOffsetY=0;
       }
-      // Fill text
-      c.fillStyle=el.color;
-      if(el.shadow&&!el.stroke){
+      // Fill — solid or gradient
+      if(el.gradientFill){
+        const g=c.createLinearGradient(el.x,el.y,el.x,el.y+el.h);
+        g.addColorStop(0, el.gradColor1||el.color||'#f1c40f');
+        g.addColorStop(1, el.gradColor2||'#e67e22');
+        c.fillStyle=g;
+      } else {
+        c.fillStyle=el.color;
+      }
+      if(el.shadow&&!el.stroke&&!el.doubleStroke){
         c.shadowColor=el.shadowColor||'#000';
         c.shadowBlur=el.shadowBlur??15;
         c.shadowOffsetX=el.shadowOffsetX??4;
         c.shadowOffsetY=el.shadowOffsetY??4;
       }
       lines.forEach((line,i)=>c.fillText(line,xPos,el.y+i*lineH));
+      c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetX=0;c.shadowOffsetY=0;
     }
   }else if(el.type==='logo'){
     const cx=el.x+el.w/2,cy=el.y+el.h/2,r=el.w/2;
@@ -2175,16 +2266,54 @@ function drawElement(c,el){
     c.drawImage(el.img,el.x,el.y,el.w,el.h);
     c.restore();
   }else if(el.type==='image'){
-    c.filter=`brightness(${el.brightness}%) contrast(${el.contrast}%) saturate(${el.saturation}%)`;
-    if(el.maskShape){
-      // Shape mask — clip করে image draw করো
+    const br=el.brightness??100, ct=el.contrast??100, sat=el.saturation??100;
+    const warm=el.warmth||0; // -50..50 approx via sepia/hue trick on filter
+    c.filter=`brightness(${br}%) contrast(${ct}%) saturate(${sat}%)`;
+    if(el.feather && el.feather>0){
+      // Soft edge via offscreen + gradient alpha mask
+      const fw=Math.max(1,Math.round(el.w)), fh=Math.max(1,Math.round(el.h));
+      const oc=document.createElement('canvas'); oc.width=fw; oc.height=fh;
+      const octx=oc.getContext('2d');
+      octx.filter=c.filter;
+      octx.drawImage(el.img,0,0,fw,fh);
+      octx.filter='none';
+      octx.globalCompositeOperation='destination-in';
+      const f=Math.min(el.feather, Math.min(fw,fh)/2);
+      const grd=octx.createLinearGradient(0,0,0,fh);
+      // full soft edge around: use radial-ish via rect gradients on sides
+      const mask=octx.createLinearGradient(0,0,fw,0);
+      // simpler: inset feather on all sides using shadow blur trick
+      const mc=document.createElement('canvas'); mc.width=fw; mc.height=fh;
+      const mctx=mc.getContext('2d');
+      mctx.fillStyle='#fff';
+      mctx.shadowColor='#fff';
+      mctx.shadowBlur=f;
+      mctx.fillRect(f,f,fw-f*2,fh-f*2);
+      octx.drawImage(mc,0,0);
+      c.filter='none';
+      if(el.maskShape){
+        c.save();
+        if(el.maskShape==='circle'){
+          c.beginPath();
+          c.ellipse(el.x+el.w/2,el.y+el.h/2,el.w/2,el.h/2,0,0,Math.PI*2);
+          c.clip();
+        }else{
+          const r=el.radius||0;
+          roundRect(c,el.x,el.y,el.w,el.h,r);
+          c.clip();
+        }
+        c.drawImage(oc,el.x,el.y,el.w,el.h);
+        c.restore();
+      }else{
+        c.drawImage(oc,el.x,el.y,el.w,el.h);
+      }
+    }else if(el.maskShape){
       c.save();
       if(el.maskShape==='circle'){
         c.beginPath();
         c.ellipse(el.x+el.w/2,el.y+el.h/2,el.w/2,el.h/2,0,0,Math.PI*2);
         c.clip();
       }else{
-        // rect
         const r=el.radius||0;
         roundRect(c,el.x,el.y,el.w,el.h,r);
         c.clip();
@@ -2287,7 +2416,12 @@ function getHandles(el){
 // ═══════════════════════════
 function canvasPoint(e){
   const rect=canvas.getBoundingClientRect();
-  return{x:(e.clientX-rect.left)/zoom,y:(e.clientY-rect.top)/zoom};
+  // zoom/scale যাই হোক — ক্যানভাস পিক্সেলে সরাসরি ম্যাপ (কাস্টম সাইজেও ঠিক)
+  const rw=rect.width||1, rh=rect.height||1;
+  return{
+    x:(e.clientX-rect.left)*(CW/rw),
+    y:(e.clientY-rect.top)*(CH/rh)
+  };
 }
 
 function onPointerDown(e){
@@ -3381,9 +3515,484 @@ function doDownload(){
   hideDownload();
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// PRO TOOLS — YouTube text, eyedropper, soft brush, templates,
+// logo lock, match color (offline, হাতে থাম্বনেইল)
+// ═══════════════════════════════════════════════════════════
+let _logoLocked = false;
+let _eyedropperOn = false;
+let _softBrushOn = false;
+let _softBrushDrawing = false;
+let _softBrushCanvas = null; // offscreen persistent layer
+let _lastBrushPt = null;
+
+function ensureSoftBrushCanvas(){
+  if(_softBrushCanvas && _softBrushCanvas.width===CW && _softBrushCanvas.height===CH) return _softBrushCanvas;
+  const c=document.createElement('canvas');
+  c.width=CW; c.height=CH;
+  if(_softBrushCanvas){
+    c.getContext('2d').drawImage(_softBrushCanvas,0,0,CW,CH);
+  }
+  _softBrushCanvas=c;
+  return c;
+}
+
+function createStandardBrushImage(kind, colorHex, w, h, done){
+  // kind: 'ink' | 'inkSoft' | 'diag'
+  const c=document.createElement('canvas');
+  c.width=w; c.height=h;
+  const ctx=c.getContext('2d');
+  const hex=colorHex||'#111111';
+  const m=hex.replace('#','').match(/.{2}/g);
+  const R=parseInt(m[0],16), G=parseInt(m[1],16), B=parseInt(m[2],16);
+  const passes = kind==='inkSoft' ? 22 : 16;
+  for(let p=0;p<passes;p++){
+    ctx.save();
+    if(kind==='diag'){
+      ctx.translate(w/2,h/2);
+      ctx.rotate(-0.35);
+      ctx.translate(-w/2,-h/2);
+    }
+    for(let s=0;s<90;s++){
+      const t=s/89;
+      const env=Math.pow(Math.sin(t*Math.PI), 0.75);
+      const thick=(h*0.5*env)*(0.65+0.35*Math.random())*(kind==='inkSoft'?0.75:1);
+      const x=16+t*(w-32)+(Math.random()*4-2);
+      const y=h/2 + Math.sin(t*Math.PI*3+p)*(h*0.07) + (Math.random()*6-3);
+      const a=env*(kind==='inkSoft'?0.35:0.55)*(0.5+0.5*Math.random());
+      ctx.fillStyle='rgba('+R+','+G+','+B+','+a+')';
+      ctx.beginPath();
+      ctx.ellipse(x,y, Math.max(2,thick*0.22), Math.max(2,thick*0.5), 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    // fine fibers
+    for(let f=0;f<5;f++){
+      const y0=h/2+(Math.random()-0.5)*h*0.35;
+      for(let s=0;s<70;s++){
+        const t=s/69;
+        const env=Math.sin(t*Math.PI);
+        const x=12+t*(w-24);
+        const y=y0+Math.sin(t*12)*2;
+        ctx.fillStyle='rgba('+R+','+G+','+B+','+(env*0.25)+')';
+        ctx.beginPath();
+        ctx.ellipse(x,y,2, Math.max(1,3*env),0,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+  const img=new Image();
+  img.onload=function(){ done(img); };
+  img.src=c.toDataURL('image/png');
+}
+
+function addYtText(style){
+  const presets={
+    yellow:{
+      text:'স্বপ্ন', color:'#f1c40f', gradColor1:'#ffe566', gradColor2:'#e67e22',
+      gradientFill:true, bold:true, fontSize:120, fontFamily:'Hind Siliguri',
+      stroke:true, strokeColor:'#1a1a1a', strokeWidth:8,
+      doubleStroke:true, doubleStrokeColor:'#000000', doubleStrokeWidth:14,
+      shadow:true, shadowColor:'#000000', shadowBlur:18, shadowOffsetX:4, shadowOffsetY:6,
+      glow:true, glowColor:'#f39c12', glowBlur:32,
+      brushColor:'#141414', brushKind:'ink', accentColor:'#f1c40f', accentKind:'inkSoft',
+      curveMode:'none'
+    },
+    white:{
+      text:'স্বপ্ন', color:'#ffffff', gradientFill:false,
+      bold:true, fontSize:120, fontFamily:'Hind Siliguri',
+      stroke:true, strokeColor:'#000000', strokeWidth:10,
+      doubleStroke:true, doubleStrokeColor:'#000000', doubleStrokeWidth:16,
+      shadow:true, shadowColor:'#000000', shadowBlur:20, shadowOffsetX:5, shadowOffsetY:7,
+      glow:false,
+      brushColor:'#0a0a0a', brushKind:'ink', accentColor:'#ffffff', accentKind:'inkSoft',
+      curveMode:'none'
+    },
+    red:{
+      text:'সতর্কতা', color:'#ffffff', gradientFill:false,
+      bold:true, fontSize:96, fontFamily:'Hind Siliguri',
+      stroke:true, strokeColor:'#8B0000', strokeWidth:6,
+      doubleStroke:true, doubleStrokeColor:'#000000', doubleStrokeWidth:12,
+      shadow:true, shadowColor:'#000000', shadowBlur:16, shadowOffsetX:3, shadowOffsetY:5,
+      glow:true, glowColor:'#e74c3c', glowBlur:36,
+      brushColor:'#b01a1a', brushKind:'diag', accentColor:'#1a0000', accentKind:'ink',
+      curveMode:'none'
+    },
+    arch:{
+      text:'স্বপ্ন', color:'#f1c40f', gradColor1:'#ffe566', gradColor2:'#e67e22',
+      gradientFill:true, bold:true, fontSize:100, fontFamily:'Hind Siliguri',
+      stroke:true, strokeColor:'#000000', strokeWidth:8,
+      doubleStroke:true, doubleStrokeColor:'#000000', doubleStrokeWidth:14,
+      shadow:true, shadowColor:'#000000', shadowBlur:18, shadowOffsetX:4, shadowOffsetY:6,
+      glow:true, glowColor:'#f39c12', glowBlur:28,
+      brushColor:'#141414', brushKind:'ink', accentColor:'#f1c40f', accentKind:'inkSoft',
+      curveMode:'arch-up'
+    }
+  };
+  const p=presets[style]||presets.yellow;
+  const baseX=Math.round(CW*0.36);
+  const baseY=Math.round(CH*0.28);
+  const tw=Math.round(CW*0.58);
+  const th=Math.round(p.fontSize*1.4);
+  const brushW=Math.round(tw*1.05);
+  const brushH=Math.round(th*0.85);
+
+  // মেইন টেক্সট (আগে id নিন; ব্রাশ লোড হলে নিচে ইনসার্ট হবে)
+  const textId=++idCounter;
+  const el={
+    id:textId, type:'text',
+    x:baseX, y:baseY, w:tw, h:th,
+    text:p.text, fontSize:p.fontSize, fontFamily:p.fontFamily,
+    color:p.color, bold:true, italic:false, align:'left', opacity:1,
+    shadow:!!p.shadow, shadowColor:p.shadowColor||'#000', shadowBlur:p.shadowBlur||15,
+    shadowOffsetX:p.shadowOffsetX||4, shadowOffsetY:p.shadowOffsetY||4,
+    stroke:!!p.stroke, strokeColor:p.strokeColor||'#000', strokeWidth:p.strokeWidth||8,
+    doubleStroke:!!p.doubleStroke, doubleStrokeColor:p.doubleStrokeColor||'#000',
+    doubleStrokeWidth:p.doubleStrokeWidth||12,
+    glow:!!p.glow, glowColor:p.glowColor||'#f1c40f', glowBlur:p.glowBlur||28,
+    gradientFill:!!p.gradientFill, gradColor1:p.gradColor1||'#f1c40f', gradColor2:p.gradColor2||'#e67e22',
+    rotation:0, curveMode:p.curveMode||'none', curveAmount:34,
+    textBg:'none', textBgColor:'#e60000', textBgOpacity:0.85, textBgPad:20, wrapText:false
+  };
+
+  function pushBrushLayer(img, x, y, bw, bh){
+    const br={
+      id:++idCounter, type:'image',
+      x:x, y:y, w:bw, h:bh,
+      img:img, imgW:img.width, imgH:img.height,
+      opacity:1, rotation:0,
+      brightness:100, contrast:100, saturation:100, lockRatio:false,
+      _isBrushLayer:true
+    };
+    // টেক্সটের নিচে বসাও
+    const idx=elements.findIndex(e=>e.id===textId);
+    if(idx>=0) elements.splice(idx, 0, br);
+    else elements.push(br);
+  }
+
+  // আগে টেক্সট পুশ
+  elements.push(el);
+
+  // মেইন ইঙ্ক ব্রাশ (নিচে)
+  createStandardBrushImage(p.brushKind||'ink', p.brushColor||'#141414', 900, 220, function(img){
+    pushBrushLayer(img, baseX-10, baseY+Math.round(th*0.12), brushW, brushH);
+    // অ্যাকসেন্ট স্ট্রোক
+    createStandardBrushImage(p.accentKind||'inkSoft', p.accentColor||'#f1c40f', 700, 140, function(img2){
+      pushBrushLayer(img2, baseX+Math.round(tw*0.05), baseY+Math.round(th*0.7), Math.round(brushW*0.75), Math.round(brushH*0.4));
+      saveState(); updateLayers(); selectElement(textId); render();
+    });
+  });
+}
+
+function applyYtPreset(name){
+  const el=getSelected();
+  if(!el||el.type!=='text'){ alert('আগে একটি টেক্সট লেয়ার সিলেক্ট করুন'); return; }
+  const map={
+    yellow:{color:'#f1c40f',gradientFill:true,gradColor1:'#ffe566',gradColor2:'#e67e22',
+      stroke:true,strokeColor:'#1a1a1a',strokeWidth:8,
+      doubleStroke:true,doubleStrokeColor:'#000',doubleStrokeWidth:14,
+      shadow:true,shadowBlur:18,shadowOffsetX:4,shadowOffsetY:6,
+      glow:true,glowColor:'#f39c12',glowBlur:32,bold:true},
+    white:{color:'#ffffff',gradientFill:false,
+      stroke:true,strokeColor:'#000',strokeWidth:10,
+      doubleStroke:true,doubleStrokeColor:'#000',doubleStrokeWidth:16,
+      shadow:true,shadowBlur:20,glow:false,bold:true},
+    red:{color:'#ffffff',gradientFill:false,
+      stroke:true,strokeColor:'#8B0000',strokeWidth:6,
+      doubleStroke:true,doubleStrokeColor:'#000',doubleStrokeWidth:12,
+      shadow:true,glow:true,glowColor:'#e74c3c',glowBlur:36,bold:true},
+    gradient:{color:'#f1c40f',gradientFill:true,gradColor1:'#fff3a0',gradColor2:'#e67e22',
+      stroke:true,strokeColor:'#000',strokeWidth:7,
+      doubleStroke:true,doubleStrokeColor:'#000',doubleStrokeWidth:13,
+      shadow:true,glow:true,glowColor:'#f1c40f',glowBlur:30,bold:true}
+  };
+  Object.assign(el, map[name]||map.yellow);
+  saveState(); render(); showProps();
+}
+
+function toggleEyedropper(){
+  _eyedropperOn=(!_eyedropperOn);
+  _softBrushOn=false;
+  const b=document.getElementById('eyedropperBtn');
+  const sb=document.getElementById('softBrushBtn');
+  const so=document.getElementById('softBrushOpts');
+  if(b) b.style.background=_eyedropperOn?'rgba(241,196,15,0.25)':'';
+  if(sb) sb.style.background='';
+  if(so) so.style.display='none';
+  const canvas=document.getElementById('mainCanvas');
+  if(canvas) canvas.style.cursor=_eyedropperOn?'crosshair':'default';
+}
+
+function toggleSoftBrush(){
+  _softBrushOn=(!_softBrushOn);
+  _eyedropperOn=false;
+  const b=document.getElementById('softBrushBtn');
+  const eb=document.getElementById('eyedropperBtn');
+  const so=document.getElementById('softBrushOpts');
+  if(b) b.style.background=_softBrushOn?'rgba(108,99,255,0.3)':'';
+  if(eb) eb.style.background='';
+  if(so) so.style.display=_softBrushOn?'block':'none';
+  const canvas=document.getElementById('mainCanvas');
+  if(canvas) canvas.style.cursor=_softBrushOn?'crosshair':'default';
+  if(_softBrushOn) ensureSoftBrushCanvas();
+}
+
+function clearSoftBrushLayer(){
+  if(!_softBrushCanvas) return;
+  _softBrushCanvas.getContext('2d').clearRect(0,0,_softBrushCanvas.width,_softBrushCanvas.height);
+  render();
+}
+
+function canvasToLocal(e){
+  const canvas=document.getElementById('mainCanvas');
+  const r=canvas.getBoundingClientRect();
+  const clientX=e.touches?e.touches[0].clientX:e.clientX;
+  const clientY=e.touches?e.touches[0].clientY:e.clientY;
+  const x=(clientX-r.left)*(CW/r.width);
+  const y=(clientY-r.top)*(CH/r.height);
+  return {x,y};
+}
+
+function sampleCanvasColor(x,y){
+  // sample from main rendered frame
+  const canvas=document.getElementById('mainCanvas');
+  const c=canvas.getContext('2d');
+  const ix=Math.max(0,Math.min(CW-1,Math.round(x)));
+  const iy=Math.max(0,Math.min(CH-1,Math.round(y)));
+  const d=c.getImageData(ix,iy,1,1).data;
+  const hex='#'+[d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+  return hex;
+}
+
+function paintSoftBrush(x,y){
+  const layer=ensureSoftBrushCanvas();
+  const ctx=layer.getContext('2d');
+  const size=+(document.getElementById('sbSize')||{value:36}).value;
+  const hard=+(document.getElementById('sbHard')||{value:20}).value; // 0 soft .. 100 hard
+  const color=(document.getElementById('sbColor')||{value:'#ffffff'}).value;
+  const op=(+(document.getElementById('sbOp')||{value:70}).value)/100;
+  const r=size/2;
+  // soft radial gradient stamp
+  const g=ctx.createRadialGradient(x,y,r*(hard/100),x,y,r);
+  // parse hex
+  const m=color.match(/^#([0-9a-f]{6})$/i);
+  let rr=255,gg=255,bb=255;
+  if(m){ rr=parseInt(m[1].slice(0,2),16); gg=parseInt(m[1].slice(2,4),16); bb=parseInt(m[1].slice(4,6),16); }
+  g.addColorStop(0, `rgba(${rr},${gg},${bb},${op})`);
+  g.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fill();
+  // also connect from last point
+  if(_lastBrushPt){
+    const dx=x-_lastBrushPt.x, dy=y-_lastBrushPt.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const steps=Math.max(1, Math.floor(dist/(r*0.35)));
+    for(let i=1;i<steps;i++){
+      const t=i/steps;
+      const px=_lastBrushPt.x+dx*t, py=_lastBrushPt.y+dy*t;
+      const g2=ctx.createRadialGradient(px,py,r*(hard/100),px,py,r);
+      g2.addColorStop(0, `rgba(${rr},${gg},${bb},${op})`);
+      g2.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
+      ctx.fillStyle=g2;
+      ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill();
+    }
+  }
+  _lastBrushPt={x,y};
+  render();
+}
+
+// Hook pointer events on canvas for eyedropper + soft brush
+(function setupProPointer(){
+  function onDown(e){
+    if(!_eyedropperOn && !_softBrushOn) return;
+    e.preventDefault(); e.stopPropagation();
+    const pt=canvasToLocal(e);
+    if(_eyedropperOn){
+      const hex=sampleCanvasColor(pt.x,pt.y);
+      const el=getSelected();
+      if(el && el.type==='text'){ el.color=hex; saveState(); render(); showProps(); }
+      else if(el && el.type==='shape'){ el.fill=hex; saveState(); render(); showProps(); }
+      else {
+        const sb=document.getElementById('sbColor'); if(sb) sb.value=hex;
+        const bg=document.getElementById('bgColor');
+        if(bg && confirm('কোনো লেয়ার সিলেক্ট নেই। Background color সেট করব?\\n'+hex)){
+          bg.value=hex; updateBackground();
+        } else {
+          alert('রং তোলা হয়েছে: '+hex+'\\nটেক্সট/শেপ সিলেক্ট করে আবার ক্লিক করুন, অথবা Soft Brush color এ সেট হয়েছে।');
+        }
+      }
+      toggleEyedropper();
+      return;
+    }
+    if(_softBrushOn){
+      _softBrushDrawing=true;
+      _lastBrushPt=null;
+      paintSoftBrush(pt.x,pt.y);
+    }
+  }
+  function onMove(e){
+    if(!_softBrushOn || !_softBrushDrawing) return;
+    e.preventDefault();
+    const pt=canvasToLocal(e);
+    paintSoftBrush(pt.x,pt.y);
+  }
+  function onUp(){
+    if(_softBrushDrawing){
+      _softBrushDrawing=false;
+      _lastBrushPt=null;
+      // স্ট্রোক শেষে history তে রাখো (undo কাজ করবে elements এর সাথে; brush canvas আলাদা)
+      if(typeof saveState==='function') saveState();
+    }
+  }
+  window.addEventListener('load',()=>{
+    const canvas=document.getElementById('mainCanvas');
+    if(!canvas) return;
+    canvas.addEventListener('mousedown', onDown, true);
+    canvas.addEventListener('mousemove', onMove, true);
+    window.addEventListener('mouseup', onUp, true);
+    canvas.addEventListener('touchstart', onDown, {capture:true,passive:false});
+    canvas.addEventListener('touchmove', onMove, {capture:true,passive:false});
+    window.addEventListener('touchend', onUp, true);
+  });
+})();
+
+
+function applyTemplate(name){
+  // Keep logo if locked; clear other elements or guide layout with placeholder texts
+  if(!_logoLocked){
+    // keep logo layers only
+    elements = elements.filter(e=>e.type==='logo');
+  } else {
+    elements = elements.filter(e=>e.type==='logo');
+  }
+  // Soft clear brush
+  if(_softBrushCanvas){
+    _softBrushCanvas.getContext('2d').clearRect(0,0,_softBrushCanvas.width,_softBrushCanvas.height);
+  }
+
+  const title = {
+    id:++idCounter, type:'text',
+    text:'বড় শিরোনাম', fontSize:96, fontFamily:'Hind Siliguri',
+    color:'#f1c40f', bold:true, italic:false, align:'left', opacity:1,
+    shadow:true, shadowColor:'#000', shadowBlur:18, shadowOffsetX:4, shadowOffsetY:6,
+    stroke:true, strokeColor:'#000', strokeWidth:8,
+    doubleStroke:true, doubleStrokeColor:'#000', doubleStrokeWidth:14,
+    glow:true, glowColor:'#f39c12', glowBlur:28,
+    gradientFill:true, gradColor1:'#ffe566', gradColor2:'#e67e22',
+    rotation:0, curveMode:'none', curveAmount:25,
+    textBg:'none', textBgColor:'#e60000', textBgOpacity:0.85, textBgPad:20, wrapText:false,
+  };
+  const sub = {
+    id:++idCounter, type:'text',
+    text:'ছোট সাবটাইটেল এখানে', fontSize:42, fontFamily:'Hind Siliguri',
+    color:'#ffffff', bold:true, italic:false, align:'left', opacity:1,
+    shadow:true, shadowColor:'#000', shadowBlur:12, shadowOffsetX:3, shadowOffsetY:3,
+    stroke:true, strokeColor:'#000', strokeWidth:4,
+    doubleStroke:false, glow:false, gradientFill:false,
+    rotation:0, curveMode:'none', curveAmount:25,
+    textBg:'none', textBgColor:'#e60000', textBgOpacity:0.85, textBgPad:20, wrapText:false,
+  };
+
+  if(name==='personLeft'){
+    title.x=Math.round(CW*0.42); title.y=Math.round(CH*0.22); title.w=Math.round(CW*0.55);
+    sub.x=title.x; sub.y=Math.round(CH*0.62); sub.w=Math.round(CW*0.5);
+    sub.color='#ffdddd'; sub.strokeColor='#8B0000';
+  } else if(name==='personRight'){
+    title.x=Math.round(CW*0.06); title.y=Math.round(CH*0.22); title.w=Math.round(CW*0.55);
+    sub.x=title.x; sub.y=Math.round(CH*0.62); sub.w=Math.round(CW*0.5);
+  } else {
+    // bigCenter
+    title.x=Math.round(CW*0.1); title.y=Math.round(CH*0.35); title.w=Math.round(CW*0.8);
+    title.align='center'; title.fontSize=110;
+    sub.x=title.x; sub.y=Math.round(CH*0.62); sub.w=title.w; sub.align='center';
+  }
+  elements.push(title, sub);
+  // re-assert logo top-right if any
+  elements.forEach(e=>{
+    if(e.type==='logo'){ e.x=CW-e.w-24; e.y=24; }
+  });
+  saveState(); updateLayers(); render();
+  selectElement(title.id); showProps();
+  alert('Template বসানো হয়েছে।\\n• বামে/ডানে নিজের ছবি Add Image করে বসান\\n• টেক্সট এডিট করুন\\n• Logo Lock চালু রাখলে লোগো থাকবে');
+}
+
+function toggleLogoLock(){
+  _logoLocked=!_logoLocked;
+  const b=document.getElementById('logoLockBtn');
+  if(b){
+    b.textContent=_logoLocked?'🔒 Logo Lock: ON':'🔒 Logo Lock: OFF';
+    b.style.background=_logoLocked?'rgba(46,204,113,0.25)':'';
+  }
+}
+
+// Protect logo when clearCanvas if locked
+(function patchClearCanvas(){
+  window.addEventListener('load',()=>{
+    if(typeof clearCanvas!=='function') return;
+    const orig=clearCanvas;
+    window.clearCanvas=function(){
+      if(_logoLocked){
+        const logos=elements.filter(e=>e.type==='logo');
+        orig();
+        elements=logos.slice();
+        // restore bg may have been reset by orig — keep logos
+        updateLayers(); render();
+      } else {
+        orig();
+      }
+    };
+  });
+})();
+
+function matchImageColor(){
+  const el=getSelected();
+  if(!el||el.type!=='image'){ alert('আগে একটি ইমেজ লেয়ার সিলেক্ট করুন'); return; }
+  // Sample average color from background region (corners) vs image center — simple heuristic
+  const canvas=document.getElementById('mainCanvas');
+  const c=canvas.getContext('2d');
+  function avgAt(x,y,s){
+    let R=0,G=0,B=0,n=0;
+    const x0=Math.max(0,Math.round(x-s)), y0=Math.max(0,Math.round(y-s));
+    const x1=Math.min(CW,Math.round(x+s)), y1=Math.min(CH,Math.round(y+s));
+    try{
+      const data=c.getImageData(x0,y0,Math.max(1,x1-x0),Math.max(1,y1-y0)).data;
+      for(let i=0;i<data.length;i+=4){ R+=data[i];G+=data[i+1];B+=data[i+2];n++; }
+    }catch(err){}
+    if(!n) return {r:128,g:128,b:128};
+    return {r:R/n,g:G/n,b:B/n};
+  }
+  // BG samples: top-left, top-right, bottom-left
+  const bg1=avgAt(40,40,20), bg2=avgAt(CW-40,40,20), bg3=avgAt(40,CH-40,20);
+  const bg={r:(bg1.r+bg2.r+bg3.r)/3, g:(bg1.g+bg2.g+bg3.g)/3, b:(bg1.b+bg2.b+bg3.b)/3};
+  const imgC=avgAt(el.x+el.w/2, el.y+el.h/2, Math.min(40,el.w/4));
+  const bgLum=(bg.r+bg.g+bg.b)/3;
+  const imgLum=(imgC.r+imgC.g+imgC.b)/3;
+  // Adjust brightness toward bg
+  let br=el.brightness??100;
+  if(imgLum>5){
+    const ratio=bgLum/imgLum;
+    br=Math.round(Math.max(60, Math.min(160, br*ratio)));
+  }
+  // Warmth: if bg is warmer (more R), bump saturation slightly & brightness
+  const bgWarm=(bg.r-bg.b);
+  const imgWarm=(imgC.r-imgC.b);
+  let sat=el.saturation??100;
+  if(bgWarm>imgWarm+15) sat=Math.min(160, sat+15);
+  if(bgWarm<imgWarm-15) sat=Math.max(60, sat-10);
+  let ct=el.contrast??100;
+  ct=Math.min(130, Math.max(90, ct));
+  el.brightness=br; el.saturation=sat; el.contrast=ct;
+  saveState(); render(); showProps();
+  alert('Match Color করা হয়েছে\\nBrightness: '+br+' | Saturate: '+sat+'\\nপ্রয়োজন হলে Properties থেকে আরও টুইক করুন');
+}
+
 // ── INIT ──
 document.getElementById('downloadModal').addEventListener('click',function(e){if(e.target===this)hideDownload();});
 document.getElementById('previewModal').addEventListener('click',function(e){if(e.target===this)hidePreview();});
+
 
 window.addEventListener('load',()=>{
   // Canvas wrap initial size

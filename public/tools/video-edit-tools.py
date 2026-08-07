@@ -166,6 +166,22 @@ def probe_duration(filepath: str) -> float:
     return 0.0
 
 
+def probe_has_audio(filepath: str) -> bool:
+    """FFprobe দিয়ে চেক করে ফাইলে audio stream আছে কিনা (mute করা ক্লিপে থাকে না)।"""
+    cmd = [
+        FFPROBE_BIN, "-v", "error",
+        "-select_streams", "a",
+        "-show_entries", "stream=index",
+        "-of", "csv=p=0",
+        filepath,
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return bool(result.stdout.strip())
+    except Exception as e:
+        log.warning(f"ffprobe audio-check failed: {e}")
+        return False
+
 def run_ffmpeg(cmd: list, description: str = "") -> tuple[bool, str]:
     """
     FFmpeg command চালায়।
@@ -273,6 +289,10 @@ def init_session_state() -> None:
         # ১২. Hum Removal — বৈদ্যুতিক যন্ত্রের 50/60Hz গুনগুন শব্দ কাটে
         "vo_hum_removal":    False,   # ডিফল্ট OFF — শুধু generator/motor থাকলে দরকার
         "vo_hum_freq":       50,      # 50Hz (বাংলাদেশ/ভারত standard) বা 60Hz (US)
+        # AI Denoise (afftdn) এর backup/extra adaptive denoise — RNNoise না থাকলে/
+        # আরও নয়েজি হলে কাজে লাগে। ডিফল্ট OFF — RNNoise ইতিমধ্যে থাকলে সাধারণত দরকার নেই।
+        "vo_afftdn":         False,
+        "vo_afftdn_amount":  12.0,    # Noise reduction (dB), 5–25 রেঞ্জ
         # ১৩. Stereo Widening — কণ্ঠ/audio কে প্রশস্ত শোনায়
         "vo_stereo_widen":   False,   # ডিফল্ট OFF — subtle effect, ঐচ্ছিক
         "vo_widen_amount":   1.3,     # 1.0 = কোনো পরিবর্তন নেই, 2.0 = সর্বোচ্চ প্রশস্ত
@@ -302,6 +322,12 @@ def init_session_state() -> None:
         "transition_whoosh_volume":     0.4,    # 0.0–1.0
         # Global speed (1.1 – 2.0)
         "global_speed":     DEFAULT_SPEED,
+        # Global Stabilization (Deshake) — speed এর মতোই, নতুন ক্লিপে auto apply হবে
+        "global_stabilize_enable":    False,
+        "global_stabilize_mode":      "light",   # "strong" (ধীর, শক্তিশালী) বা "light" (দ্রুত)
+        "global_stabilize_smoothing": 15,
+        "global_stabilize_shakiness": 5,
+        "global_stabilize_zoom":      0.0,
         # Background Music (voiceover থেকে আলাদা)
         "bg_music_enable":  False,
         "bg_music_volume":  0.12,   # 12% — voiceover এর নিচে থাকবে
@@ -728,6 +754,12 @@ def build_voiceover_audio_filter(settings: dict) -> str:
     # ধাপ ৪ — De-clicker: প্লোসিভ (প-ফ-ব) ও মাউথ ক্লিক শব্দ মসৃণ করে
     if settings.get("vo_declicker"):
         parts.append("adeclick=window=55:overlap=75:arorder=2:threshold=2")
+        # ধাপ ৪.৫ — Adaptive Noise-Print Denoise (afftdn, track_noise মোড)
+    # নয়েজ প্রোফাইল আলাদা করে sample নিতে হয় না — tn=1 দিলে ক্রমাগত
+    # ব্যাকগ্রাউন্ড নয়েজ auto-track করে বিয়োগ করে। RNNoise এর backup/extra।
+    if settings.get("vo_afftdn"):
+        nr = float(settings.get("vo_afftdn_amount", 12.0))
+        parts.append(f"afftdn=nr={nr:.1f}:nf=-25:tn=1")
 
     # ধাপ ৫ — Vocal EQ — স্টুডিও সাউন্ডের জন্য
     if settings.get("vo_eq_enable"):
@@ -1482,6 +1514,8 @@ def apply_transitions(
         return True
 
     durations = [probe_duration(p) for p in clip_paths]
+    # প্রথম ক্লিপ চেক করেই বোঝা যাবে — mute_all থাকলে সবগুলোই audio-বিহীন হবে
+    has_audio = probe_has_audio(clip_paths[0])
     filter_parts = []
     input_args   = []
     for p in clip_paths:
@@ -1496,7 +1530,7 @@ def apply_transitions(
 
     cumulative = 0.0
     cur_v = "[0:v]"
-    cur_a = "[0:a]"
+    cur_a = "[0:a]" if has_audio else None
 
     # ১. Adaptive Duration হলে প্রতিটা কাট পয়েন্টের জন্য আলাদা duration,
     # নাহলে সবগুলোতে একই XFADE_DURATION ব্যবহার হবে।
@@ -1514,8 +1548,6 @@ def apply_transitions(
         cumulative += durations[i]
         offset = max(0.0, cumulative - this_xfade_dur)
         out_v  = f"[vx{i}]"
-        out_a_raw = f"[ax{i}raw]"
-        out_a  = f"[ax{i}]"
 
         # Video xfade — নির্বাচিত transition type, adaptive duration সহ
         filter_parts.append(
@@ -1526,50 +1558,47 @@ def apply_transitions(
             f"{out_v}"
         )
 
-        # ২. Audio Crossfade — curve parameter সহ (linear এর বদলে tri/qsin)
-        filter_parts.append(
-            f"{cur_a}[{i+1}:a]acrossfade="
-            f"d={this_xfade_dur}:c1={audio_curve}:c2={audio_curve}"
-            f"{out_a_raw}"
-        )
+        # ২. Audio Crossfade — ক্লিপে audio না থাকলে (mute_all অবস্থায়)
+        # এই পুরো ধাপটা স্কিপ হবে, নাহলে "Stream specifier ':a' matches
+        # no streams" এরর দিত।
+        if has_audio:
+            out_a_raw = f"[ax{i}raw]"
+            out_a  = f"[ax{i}]"
+            filter_parts.append(
+                f"{cur_a}[{i+1}:a]acrossfade="
+                f"d={this_xfade_dur}:c1={audio_curve}:c2={audio_curve}"
+                f"{out_a_raw}"
+            )
 
-        # ৩. Auto-Level Matching — এই কাট পয়েন্টের দুই পাশের ক্লিপের
-        # loudness ফারাক বেশি হলে (>3 LUFS), দুর্বল দিকটার volume সামান্য
-        # adjust করে সমান শোনানোর চেষ্টা করি।
-        current_a_label = out_a_raw
-        if auto_level_match and clip_loudness[i] is not None and clip_loudness[i + 1] is not None:
-            diff = clip_loudness[i + 1] - clip_loudness[i]
-            if abs(diff) > 3.0:
-                # diff পজিটিভ মানে পরের ক্লিপ জোরে — তাই crossfaded অংশে
-                # একটা mild compensating gain apply করি (±3dB এর মধ্যে,
-                # অতিরিক্ত correction distortion তৈরি করতে পারে তাই capped)
-                correction_db = max(-3.0, min(3.0, -diff / 2))
-                filter_parts.append(f"{current_a_label}volume={correction_db:.1f}dB{out_a}")
-                current_a_label = out_a
+            # ৩. Auto-Level Matching — এই কাট পয়েন্টের দুই পাশের ক্লিপের
+            # loudness ফারাক বেশি হলে (>3 LUFS), দুর্বল দিকটার volume সামান্য
+            # adjust করে সমান শোনানোর চেষ্টা করি।
+            current_a_label = out_a_raw
+            if auto_level_match and clip_loudness[i] is not None and clip_loudness[i + 1] is not None:
+                diff = clip_loudness[i + 1] - clip_loudness[i]
+                if abs(diff) > 3.0:
+                    correction_db = max(-3.0, min(3.0, -diff / 2))
+                    filter_parts.append(f"{current_a_label}volume={correction_db:.1f}dB{out_a}")
+                    current_a_label = out_a
+                else:
+                    filter_parts.append(f"{current_a_label}anull{out_a}")
+                    current_a_label = out_a
             else:
                 filter_parts.append(f"{current_a_label}anull{out_a}")
                 current_a_label = out_a
-        else:
-            filter_parts.append(f"{current_a_label}anull{out_a}")
-            current_a_label = out_a
+
+            cur_a = current_a_label
 
         cur_v = out_v
-        cur_a = current_a_label
         cumulative -= this_xfade_dur
 
-    # ৪. Transition Whoosh SFX — প্রতিটা কাট পয়েন্টে whoosh sound মিশিয়ে
-    # দিই, চূড়ান্ত audio track এর সাথে mix করে। Whoosh এর precise timing
-    # প্রতিটা transition offset অনুযায়ী adelay দিয়ে বসানো হয়।
-    whoosh_input_start_idx = n  # ইনপুট ইনডেক্স যেখান থেকে whoosh instances শুরু হবে
-    if whoosh_sfx_path:
-        # প্রতিটা transition point এর জন্য একটা করে whoosh instance লাগবে,
-        # কারণ প্রতিটাতে আলাদা timing offset প্রয়োজন।
+    # ৪. Transition Whoosh SFX — audio না থাকলে এটাও প্রযোজ্য না
+    whoosh_input_start_idx = n
+    if whoosh_sfx_path and has_audio:
         n_transitions = n - 1
         for _ in range(n_transitions):
             input_args += ["-i", whoosh_sfx_path]
 
-        # প্রতিটা whoosh কে তার transition offset এ delay করে মূল audio
-        # track এর সাথে mix করি।
         whoosh_cumulative = 0.0
         whoosh_mix_inputs = [cur_a]
         for i in range(n_transitions):
@@ -1600,18 +1629,27 @@ def apply_transitions(
     bitrate  = profile["bitrate"] if not is_preview else "3M"
     enc_opts = ["-preset", "p4", "-rc", "vbr", "-cq", "20"] if not is_preview else ["-preset", "fast", "-crf", "26"]
 
+    map_args = ["-map", cur_v]
+    if has_audio:
+        map_args += ["-map", cur_a]
+    audio_out_opts = ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"] if has_audio else ["-an"]
+
     cmd = (
         [FFMPEG_BIN, "-y"] + input_args
         + ["-filter_complex", filter_complex]
-        + ["-map", cur_v, "-map", cur_a]
+        + map_args
         + ["-c:v", encoder, "-b:v", bitrate, "-r", str(TARGET_FPS), "-pix_fmt", "yuv420p"]
         + enc_opts
-        + ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"]
+        + audio_out_opts
         + [output_path]
     )
 
     success, err = run_ffmpeg(cmd, "transitions concat")
-    if not success and ("nvenc" in err.lower() or "no capable devices" in err.lower()):
+    # শুধু তখনই SW fallback ট্রাই করব যখন আসলেই NVENC ব্যবহার হয়েছিল —
+    # নাহলে libx264 (preview) কমান্ডও ভুলভাবে "ঠিক" করতে গিয়ে ভেঙে যাচ্ছিল।
+    if not success and "h264_nvenc" in cmd and (
+        "nvenc" in err.lower() or "no capable devices" in err.lower() or "cannot load nvcuda" in err.lower()
+    ):
         success, _ = run_ffmpeg(nvenc_to_sw_fallback(cmd), "transitions concat SW")
     return success
 
@@ -1823,24 +1861,44 @@ def apply_lcut_voiceover_mix(
     jcut_ms = int(JCUT_OFFSET * 1000)
     audio_bitrate = "320k" if audio_settings.get("vo_aac_320") else "192k"
 
+    # ভিডিও ক্লিপে নিজস্ব audio stream আছে কিনা চেক (mute/silent ক্লিপে থাকে না) —
+    # না থাকলে [0:a] filter এ পাঠালে FFmpeg "matches no streams" এরর দেয়।
+    has_clip_audio = probe_has_audio(video_path)
+
     inputs = [FFMPEG_BIN, "-y", "-i", video_path, "-i", voiceover_path]
 
     if bg_music_path:
         # -stream_loop -1 দিয়ে music ভিডিওর চেয়ে ছোট হলেও loop করে পুরো ভিডিও জুড়ে বাজবে
         inputs += ["-stream_loop", "-1", "-i", bg_music_path]
 
-        filter_complex = (
-            f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
-            f"[1:a]volume=1.0[vo];"
-            f"[2:a]volume={bg_music_volume:.2f}[bgm];"
-            f"[va][vo][bgm]amix=inputs=3:duration=first:dropout_transition=2[aout_raw]"
-        )
+        if has_clip_audio:
+            filter_complex = (
+                f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
+                f"[1:a]volume=1.0[vo];"
+                f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
+                # Real sidechain ducking — কথা বললেই music auto নিচে নামবে,
+                # চুপ থাকলে normal ভলিউমে ফিরবে (static % ভলিউম-এর বদলে)
+                f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
+                f"[va][vo][bgm]amix=inputs=3:duration=first:dropout_transition=2[aout_raw]"
+            )
+        else:
+            # ক্লিপে audio নেই → শুধু voiceover + bg music মিক্স হবে (va layer বাদ)
+            filter_complex = (
+                f"[1:a]volume=1.0[vo];"
+                f"[2:a]volume={bg_music_volume:.2f}[bgm_raw];"
+                f"[bgm_raw][vo]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=400:makeup=1[bgm];"
+                f"[vo][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout_raw]"
+            )
     else:
-        filter_complex = (
-            f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
-            f"[1:a]volume=1.0[vo];"
-            f"[va][vo]amix=inputs=2:duration=longest:dropout_transition=2[aout_raw]"
-        )
+        if has_clip_audio:
+            filter_complex = (
+                f"[0:a]adelay={jcut_ms}|{jcut_ms},volume=0.15[va];"
+                f"[1:a]volume=1.0[vo];"
+                f"[va][vo]amix=inputs=2:duration=longest:dropout_transition=2[aout_raw]"
+            )
+        else:
+            # ক্লিপে audio নেই, bg music-ও নেই → voiceover-ই একমাত্র audio, মিক্সের দরকার নেই
+            filter_complex = f"[1:a]volume=1.0[aout_raw]"
 
     # Fade In/Out — mixed audio এর উপর প্রয়োগ হয়
     fade_parts = []
@@ -2427,6 +2485,7 @@ def export_settings_preset() -> dict:
         "vo_bandpass", "vo_bandpass_low", "vo_bandpass_high",
         "vo_wind_filter", "vo_wind_cutoff",
         "vo_hum_removal", "vo_hum_freq",
+        "vo_afftdn", "vo_afftdn_amount",
         "vo_multiband", "vo_agc",
         "vo_exciter", "vo_exciter_amount",
         "vo_stereo_widen", "vo_widen_amount",
@@ -2822,24 +2881,184 @@ def render_ui() -> None:
 
     st.markdown("""
     <style>
-    .stApp { background-color: #111; }
+    :root {
+        --shd-bg:         #0d1210;
+        --shd-panel:      #161d16;
+        --shd-panel-alt:  #1c261c;
+        --shd-border:     #2a3a2a;
+        --shd-text:       #eef2ee;
+        --shd-text-dim:   #9fb0a0;
+        --shd-green:      #1b5e20;
+        --shd-green-light:#2e7d32;
+        --shd-gold:       #d9a441;
+    }
+
+    /* ── বেস টেক্সট রিসেট — dark theme এ কোনো টেক্সট চোখে না পড়ার আসল ফিক্স ──
+       Streamlit এর প্রতিটা native widget (selectbox/radio/toggle/slider/
+       input) নিজস্ব ভেতরের রঙ ব্যবহার করে, যেটা আমাদের কাস্টম dark
+       background এর সাথে contrast miss করছিল। এখানে পুরো app এর ভেতরে
+       ডিফল্ট টেক্সট রঙ একটা readable হালকা শেডে সেট করে দিচ্ছি, তারপর
+       নিচে badge/heading এর মতো নির্দিষ্ট জায়গায় আলাদা রঙ override হচ্ছে। */
+    .stApp, .stApp * { color: var(--shd-text); }
+    .stApp { background-color: var(--shd-bg); }
+
+    /* Selectbox/Multiselect dropdown এর option list — এটা .stApp এর বাইরে,
+       document body তে আলাদা portal হিসেবে রেন্ডার হয়, তাই আলাদা global
+       selector লাগে, নাহলে dropdown খুললে ভেতরের অপশন টেক্সট দেখা যেত না। */
+    [data-baseweb="popover"], [data-baseweb="popover"] *,
+    [data-baseweb="menu"],    [data-baseweb="menu"] *,
+    ul[role="listbox"],       ul[role="listbox"] * {
+        background-color: var(--shd-panel) !important;
+        color: var(--shd-text) !important;
+    }
+    [data-baseweb="popover"] li:hover,
+    ul[role="listbox"] li:hover { background-color: var(--shd-panel-alt) !important; }
+
+    /* সব widget এর লেবেল (selectbox/slider/radio/toggle/input শিরোনাম) */
+    [data-testid="stWidgetLabel"] p { color: var(--shd-text) !important; font-weight: 500; }
+
+    /* Text/Number input বক্স */
+    .stTextInput input, .stTextArea textarea, .stNumberInput input {
+        color: var(--shd-text) !important;
+        background-color: var(--shd-panel-alt) !important;
+        border: 1px solid var(--shd-border) !important;
+        border-radius: 6px !important;
+    }
+    .stTextInput input::placeholder,
+    .stTextArea textarea::placeholder,
+    .stNumberInput input::placeholder {
+        color: var(--shd-text-dim) !important;
+        opacity: 1 !important;
+    }
+
+    /* Selectbox নিজের বক্স */
+    [data-baseweb="select"] > div {
+        background-color: var(--shd-panel-alt) !important;
+        border-color: var(--shd-border) !important;
+        color: var(--shd-text) !important;
+    }
+
+    /* Slider এর সংখ্যা bubble ও tick label */
+    [data-testid="stThumbValue"] { color: var(--shd-gold) !important; font-weight: 700; }
+    [data-testid="stTickBar"] p  { color: var(--shd-text-dim) !important; }
+
+    /* Radio/Checkbox লেবেল */
+    [data-testid="stRadio"] label p,
+    [data-testid="stCheckbox"] label p { color: var(--shd-text) !important; }
+
+    /* Toggle — চালু থাকলে gold accent */
+    [data-testid="stToggle"] div[role="switch"][aria-checked="true"] {
+        background-color: var(--shd-gold) !important;
+    }
+
+    /* Info/Success/Warning/Error বক্সের ভেতরের টেক্সট */
+    [data-testid="stAlert"] p, [data-testid="stAlert"] span { color: var(--shd-text) !important; }
+
+    /* পাইপলাইন সারসংক্ষেপ টেবিলের টেক্সট/বর্ডার */
+    [data-testid="stMarkdownContainer"] table,
+    [data-testid="stMarkdownContainer"] th,
+    [data-testid="stMarkdownContainer"] td { color: var(--shd-text) !important; border-color: var(--shd-border) !important; }
+
+    /* File uploader dropzone — কার্ডের মতো */
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: var(--shd-panel-alt) !important;
+        border: 1px dashed var(--shd-border) !important;
+        border-radius: 10px;
+    }
+
+    /* Caption — মূল টেক্সট থেকে একটু dim, কিন্তু readable */
+    [data-testid="stCaptionContainer"],
+    [data-testid="stCaptionContainer"] *,
+    .stCaption, .stCaption *, small {
+        color: var(--shd-text-dim) !important;
+        opacity: 1 !important;
+    }
+
     .clip-row {
-        background: #1a2a1a; border-left: 3px solid #4CAF50;
+        background: var(--shd-panel-alt); border-left: 3px solid var(--shd-green-light);
         padding: 0.5rem 1rem; margin: 0.2rem 0;
         border-radius: 0 8px 8px 0; font-size: 0.85rem;
     }
-    .badge-nvenc { background:#1b5e20; color:#a5d6a7; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .badge-sw    { background:#4a2c00; color:#ffcc80; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .badge-err   { background:#5c0011; color:#ffcdd2; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
-    .audio-feat  { background:#0d1f0d; border:1px solid #2d4a2d; border-radius:8px; padding:0.8rem; margin:0.3rem 0; }
+    .badge-nvenc { background:#1b5e20; color:#a5d6a7 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+    .badge-sw    { background:#4a2c00; color:#ffcc80 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+    .badge-err   { background:#5c0011; color:#ffcdd2 !important; padding:2px 10px; border-radius:12px; font-size:0.78rem; }
+
     #MainMenu {visibility:hidden;} footer {visibility:hidden;}
+    [data-testid="stToolbar"] { visibility: hidden !important; }
+    [data-testid="stDecoration"] { display: none !important; }
+
+    /* Sidebar — CapCut এর left panel এর মতো একটু গাঢ় শেড */
+    [data-testid="stSidebar"] {
+        background-color: var(--shd-panel);
+        border-right: 1px solid var(--shd-border);
+    }
+    [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+        color: var(--shd-gold) !important;
+        font-weight: 700;
+    }
+
+    /* Headings */
+    h1, h2, h3 { color: var(--shd-text) !important; }
+    hr { border-color: var(--shd-border) !important; }
+
+    /* Expander → CapCut এর মতো card panel */
+    [data-testid="stExpander"] {
+        background: var(--shd-panel);
+        border: 1px solid var(--shd-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    [data-testid="stExpander"] summary {
+        font-weight: 600;
+        color: var(--shd-text) !important;
+    }
+    [data-testid="stExpander"] summary:hover { background-color: var(--shd-panel-alt); }
+
+    /* Tabs (যদি ভবিষ্যতে ব্যবহার হয়) — CapCut এর pill tab এর মতো */
+    [data-testid="stTabs"] button { color: var(--shd-text-dim) !important; border-radius: 6px 6px 0 0; }
+    [data-testid="stTabs"] button[aria-selected="true"] {
+        color: var(--shd-gold) !important;
+        border-bottom: 2px solid var(--shd-gold) !important;
+    }
+
+    /* Buttons */
+    .stButton button {
+        border-radius: 8px;
+        border: 1px solid var(--shd-green-light);
+        color: var(--shd-text) !important;
+        background-color: var(--shd-panel-alt);
+        transition: all 0.15s ease;
+    }
+    .stButton button p { color: inherit !important; }
+    .stButton button:hover {
+        border-color: var(--shd-gold);
+        color: var(--shd-gold) !important;
+    }
+    .stButton button[kind="primary"] {
+        background: linear-gradient(135deg, var(--shd-green), var(--shd-green-light));
+        border: none;
+        font-weight: 700;
+        color: #ffffff !important;
+    }
+    .stButton button[kind="primary"]:hover {
+        background: linear-gradient(135deg, var(--shd-green-light), var(--shd-gold));
+    }
+
+    /* Progress bar */
+    .stProgress > div > div { background-color: var(--shd-gold) !important; }
     </style>
     """, unsafe_allow_html=True)
 
     # ── Header ────────────────────────────────────────────────────────────────
     c1, c2 = st.columns([4, 1])
     with c1:
-        st.markdown("## 🌾 Shadhinata Farm Video Automation Tool v2.0")
+        st.markdown(
+            "<h2 style='margin-bottom:0;color:#e8f5e9;'>"
+            "🌾 <span style='color:#d9a441;'>Shadhinata Farm</span> Video Automation Tool "
+            "<span style='font-size:0.6em;color:#7a8a7a;'>v2.0</span></h2>",
+            unsafe_allow_html=True,
+        )
         st.caption("Offline · FFmpeg NVENC · Bangla Unicode · 60FPS · Pro Audio")
     with c2:
         if st.session_state["nvenc_available"] is None:
@@ -3041,6 +3260,32 @@ def render_ui() -> None:
         )
         st.session_state["global_speed"] = global_speed
         st.caption(f"বর্তমান: **{global_speed}×** গতি")
+
+        st.divider()
+
+        # ── Global Stabilization ─────────────────────────────────────────────
+        st.markdown("### 📹 ডিফল্ট Stabilization (কাঁপুনি কমানো)")
+        global_stab_enable = st.toggle(
+            "সব নতুন ক্লিপে auto stabilize চালু করুন",
+            value=st.session_state["global_stabilize_enable"],
+            help="Speed এর মতোই — চালু রাখলে নতুন আপলোড করা প্রতিটা ক্লিপে auto stabilization বসে যাবে",
+        )
+        st.session_state["global_stabilize_enable"] = global_stab_enable
+
+        if global_stab_enable:
+            global_stab_mode = st.radio(
+                "মোড",
+                options=["light", "strong"],
+                index=["light", "strong"].index(st.session_state["global_stabilize_mode"]),
+                horizontal=True,
+                help="Light = দ্রুত, single-pass। Strong = দুই-পাস vidstab, শক্তিশালী কিন্তু অনেক ধীর।",
+            )
+            st.session_state["global_stabilize_mode"] = global_stab_mode
+            st.caption(
+                "⚠️ Strong মোড প্রতিটা ক্লিপে ২-পাস প্রসেসিং করে — সব ক্লিপে auto চালু রাখলে "
+                "রেন্ডার অনেক ধীর হবে। বেশি ক্লিপ থাকলে Light রাখাই ভালো, শুধু বেশি কাঁপা ক্লিপে "
+                "ম্যানুয়ালি Strong করে দিন।"
+            )
 
         st.divider()
 
@@ -3260,6 +3505,19 @@ def render_ui() -> None:
                 options=[50, 60],
                 index=[50, 60].index(st.session_state["vo_hum_freq"]),
                 help="বাংলাদেশ/ভারতে সাধারণত 50Hz। আমেরিকান যন্ত্রপাতি হলে 60Hz।"
+            )
+            st.session_state["vo_afftdn"] = st.toggle(
+            "🧪 Adaptive Denoise (afftdn) — Extra/Backup",
+            value=st.session_state["vo_afftdn"],
+            help="RNNoise এর backup — মডেল ফাইল না থাকলে বা extra নয়েজি ফুটেজে ON করুন। "
+                 "RNNoise এর সাথে একসাথে ON রাখলে ভয়েস কিছুটা 'রোবটিক' শোনাতে পারে।"
+        )
+        if st.session_state["vo_afftdn"]:
+            st.session_state["vo_afftdn_amount"] = st.slider(
+                "Denoise Strength (dB)",
+                min_value=5.0, max_value=25.0,
+                value=float(st.session_state["vo_afftdn_amount"]),
+                step=1.0
             )
 
         st.divider()
@@ -3633,11 +3891,11 @@ def render_ui() -> None:
                     "zoom_style":        "none",
                     "zoom_strength":     1.0,
                     # Stabilizer (Deshake, ঐচ্ছিক, প্রতি ক্লিপে আলাদা)
-                    "stabilize_enable":     False,
-                    "stabilize_smoothing":  15,   # 5–50, বেশি = মসৃণ কিন্তু বেশি crop
-                    "stabilize_shakiness":  5,    # 1–10, ইনপুট কতটা কাঁপা ধরা হবে
-                    "stabilize_zoom":       0.0,  # 0–20%, crop পূরণ করতে অতিরিক্ত zoom
-                    "stabilize_mode":       "strong",  # "strong" (vidstab) বা "light" (deshake)
+                    "stabilize_enable":     st.session_state["global_stabilize_enable"],
+                    "stabilize_smoothing":  st.session_state["global_stabilize_smoothing"],
+                    "stabilize_shakiness":  st.session_state["global_stabilize_shakiness"],
+                    "stabilize_zoom":       st.session_state["global_stabilize_zoom"],
+                    "stabilize_mode":       st.session_state["global_stabilize_mode"],
                     # Rotate/Mirror (ঐচ্ছিক, প্রতি ক্লিপে আলাদা)
                     "rotate_degrees":       0,     # 0, 90, 180, 270
                     "mirror_enable":        False,
@@ -4321,6 +4579,8 @@ def render_ui() -> None:
             "vo_wind_cutoff":     st.session_state["vo_wind_cutoff"],
             "vo_hum_removal":     st.session_state["vo_hum_removal"],
             "vo_hum_freq":        st.session_state["vo_hum_freq"],
+            "vo_afftdn":          st.session_state["vo_afftdn"],
+            "vo_afftdn_amount":   st.session_state["vo_afftdn_amount"],
             # ১৪-১৭. কণ্ঠ পলিশ
             "vo_multiband":       st.session_state["vo_multiband"],
             "vo_agc":             st.session_state["vo_agc"],

@@ -57,7 +57,6 @@ export default function NewProductPage() {
       for (const file of Array.from(files)) {
         const formData = new FormData()
         formData.append("file", file)
-        // নতুন তৈরি করা গ্লোবাল আপলোড এপিআই পাথ এখানে যুক্ত করা হয়েছে
         const res = await fetch("/api/upload", {
           method: "POST",
           body: formData,
@@ -93,31 +92,60 @@ export default function NewProductPage() {
   function generateSlug(name: string) {
     return name
       .toLowerCase()
+      .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
   }
 
+  // বাংলা নাম → শুধু name; slug স্পর্শ করবে না (বাংলা অক্ষর slug খালি করে দিত)
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const name = e.target.value
     setForm(prev => ({
       ...prev,
       name,
-      slug: generateSlug(name)
     }))
   }
 
+  // English নাম → slug + slugEn দুটোই একই auto-slug (BN/EN URL একই স্লাগ)
   function handleNameEnChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nameEn = e.target.value
+    const auto = generateSlug(nameEn)
     setForm(prev => ({
       ...prev,
       nameEn,
-      slugEn: generateSlug(nameEn)
+      slug: auto,
+      slugEn: auto,
     }))
   }
 
   async function handleSubmit() {
     if (form.imageUrls.length === 0) {
       setError("দয়া করে পণ্যের একটি ছবি আপলোড করুন।")
+      return
+    }
+
+    // slug খালি হলে slugEn থেকে কপি (বা উল্টো)
+    let slug = (form.slug || "").trim()
+    let slugEn = (form.slugEn || "").trim()
+    if (!slug && slugEn) slug = slugEn
+    if (!slugEn && slug) slugEn = slug
+
+    if (!form.name.trim()) {
+      setError("পণ্যের বাংলা নাম আবশ্যক")
+      return
+    }
+    if (!slug) {
+      setError("Slug আবশ্যক — English নাম লিখলে অটো তৈরি হবে, অথবা হাতে লিখুন")
+      return
+    }
+    if (!form.pricePerUnit || Number.isNaN(parseFloat(form.pricePerUnit))) {
+      setError("মূল দাম আবশ্যক")
+      return
+    }
+    if (form.stockQty === "" || Number.isNaN(parseFloat(form.stockQty))) {
+      setError("স্টক পরিমাণ আবশ্যক")
       return
     }
 
@@ -130,6 +158,8 @@ export default function NewProductPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          slug,
+          slugEn: slugEn || null,
           categoryId: form.categoryId ? parseInt(form.categoryId) : null,
           pricePerUnit: parseFloat(form.pricePerUnit),
           discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
@@ -172,7 +202,7 @@ export default function NewProductPage() {
           />
         </div>
 
-        {/* Slug */}
+        {/*Slug */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">Slug (URL)</label>
           <input
@@ -204,20 +234,13 @@ export default function NewProductPage() {
           </select>
         </div>
 
-        {/* Banglish নাম (ঐচ্ছিক) */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">নাম (Banglish, ঐচ্ছিক)</label>
-          <input
-            type="text"
-            name="nameBanglish"
-            value={form.nameBanglish}
-            onChange={handleChange}
+          <input type="text" name="nameBanglish" value={form.nameBanglish} onChange={handleChange}
             placeholder="যেমন: Sundarbaner Khati Modhu"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-          />
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
         </div>
 
-        {/* English নাম */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">Product Name (English)</label>
           <input
@@ -228,9 +251,9 @@ export default function NewProductPage() {
             placeholder="e.g. Pure Sundarban Honey"
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
           />
+          <p className="text-xs text-gray-400 mt-1">English নাম লিখলে slug অটো তৈরি হবে (BN ও EN একই slug)</p>
         </div>
 
-        {/* English Slug */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">Slug (English URL)</label>
           <input
@@ -244,183 +267,96 @@ export default function NewProductPage() {
           <p className="text-xs text-gray-400 mt-1">URL: /en/shop/{form.slugEn || "..."}</p>
         </div>
 
-        {/* পিসি থেকে ইমেজ আপলোড সেকশন */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">পণ্যের ছবি যোগ করুন (একাধিক) *</label>
-          <div className="flex items-center gap-4">
-            <label className="cursor-pointer bg-green-50 text-green-700 border border-green-200 px-5 py-3 rounded-lg font-medium hover:bg-green-100 transition">
-              {uploading ? "ছবি আপলোড হচ্ছে..." : "📁 কম্পিউটার থেকে ফাইল বাছুন"}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                disabled={uploading}
-                className="hidden"
-              />
-            </label>
-            {form.imageUrls.length > 0 && (
-              <span className="text-sm text-green-600 font-medium">✅ {form.imageUrls.length} টি ছবি আপলোড সফল!</span>
-            )}
-          </div>
-          {/* প্রিভিউ স্ক্রিন */}
+          <label className="block text-sm font-medium text-gray-700 mb-2">পণ্যের ছবি আপলোড করুন *</label>
+          <input type="file" accept="image/*" multiple onChange={handleImageUpload}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3" />
+          {uploading && <p className="text-sm text-blue-600 mt-2">আপলোড হচ্ছে...</p>}
           {form.imageUrls.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mt-3">
               {form.imageUrls.map((url) => (
-                <div key={url} className="relative w-28 h-28 rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
-                  <img src={url} alt="Uploaded preview" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => removeImage(url)}
-                    className="absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full text-xs font-bold"
-                  >
-                    ✕
-                  </button>
+                <div key={url} className="relative">
+                  <img src={url} alt="preview" className="w-24 h-24 object-cover rounded-lg border" />
+                  <button type="button" onClick={() => removeImage(url)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs">×</button>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* বিবরণ (বাংলা) */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">বিবরণ (বাংলা)</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="পণ্যের বিস্তারিত বিবরণ লিখুন"
-            rows={4}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-          />
+          <textarea name="description" value={form.description} onChange={handleChange} rows={4}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
         </div>
 
-        {/* বিবরণ (English) */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">Description (English)</label>
-          <textarea
-            name="descriptionEn"
-            value={form.descriptionEn}
-            onChange={handleChange}
-            placeholder="Write the product description in English"
-            rows={4}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-          />
+          <textarea name="descriptionEn" value={form.descriptionEn} onChange={handleChange} rows={4}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
         </div>
 
-        {/* দাম */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">মূল দাম (৳) *</label>
-            <input
-              type="number"
-              name="pricePerUnit"
-              value={form.pricePerUnit}
-              onChange={handleChange}
-              placeholder="650"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-            />
+            <input type="number" name="pricePerUnit" value={form.pricePerUnit} onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">সেল দাম (৳)</label>
-            <input
-              type="number"
-              name="discountPrice"
-              value={form.discountPrice}
-              onChange={handleChange}
-              placeholder="550 (ঐচ্ছিক)"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-            />
+            <input type="number" name="discountPrice" value={form.discountPrice} onChange={handleChange}
+              placeholder="ঐচ্ছিক"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
         </div>
 
-        {/* Unit ও Stock */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">একক *</label>
-            <select
-              name="unit"
-              value={form.unit}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-            >
+            <select name="unit" value={form.unit} onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 bg-white">
               <option value="কেজি">কেজি</option>
-              <option value="৫০০ গ্রাম">৫০০ গ্রাম</option>
-              <option value="২৫০ গ্রাম">২৫০ গ্রাম</option>
               <option value="গ্রাম">গ্রাম</option>
               <option value="লিটার">লিটার</option>
               <option value="মিলি">মিলি</option>
               <option value="পিস">পিস</option>
-              <option value="ডজন">ডজন</option>
+              <option value="প্যাকেট">প্যাকেট</option>
+              <option value="বোতল">বোতল</option>
+              <option value="কোটি">কোটি</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">স্টক পরিমাণ *</label>
-            <input
-              type="number"
-              name="stockQty"
-              value={form.stockQty}
-              onChange={handleChange}
-              placeholder="100"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-            />
+            <input type="number" name="stockQty" value={form.stockQty} onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
         </div>
 
-        {/* অর্ডার পদ্ধতি: ওয়েবসাইটে সরাসরি অর্ডার নাকি শুধু WhatsApp/ফোনে */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">অর্ডার পদ্ধতি *</label>
-          <select
-            name="priceType"
-            value={form.priceType}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 bg-white"
-          >
-            <option value="FIXED">নির্দিষ্ট দাম — ওয়েবসাইটে Add to Cart/অর্ডার বাটন থাকবে</option>
+          <select name="priceType" value={form.priceType} onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 bg-white">
+            <option value="FIXED">ওয়েবসাইটে সরাসরি অর্ডার (কার্ট বাটন থাকবে)</option>
             <option value="NEGOTIABLE">শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের বাচ্চা)</option>
           </select>
         </div>
-        </div>
 
-        {/* Options */}
-        <div className="flex gap-6 mb-8">
+        <div className="flex gap-6 mb-8 flex-wrap">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="isFeatured"
-              checked={form.isFeatured}
-              onChange={handleChange}
-              className="w-4 h-4 accent-green-600"
-            />
+            <input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={handleChange} className="w-4 h-4 accent-green-600" />
             <span className="text-sm text-gray-700">হোমপেজে ফিচার্ড দেখাবে</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="isTopSeller"
-              checked={form.isTopSeller}
-              onChange={handleChange}
-              className="w-4 h-4 accent-green-600"
-            />
+            <input type="checkbox" name="isTopSeller" checked={form.isTopSeller} onChange={handleChange} className="w-4 h-4 accent-green-600" />
             <span className="text-sm text-gray-700">জনপ্রিয় পণ্য সেকশনে দেখাবে</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="isActive"
-              checked={form.isActive}
-              onChange={handleChange}
-              className="w-4 h-4 accent-green-600"
-            />
-            <span className="text-sm text-gray-700">সক্রিয়</span>
+            <input type="checkbox" name="isActive" checked={form.isActive} onChange={handleChange} className="w-4 h-4 accent-green-600" />
+            <span className="text-sm text-gray-700">সক্রিয়</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="isOutOfStockVisible"
-              checked={form.isOutOfStockVisible}
-              onChange={handleChange}
-              className="w-4 h-4 accent-green-600"
-            />
+            <input type="checkbox" name="isOutOfStockVisible" checked={form.isOutOfStockVisible} onChange={handleChange} className="w-4 h-4 accent-green-600" />
             <span className="text-sm text-gray-700">স্টক শেষে দেখাবে</span>
           </label>
         </div>
@@ -444,6 +380,6 @@ export default function NewProductPage() {
         </div>
 
       </div>
+    </div>
   )
 }
-
