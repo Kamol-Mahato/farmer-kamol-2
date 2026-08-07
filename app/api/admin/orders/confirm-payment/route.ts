@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { verifyAdminOrAgent } from "@/lib/adminAuth"
 
 export async function POST(request: Request) {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const body = await request.json()
     const { orderId, paidAmount } = body

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { verifyAdminOrAgent } from "@/lib/adminAuth"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { id } = await params
     const body = await req.json()
@@ -26,6 +31,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { id } = await params
     const categoryId = parseInt(id)

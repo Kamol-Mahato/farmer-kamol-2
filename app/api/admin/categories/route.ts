@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { verifyAdminOrAgent } from "@/lib/adminAuth"
 
 // ✅ সব ক্যাটাগরির লিস্ট (Admin panel-এর জন্য)
 export async function GET() {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const categories = await prisma.category.findMany({
       orderBy: { displayOrder: "asc" },
@@ -18,6 +23,10 @@ export async function GET() {
 
 // ✅ নতুন ক্যাটাগরি তৈরি
 export async function POST(req: Request) {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const body = await req.json()
     const { name, nameEn, slug, displayOrder } = body
