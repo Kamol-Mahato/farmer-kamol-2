@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import { verifySession } from "@/lib/session"
-
-// 🔒 কাস্টমার সেশন যাচাই — শুধু লগইন করা কাস্টমারই রিভিউ দিতে/এলিজিবিলিটি চেক করতে পারবে
-async function getCustomerId() {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get("customer_session")
-  if (!sessionCookie) return null
-  const data = await verifySession(sessionCookie.value)
-  return (data?.id as number) || null
-}
+import { getCustomerId } from "@/lib/customerAuth"
 
 // ✅ এই কাস্টমার এই প্রোডাক্টে রিভিউ দেওয়ার যোগ্য কিনা চেক করা
 // (শর্ত: এই প্রোডাক্টের একটা DELIVERED অর্ডার আছে, এবং এখনো রিভিউ দেয়নি)

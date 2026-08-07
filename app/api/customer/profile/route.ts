@@ -1,16 +1,6 @@
-import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import { verifySession } from "@/lib/session"
+import { getCustomerId } from "@/lib/customerAuth"
 import { NextRequest, NextResponse } from "next/server"
-
-async function getCustomerId() {
-  const cookieStore = await cookies()
-  const customerCookie = cookieStore.get("customer_session")
-  if (!customerCookie) return null
-
-  const session = await verifySession(customerCookie.value)
-  return (session?.id as number | undefined) ?? null
-}
 
 // প্রোফাইল ডেটা আনা — order/cart পেজে auto-fill এর জন্য
 export async function GET() {

@@ -1,6 +1,16 @@
 import { SignJWT, jwtVerify } from "jose"
 
-const secret = new TextEncoder().encode(process.env.SESSION_SECRET)
+function getSessionSecret() {
+  const raw = process.env.SESSION_SECRET
+  if (!raw || raw.length < 32) {
+    throw new Error(
+      "SESSION_SECRET missing বা খুব ছোট (কমপক্ষে ৩২ অক্ষর দরকার)। .env চেক করো।"
+    )
+  }
+  return new TextEncoder().encode(raw)
+}
+
+const secret = getSessionSecret()
 
 // 🔒 cookie-র জন্য signed JWT বানানো — কেউ চাইলেও এটা ভুয়া বানাতে পারবে না
 export async function signSession(payload: Record<string, unknown>) {

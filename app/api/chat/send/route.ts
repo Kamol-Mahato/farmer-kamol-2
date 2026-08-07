@@ -6,6 +6,7 @@ import { ChatSenderType } from "@prisma/client"
 import { sendTelegramAlert, escapeHtml } from "@/lib/telegram"
 import { chatEvents } from "@/lib/chatEvents"
 import { checkAndIncrementRate } from "@/lib/rateLimiter"
+import { sanitizeHtml } from "@/lib/sanitize"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -49,7 +50,10 @@ export async function POST(req: Request) {
       return json({ error: "মেসেজ খালি হতে পারে না" }, 400)
     }
 
-    const trimmed = String(text).trim()
+    const trimmed = sanitizeHtml(String(text).trim())
+    if (!trimmed || trimmed.length === 0) {
+      return json({ error: "মেসেজ খালি হতে পারে না" }, 400)
+    }
     if (trimmed.length > 2000) {
       return json({ error: "মেসেজ খুব বড়" }, 400)
     }

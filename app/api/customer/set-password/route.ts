@@ -10,9 +10,9 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { phone, password } = body
 
-    if (!phone || !password || password.length < 6) {
+    if (!phone || !password || typeof password !== "string" || password.length < 8) {
       return NextResponse.json(
-        { error: "ফোন নম্বর এবং ন্যূনতম ৬ অক্ষরের পাসওয়ার্ড আবশ্যক" },
+        { error: "ফোন নম্বর এবং ন্যূনতম ৮ অক্ষরের পাসওয়ার্ড আবশ্যক" },
         { status: 400 }
       )
     }

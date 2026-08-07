@@ -26,9 +26,9 @@ if (!rateCheck.allowed) {
   )
 }
 
-    if (password.length < 6) {
+    if (typeof password !== "string" || password.length < 8) {
       return NextResponse.json(
-        { error: "পাসওয়ার্ড কমপক্ষে ৬ ডিজিট/অক্ষর হতে হবে" },
+        { error: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে" },
         { status: 400 }
       )
     }
