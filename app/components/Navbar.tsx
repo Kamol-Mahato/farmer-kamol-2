@@ -140,9 +140,9 @@ export default function Navbar() {
     <>
       <AnnouncementBar />
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-[70] md:hidden" onClick={() => closeSidebar()} />
+        <div className="fixed inset-0 bg-black/50 z-[70] lg:hidden" onClick={() => closeSidebar()} />
       )}
-      <div className={`fixed top-0 left-0 h-auto max-h-[85vh] overflow-y-auto w-56 bg-green-800 rounded-br-2xl z-[80] transform transition-transform duration-300 md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`fixed top-0 left-0 h-auto max-h-[85vh] overflow-y-auto w-56 bg-green-800 rounded-br-2xl z-[80] transform transition-transform duration-300 lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>`
       <div className="flex items-center justify-between p-3 border-b border-green-700">
       <Link href={href("/")} className="flex items-center gap-2" onClick={() => closeSidebarForNav()}>
       <Image src={siteConfig.domain.logo} alt={siteConfig.brand.name} width={44} height={44} priority className="w-11 h-11 rounded-full object-cover border-2 border-white-400 shrink-0" />
@@ -192,7 +192,7 @@ export default function Navbar() {
       <nav className="fixed top-8 left-0 w-full bg-green-800/90 backdrop-blur-md text-white py-0.5 md:py-2 px-3 md:px-6 shadow-md z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <button className="md:hidden text-white text-2xl" onClick={openSidebar}>☰</button>
+            <button className="lg:hidden text-white text-2xl" onClick={openSidebar}>☰</button>
             <Link href={href("/")} className="flex items-center gap-1.5">
             <Image src={siteConfig.domain.logo} alt={siteConfig.brand.name} width={36} height={36} priority className="w-9 h-9 rounded-full object-cover border-2 border-white-400" />
               <div className="flex flex-col leading-tight">
@@ -202,7 +202,7 @@ export default function Navbar() {
             </Link>
           </div>
           
-          <div className="hidden md:flex items-center gap-2 text-lg font-medium">
+          <div className="hidden lg:flex items-center gap-2 text-lg font-medium">
             {menus.map(menu => (
               <div key={menu.id} className="relative"
                 onMouseEnter={() => setOpenMenu(menu.id)}
@@ -248,7 +248,7 @@ export default function Navbar() {
             {/* 🌐 মোবাইলের জন্য প্রফেশনাল ল্যাঙ্গুয়েজ বক্স বাটন (শুধু মোবাইলে দেখাবে) */}
 <Link
   href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", searchParams.toString())}
-  className="flex md:hidden items-center justify-center px-2.5 py-1 text-xs font-semibold tracking-wide text-white border border-white/20 rounded-md bg-white/10 backdrop-blur-sm active:scale-95 hover:bg-white/20 transition duration-200 shrink-0 -mr-1"
+  className="flex lg:hidden items-center justify-center px-2.5 py-1 text-xs font-semibold tracking-wide text-white border border-white/20 rounded-md bg-white/10 backdrop-blur-sm active:scale-95 hover:bg-white/20 transition duration-200 shrink-0 -mr-1"
   aria-label="Language Switch"
   title={t.langSwitch}
 >
@@ -259,7 +259,7 @@ export default function Navbar() {
             {/* 📊 পিসির জন্য এক্সেল স্টাইল টগল বাটন (মোবাইলে হাইড থাকবে) */}
             <Link
               href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", searchParams.toString())}
-              className="hidden md:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-7 text-xs font-bold shrink-0 shadow-inner transition hover:border-yellow-400 group ml-3"
+              className="hidden lg:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-7 text-xs font-bold shrink-0 shadow-inner transition hover:border-yellow-400 group ml-3"
               aria-label="ভাষা পরিবর্তন"
               title={t.langSwitch}
             >
@@ -275,7 +275,7 @@ export default function Navbar() {
               <NewOrderNotifier />
             )}
             
-            <div className="hidden md:flex items-center">
+            <div className="hidden lg:flex items-center">
               <form onSubmit={handleSearch} className="flex items-center">
                 <input
                   type="text"

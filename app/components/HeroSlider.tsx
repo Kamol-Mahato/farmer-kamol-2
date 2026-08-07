@@ -151,7 +151,7 @@ type MobileQueueItem =
               priority={isPriority}
             />
         {savePercent !== null && (
-          <span className="absolute top-1.5 left-1.5 z-10 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow">
+          <span className="absolute top-1.5 right-1.5 z-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-save-pop">
             {savePercent}% সেভ
           </span>
         )}
