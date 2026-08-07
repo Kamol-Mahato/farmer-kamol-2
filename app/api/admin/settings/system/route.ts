@@ -34,10 +34,12 @@ export async function PUT(request: Request) {
     const body = await request.json()
 
     // ✅ নিরাপত্তার জন্য — শুধু SystemControlCenter-এ সত্যিই যে ফিল্ডগুলো আছে সেগুলোই আপডেট হবে
-    const allowedFields = [
+        const allowedFields = [
       "enableOtpForGuest",
       "defaultLanguage",
       "heroYoutubeUrl",
+      "youtubeChannelUrl",
+      "facebookPageUrl",
       "maskCustomerData",
       "disableLiveCourierAPI",
       "paperSizeMode",

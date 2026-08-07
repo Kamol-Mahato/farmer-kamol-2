@@ -19,21 +19,33 @@ export const metadata: Metadata = {
 }
 
 export default async function MediaVideoPage() {
-  const videos = await prisma.youtubeVideo.findMany({
-    where: { isActive: true },
-    orderBy: { displayOrder: "asc" },
-  })
+    const [videos, systemSettings] = await Promise.all([
+    prisma.youtubeVideo.findMany({
+      where: { isActive: true },
+      orderBy: { displayOrder: "asc" },
+    }),
+    prisma.systemControlCenter.findUnique({ where: { id: 1 } }),
+  ])
+
+  const youtubeChannelUrl =
+    systemSettings?.youtubeChannelUrl || siteConfig.social.youtube
+  const facebookPageUrl =
+    systemSettings?.facebookPageUrl || siteConfig.social.facebook
 
   return (
     <div>
       <Breadcrumb items={[
-        { label: "Home", href: "/en" },
-        { label: "Videos" },
+        { label: "হোম", href: "/" },
+        { label: "ভিডিও" },
       ]} />
       <div className="max-w-6xl mx-auto px-4 py-2">
-        <h1 className="text-3xl font-bold text-green-800 mb-2 text-center">Our Videos</h1>
-        <p className="text-gray-500 text-center mb-8">From {siteConfig.brand.nameEn}'s YouTube channel</p>
-        <VideoGalleryClient videos={videos} />
+        <h1 className="text-3xl font-bold text-green-800 mb-2 text-center">আমাদের ভিডিও</h1>
+        <p className="text-gray-500 text-center mb-8">{siteConfig.brand.name} YouTube চ্যানেল থেকে</p>
+        <VideoGalleryClient
+          videos={videos}
+          youtubeChannelUrl={youtubeChannelUrl}
+          facebookPageUrl={facebookPageUrl}
+        />
       </div>
     </div>
   )

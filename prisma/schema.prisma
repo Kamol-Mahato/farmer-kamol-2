@@ -11,6 +11,8 @@ model SystemControlCenter {
   enableOtpForGuest     Boolean @default(false)
   defaultLanguage       String  @default("BN")
   heroYoutubeUrl        String  @default("https://www.youtube.com/watch?v=default")
+  youtubeChannelUrl     String  @default("https://www.youtube.com/@FarmerKamol")
+  facebookPageUrl       String  @default("https://www.facebook.com/farmerkamol")
   maskCustomerData      Boolean @default(true)
   disableLiveCourierAPI Boolean @default(true)
   paperSizeMode         String  @default("POS")

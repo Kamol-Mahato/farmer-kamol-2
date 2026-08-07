@@ -5,6 +5,8 @@ type Settings = {
   enableOtpForGuest: boolean
   defaultLanguage: string
   heroYoutubeUrl: string
+  youtubeChannelUrl: string
+  facebookPageUrl: string
   maskCustomerData: boolean
   disableLiveCourierAPI: boolean
   paperSizeMode: string
@@ -284,13 +286,35 @@ export default function AdminSystemSettingsPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
-          <div className="md:col-span-2">
+                    <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-gray-500 mb-1">ডিফল্ট হিরো ইউটিউব URL</label>
             <input
               type="text"
               value={settings.heroYoutubeUrl}
               onChange={(e) => setSettings({ ...settings, heroYoutubeUrl: e.target.value })}
               onBlur={(e) => updateField("heroYoutubeUrl", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">YouTube চ্যানেল (Subscribe বাটন)</label>
+            <input
+              type="text"
+              value={settings.youtubeChannelUrl || ""}
+              onChange={(e) => setSettings({ ...settings, youtubeChannelUrl: e.target.value })}
+              onBlur={(e) => updateField("youtubeChannelUrl", e.target.value)}
+              placeholder="https://www.youtube.com/@FarmerKamol"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Facebook পেজ (Follow বাটন)</label>
+            <input
+              type="text"
+              value={settings.facebookPageUrl || ""}
+              onChange={(e) => setSettings({ ...settings, facebookPageUrl: e.target.value })}
+              onBlur={(e) => updateField("facebookPageUrl", e.target.value)}
+              placeholder="https://www.facebook.com/farmerkamol"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
