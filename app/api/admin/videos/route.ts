@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const video = await prisma.youtubeVideo.create({
-            data: {
+      data: {
         title: body.title,
         titleEn: body.titleEn || null,
         description: body.description ? sanitizeHtml(body.description) : null,
@@ -51,10 +51,15 @@ export async function POST(req: Request) {
       ).catch((err) => console.error("Push notify error:", err))
     }
 
+    // Revalidate paths for Home and Video pages
     revalidatePath("/")
     revalidatePath("/en")
+    revalidatePath("/media/video")
+    revalidatePath("/en/media/video")
+
     return NextResponse.json(video)
   } catch (error) {
+    console.error("POST Error:", error)
     return NextResponse.json({ error: "যোগ হয়নি" }, { status: 500 })
   }
 }
@@ -69,7 +74,7 @@ export async function PUT(req: Request) {
     const body = await req.json()
     const video = await prisma.youtubeVideo.update({
       where: { id: body.id },
-            data: {
+      data: {
         title: body.title,
         titleEn: body.titleEn || null,
         description: body.description ? sanitizeHtml(body.description) : null,
@@ -81,12 +86,16 @@ export async function PUT(req: Request) {
         isActive: body.isActive,
       },
     })
-        revalidatePath("/")
+
+    // Revalidate paths for Home and Video pages
+    revalidatePath("/")
     revalidatePath("/en")
     revalidatePath("/media/video")
     revalidatePath("/en/media/video")
+
     return NextResponse.json(video)
   } catch (error) {
+    console.error("PUT Error:", error)
     return NextResponse.json({ error: "আপডেট হয়নি" }, { status: 500 })
   }
 }
@@ -100,10 +109,16 @@ export async function DELETE(req: Request) {
   try {
     const { id } = await req.json()
     await prisma.youtubeVideo.delete({ where: { id } })
+
+    // Revalidate paths for Home and Video pages
     revalidatePath("/")
     revalidatePath("/en")
+    revalidatePath("/media/video")
+    revalidatePath("/en/media/video")
+
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error("DELETE Error:", error)
     return NextResponse.json({ error: "মুছা যায়নি" }, { status: 500 })
   }
 }
