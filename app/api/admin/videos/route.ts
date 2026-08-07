@@ -30,13 +30,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const video = await prisma.youtubeVideo.create({
-      data: {
+            data: {
         title: body.title,
         titleEn: body.titleEn || null,
         description: body.description ? sanitizeHtml(body.description) : null,
         descriptionEn: body.descriptionEn ? sanitizeHtml(body.descriptionEn) : null,
         youtubeUrl: body.youtubeUrl,
         platform: body.platform || "YOUTUBE",
+        thumbnailUrl: body.thumbnailUrl || null,
         displayOrder: body.displayOrder ?? 0,
         isActive: body.isActive ?? true,
       },
@@ -68,19 +69,22 @@ export async function PUT(req: Request) {
     const body = await req.json()
     const video = await prisma.youtubeVideo.update({
       where: { id: body.id },
-      data: {
+            data: {
         title: body.title,
         titleEn: body.titleEn || null,
         description: body.description ? sanitizeHtml(body.description) : null,
         descriptionEn: body.descriptionEn ? sanitizeHtml(body.descriptionEn) : null,
         youtubeUrl: body.youtubeUrl,
         platform: body.platform || "YOUTUBE",
+        thumbnailUrl: body.thumbnailUrl || null,
         displayOrder: body.displayOrder,
         isActive: body.isActive,
       },
     })
-    revalidatePath("/")
+        revalidatePath("/")
     revalidatePath("/en")
+    revalidatePath("/media/video")
+    revalidatePath("/en/media/video")
     return NextResponse.json(video)
   } catch (error) {
     return NextResponse.json({ error: "আপডেট হয়নি" }, { status: 500 })

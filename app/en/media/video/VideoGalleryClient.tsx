@@ -9,6 +9,7 @@ interface Video {
   descriptionEn: string | null
   youtubeUrl: string
   platform: string
+  thumbnailUrl?: string | null
   displayOrder: number
   isActive: boolean
 }
@@ -58,9 +59,38 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
   const restVideos = videos.slice(3)
   const secondaryVideo = restVideos[secondaryIndex] || null
 
-    function renderVideoFrame(video: Video) {
+      function renderVideoFrame(video: Video) {
     const isUnmuted = unmutedId === video.id
-    const displayTitle = video.titleEn || video.title
+    const ytId = getYoutubeId(video.youtubeUrl)
+
+    // Facebook → শুধু thumbnail + ক্লিক করলে FB খুলবে
+    if (video.platform === "FACEBOOK") {
+      return (
+        <a
+          key={video.id}
+          href={video.youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative bg-black rounded-2xl overflow-hidden shadow-xl block group"
+          style={{ aspectRatio: "16/9" }}
+        >
+          {video.thumbnailUrl ? (
+            <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-blue-50 flex items-center justify-center text-blue-500 text-sm font-bold">
+            📘 Facebook Video
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition">
+            <div className="w-14 h-14 rounded-full bg-black/70 flex items-center justify-center text-white text-2xl">
+              ▶
+            </div>
+          </div>
+        </a>
+      )
+    }
+
+    // YouTube → embed + mute/unmute
     return (
       <div
         key={video.id}
@@ -70,7 +100,7 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
         <iframe
           ref={(el) => { iframeRefs.current[video.id] = el }}
           src={getEmbedUrl(video)}
-          title={displayTitle}
+          title={video.title}
           allow="autoplay; encrypted-media"
           allowFullScreen
           className="w-full h-full"
@@ -156,10 +186,16 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
                     secondaryIndex === index ? "border-green-600" : "border-transparent"
                   }`}
                 >
-                  {video.platform === "YOUTUBE" && ytId ? (
+                                    {video.thumbnailUrl ? (
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
+                    />
+                  ) : video.platform === "YOUTUBE" && ytId ? (
                     <img
                       src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
-                      alt={displayTitle}
+                      alt={video.title}
                       className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
                     />
                   ) : (

@@ -391,6 +391,7 @@ model YoutubeVideo {
   description  String?
   youtubeUrl   String
   platform     String   @default("YOUTUBE")
+  thumbnailUrl String?  // Custom thumbnail (YT + FB)
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   heroOrder    Int?     // null = হিরো স্লাইডে নেই, সংখ্যা = হিরো রোটেশনে ক্রম (০,১,২,৩)

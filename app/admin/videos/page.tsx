@@ -10,6 +10,7 @@ interface Video {
   descriptionEn: string | null
   youtubeUrl: string
   platform: string
+  thumbnailUrl: string | null
   displayOrder: number
   isActive: boolean
 }
@@ -21,8 +22,10 @@ export default function AdminVideosPage() {
   const [titleEn, setTitleEn] = useState("")
   const [description, setDescription] = useState("")
   const [descriptionEn, setDescriptionEn] = useState("")
-  const [youtubeUrl, setYoutubeUrl] = useState("")
+    const [youtubeUrl, setYoutubeUrl] = useState("")
   const [platform, setPlatform] = useState("YOUTUBE")
+  const [thumbnailUrl, setThumbnailUrl] = useState("")
+  const [uploadingThumb, setUploadingThumb] = useState(false)
   const [displayOrder, setDisplayOrder] = useState(0)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [heroVideos, setHeroVideos] = useState<{ id: number; heroOrder: number }[]>([])
@@ -101,21 +104,22 @@ export default function AdminVideosPage() {
       await fetch("/api/admin/videos", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, title, titleEn, description, descriptionEn, youtubeUrl, platform, displayOrder, isActive: true }),
+        body: JSON.stringify({ id: editingId, title, titleEn, description, descriptionEn, youtubeUrl, platform, thumbnailUrl: thumbnailUrl || null, displayOrder, isActive: true }),
       })
     } else {
       await fetch("/api/admin/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, titleEn, description, descriptionEn, youtubeUrl, platform, displayOrder, isActive: true }),
+        body: JSON.stringify({ title, titleEn, description, descriptionEn, youtubeUrl, platform, thumbnailUrl: thumbnailUrl || null, displayOrder, isActive: true }),
       })
     }
     setTitle("")
     setTitleEn("")
     setDescription("")
     setDescriptionEn("")
-    setYoutubeUrl("")
+        setYoutubeUrl("")
     setPlatform("YOUTUBE")
+    setThumbnailUrl("")
     setDisplayOrder(0)
     setEditingId(null)
     fetchVideos()
@@ -196,7 +200,7 @@ export default function AdminVideosPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
             />
           </div>
-          <div className="md:col-span-2">
+                    <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-gray-500 mb-1">ভিডিও লিংক (YouTube/Facebook)</label>
             <input
               type="text"
@@ -205,6 +209,41 @@ export default function AdminVideosPage() {
               placeholder="https://www.youtube.com/watch?v=... অথবা Facebook ভিডিও লিংক"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
             />
+          </div>
+          <div className="md:col-span-3">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">কাস্টম থাম্বনেইল (YT + FB — ক্লিক রেট বাড়াতে)</label>
+            <div className="flex items-center gap-3 flex-wrap">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setUploadingThumb(true)
+                  try {
+                    const fd = new FormData()
+                    fd.append("file", file)
+                    fd.append("name", title || "video-thumb")
+                    const res = await fetch("/api/upload", { method: "POST", body: fd })
+                    const data = await res.json()
+                    if (data.imageUrl) setThumbnailUrl(data.imageUrl)
+                    else alert(data.error || "আপলোড ব্যর্থ")
+                  } catch {
+                    alert("আপলোড ব্যর্থ")
+                  } finally {
+                    setUploadingThumb(false)
+                  }
+                }}
+                className="text-sm"
+              />
+              {uploadingThumb && <span className="text-xs text-gray-500">আপলোড হচ্ছে...</span>}
+              {thumbnailUrl && (
+                <div className="flex items-center gap-2">
+                  <img src={thumbnailUrl} alt="thumb" className="h-14 w-24 object-cover rounded border" />
+                  <button type="button" onClick={() => setThumbnailUrl("")} className="text-xs text-red-600 font-bold">✕ সরান</button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="md:col-span-1">
             <label className="block text-xs font-semibold text-gray-500 mb-1">বিবরণ (ঐচ্ছিক)</label>
@@ -240,7 +279,7 @@ export default function AdminVideosPage() {
             {editingId ? "আপডেট করুন" : "যোগ করুন"}
           </button>
           {editingId && (
-            <button onClick={() => { setEditingId(null); setTitle(""); setTitleEn(""); setDescription(""); setDescriptionEn(""); setYoutubeUrl(""); setPlatform("YOUTUBE"); setDisplayOrder(0) }}
+            <button onClick={() => { setEditingId(null); setTitle(""); setTitleEn(""); setDescription(""); setDescriptionEn(""); setYoutubeUrl(""); setPlatform("YOUTUBE"); setThumbnailUrl(""); setDisplayOrder(0) }}
               className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold text-sm hover:bg-gray-300 transition">
               বাতিল
             </button>
@@ -257,7 +296,13 @@ export default function AdminVideosPage() {
             const ytId = getYoutubeId(video.youtubeUrl)
             return (
               <div key={video.id} className={`bg-white rounded-xl shadow overflow-hidden border ${!video.isActive ? "opacity-50" : ""}`}>
-                {video.platform === "YOUTUBE" && ytId ? (
+                                {video.thumbnailUrl ? (
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-full h-40 object-cover"
+                  />
+                ) : video.platform === "YOUTUBE" && ytId ? (
                   <img
                     src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
                     alt={video.title}
