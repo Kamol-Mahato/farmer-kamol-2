@@ -7,6 +7,7 @@ import ProductActions from "./ProductActions"
 import { safeJsonLd } from "@/lib/jsonLd"
 import { cache } from "react"
 import ReviewForm from "@/app/components/ReviewForm"
+import { getSavePercent } from "@/lib/pricing"
 
 export const revalidate = 86400
 
@@ -196,9 +197,19 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               {product.priceType === "NEGOTIABLE" ? (
                 <p className="text-lg font-bold text-green-700">💬 Contact us for price</p>
               ) : (
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-black">৳ {product.pricePerUnit}</span>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-3xl font-extrabold text-black">
+                    ৳ {getSavePercent(product.pricePerUnit, product.discountPrice) !== null ? product.discountPrice : product.pricePerUnit}
+                  </span>
                   <span className="text-sm text-gray-400">/ {product.unit}</span>
+                  {getSavePercent(product.pricePerUnit, product.discountPrice) !== null && (
+                    <>
+                      <span className="text-lg text-gray-400 line-through">৳ {product.pricePerUnit}</span>
+                      <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {getSavePercent(product.pricePerUnit, product.discountPrice)}% Save
+                      </span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -210,7 +221,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 id: product.id,
                 name: product.name,
                 nameEn: product.nameEn,
-                pricePerUnit: product.pricePerUnit,
+                pricePerUnit: getSavePercent(product.pricePerUnit, product.discountPrice) !== null ? (product.discountPrice as number) : product.pricePerUnit,
                 unit: product.unit,
                 stockQty: product.stockQty,
                 priceType: product.priceType,
