@@ -6,6 +6,7 @@ interface Video {
   description: string | null
   youtubeUrl: string
   platform: string
+  thumbnailUrl?: string | null
 }
 
 function getYoutubeId(url: string) {
@@ -36,7 +37,13 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block"
               >
                 <div className="relative w-full aspect-video bg-black">
-                  {video.platform === "YOUTUBE" && ytId ? (
+                                    {video.thumbnailUrl ? (
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : video.platform === "YOUTUBE" && ytId ? (
                     <img
                       src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
                       alt={video.title}
