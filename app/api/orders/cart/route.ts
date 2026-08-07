@@ -21,12 +21,45 @@ export async function POST(request: Request) {
       gatewayName,
       trxId,
     } = body
-    if (!name || !phone || !address || !Array.isArray(items) || items.length === 0) {
+        if (!name || !phone || !address || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "সব তথ্য সঠিকভাবে দিন" },
         { status: 400 }
       )
     }
+
+    const safeName = String(name).trim()
+    const safeAddress = String(address).trim()
+    const rawNote = customerNote != null ? String(customerNote).trim() : ""
+
+    if (safeName.length < 2 || safeName.length > 50) {
+      return NextResponse.json(
+        { error: "নাম ২ থেকে ৫০ অক্ষরের মধ্যে হতে হবে" },
+        { status: 400 }
+      )
+    }
+    if (safeAddress.length < 10 || safeAddress.length > 300) {
+      return NextResponse.json(
+        { error: "ঠিকানা ১০ থেকে ৩০০ অক্ষরের মধ্যে হতে হবে" },
+        { status: 400 }
+      )
+    }
+    if (rawNote.length > 500) {
+      return NextResponse.json(
+        { error: "নোট সর্বোচ্চ ৫০০ অক্ষর হতে পারবে" },
+        { status: 400 }
+      )
+    }
+    if (/[<>]/.test(safeName) || /[<>]/.test(safeAddress) || /[<>]/.test(rawNote)) {
+      return NextResponse.json(
+        { error: "নাম/ঠিকানা/নোটে < বা > ব্যবহার করা যাবে না" },
+        { status: 400 }
+      )
+    }
+
+    const finalName = safeName
+    const finalAddress = safeAddress
+    const finalNote = rawNote || null
 
     // 🔒 একই ফোন নম্বর থেকে বারবার অর্ডার (spam) ঠেকাতে rate limit
     const rateCheck = await checkRateLimit(`order:${phone}`)
@@ -95,7 +128,7 @@ export async function POST(request: Request) {
       let customer = await tx.user.findUnique({ where: { phone } })
       if (!customer) {
         customer = await tx.user.create({
-          data: { phone, name, role: "CUSTOMER" },
+          data: { phone, name: finalName, role: "CUSTOMER" },
         })
       }
 
@@ -109,8 +142,8 @@ export async function POST(request: Request) {
         data: {
           customerId: customer.id,
           createdById: customer.id,
-          deliveryAddress: address,
-          customerNote,
+          deliveryAddress: finalAddress,
+          customerNote: finalNote,
           totalProductPrice,
           deliveryCharge,
           finalCodAmount,
@@ -147,7 +180,7 @@ export async function POST(request: Request) {
     if (paymentMethod === "GATEWAY") {
       await sendTelegramAlert(
         `🟡 <b>নতুন পেমেন্ট রিসিভড! (কার্ট)</b>\n\n` +
-        `👤 কাস্টমার: ${name}\n` +
+        `👤 কাস্টমার: ${finalName}\n` +
         `📞 ফোন: ${phone}\n` +
         `💳 মাধ্যম: ${gatewayName}\n` +
         `🔢 TrxID: ${trxId}\n` +
@@ -158,9 +191,9 @@ export async function POST(request: Request) {
     // ✅ Admin-এর ফোনে push notification
     await sendPushToAdmin(
       "🛒 নতুন অর্ডার এসেছে!",
-      `${name} — ৳ ${finalCodAmount} (COD)`,
+      `${finalName} — ৳ ${finalCodAmount} (COD)`,
       "/admin/orders",
-      { orderId: result.id, name, amount: finalCodAmount }
+      { orderId: result.id, name: finalName, amount: finalCodAmount }
     )
     const cookieStore2 = await cookies()
     cookieStore2.set("order_phone_token", await signOrderPhoneToken(phone), {
