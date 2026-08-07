@@ -1,18 +1,9 @@
-import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import { verifySession } from "@/lib/session"
+import { getCustomerId } from "@/lib/customerAuth"
 import { NextResponse } from "next/server"
 
 export async function GET() {
-  const cookieStore = await cookies()
-  const customerCookie = cookieStore.get("customer_session")
-
-  if (!customerCookie) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })
-  }
-
-  const session = await verifySession(customerCookie.value)
-  const customerId = session?.id as number | undefined
+  const customerId = await getCustomerId()
 
   if (!customerId) {
     return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })

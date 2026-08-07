@@ -14,9 +14,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (newPassword.length < 6) {
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
       return NextResponse.json(
-        { error: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে" },
+        { error: "নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে" },
         { status: 400 }
       )
     }

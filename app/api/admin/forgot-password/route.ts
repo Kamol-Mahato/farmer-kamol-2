@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateOTP, getOTPExpiry } from "@/lib/otp";
+import { generateOTP, getOTPExpiry, hashOtp } from "@/lib/otp";
 import { sendTelegramMessage } from "@/lib/telegram";
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
 
@@ -30,7 +30,7 @@ if (!rateCheck.allowed) {
     await prisma.user.update({
       where: { phone },
       data: {
-        otp,
+        otp: hashOtp(otp),
         otpExpiry: getOTPExpiry(),
         otpAttempts: 0,
       },

@@ -29,24 +29,21 @@ export async function POST(request: Request) {
 
     const customer = await prisma.user.findUnique({ where: { phone } })
 
-    if (!customer) {
-      return NextResponse.json(
-        { error: "এই নম্বরে কোনো অ্যাকাউন্ট বা অর্ডার পাওয়া যায়নি" },
-        { status: 404 }
-      )
+    // 🔒 আছে/নাই — একই response (user enumeration ঠেকাতে)
+    if (customer) {
+      await prisma.user.update({
+        where: { phone },
+        data: {
+          passwordResetRequested: true,
+          passwordResetRequestedAt: new Date(),
+        },
+      })
     }
-
-    await prisma.user.update({
-      where: { phone },
-      data: {
-        passwordResetRequested: true,
-        passwordResetRequestedAt: new Date(),
-      },
-    })
 
     return NextResponse.json({
       success: true,
-      message: "আপনার রিকোয়েস্ট পাঠানো হয়েছে। আমাদের টিম শীঘ্রই আপনাকে কল করবে, অথবা সরাসরি যোগাযোগ করুন: 01737939688",
+      message:
+        "রিকোয়েস্ট গ্রহণ করা হয়েছে। অ্যাকাউন্ট থাকলে আমাদের টিম শীঘ্রই যোগাযোগ করবে। জরুরি হলে: 01737939688",
     })
   } catch (error) {
     console.error("FORGOT PASSWORD REQUEST ERROR:", error)

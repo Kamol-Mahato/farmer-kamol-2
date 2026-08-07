@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { randomInt } from "crypto"
 import { verifyAdminOnly } from "@/lib/adminAuth"
 
-// ✅ ভুল বোঝার মতো character (0,O,1,I,L) বাদ — ফোনে বলতে সহজ হবে
+// ✅ ভুল বোঝার মতো character (0,O,1,I,L) বাদ — crypto-secure
 function generateTempPassword() {
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
   let pass = ""
   for (let i = 0; i < 8; i++) {
-    pass += chars[Math.floor(Math.random() * chars.length)]
+    pass += chars[randomInt(0, chars.length)]
   }
   return pass
 }
