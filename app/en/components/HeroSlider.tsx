@@ -50,12 +50,14 @@ export default function HeroSlider({
   featuredProducts?: Product[]
   heroVideos?: HeroVideo[]
 }) {
-  const [pcVideoIndex, setPcVideoIndex] = useState(0)
+    const [pcVideoIndex, setPcVideoIndex] = useState(0)
   const [pcProductIndex, setPcProductIndex] = useState(0)
   const pcIframeRef = useRef<HTMLIFrameElement>(null)
+  const [pcMuted, setPcMuted] = useState(true)
 
   const [mobileQueueIndex, setMobileQueueIndex] = useState(0)
   const mobileIframeRef = useRef<HTMLIFrameElement>(null)
+  const [mobileMuted, setMobileMuted] = useState(true)
 
   const hasVideos = heroVideos.length > 0
 
@@ -111,13 +113,35 @@ export default function HeroSlider({
     return () => window.removeEventListener("message", handleMessage)
   }, [heroVideos.length, mobileTotal])
 
-  function pcPrevVideo() { setPcVideoIndex(p => (p - 1 + heroVideos.length) % heroVideos.length) }
-  function pcNextVideo() { setPcVideoIndex(p => (p + 1) % heroVideos.length) }
+    function togglePcMute() {
+    const iframe = pcIframeRef.current
+    if (!iframe?.contentWindow) return
+    const nextMuted = !pcMuted
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: "command", func: nextMuted ? "mute" : "unMute", args: [] }),
+      "*"
+    )
+    setPcMuted(nextMuted)
+  }
+
+  function toggleMobileMute() {
+    const iframe = mobileIframeRef.current
+    if (!iframe?.contentWindow) return
+    const nextMuted = !mobileMuted
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: "command", func: nextMuted ? "mute" : "unMute", args: [] }),
+      "*"
+    )
+    setMobileMuted(nextMuted)
+  }
+
+  function pcPrevVideo() { setPcVideoIndex(p => (p - 1 + heroVideos.length) % heroVideos.length); setPcMuted(true) }
+  function pcNextVideo() { setPcVideoIndex(p => (p + 1) % heroVideos.length); setPcMuted(true) }
   function pcPrevProduct() { setPcProductIndex(p => (p - 1 + featuredProducts.length) % featuredProducts.length) }
   function pcNextProduct() { setPcProductIndex(p => (p + 1) % featuredProducts.length) }
 
-  function mobilePrev() { setMobileQueueIndex(p => (p - 1 + mobileTotal) % mobileTotal) }
-  function mobileNext() { setMobileQueueIndex(p => (p + 1) % mobileTotal) }
+  function mobilePrev() { setMobileQueueIndex(p => (p - 1 + mobileTotal) % mobileTotal); setMobileMuted(true) }
+  function mobileNext() { setMobileQueueIndex(p => (p + 1) % mobileTotal); setMobileMuted(true) }
 
   const pcEmbedUrl = hasVideos ? toYoutubeEmbedUrl(heroVideos[pcVideoIndex % heroVideos.length]?.youtubeUrl || "") : null
   const mobileEmbedUrl =
@@ -188,6 +212,14 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">No live video available</p>
             </div>
           )}
+                    {pcEmbedUrl && (
+            <button
+              onClick={togglePcMute}
+              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
+            >
+              {pcMuted ? "🔇 Unmute" : "🔊 Mute"}
+            </button>
+          )}
           {heroVideos.length > 1 && (
             <>
               <button onClick={pcPrevVideo} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition">‹</button>
@@ -235,6 +267,14 @@ export default function HeroSlider({
             <div className="absolute inset-0 flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">No content available</p>
             </div>
+          )}
+                    {currentMobileItem?.kind === "video" && mobileEmbedUrl && (
+            <button
+              onClick={toggleMobileMute}
+              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
+            >
+              {mobileMuted ? "🔇 Unmute" : "🔊 Mute"}
+            </button>
           )}
           {mobileTotal > 1 && (
             <>

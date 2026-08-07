@@ -50,8 +50,8 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
         className="relative bg-black rounded-2xl overflow-hidden shadow-xl"
         style={{ aspectRatio: "16/9" }}
       >
-        <iframe
-          key={`${video.id}-${isUnmuted}`}
+                <iframe
+          key={video.id}
           src={getEmbedUrl(video)}
           title={video.title}
           allow="autoplay; encrypted-media"

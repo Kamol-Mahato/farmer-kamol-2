@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
 
 const MAX_HERO_VIDEOS = 4
 
@@ -34,10 +35,12 @@ export async function POST(req: Request) {
       }
     }
     const nextOrder = current[0] ? current[0].heroOrder! + 1 : 0
-    await prisma.youtubeVideo.update({
+        await prisma.youtubeVideo.update({
       where: { id: videoId },
       data: { heroOrder: nextOrder },
     })
+    revalidatePath("/")
+    revalidatePath("/en")
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("HERO SLIDE ADD ERROR:", error)
@@ -57,9 +60,11 @@ export async function DELETE(req: Request) {
       where: { heroOrder: { not: null } },
       orderBy: { heroOrder: "asc" },
     })
-    await prisma.$transaction(
+        await prisma.$transaction(
       remaining.map((v, i) => prisma.youtubeVideo.update({ where: { id: v.id }, data: { heroOrder: i } }))
     )
+    revalidatePath("/")
+    revalidatePath("/en")
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("HERO SLIDE REMOVE ERROR:", error)
@@ -80,10 +85,12 @@ export async function PATCH(req: Request) {
     if (!neighbor) {
       return NextResponse.json({ error: "আর সরানো যাবে না" }, { status: 400 })
     }
-    await prisma.$transaction([
+        await prisma.$transaction([
       prisma.youtubeVideo.update({ where: { id: target.id }, data: { heroOrder: neighborOrder } }),
       prisma.youtubeVideo.update({ where: { id: neighbor.id }, data: { heroOrder: target.heroOrder } }),
     ])
+    revalidatePath("/")
+    revalidatePath("/en")
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("HERO SLIDE REORDER ERROR:", error)
