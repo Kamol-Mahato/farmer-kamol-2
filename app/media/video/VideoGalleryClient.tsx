@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useRef } from "react"
 
 interface Video {
   id: number
@@ -14,9 +14,24 @@ interface Video {
 export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
   const [secondaryIndex, setSecondaryIndex] = useState(0)
   const [unmutedId, setUnmutedId] = useState<number | null>(null)
+  const iframeRefs = useRef<Record<number, HTMLIFrameElement | null>>({})
 
   function handleUnmute(id: number) {
-    setUnmutedId((prev) => (prev === id ? null : id))
+    const iframe = iframeRefs.current[id]
+    const willUnmute = unmutedId !== id
+
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: willUnmute ? "unMute" : "mute",
+          args: [],
+        }),
+        "*"
+      )
+    }
+
+    setUnmutedId(willUnmute ? id : null)
   }
 
   function getYoutubeId(url: string) {
@@ -25,13 +40,13 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
   }
 
   function getEmbedUrl(video: Video) {
-    const isMuted = unmutedId !== video.id
+    // সবসময় mute=1 দিয়ে শুরু — mute/unmute postMessage দিয়ে হবে, তাই রিস্টার্ট হবে না
     if (video.platform === "FACEBOOK") {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(video.youtubeUrl)}&autoplay=true&mute=${isMuted ? 1 : 0}`
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(video.youtubeUrl)}&autoplay=true&mute=1`
     }
     const id = getYoutubeId(video.youtubeUrl)
     if (!id) return ""
-    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${id}&rel=0&modestbranding=1`
+    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1`
   }
 
   if (videos.length === 0) {
@@ -42,7 +57,7 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
   const restVideos = videos.slice(3)
   const secondaryVideo = restVideos[secondaryIndex] || null
 
-  function renderVideoFrame(video: Video) {
+    function renderVideoFrame(video: Video) {
     const isUnmuted = unmutedId === video.id
     return (
       <div
@@ -50,8 +65,8 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
         className="relative bg-black rounded-2xl overflow-hidden shadow-xl"
         style={{ aspectRatio: "16/9" }}
       >
-                <iframe
-          key={video.id}
+        <iframe
+          ref={(el) => { iframeRefs.current[video.id] = el }}
           src={getEmbedUrl(video)}
           title={video.title}
           allow="autoplay; encrypted-media"
@@ -60,7 +75,7 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
         />
         <button
           onClick={() => handleUnmute(video.id)}
-          className="absolute bottom-3 right-3 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:bg-black/80 transition z-10"
+          className="absolute bottom-3 right-3 z-20 bg-white/90 text-green-900 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:bg-white transition border border-green-700"
         >
           {isUnmuted ? "🔊 Mute" : "🔇 Unmute"}
         </button>
