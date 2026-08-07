@@ -127,7 +127,11 @@ export default async function HomePageEn() {
 
       <BlogSection blogs={blogs} categories={blogCategories} />
 
-      <VideoSection videos={videos} />
+      <VideoSection
+  videos={videos}
+  youtubeChannelUrl={systemSettings?.youtubeChannelUrl || siteConfig.social.youtube}
+  facebookPageUrl={systemSettings?.facebookPageUrl || siteConfig.social.facebook}
+/>
 
       <div className="bg-yellow-50 py-6 px-4">
         <div className="max-w-7xl mx-auto">

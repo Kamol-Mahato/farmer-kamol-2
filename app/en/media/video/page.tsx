@@ -28,9 +28,9 @@ export default async function MediaVideoPage() {
   ])
 
   const youtubeChannelUrl =
-    systemSettings?.youtubeChannelUrl || siteConfig.social.youtube
+    systemSettings?.youtubeChannelUrl || "https://www.youtube.com/@FarmerKamol"
   const facebookPageUrl =
-    systemSettings?.facebookPageUrl || siteConfig.social.facebook
+    systemSettings?.facebookPageUrl || "https://www.facebook.com/farmerkamol"
 
   return (
     <div>
