@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { verifyAdminOnly } from "@/lib/adminAuth"
 
 // ✅ ভুল বোঝার মতো character (0,O,1,I,L) বাদ — ফোনে বলতে সহজ হবে
 function generateTempPassword() {
@@ -16,6 +17,10 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isAuthorized = await verifyAdminOnly()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { id } = await params
     const agentId = parseInt(id)

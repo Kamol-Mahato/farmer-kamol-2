@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
+import { verifyAdminOrAgent } from "@/lib/adminAuth"
 
 // ✅ এই route কখনো cache হবে না — প্রতিবার সত্যিই ডাটাবেস থেকে fresh ডেটা আনবে
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 export async function GET(req: NextRequest) {
+  const isAuthorized = await verifyAdminOrAgent()
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { searchParams } = new URL(req.url)
     const afterId = parseInt(searchParams.get("afterId") || "0")
