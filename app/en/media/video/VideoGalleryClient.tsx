@@ -30,7 +30,6 @@ export default function VideoGalleryClient({
   function handleUnmute(id: number) {
     const iframe = iframeRefs.current[id]
     const willUnmute = unmutedId !== id
-
     if (iframe?.contentWindow) {
       iframe.contentWindow.postMessage(
         JSON.stringify({
@@ -41,7 +40,6 @@ export default function VideoGalleryClient({
         "*"
       )
     }
-
     setUnmutedId(willUnmute ? id : null)
   }
 
@@ -67,38 +65,51 @@ export default function VideoGalleryClient({
   const restVideos = videos.slice(3)
   const secondaryVideo = restVideos[secondaryIndex] || null
 
-      function renderVideoFrame(video: Video) {
+  function renderVideoFrame(video: Video) {
     const isUnmuted = unmutedId === video.id
-    const ytId = getYoutubeId(video.youtubeUrl)
+    const displayTitle = video.titleEn || video.title
 
-    // Facebook → শুধু thumbnail + ক্লিক করলে FB খুলবে
+    // Facebook → thumbnail + Follow button on video
     if (video.platform === "FACEBOOK") {
       return (
-        <a
+        <div
           key={video.id}
-          href={video.youtubeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative bg-black rounded-2xl overflow-hidden shadow-xl block group"
+          className="relative bg-black rounded-2xl overflow-hidden shadow-xl group"
           style={{ aspectRatio: "16/9" }}
         >
-          {video.thumbnailUrl ? (
-            <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-blue-50 flex items-center justify-center text-blue-500 text-sm font-bold">
-            📘 Facebook Video
+          <a
+            href={video.youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute inset-0 z-0 block"
+          >
+            {video.thumbnailUrl ? (
+              <img src={video.thumbnailUrl} alt={displayTitle} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-blue-50 flex items-center justify-center text-blue-500 text-sm font-bold">
+                📘 Facebook Video
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition">
+              <div className="w-14 h-14 rounded-full bg-black/70 flex items-center justify-center text-white text-2xl">
+                ▶
+              </div>
             </div>
-          )}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition">
-            <div className="w-14 h-14 rounded-full bg-black/70 flex items-center justify-center text-white text-2xl">
-              ▶
-            </div>
-          </div>
-        </a>
+          </a>
+          <a
+            href={facebookPageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-3 left-3 z-20 inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg hover:bg-[#166FE5] transition"
+            onClick={(e) => e.stopPropagation()}
+          >
+            👍 Follow
+          </a>
+        </div>
       )
     }
 
-    // YouTube → embed + mute/unmute
+    // YouTube → embed + Subscribe (left) + Mute (right)
     return (
       <div
         key={video.id}
@@ -106,13 +117,23 @@ export default function VideoGalleryClient({
         style={{ aspectRatio: "16/9" }}
       >
         <iframe
-          ref={(el) => { iframeRefs.current[video.id] = el }}
+          ref={(el) => {
+            iframeRefs.current[video.id] = el
+          }}
           src={getEmbedUrl(video)}
-          title={video.title}
+          title={displayTitle}
           allow="autoplay; encrypted-media"
           allowFullScreen
           className="w-full h-full"
         />
+        <a
+          href={youtubeChannelUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-3 left-3 z-20 inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg hover:bg-red-700 transition"
+        >
+          ▶️ Subscribe
+        </a>
         <button
           onClick={() => handleUnmute(video.id)}
           className="absolute bottom-3 right-3 z-20 bg-white/90 text-green-900 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:bg-white transition border border-green-700"
@@ -140,35 +161,14 @@ export default function VideoGalleryClient({
                     dangerouslySetInnerHTML={{ __html: displayDescription }}
                   />
                 )}
-                                <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
-                  <a
-                    href={video.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:underline"
-                  >
-                    {video.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
-                  </a>
-                  {video.platform === "FACEBOOK" ? (
-                    <a
-                      href={facebookPageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-[#166FE5] transition"
-                    >
-                      👍 Follow
-                    </a>
-                  ) : (
-                    <a
-                      href={youtubeChannelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-red-700 transition"
-                    >
-                      ▶️ Subscribe
-                    </a>
-                  )}
-                </div>
+                <a
+                  href={video.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-1 text-xs text-blue-600 hover:underline"
+                >
+                  {video.platform === "FACEBOOK" ? "View on Facebook" : "View on YouTube"}
+                </a>
               </div>
             </div>
           )
@@ -178,9 +178,7 @@ export default function VideoGalleryClient({
       {restVideos.length > 0 && secondaryVideo && (
         <>
           <h2 className="text-xl font-bold text-green-800 mb-4 text-center">More Videos</h2>
-
           {renderVideoFrame(secondaryVideo)}
-
           <div className="text-center my-8 max-w-2xl mx-auto">
             <h3 className="text-lg font-bold text-green-800">
               {secondaryVideo.titleEn || secondaryVideo.title}
@@ -193,35 +191,14 @@ export default function VideoGalleryClient({
                 }}
               />
             )}
-                        <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
-              <a
-                href={secondaryVideo.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                {secondaryVideo.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
-              </a>
-              {secondaryVideo.platform === "FACEBOOK" ? (
-                <a
-                  href={facebookPageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-[#166FE5] transition"
-                >
-                  👍 Follow
-                </a>
-              ) : (
-                <a
-                  href={youtubeChannelUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-red-700 transition"
-                >
-                  ▶️ Subscribe
-                </a>
-              )}
-            </div>
+            <a
+              href={secondaryVideo.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-2 text-sm text-blue-600 hover:underline"
+            >
+              {secondaryVideo.platform === "FACEBOOK" ? "View on Facebook" : "View on YouTube"}
+            </a>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -236,16 +213,16 @@ export default function VideoGalleryClient({
                     secondaryIndex === index ? "border-green-600" : "border-transparent"
                   }`}
                 >
-                                    {video.thumbnailUrl ? (
+                  {video.thumbnailUrl ? (
                     <img
                       src={video.thumbnailUrl}
-                      alt={video.title}
+                      alt={displayTitle}
                       className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
                     />
                   ) : video.platform === "YOUTUBE" && ytId ? (
                     <img
                       src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
-                      alt={video.title}
+                      alt={displayTitle}
                       className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
                     />
                   ) : (

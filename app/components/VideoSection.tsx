@@ -14,7 +14,15 @@ function getYoutubeId(url: string) {
   return match ? match[1] : null
 }
 
-export default function VideoSection({ videos }: { videos: Video[] }) {
+export default function VideoSection({
+  videos,
+  youtubeChannelUrl = "https://www.youtube.com/@FarmerKamol",
+  facebookPageUrl = "https://www.facebook.com/farmerkamol",
+}: {
+  videos: Video[]
+  youtubeChannelUrl?: string
+  facebookPageUrl?: string
+}) {
   if (videos.length === 0) return null
 
   return (
@@ -22,43 +30,67 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-green-800 text-2xl font-bold border-2 rounded-full border-green-700 inline-block px-4 py-1">
-          আমাদের ভিডিও
+            আমাদের ভিডিও
           </h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
           {videos.map((video) => {
             const ytId = getYoutubeId(video.youtubeUrl)
             return (
-              <Link
+              <div
                 key={video.id}
-                href={video.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="relative w-full aspect-video bg-black">
-                                    {video.thumbnailUrl ? (
-                    <img
-                      src={video.thumbnailUrl}
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : video.platform === "YOUTUBE" && ytId ? (
-                    <img
-                      src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
+                  <Link
+                    href={video.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 z-0 block"
+                  >
+                    {video.thumbnailUrl ? (
+                      <img
+                        src={video.thumbnailUrl}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : video.platform === "YOUTUBE" && ytId ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-blue-400 text-sm font-bold bg-blue-50">
+                        📘 Facebook ভিডিও
+                      </div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white text-xl">
+                        ▶
+                      </div>
+                    </div>
+                  </Link>
+
+                  {video.platform === "FACEBOOK" ? (
+                    <a
+                      href={facebookPageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-2 left-2 z-20 inline-flex items-center gap-1 bg-[#1877F2] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg hover:bg-[#166FE5] transition"
+                    >
+                      👍 Follow
+                    </a>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-blue-400 text-sm font-bold bg-blue-50">
-                      📘 Facebook ভিডিও
-                    </div>
+                    <a
+                      href={youtubeChannelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-2 left-2 z-20 inline-flex items-center gap-1 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg hover:bg-red-700 transition"
+                    >
+                      ▶️ Subscribe
+                    </a>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white text-xl">
-                      ▶
-                    </div>
-                  </div>
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-green-800 text-sm line-clamp-2">{video.title}</h3>
@@ -66,7 +98,7 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
                     <p className="text-gray-500 text-xs mt-1 line-clamp-2">{video.description}</p>
                   )}
                 </div>
-              </Link>
+              </div>
             )
           })}
         </div>

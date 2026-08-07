@@ -123,8 +123,12 @@ export default async function HomePage() {
       {/* Blog Section */}
       <BlogSection blogs={blogs} />
 
-      {/* Video Section */}
-      <VideoSection videos={videos} />
+            {/* Video Section */}
+      <VideoSection
+        videos={videos}
+        youtubeChannelUrl={systemSettings?.youtubeChannelUrl || siteConfig.social.youtube}
+        facebookPageUrl={systemSettings?.facebookPageUrl || siteConfig.social.facebook}
+      />
 
       {/* Reviews — Footer-এর ঠিক আগে */}
       <div className="bg-yellow-50 py-6 px-4">
