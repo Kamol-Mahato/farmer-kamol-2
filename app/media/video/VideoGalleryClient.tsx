@@ -12,7 +12,15 @@ interface Video {
   isActive: boolean
 }
 
-export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
+export default function VideoGalleryClient({
+  videos,
+  youtubeChannelUrl = "https://www.youtube.com/@FarmerKamol",
+  facebookPageUrl = "https://www.facebook.com/farmerkamol",
+}: {
+  videos: Video[]
+  youtubeChannelUrl?: string
+  facebookPageUrl?: string
+}) {
   const [secondaryIndex, setSecondaryIndex] = useState(0)
   const [unmutedId, setUnmutedId] = useState<number | null>(null)
   const iframeRefs = useRef<Record<number, HTMLIFrameElement | null>>({})
@@ -128,14 +136,35 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
                   dangerouslySetInnerHTML={{ __html: video.description }}
                 />
               )}
-              <a
-                href={video.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-1 text-xs text-blue-600 hover:underline"
-              >
-                {video.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
-              </a>
+                              <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
+                  <a
+                    href={video.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    {video.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
+                  </a>
+                  {video.platform === "FACEBOOK" ? (
+                    <a
+                      href={facebookPageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-[#166FE5] transition"
+                    >
+                      👍 Follow
+                    </a>
+                  ) : (
+                    <a
+                      href={youtubeChannelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-red-700 transition"
+                    >
+                      ▶️ Subscribe
+                    </a>
+                  )}
+                </div>
             </div>
           </div>
         ))}
@@ -155,14 +184,35 @@ export default function VideoGalleryClient({ videos }: { videos: Video[] }) {
                 dangerouslySetInnerHTML={{ __html: secondaryVideo.description }}
               />
             )}
-            <a
-              href={secondaryVideo.youtubeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-2 text-sm text-blue-600 hover:underline"
-            >
-              {secondaryVideo.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
-            </a>
+                        <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
+              <a
+                href={secondaryVideo.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {secondaryVideo.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
+              </a>
+              {secondaryVideo.platform === "FACEBOOK" ? (
+                <a
+                  href={facebookPageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-[#166FE5] transition"
+                >
+                  👍 Follow
+                </a>
+              ) : (
+                <a
+                  href={youtubeChannelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-red-700 transition"
+                >
+                  ▶️ Subscribe
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
