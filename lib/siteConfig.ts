@@ -39,6 +39,8 @@ export const siteConfig = {
       phone: "+8801737939688",
       phoneDisplay: "01737939688",
       whatsapp: "8801737939688",
+      email: "contact@farmerkamol.com",
+
     },
   
     // ঠিকানা
