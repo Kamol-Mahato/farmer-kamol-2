@@ -146,8 +146,8 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <h4 className="font-bold mb-3 text-sm text-green-900">{t.farmHeading}</h4>
             <div className="flex flex-col gap-1.5 text-sm text-black">
-              <a href="https://maps.app.goo.gl/vsE66z72VEgxzNM68" target="_blank" rel="noopener noreferrer" className="hover:text-green-700 transition">
-                📍 {t.location}
+              <a href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="hover:text-green-700 transition">
+                🏡 {t.location}
               </a>
               <a href={`tel:${siteConfig.contact.phone}`} className="hover:text-green-700 transition">📞 {siteConfig.contact.phoneDisplay}</a>
               <a href={`https://wa.me/${siteConfig.contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-green-700 transition">💬 {siteConfig.contact.phoneDisplay}</a>
