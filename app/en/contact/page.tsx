@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPageEn() {
-  const mapsLink = "https://maps.app.goo.gl/Vvy4KaKePZwsB9gK6"
+  const mapsLink = "https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
 
   return (
     <main className="pt-6 sm:pt-10 pb-6 bg-white">
