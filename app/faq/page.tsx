@@ -179,7 +179,8 @@ const faqGroups = [
       },
       {
         q: "আপনাদের সাথে কীভাবে যোগাযোগ করব?",
-        a: `হোয়াটসঅ্যাপ/ফোন: ${siteConfig.contact.phoneDisplay}। এছাড়া আমাদের Facebook ও YouTube (${siteConfig.brand.youtubeHandle}) পেজেও মেসেজ করতে পারেন।`,
+        a: `হোয়াটসঅ্যাপ/ফোন: ${siteConfig.contact.phoneDisplay}। এছাড়া আমাদের Facebook ও YouTube (${siteConfig.brand.youtubeHandle}) পেজেও মেসেজ করতে পারেন।এছাড়াও আমাদের অফিসিয়াল মেইল এ আপনার মতামত জানাতে পারেন। 
+✉️ contact@farmerkamol.com`,
       },
     ],
   },
