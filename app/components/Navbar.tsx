@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import AnnouncementBar from "./AnnouncementBar"
+import FlagRibbonBackground from "./FlagRibbonBackground"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import NewOrderNotifier from "../admin/components/NewOrderNotifier"
 import { useMobileMenu } from "./MobileMenuContext"
@@ -189,8 +190,9 @@ export default function Navbar() {
           ))}
         </div>
       </div>
-      <nav className="fixed top-8 left-0 w-full bg-green-800/90 backdrop-blur-md text-white py-0.5 md:py-2 px-3 md:px-6 shadow-md z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+       <nav className="fixed top-8 left-0 w-full overflow-hidden bg-green-800 text-white py-0.5 md:py-2 px-3 md:px-6 shadow-md z-50 transition-all duration-300">
+        <FlagRibbonBackground className="opacity-40" />
+        <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             <button className="lg:hidden text-white text-2xl" onClick={openSidebar}>☰</button>
             <Link href={href("/")} className="flex items-center gap-1.5">

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
 import { getBengaliDate } from "@/lib/bengaliDate"
 import { siteConfig } from "@/lib/siteConfig"
+import BangladeshFlagWave from "./BangladeshFlagWave"
 
 export default function AnnouncementBar() {
   const pathname = usePathname()
@@ -13,15 +14,21 @@ export default function AnnouncementBar() {
   const [now, setNow] = useState(new Date())
   const [rotateIndex, setRotateIndex] = useState(0)
 
+  // ইনডেক্স ০ = পতাকা (২.৫ সে.), ১ = সময়, ২ = তারিখ, ৩ = ঋতু (প্রতিটা ৫ সে.)
+  const rotateDurations = [2500, 5000, 5000, 5000]
+
   useEffect(() => {
     setMounted(true)
     const timeTimer = setInterval(() => setNow(new Date()), 60 * 1000)
-    const rotateTimer = setInterval(() => setRotateIndex((i) => (i + 1) % 3), 5000)
-    return () => {
-      clearInterval(timeTimer)
-      clearInterval(rotateTimer)
-    }
+    return () => clearInterval(timeTimer)
   }, [])
+
+  useEffect(() => {
+    const rotateTimer = setTimeout(() => {
+      setRotateIndex((i) => (i + 1) % rotateDurations.length)
+    }, rotateDurations[rotateIndex])
+    return () => clearTimeout(rotateTimer)
+  }, [rotateIndex])
 
   const bDate = getBengaliDate(now)
 
@@ -56,13 +63,21 @@ export default function AnnouncementBar() {
   return (
     <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-sm py-1.5 font-bold z-[60] flex items-center">
       {mounted && (
-        <div className="shrink-0 px-1.5 md:px-3 overflow-hidden w-[70px] md:w-[190px] text-left md:text-center flex items-center h-6 md:h-auto">
-          <span key={`m-${rotateIndex}`} className="inline-block animate-fadeIn text-[10px] leading-tight whitespace-pre-line md:hidden">
-            {itemsMobile[rotateIndex]}
-          </span>
-          <span key={`d-${rotateIndex}`} className="hidden md:inline-block animate-fadeIn md:text-sm">
-            {itemsDesktop[rotateIndex]}
-          </span>
+        <div className="shrink-0 px-1.5 md:px-3 overflow-hidden w-[70px] md:w-[190px] text-left md:text-center flex items-center justify-center md:justify-center h-6 md:h-auto">
+          {rotateIndex === 0 ? (
+            <span key="flag" className="inline-flex items-center animate-fadeIn">
+              <BangladeshFlagWave className="w-6 h-4 md:w-8 md:h-5 rounded-[2px] shadow-sm" />
+            </span>
+          ) : (
+            <>
+              <span key={`m-${rotateIndex}`} className="inline-block animate-fadeIn text-[10px] leading-tight whitespace-pre-line md:hidden">
+                {itemsMobile[rotateIndex - 1]}
+              </span>
+              <span key={`d-${rotateIndex}`} className="hidden md:inline-block animate-fadeIn md:text-sm">
+                {itemsDesktop[rotateIndex - 1]}
+              </span>
+            </>
+          )}
         </div>
       )}
       <div className="flex-1 overflow-hidden">
