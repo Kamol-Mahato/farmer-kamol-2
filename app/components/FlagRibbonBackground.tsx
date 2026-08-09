@@ -4,7 +4,7 @@ export default function FlagRibbonBackground({ className = "" }: { className?: s
     <div
       className={`absolute inset-0 pointer-events-none ${className}`}
       style={{
-        backgroundImage: `url("/uploads/bg-flag.jpg")`,
+        backgroundImage: `url("/uploads/bg-flag.gif")`,
         backgroundRepeat: "repeat-x",
         backgroundSize: "auto 100%",
         backgroundPosition: "left center",
