@@ -61,19 +61,19 @@ export default function AnnouncementBar() {
       : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month},\n${bDate.yearBn} বঙ্গাব্দ`, `${bDate.ritu} কাল`]
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-sm py-1.5 font-bold z-[60] flex items-center">
+    <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-xs md:text-sm font-bold z-[60] flex items-center h-8">
       {mounted && (
-        <div className="shrink-0 px-1.5 md:px-3 overflow-hidden w-[70px] md:w-[190px] text-left md:text-center flex items-center justify-center md:justify-center h-6 md:h-auto">
+        <div className="shrink-0 px-1.5 md:px-3 overflow-hidden w-[70px] md:w-[190px] text-left md:text-center flex items-center justify-center h-full">
           {rotateIndex === 0 ? (
             <span key="flag" className="inline-flex items-center animate-fadeIn">
-              <BangladeshFlagWave className="w-6 h-4 md:w-8 md:h-5 rounded-[2px] shadow-sm" />
+              <BangladeshFlagWave className="w-6 h-4 md:w-7 md:h-4.5 rounded-[2px] shadow-sm" />
             </span>
           ) : (
             <>
               <span key={`m-${rotateIndex}`} className="inline-block animate-fadeIn text-[10px] leading-tight whitespace-pre-line md:hidden">
                 {itemsMobile[rotateIndex - 1]}
               </span>
-              <span key={`d-${rotateIndex}`} className="hidden md:inline-block animate-fadeIn md:text-sm">
+              <span key={`d-${rotateIndex}`} className="hidden md:inline-block animate-fadeIn text-xs md:text-sm">
                 {itemsDesktop[rotateIndex - 1]}
               </span>
             </>
@@ -82,11 +82,11 @@ export default function AnnouncementBar() {
       )}
       <div className="flex-1 overflow-hidden">
         <div className="animate-marquee whitespace-nowrap inline-block">
-        {[...Array(3)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <span key={i}>
               {locale === "en" ? (
                 <>
-                  Nomoskar / Assalamu Alaikum Pure Honey, Ghee, Mustard oil & Duck Chicks — straight from our farm to your door. Wellcome &nbsp;
+                  Nomoskar / Assalamu Alaikum Pure Honey, Ghee, Mustard oil & Duck Chicks — straight from our farm to your door. Welcome &nbsp;
                   <a href={localizeHref("/", locale)} className="text-yellow-400 font-bold hover:underline">{siteConfig.brand.name}</a>
                   &nbsp;Family. For our products or any inquiry, WhatsApp or call us at:&nbsp;
                   <a href={`tel:${siteConfig.contact.phone}`} className="text-yellow-400 font-bold hover:underline">
