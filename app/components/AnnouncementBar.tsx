@@ -96,13 +96,13 @@ export default function AnnouncementBar() {
                 </>
               ) : (
                 <>
-                  নমস্কার / আসসালামুআলাইকুম, {siteConfig.brand.name} এ পেয়ে যাচ্ছেন খাঁটিমধু - ঘি - সরিষার তেল ও হাঁসের বাচ্চা — সরাসরি খামার থেকে আপনার দরজায়।&nbsp;
+                  নমস্কার / আসসালামুআলাইকুম, {siteConfig.brand.name}-এ পেয়ে যাচ্ছেন খাঁটিমধু - ঘি - সরিষার তেল ও হাঁসের বাচ্চা — সরাসরি খামার থেকে আপনার দরজায়।&nbsp;
                   <a href={localizeHref("/", locale)} className="text-yellow-400 font-bold hover:underline">{siteConfig.brand.name}</a>
                   &nbsp;পরিবারে স্বাগতম। আমাদের পণ্য ও যেকোনো প্রয়োজনে WhatsApp অথবা কল করুন:&nbsp;
                   <a href={`tel:${siteConfig.contact.phone}`} className="text-yellow-400 font-bold hover:underline">
                     {siteConfig.contact.phoneDisplay}
                   </a>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  &nbsp;। ঢাকার মধ্যে হোম ডেলিভারি ২৪ ঘন্টার মধ্যে, ঢাকার বাইরে ৪৮ ঘন্টায়।&nbsp;
                 </>
               )}
             </span>
