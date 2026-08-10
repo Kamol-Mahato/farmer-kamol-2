@@ -2,6 +2,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/session"
+import AgentChatDashboardCard from "./components/AgentChatDashboardCard"
 
 export default async function AgentDashboardPage() {
   const cookieStore = await cookies()
@@ -43,7 +44,7 @@ export default async function AgentDashboardPage() {
       </div>
 
       {/* গ্রিড লেআউট: ৩টা ক্লিকযোগ্য কার্ড — Orders, Customer, New Order */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
         {/* কার্ড ১: Orders */}
         <a href="/agent/orders" className="block bg-white p-6 rounded-2xl border border-black hover:shadow-md transition-shadow">
@@ -92,6 +93,9 @@ export default async function AgentDashboardPage() {
           </div>
           <p className="text-xs text-gray-300 mt-4 font-bold">→ প্রোডাক্ট বেছে সরাসরি অর্ডার বুক করুন</p>
         </a>
+
+        {/* কার্ড ৪: লাইভ চ্যাট — badge সহ */}
+        <AgentChatDashboardCard />
 
       </div>
     </div>

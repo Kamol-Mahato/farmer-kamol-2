@@ -188,7 +188,7 @@ export default function Navbar() {
       </div>
 
       <nav className="fixed top-8 left-0 w-full bg-green-800 text-white py-1 px-3 md:px-6 shadow-md z-50 transition-all duration-300">
-        <FlagRibbonBackground className="opacity-85" />
+        <FlagRibbonBackground className="opacity-60" />
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center h-8 md:h-9">
           <div className="flex items-center gap-2">
             <button className="lg:hidden text-white text-lg" onClick={openSidebar}>☰</button>
