@@ -3,6 +3,7 @@ import PanelNavbar from "../components/PanelNavbar"
 import AgentLogoutButton from "./components/AgentLogoutButton"
 import EnablePushButton from "../admin/components/EnablePushButton"
 import AgentBottomNav from "./components/AgentBottomNav"
+import AgentChatNavLabel from "./components/AgentChatNavLabel"
 import { StaffChatProvider } from "../components/StaffChatProvider"
 import StaffChatWidget from "../components/StaffChatWidget"
 
@@ -31,6 +32,7 @@ export default function AgentLayout({
           { label: "Orders", href: "/agent/orders" },
           { label: "Customer", href: "/agent/customers" },
           { label: "নতুন অর্ডার", href: "/agent/orders/create" },
+          { label: <AgentChatNavLabel />, href: "/agent/chat" },
           {
             label: (
               <span className="flex items-center gap-1">
