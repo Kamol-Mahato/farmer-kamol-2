@@ -170,6 +170,11 @@ export async function POST(request: Request) {
             }
           })
         }
+        // Order.courierProvider ও সেট করা হচ্ছে যাতে ডিটেইলস পেজে সঠিক কুরিয়ার নাম দেখায়
+        await prisma.order.update({
+          where: { id: orderIdInt },
+          data: { courierProvider: courierName },
+        })
       }
 
       const overrideFlag = isOverrideTransition(currentStatus, status, role)
