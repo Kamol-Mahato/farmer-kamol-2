@@ -486,19 +486,30 @@ interface Props {
 
             <div>
               <h3 className="font-bold text-green-800 mb-2 text-sm">কুরিয়ার</h3>
-              {order.courierTrackingId || !order.courierProvider || order.courierProvider === "Pathao" ? (
-                <CourierBookButton
-                  orderId={order.id}
-                  alreadyBooked={!!order.courierTrackingId}
-                  trackingId={order.courierTrackingId}
-                  onSuccess={refetchOrder}
-                />
-              ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm">
-                  <p className="text-gray-700 font-bold">🚚 নির্বাচিত কুরিয়ার: {order.courierProvider}</p>
-                  <p className="text-gray-500 text-xs mt-1">এই কুরিয়ারে ম্যানুয়ালি বুক করতে হবে (Pathao API প্রযোজ্য না)</p>
-                </div>
-              )}
+              {(() => {
+                // লিস্ট পেজের মতো courierSummary.courierStatus কে প্রাধান্য দেওয়া হচ্ছে
+                const selectedCourier = order.courierSummary?.courierStatus || order.courierProvider || null
+                const isPathao = !selectedCourier || selectedCourier === "Pathao"
+                const alreadyBooked = !!order.courierTrackingId
+
+                if (isPathao) {
+                  return (
+                    <CourierBookButton
+                      orderId={order.id}
+                      alreadyBooked={alreadyBooked}
+                      trackingId={order.courierTrackingId}
+                      onSuccess={refetchOrder}
+                    />
+                  )
+                }
+
+                return (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm">
+                    <p className="text-gray-700 font-bold">🚚 নির্বাচিত কুরিয়ার: {selectedCourier}</p>
+                    <p className="text-gray-500 text-xs mt-1">এই কুরিয়ারে ম্যানুয়ালি বুক করতে হবে (Pathao API প্রযোজ্য না)</p>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* 🚚 Courier Payment ব্যাজ */}
