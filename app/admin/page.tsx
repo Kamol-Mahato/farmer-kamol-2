@@ -74,6 +74,16 @@ export default async function AdminDashboard() {
   </div>
   <p className="text-xs text-gray-300 mt-4 font-bold">→ প্রোডাক্ট বেছে সরাসরি অর্ডার বুক করুন</p>
 </a>
+        <a
+          href="/tools/thumbnail-maker.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block bg-teal-700 text-white rounded-xl p-6 hover:bg-teal-600 transition"
+        >
+          <p className="text-2xl mb-2">🎨</p>
+          <p className="text-lg font-bold">ছবি এডিট করুন</p>
+          <p className="text-teal-100 text-sm mt-1">থাম্বনেইল / ইমেজ এডিটর খুলুন</p>
+        </a>
       </div>
     </div>
   )
