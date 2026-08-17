@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { districts, upazilas } from "@/lib/bd-locations"
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 
 interface Product {
   id: number
@@ -117,32 +118,21 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
         <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ঠিকানা" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" />
 
         <div className="grid grid-cols-2 gap-3">
-          <select
-            value={districtId ?? ""}
-            onChange={(e) => {
-              const id = e.target.value ? parseInt(e.target.value) : null
-              setDistrictId(id)
-              setDistrict(districts.find((d) => d.id === id)?.name || "")
+          <DistrictSearch
+            districts={districts}
+            value={district}
+            onSelect={(d) => {
+              setDistrictId(d.id)
+              setDistrict(d.name)
               setUpazila("")
             }}
-            className="border border-gray-400 rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">জেলা বাছুন</option>
-            {districts.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-          <select
+          />
+          <UpazilaSearch
+            upazilas={upazilaOptions}
             value={upazila}
-            onChange={(e) => setUpazila(e.target.value)}
+            onSelect={(u) => setUpazila(u)}
             disabled={!districtId}
-            className="border border-gray-400 rounded-lg px-3 py-2 text-sm disabled:opacity-50"
-          >
-            <option value="">উপজেলা বাছুন</option>
-            {upazilaOptions.map((u) => (
-              <option key={u} value={u}>{u}</option>
-            ))}
-          </select>
+          />
         </div>
 
         <textarea value={customerNote} onChange={(e) => setCustomerNote(e.target.value)} placeholder="কাস্টমার নোট" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" rows={2} />
