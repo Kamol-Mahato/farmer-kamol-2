@@ -10,7 +10,7 @@ export default function BlogSection({ blogs }: { blogs: Blog[] }) {
         <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-green-800">আমাদের কৃষি বিষয়ক ব্লগ</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {blogs.map(blog => (
             <Link key={blog.id} href={`/blog/${blog.slug}`}
               className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden group border border-gray-100"

@@ -75,12 +75,12 @@ export default async function HomePageEn() {
         contentEn: { not: null },
       },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: 6,
     }),
     prisma.youtubeVideo.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: "asc" },
-      take: 3,
+      take: 6,
     }),
     prisma.youtubeVideo.findMany({
       where: { heroOrder: { not: null } },
