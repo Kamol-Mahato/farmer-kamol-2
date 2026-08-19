@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense } from "react"
-import { districts, upazilasEn } from "@/lib/bd-locations"
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
 import { translateUnit } from "@/lib/unitTranslate"
 import { normalizePhone, isValidBDPhone } from "@/lib/phone"
 import { siteConfig } from "@/lib/siteConfig"
@@ -15,6 +15,17 @@ interface ProductData {
   stockQty: number
   images: { imageUrl: string }[]
 }
+/** English upazila list — ঢাকায় BN/EN mismatch হলে Bangla থেকে (English) অংশ বের করে */
+function getEnglishUpazilas(districtId: number): string[] {
+  const bn = upazilas[districtId] || []
+  const en = upazilasEn[districtId] || []
+  if (bn.length === en.length && en.length > 0) return en
+  return bn.map(u => {
+    const m = u.match(/\(([^)]+)\)\s*$/)
+    return m ? m[1].trim() : u
+  })
+}
+
 function DistrictSearch({ districts, value, onSelect }: {
   districts: { id: number; name: string; en_name: string }[]
   value: string
@@ -405,7 +416,7 @@ function OrderForm() {
             <label className="block text-xs font-medium text-gray-700 mb-1">Upazila/Area *</label>
             <UpazilaSearch
               key={selectedDistrictId ?? "none"}
-              upazilas={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
+              upazilas={selectedDistrictId ? getEnglishUpazilas(selectedDistrictId) : []}
               value={form.upazila}
               disabled={!selectedDistrictId}
               onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}

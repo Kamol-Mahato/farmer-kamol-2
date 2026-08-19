@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 import { normalizePhone, isValidBDPhone } from "@/lib/phone"
 
 interface Product {
@@ -15,87 +16,6 @@ interface Product {
 interface Props {
   basePath: string // "/admin/orders" বা "/agent/orders"
   products: Product[]
-}
-
-function DistrictSearch({ districts, value, onSelect }: {
-  districts: { id: number; name: string; en_name: string }[]
-  value: string
-  onSelect: (d: { id: number; name: string; en_name: string }) => void
-}) {
-  const [query, setQuery] = useState("")
-  const [show, setShow] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const filtered = districts.filter(d =>
-    d.name.includes(query) ||
-    d.en_name.toLowerCase().includes(query.toLowerCase())
-  )
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={editing ? query : value}
-        onChange={e => { setQuery(e.target.value); setShow(true) }}
-        onFocus={() => { setEditing(true); setQuery(""); setShow(true) }}
-        onBlur={() => setTimeout(() => { setShow(false); setEditing(false) }, 200)}
-        placeholder="জেলা লিখুন বা খুঁজুন"
-        className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(d => (
-            <div key={d.id}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setQuery(""); setEditing(false); setShow(false); onSelect(d) }}
-            >
-              {d.name} <span className="text-gray-400 text-xs">({d.en_name})</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function UpazilaSearch({ upazilas, upazilasEn, value, onSelect, disabled }: {
-  upazilas: string[]
-  upazilasEn: string[]
-  value: string
-  onSelect: (u: string) => void
-  disabled?: boolean
-}) {
-  const [query, setQuery] = useState("")
-  const [show, setShow] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const q = query.toLowerCase()
-  const filtered = upazilas.filter((u, i) =>
-    u.includes(query) || (upazilasEn[i] || "").toLowerCase().includes(q)
-  )
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={editing ? query : value}
-        onChange={e => { setQuery(e.target.value); setShow(true) }}
-        onFocus={() => { setEditing(true); setQuery(""); setShow(true) }}
-        onBlur={() => setTimeout(() => { setShow(false); setEditing(false) }, 200)}
-        placeholder={disabled ? "আগে জেলা বেছে নিন" : "উপজেলা লিখুন বা খুঁজুন"}
-        disabled={disabled}
-        className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black disabled:bg-gray-100"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(u => (
-            <div key={u}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setQuery(""); setEditing(false); setShow(false); onSelect(u) }}
-            >
-              {u}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
 }
 
 export default function CreateOrderForm({ basePath, products }: Props) {
@@ -232,18 +152,18 @@ export default function CreateOrderForm({ basePath, products }: Props) {
         <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ঠিকানা" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" />
 
         <div className="grid grid-cols-2 gap-3">
-          <DistrictSearch
-            districts={districts}
-            value={district}
-            onSelect={(d) => { setDistrictId(d.id); setDistrict(d.name); setUpazila("") }}
-          />
-          <UpazilaSearch
-            upazilas={districtId ? (upazilas[districtId] || []) : []}
-            upazilasEn={districtId ? (upazilasEn[districtId] || []) : []}
-            value={upazila}
-            onSelect={(u) => setUpazila(u)}
-            disabled={!districtId}
-          />
+<DistrictSearch
+  districts={districts}
+  value={district}
+  onSelect={(d) => { setDistrictId(d.id); setDistrict(d.name); setUpazila("") }}
+/>
+<UpazilaSearch
+  upazilas={districtId ? (upazilas[districtId] || []) : []}
+  upazilasEn={districtId ? (upazilasEn[districtId] || []) : []}
+  value={upazila}
+  onSelect={(u) => setUpazila(u)}
+  disabled={!districtId}
+/>
         </div>
 
         <select value={orderSource} onChange={(e) => setOrderSource(e.target.value)} className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm">
