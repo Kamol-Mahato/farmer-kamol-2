@@ -392,16 +392,18 @@ const deliveryCharge = deliverySettings.mode === "FREE"
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">জেলা *</label>
-<DistrictSearch districts={districts} value={form.district} onSelect={(d) => { setSelectedDistrictId(d.id); setForm(prev => ({ ...prev, district: d.name, upazila: "" })) }} />
-
-<UpazilaSearch
-  key={selectedDistrictId ?? "none"}
-  upazilas={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
-  upazilasEn={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
-  value={form.upazila}
-  disabled={!selectedDistrictId}
-  onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}
-/>
+            <DistrictSearch districts={districts} value={form.district} onSelect={(d) => { setSelectedDistrictId(d.id); setForm(prev => ({ ...prev, district: d.name, upazila: "" })) }} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">উপজেলা/এরিয়া *</label>
+            <UpazilaSearch
+              key={selectedDistrictId ?? "none"}
+              upazilas={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
+              upazilasEn={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
+              value={form.upazila}
+              disabled={!selectedDistrictId}
+              onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}
+            />
           </div>
         </div>
 
