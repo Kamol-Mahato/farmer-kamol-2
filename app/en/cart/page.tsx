@@ -14,6 +14,17 @@ type CartItem = {
   quantity: number
 }
 
+/** English upazila list — ঢাকায় BN/EN mismatch হলে Bangla থেকে (English) অংশ বের করে */
+function getEnglishUpazilas(districtId: number): string[] {
+  const bn = upazilas[districtId] || []
+  const en = upazilasEn[districtId] || []
+  if (bn.length === en.length && en.length > 0) return en
+  return bn.map(u => {
+    const m = u.match(/\(([^)]+)\)\s*$/)
+    return m ? m[1].trim() : u
+  })
+}
+
 function DistrictSearch({ districts, value, onSelect }: {
   districts: { id: number; name: string; en_name: string }[]
   value: string
@@ -51,19 +62,17 @@ function DistrictSearch({ districts, value, onSelect }: {
   )
 }
 
-// ✅ upazilas (bn) and upazilasEn are index-matched arrays — zip them for display
-function UpazilaSearch({ upazilasBn, upazilasList, value, onSelect, disabled }: {
-  upazilasBn: string[]
-  upazilasList: string[]
+function UpazilaSearch({ upazilas, value, onSelect, disabled }: {
+  upazilas: string[]
   value: string
-  onSelect: (u: { bn: string; en: string }) => void
+  onSelect: (u: string) => void
   disabled?: boolean
 }) {
   const [query, setQuery] = useState("")
   const [show, setShow] = useState(false)
-  const filtered = upazilasList
-    .map((en, i) => ({ en, bn: upazilasBn[i] }))
-    .filter(u => u.en.toLowerCase().includes(query.toLowerCase()))
+  const filtered = upazilas.filter(u =>
+    u.toLowerCase().includes(query.toLowerCase())
+  )
   return (
     <div className="relative">
       <input
@@ -79,11 +88,11 @@ function UpazilaSearch({ upazilasBn, upazilasList, value, onSelect, disabled }: 
       {show && filtered.length > 0 && (
         <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
           {filtered.map(u => (
-            <div key={u.en}
+            <div key={u}
               className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
               onMouseDown={() => { setQuery(""); setShow(false); onSelect(u) }}
             >
-              {u.en}
+              {u}
             </div>
           ))}
         </div>
@@ -337,11 +346,10 @@ export default function CartPage() {
             <label className="block text-xs font-medium text-gray-700 mb-1">Upazila *</label>
             <UpazilaSearch
               key={selectedDistrictId ?? "none"}
-              upazilasBn={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
-              upazilasList={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
+              upazilas={selectedDistrictId ? getEnglishUpazilas(selectedDistrictId) : []}
               value={form.upazila}
               disabled={!selectedDistrictId}
-              onSelect={(u) => setForm(prev => ({ ...prev, upazila: u.en }))}
+              onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}
             />
           </div>
         </div>

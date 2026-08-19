@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { districts, upazilas } from "@/lib/bd-locations"
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
 import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 import { normalizePhone, isValidBDPhone } from "@/lib/phone"
 import { siteConfig } from "@/lib/siteConfig"
@@ -263,6 +263,7 @@ export default function CartPage() {
             <UpazilaSearch
               key={selectedDistrictId ?? "none"}
               upazilas={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
+              upazilasEn={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
               value={form.upazila}
               disabled={!selectedDistrictId}
               onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}

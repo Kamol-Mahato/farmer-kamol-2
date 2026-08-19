@@ -60,8 +60,9 @@ export function DistrictSearch({ districts, value, onSelect, inputRef, onEnterNe
 }
 
 // 🔎 উপজেলা টাইপ করে খোঁজার ইনপুট — একই ফিক্স
-export function UpazilaSearch({ upazilas, value, onSelect, disabled, inputRef, onEnterNext }: {
+export function UpazilaSearch({ upazilas, upazilasEn, value, onSelect, disabled, inputRef, onEnterNext }: {
   upazilas: string[]
+  upazilasEn?: string[]   // ← নতুন optional
   value: string
   onSelect: (u: string) => void
   disabled?: boolean
@@ -73,7 +74,17 @@ export function UpazilaSearch({ upazilas, value, onSelect, disabled, inputRef, o
 
   useEffect(() => { setText(value) }, [value])
 
-  const filtered = upazilas.filter(u => u.includes(text))
+  const q = text.toLowerCase().trim()
+const filtered = upazilas.filter((u, i) => {
+  // Bangla স্ট্রিংয়ে ইংরেজিও থাকে: "ডেমরা (Demra)"
+  if (u.toLowerCase().includes(q)) return true
+  // Parallel English শুধু যখন দুই লিস্ট সমান লম্বা (ঢাকা ছাড়া সব জেলা)
+  if (upazilasEn && upazilas.length === upazilasEn.length) {
+    const en = (upazilasEn[i] || "").toLowerCase()
+    if (en.includes(q)) return true
+  }
+  return false
+})
   return (
     <div className="relative">
       <input

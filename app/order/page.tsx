@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 import { normalizePhone, isValidBDPhone } from "@/lib/phone"
 import { siteConfig } from "@/lib/siteConfig"
 
@@ -14,85 +15,6 @@ interface ProductData {
   images: { imageUrl: string }[]
 }
 
-function DistrictSearch({ districts, value, onSelect }: {
-  districts: { id: number; name: string; en_name: string }[]
-  value: string
-  onSelect: (d: { id: number; name: string; en_name: string }) => void
-}) {
-  const [query, setQuery] = useState("")
-  const [show, setShow] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const filtered = districts.filter(d =>
-    d.name.includes(query) ||
-    d.en_name.toLowerCase().includes(query.toLowerCase())
-  )
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={editing ? query : value}
-        onChange={e => { setQuery(e.target.value); setShow(true) }}
-        onFocus={() => { setEditing(true); setQuery(""); setShow(true) }}
-        onBlur={() => setTimeout(() => { setShow(false); setEditing(false) }, 200)}
-        placeholder="জেলা লিখুন বা খুঁজুন"
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(d => (
-            <div key={d.id}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setQuery(""); setEditing(false); setShow(false); onSelect(d) }}
-            >
-              {d.name} <span className="text-gray-400 text-xs">({d.en_name})</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-function UpazilaSearch({ upazilas, upazilasEn, value, onSelect, disabled }: {
-  upazilas: string[]
-  upazilasEn: string[]
-  value: string
-  onSelect: (u: string) => void
-  disabled?: boolean
-}) {
-  const [query, setQuery] = useState("")
-  const [show, setShow] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const q = query.toLowerCase()
-  const filtered = upazilas.filter((u, i) =>
-    u.includes(query) || (upazilasEn[i] || "").toLowerCase().includes(q)
-  )
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={editing ? query : value}
-        onChange={e => { setQuery(e.target.value); setShow(true) }}
-        onFocus={() => { setEditing(true); setQuery(""); setShow(true) }}
-        onBlur={() => setTimeout(() => { setShow(false); setEditing(false) }, 200)}
-        placeholder={disabled ? "আগে জেলা বেছে নিন" : "উপজেলা /এরিয়া লিখুন বা খুঁজুন"}
-        disabled={disabled}
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 disabled:bg-gray-100"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(u => (
-            <div key={u}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setQuery(""); setEditing(false); setShow(false); onSelect(u) }}
-            >
-              {u}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 function OrderForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -470,18 +392,16 @@ const deliveryCharge = deliverySettings.mode === "FREE"
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">জেলা *</label>
-            <DistrictSearch districts={districts} value={form.district} onSelect={(d) => { setSelectedDistrictId(d.id); setForm(prev => ({ ...prev, district: d.name, upazila: "" })) }} />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">উপজেলা /এরিয়া*</label>
-            <UpazilaSearch
-              key={selectedDistrictId ?? "none"}
-              upazilas={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
-              upazilasEn={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
-              value={form.upazila}
-              disabled={!selectedDistrictId}
-              onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}
-            />
+<DistrictSearch districts={districts} value={form.district} onSelect={(d) => { setSelectedDistrictId(d.id); setForm(prev => ({ ...prev, district: d.name, upazila: "" })) }} />
+
+<UpazilaSearch
+  key={selectedDistrictId ?? "none"}
+  upazilas={selectedDistrictId ? (upazilas[selectedDistrictId] || []) : []}
+  upazilasEn={selectedDistrictId ? (upazilasEn[selectedDistrictId] || []) : []}
+  value={form.upazila}
+  disabled={!selectedDistrictId}
+  onSelect={(u) => setForm(prev => ({ ...prev, upazila: u }))}
+/>
           </div>
         </div>
 

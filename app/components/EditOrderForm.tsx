@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { districts, upazilas } from "@/lib/bd-locations"
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
 import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 
 interface Product {
@@ -129,6 +129,7 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
           />
           <UpazilaSearch
             upazilas={upazilaOptions}
+            upazilasEn={districtId ? (upazilasEn[districtId] || []) : []}
             value={upazila}
             onSelect={(u) => setUpazila(u)}
             disabled={!districtId}
