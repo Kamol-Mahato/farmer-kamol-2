@@ -11,9 +11,10 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { siteConfig } from "@/lib/siteConfig"
 
 const hindSiliguri = Hind_Siliguri({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
   subsets: ["bengali"],
   variable: "--font-hind-siliguri",
+  display: "swap",
 })
 
 export const metadata: Metadata = {
