@@ -9,6 +9,8 @@ export default function AdminBlogPage() {
   const [dbCategories, setDbCategories] = useState<any[]>([]) // ১. ক্যাটাগরির জন্য নতুন স্টেট
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [showAll, setShowAll] = useState(false) // নতুন
+  const INITIAL_LIMIT = 20 // চাইলে 20 বা 30 করো
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -223,36 +225,92 @@ export default function AdminBlogPage() {
         </div>
       </div>
 
-      {/* Blog List */}
+{/* Blog List - Excel-like + See More */}
       <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-lg font-bold text-green-700 mb-4">সব Blog</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold text-green-700">সব Blog</h2>
+          <span className="text-sm text-gray-500">
+            মোট: {blogs.length} টি
+            {!showAll && blogs.length > INITIAL_LIMIT && (
+              <> · দেখাচ্ছে {INITIAL_LIMIT} টি</>
+            )}
+          </span>
+        </div>
+
         {blogs.length === 0 ? (
           <p className="text-gray-400">কোনো blog নেই।</p>
         ) : (
-          <div className="flex flex-col gap-3">
-            {blogs.map(blog => (
-              <div key={blog.id} className="flex justify-between items-center border border-gray-100 rounded-lg px-4 py-3">
-                <div>
-                  <p className="font-bold text-green-800">{blog.title}</p>
-                  <p className="text-xs text-gray-400">{blog.category} · {blog.isPublished ? "✅ Published" : "⏳ Draft"}</p>
+          <>
+            {/* টেবিল হেডার */}
+            <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-green-50 rounded-t-lg text-xs font-bold text-green-800 border border-gray-100">
+              <div className="col-span-1">#</div>
+              <div className="col-span-5">শিরোনাম</div>
+              <div className="col-span-2">ক্যাটাগরি</div>
+              <div className="col-span-2">স্ট্যাটাস</div>
+              <div className="col-span-2 text-right">অ্যাকশন</div>
+            </div>
+
+            <div className="flex flex-col border border-gray-100 rounded-b-lg overflow-hidden">
+              {(showAll ? blogs : blogs.slice(0, INITIAL_LIMIT)).map((blog, index) => (
+                <div
+                  key={blog.id}
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center px-3 py-3 border-b border-gray-50 hover:bg-gray-50 transition"
+                >
+                  <div className="sm:col-span-1 text-xs text-gray-400 font-mono">
+                    {index + 1}
+                  </div>
+                  <div className="sm:col-span-5">
+                    <p className="font-bold text-green-800 text-sm leading-tight">{blog.title}</p>
+                    {blog.titleEn && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{blog.titleEn}</p>
+                    )}
+                  </div>
+                  <div className="sm:col-span-2 text-xs text-gray-500">
+                    {blog.category || "—"}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        blog.isPublished
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {blog.isPublished ? "Published" : "Draft"}
+                    </span>
+                  </div>
+                  <div className="sm:col-span-2 flex justify-end gap-3">
+                    <button
+                      onClick={() => handleEdit(blog)}
+                      className="text-green-600 hover:text-green-800 text-sm font-bold transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(blog.id)}
+                      className="text-red-400 hover:text-red-600 text-sm transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleEdit(blog)}
-                    className="text-green-600 hover:text-green-800 text-sm font-bold transition"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(blog.id)}
-                    className="text-red-400 hover:text-red-600 text-sm transition"
-                  >
-                    Delete
-                  </button>
-                </div>
+              ))}
+            </div>
+
+            {/* See More / See Less বাটন */}
+            {blogs.length > INITIAL_LIMIT && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="px-5 py-2 rounded-lg border border-green-600 text-green-700 font-bold text-sm hover:bg-green-50 transition"
+                >
+                  {showAll
+                    ? "কম দেখুন (See Less)"
+                    : `আরও দেখুন (See More) — বাকি ${blogs.length - INITIAL_LIMIT} টি`}
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

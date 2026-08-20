@@ -30,6 +30,8 @@ export default function AdminVideosPage() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [heroVideos, setHeroVideos] = useState<{ id: number; heroOrder: number }[]>([])
   const [heroBusy, setHeroBusy] = useState<number | null>(null)
+  const [showAll, setShowAll] = useState(false) // নতুন
+  const INITIAL_LIMIT = 10 // চাইলে 20 বা 30 করো
 
   async function fetchVideos() {
     const res = await fetch("/api/admin/videos")
@@ -287,16 +289,26 @@ export default function AdminVideosPage() {
         </div>
       </div>
 
-      {/* Video List */}
+{/* Video List + See More */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-green-700">সব ভিডিও</h2>
+        <span className="text-sm text-gray-500">
+          মোট: {videos.length} টি
+          {!showAll && videos.length > INITIAL_LIMIT && (
+            <> · দেখাচ্ছে {INITIAL_LIMIT} টি</>
+          )}
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {videos.length === 0 ? (
           <p className="text-gray-400 col-span-2 text-center py-12">কোনো ভিডিও নেই।</p>
         ) : (
-          videos.map((video) => {
+          (showAll ? videos : videos.slice(0, INITIAL_LIMIT)).map((video) => {
             const ytId = getYoutubeId(video.youtubeUrl)
             return (
               <div key={video.id} className={`bg-white rounded-xl shadow overflow-hidden border ${!video.isActive ? "opacity-50" : ""}`}>
-                                {video.thumbnailUrl ? (
+                {video.thumbnailUrl ? (
                   <img
                     src={video.thumbnailUrl}
                     alt={video.title}
@@ -363,6 +375,20 @@ export default function AdminVideosPage() {
           })
         )}
       </div>
+
+      {/* See More / See Less */}
+      {videos.length > INITIAL_LIMIT && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="px-5 py-2 rounded-lg border border-green-600 text-green-700 font-bold text-sm hover:bg-green-50 transition"
+          >
+            {showAll
+              ? "কম দেখুন (See Less)"
+              : `আরও দেখুন (See More) — বাকি ${videos.length - INITIAL_LIMIT} টি`}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
