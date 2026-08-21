@@ -53,9 +53,9 @@ export default function Footer() {
     <footer className="bg-green-50 text-gray-700 mt-auto">
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-6">
 
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
 
-          <div className="col-span-4 md:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <Link href={href("/")} className="flex items-center gap-2 mb-1">
               <Image
                 src="/uploads/kamol.png"
@@ -134,7 +134,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold mb-3 text-sm text-green-900">{t.serviceHeading}</h4>
+            <h4 className="font-bold mb-3 text-sm text-green-900 whitespace-nowrap">{t.serviceHeading}</h4>
             <div className="flex flex-col gap-1.5 text-sm text-black">
               <Link href={href("/customer/dashboard")} className="hover:text-green-700 transition">{t.trackOrder}</Link>
               <Link href={href("/return-policy")} className="hover:text-green-700 transition">{t.returnPolicy}</Link>
@@ -144,8 +144,8 @@ export default function Footer() {
           </div>
 
           <div className="col-span-2 md:col-span-1">
-            <h4 className="font-bold mb-3 text-sm text-green-900">{t.farmHeading}</h4>
-            <div className="flex flex-col gap-1.5 text-sm text-black">
+            <h4 className="font-bold mb-3 text-sm text-green-900 text-center md:text-left">{t.farmHeading}</h4>
+            <div className="flex flex-col gap-1.5 text-sm text-black items-center md:items-start">
               <a href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="hover:text-green-700 transition">
                 🏡 {t.location}
               </a>
