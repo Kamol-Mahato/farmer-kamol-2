@@ -219,7 +219,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
           </span>
         )}
         <Link href={`/shop/${product.slug}`}>
-           <h2 className="text-sm md:text-lg font-bold text-gray-800 mt-1 mb-1 min-h-[36px] md:min-h-[48px] line-clamp-2 hover:text-green-700 transition">
+        <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
             {product.name}
           </h2>
         </Link>
@@ -241,7 +241,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
         </div>
         </div>
       </div>
-      <div className="mt-3 pt-3 border-t border-gray-100 px-1 pb-4">
+      <div className="mt-2 pt-2 border-t border-gray-100 px-1 pb-2">
         {product.priceType === "NEGOTIABLE" ? (
           // ✅ Negotiable price পণ্যের জন্য সরাসরি WhatsApp বাটন
           <a
@@ -257,7 +257,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex-1 py-1.5 md:py-2 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap transition border-2 ${
+              className={`flex-1 py-2 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap transition border-2 ${
                 isOutOfStock
                   ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                   : added
