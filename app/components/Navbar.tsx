@@ -47,7 +47,8 @@ export default function Navbar() {
   const t = uiDict[locale]
   const href = (path: string) => localizeHref(path, locale)
 
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null)
+  const [user, setUser] = useState<{ name: string; role: string; avatarUrl?: string | null } | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [menus, setMenus] = useState<Menu[]>([])
   const [openMenu, setOpenMenu] = useState<number | null>(null)
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null)
@@ -75,8 +76,14 @@ export default function Navbar() {
 
   const checkUser = () => {
     const storedUser = localStorage.getItem("user")
-    if (storedUser) setUser(JSON.parse(storedUser))
-    else setUser(null)
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser)
+      setUser(parsed)
+      if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl)
+    } else {
+      setUser(null)
+      setAvatarUrl(null)
+    }
   }
   const checkCart = () => {
     const savedCart = localStorage.getItem("farmer_kamol_cart")
@@ -112,13 +119,34 @@ export default function Navbar() {
     window.addEventListener("storage", checkUser)
     window.addEventListener("storage", checkCart)
     window.addEventListener("cartUpdated", checkCart)
+    window.addEventListener("avatarUpdated", checkUser)
     fetch("/api/navigation")
       .then(res => res.json())
       .then(data => setMenus(localizeMenus(data)))
+
+    // লগইন থাকলে সার্ভার থেকে latest avatar আনো
+    const stored = localStorage.getItem("user")
+    if (stored) {
+      fetch("/api/profile/avatar")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data?.avatarUrl) {
+            setAvatarUrl(data.avatarUrl)
+            try {
+              const u = JSON.parse(localStorage.getItem("user") || "{}")
+              u.avatarUrl = data.avatarUrl
+              localStorage.setItem("user", JSON.stringify(u))
+            } catch {}
+          }
+        })
+        .catch(() => {})
+    }
+
     return () => {
       window.removeEventListener("storage", checkUser)
       window.removeEventListener("storage", checkCart)
       window.removeEventListener("cartUpdated", checkCart)
+      window.removeEventListener("avatarUpdated", checkUser)
     }
   }, [locale])
 
@@ -291,11 +319,16 @@ export default function Navbar() {
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-label="অ্যাকাউন্ট মেনু"
-                  className="bg-white text-green-900 hover:bg-yellow-400 transition p-1 rounded-full flex items-center justify-center"
+                  className="bg-white text-green-900 hover:bg-yellow-400 transition p-0.5 rounded-full flex items-center justify-center w-7 h-7 overflow-hidden border border-white/30"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                  </svg>
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                  )}
                 </button>
                 <div className={`absolute right-0 top-full ${userMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[160px] py-1.5 z-50`}>
                   <Link href={user.role === "ADMIN" ? href("/admin/products") : href("/customer/dashboard")}

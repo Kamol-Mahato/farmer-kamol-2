@@ -148,6 +148,17 @@ export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 
 
       setPreview(data.avatarUrl)
       setCropSrc(null)
+      // localStorage + ন্যাভবার রিফ্রেশ
+      try {
+        const stored = localStorage.getItem("user")
+        if (stored) {
+          const u = JSON.parse(stored)
+          u.avatarUrl = data.avatarUrl
+          localStorage.setItem("user", JSON.stringify(u))
+        }
+      } catch {}
+      window.dispatchEvent(new Event("avatarUpdated"))
+      window.dispatchEvent(new Event("storage"))
       onUploaded?.(data.avatarUrl)
     } catch {
       setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
