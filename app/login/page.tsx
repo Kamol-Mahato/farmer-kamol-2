@@ -10,6 +10,42 @@ interface User {
   phone: string;
 }
 
+const STATUS_BN: Record<string, string> = {
+  PENDING: "পেন্ডিং",
+  CONFIRMED: "কনফার্মড",
+  DELIVERY_ONGOING: "ডেলিভারি চলছে",
+  DELIVERED: "ডেলিভার্ড",
+  PAID_RETURN: "পেইড রিটার্ন",
+  PARTIAL_DELIVERY: "আংশিক ডেলিভারি",
+  RETURNED: "রিটার্নড",
+  CANCELLED: "বাতিল",
+  REFUNDED: "রিফান্ডেড",
+  LOST: "হারিয়ে গেছে",
+  DAMAGED: "ক্ষতিগ্রস্ত",
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  CONFIRMED: "bg-blue-50 text-blue-700 border-blue-200",
+  DELIVERY_ONGOING: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  DELIVERED: "bg-green-50 text-green-700 border-green-200",
+  PAID_RETURN: "bg-orange-50 text-orange-700 border-orange-200",
+  PARTIAL_DELIVERY: "bg-orange-50 text-orange-700 border-orange-200",
+  RETURNED: "bg-red-50 text-red-700 border-red-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+  REFUNDED: "bg-gray-50 text-gray-700 border-gray-200",
+  LOST: "bg-red-50 text-red-700 border-red-200",
+  DAMAGED: "bg-red-50 text-red-700 border-red-200",
+}
+
+interface TrackResult {
+  orderId: string
+  orderStatus: string
+  courierProvider: string | null
+  courierStatus: string | null
+  createdAt: string
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const [phone, setPhone] = useState("")
@@ -23,6 +59,11 @@ export default function LoginPage() {
   const [forgotMsg, setForgotMsg] = useState("")
   const [forgotError, setForgotError] = useState("")
   const [forgotLoading, setForgotLoading] = useState(false)
+  // 🔍 অর্ডার ট্র্যাক
+  const [trackOrderId, setTrackOrderId] = useState("")
+  const [trackLoading, setTrackLoading] = useState(false)
+  const [trackError, setTrackError] = useState("")
+  const [trackResult, setTrackResult] = useState<TrackResult | null>(null)
 
   useEffect(() => {
     setError("")
@@ -50,6 +91,31 @@ export default function LoginPage() {
     setUser(null)
     window.dispatchEvent(new Event("storage"))
     router.refresh()
+  }
+
+  async function handleTrackSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = trackOrderId.trim()
+    if (!trimmed) {
+      setTrackError("অর্ডার ID দিন")
+      return
+    }
+    setTrackLoading(true)
+    setTrackError("")
+    setTrackResult(null)
+    try {
+      const res = await fetch(`/api/orders/track?orderId=${encodeURIComponent(trimmed)}`)
+      const data = await res.json()
+      if (!res.ok) {
+        setTrackError(data.error === "Order not found" ? "অর্ডার পাওয়া যায়নি" : data.error || "সমস্যা হয়েছে")
+        return
+      }
+      setTrackResult(data)
+    } catch {
+      setTrackError("সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না")
+    } finally {
+      setTrackLoading(false)
+    }
   }
 
   async function handleForgotPassword() {
@@ -114,10 +180,67 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-12 pb-16 px-1">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+        {/* 🔍 অর্ডার ID দিয়ে সার্চ */}
+        <div className="mb-6 pb-6 border-b border-gray-100">
+          <p className="font-bold text-green-800 text-center text-sm mb-3"> অর্ডার ID দিয়ে সার্চ করুন</p>
+          <form onSubmit={handleTrackSearch} className="flex gap-2">
+            <input
+              type="text"
+              value={trackOrderId}
+              onChange={(e) => setTrackOrderId(e.target.value.toUpperCase())}
+              placeholder="FK202608181"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 tracking-wider font-mono"
+            />
+            <button
+              type="submit"
+              disabled={trackLoading}
+              className="bg-green-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-green-600 transition disabled:opacity-50 shrink-0"
+            >
+              {trackLoading ? "..." : "সার্চ"}
+            </button>
+          </form>
+          {trackError && (
+            <p className="text-red-500 text-xs text-center mt-2 font-medium">{trackError}</p>
+          )}
+          {trackResult && (
+            <div className="mt-3 bg-green-50 border border-green-100 rounded-xl p-3 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">অর্ডার ID</span>
+                <span className="font-bold text-gray-900 tracking-wider text-sm">{trackResult.orderId}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">তারিখ</span>
+                <span className="text-sm text-gray-700">
+                  {new Date(trackResult.createdAt).toLocaleDateString("bn-BD")}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">স্ট্যাটাস</span>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${
+                    STATUS_COLOR[trackResult.orderStatus] || "bg-gray-50 text-gray-700 border-gray-200"
+                  }`}
+                >
+                  {STATUS_BN[trackResult.orderStatus] || trackResult.orderStatus}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">কুরিয়ার</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {trackResult.courierProvider || trackResult.courierStatus
+                    ? `${trackResult.courierProvider || ""}${
+                        trackResult.courierProvider && trackResult.courierStatus ? " • " : ""
+                      }${trackResult.courierStatus || ""}`
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-green-800">{siteConfig.brand.name}</h1>
           <p className="text-sm text-yellow-600 mt-1">খামার থেকে আপনার দরজায়</p>
