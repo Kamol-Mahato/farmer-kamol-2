@@ -89,7 +89,7 @@ export default function MobileBottomNav() {
         </button>
 
         <Link
-          href={href("/track")}
+          href={href("/login")}
           className={`flex flex-col items-center text-xs gap-1 px-3 py-1 ${isActive(href("/track")) ? "text-yellow-400" : "text-white"}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
