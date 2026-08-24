@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload"
 
 // ✅ Base64 public key কে ব্রাউজারের বোঝার মতো ফরম্যাটে কনভার্ট করে
 function urlBase64ToUint8Array(base64String: string) {
@@ -21,6 +22,7 @@ export default function AdminAccountMenu() {
   const [supported, setSupported] = useState(true)
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -28,6 +30,13 @@ export default function AdminAccountMenu() {
       .then((r) => r.json())
       .then((data) => setIsAgent(!!data.agent))
       .catch(() => setIsAgent(false))
+
+    fetch("/api/profile/avatar")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl)
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -95,15 +104,28 @@ export default function AdminAccountMenu() {
       <button
         onClick={() => setOpen(!open)}
         aria-label="অ্যাকাউন্ট মেনু"
-        className="bg-white text-green-900 hover:bg-yellow-400 transition p-2 rounded-full flex items-center justify-center w-9 h-9"
+        className="bg-white text-green-900 hover:bg-yellow-400 transition p-0.5 rounded-full flex items-center justify-center w-9 h-9 overflow-hidden border border-green-200"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg>
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        )}
       </button>
 
       {open && (
         <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg min-w-[220px] py-2 z-50 border border-gray-100">
+          <div className="px-4 py-3 border-b border-gray-100 flex flex-col items-center gap-2">
+            <ProfileAvatarUpload
+              currentUrl={avatarUrl}
+              onUploaded={(url) => setAvatarUrl(url)}
+              size={72}
+            />
+            <p className="text-[11px] text-gray-400">প্রোফাইল ছবি</p>
+          </div>
           {supported && (
             <div className="px-4 py-2 border-b border-gray-100">
               {pushEnabled ? (

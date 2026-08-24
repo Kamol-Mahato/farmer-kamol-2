@@ -15,6 +15,7 @@ export async function GET() {
       select: {
         name: true,
         phone: true,
+        avatarUrl: true,
         district: true,
         districtId: true,
         upazila: true,

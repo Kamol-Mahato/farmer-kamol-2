@@ -43,6 +43,7 @@ model User {
   phone              String              @unique
   name               String?
   password           String?
+  avatarUrl          String?
   address            String?
   districtId         Int?
   district           String?
