@@ -15,5 +15,7 @@ export async function GET() {
   const agent = await prisma.user.findUnique({ where: { id } })
   if (!agent || !agent.isActive || agent.role !== "AGENT") return NextResponse.json({ agent: null })
 
-  return NextResponse.json({ agent: { id: agent.id, name: agent.name } })
+    return NextResponse.json({
+      agent: { id: agent.id, name: agent.name, avatarUrl: agent.avatarUrl || null },
+    })
 }

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { districts, upazilas } from "@/lib/bd-locations"
+import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload"
 
 function DistrictSearch({ districts, value, onSelect }: {
   districts: { id: number; name: string; en_name: string }[]
@@ -82,6 +83,7 @@ function UpazilaSearch({ upazilas, value, onSelect, disabled }: {
 interface Profile {
   name: string | null
   phone: string
+  avatarUrl?: string | null
   district: string | null
   districtId: number | null
   upazila: string | null
@@ -102,6 +104,7 @@ export default function CustomerSettingsPage() {
     address: "",
   })
   const [phone, setPhone] = useState("")
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -113,6 +116,7 @@ export default function CustomerSettingsPage() {
         }
         const data: Profile = await res.json()
         setPhone(data.phone)
+        setAvatarUrl(data.avatarUrl || null)
         setForm({
           name: data.name || "",
           district: data.district || "",
@@ -177,6 +181,14 @@ export default function CustomerSettingsPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
+        <div className="flex justify-center py-2">
+          <ProfileAvatarUpload
+            currentUrl={avatarUrl}
+            onUploaded={(url) => setAvatarUrl(url)}
+            size={100}
+          />
+        </div>
+
         <p className="text-xs text-gray-400">
           এখানে আপনার নাম ও ঠিকানা সেভ করে রাখলে পরবর্তী অর্ডারে এগুলো নিজে থেকেই পূরণ হয়ে যাবে।
         </p>
