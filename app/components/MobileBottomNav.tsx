@@ -54,12 +54,23 @@ export default function MobileBottomNav() {
     window.addEventListener("popstate", handlePopState)
     return () => window.removeEventListener("popstate", handlePopState)
   }, [])
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null)
+  const [user, setUser] = useState<{ name: string; role: string; avatarUrl?: string | null } | null>(null)
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) setUser(JSON.parse(storedUser))
     else setUser(null)
+
+    function onAvatar() {
+      const s = localStorage.getItem("user")
+      if (s) setUser(JSON.parse(s))
+    }
+    window.addEventListener("avatarUpdated", onAvatar)
+    window.addEventListener("storage", onAvatar)
+    return () => {
+      window.removeEventListener("avatarUpdated", onAvatar)
+      window.removeEventListener("storage", onAvatar)
+    }
   }, [pathname])
 
   const isActive = (path: string) => pathname === path
@@ -102,9 +113,14 @@ export default function MobileBottomNav() {
           href={user ? (user.role === "ADMIN" ? href("/admin/products") : href("/customer/dashboard")) : href("/login")}
           className="flex flex-col items-center text-xs gap-1 px-3 py-1 text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          </svg>
+          {user?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover border border-white/40" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+          )}
           {t.account}
         </Link>
       </nav>
