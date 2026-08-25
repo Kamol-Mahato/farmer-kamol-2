@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { useMobileMenu } from "./MobileMenuContext"
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
+import GlobalSearch from "./GlobalSearch"
 
 const dict = {
   bn: {
@@ -32,7 +33,6 @@ export default function MobileBottomNav() {
   const href = (path: string) => localizeHref(path, locale)
   const { openSidebar } = useMobileMenu()
   const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
 
   const openSearch = () => {
     setSearchOpen(true)
@@ -131,42 +131,27 @@ export default function MobileBottomNav() {
             className="bg-green-900 px-4 pt-6 pb-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (searchQuery.trim()) {
-                  if (window.history.state?.modal === "search") {
-                    window.history.replaceState(null, "")
-                  }
-                  setSearchOpen(false)
-                  router.push(`${href("/shop")}?search=${searchQuery}`)
-                }
-              }}
-              className="flex items-center gap-2"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlaceholder}
-                className="flex-1 bg-white text-green-900 placeholder-green-700 px-4 py-3 rounded-full text-sm outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-yellow-400 text-green-900 p-3 rounded-full flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-              </button>
+            <div className="flex items-start gap-2">
+              <div className="flex-1">
+                <GlobalSearch
+                  variant="mobile"
+                  autoFocus
+                  onClose={() => {
+                    if (window.history.state?.modal === "search") {
+                      window.history.replaceState(null, "")
+                    }
+                    setSearchOpen(false)
+                  }}
+                />
+              </div>
               <button
                 type="button"
                 onClick={closeSearch}
-                className="text-white text-2xl px-2"
+                className="text-white text-2xl px-2 mt-1 shrink-0"
               >
                 ✕
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}

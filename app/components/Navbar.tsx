@@ -9,6 +9,7 @@ import NewOrderNotifier from "../admin/components/NewOrderNotifier"
 import { useMobileMenu } from "./MobileMenuContext"
 import { getLocaleFromPath, localizeHref, switchLocalePath } from "@/lib/i18n"
 import { siteConfig } from "@/lib/siteConfig"
+import GlobalSearch from "./GlobalSearch"
 
 type Menu = {
   id: number
@@ -53,7 +54,6 @@ export default function Navbar() {
   const [openMenu, setOpenMenu] = useState<number | null>(null)
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null)
   const { mobileOpen, openSidebar, closeSidebar, closeSidebarForNav } = useMobileMenu()
-  const [searchQuery, setSearchQuery] = useState("")
   const [cartCount, setCartCount] = useState<number>(0)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [authMenuOpen, setAuthMenuOpen] = useState(false)
@@ -156,13 +156,6 @@ export default function Navbar() {
     setUserMenuOpen(false)
     router.push(href("/login"))
   }
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`${href("/shop")}?search=${searchQuery}`)
-    }
-  }
-
   return (
     <>
       <AnnouncementBar />
@@ -299,19 +292,8 @@ export default function Navbar() {
               <NewOrderNotifier />
             )}
 
-            <div className="hidden lg:flex items-center">
-              <form onSubmit={handleSearch} className="flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder={t.search}
-                  className="bg-green-800 text-white placeholder-white/70 px-2 py-0.5 rounded-l-full text-[11px] outline-none w-20 md:w-24 h-6 border border-r-0 border-white/20"
-                />
-                <button type="submit" aria-label="সার্চ করুন" className="bg-yellow-400 text-green-900 px-2 py-0.5 rounded-r-full text-[10px] font-bold h-6 flex items-center justify-center">
-                  🔍
-                </button>
-              </form>
+<div className="hidden lg:flex items-center">
+              <GlobalSearch variant="navbar" />
             </div>
 
             {user ? (

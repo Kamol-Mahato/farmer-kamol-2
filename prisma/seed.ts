@@ -81,7 +81,16 @@ async function main() {
     data: { title: 'আমাদের সম্পর্কে', url: '/about', displayOrder: 4, isVisible: true }
   })
   await prisma.navigationMenu.create({
-    data: { title: 'যোগাযোগ', url: '/contact', displayOrder: 5, isVisible: true }
+    data: { title: 'যোগাযোগ', titleEn: 'Contact', url: '/contact', displayOrder: 5, isVisible: true }
+  })
+  await prisma.navigationMenu.create({
+    data: {
+      title: 'বাংলার ফসল',
+      titleEn: 'Banglar Fosol',
+      url: '/banglar-fosol',
+      displayOrder: 6,
+      isVisible: true,
+    }
   })
 
   // ব্লগের ড্রপডাউন সাব-মেনু
@@ -309,6 +318,18 @@ async function main() {
       targetType: "ORDER",
       ipAddress: "192.168.1.45"
     }
+  })
+  // -------------------------------------------------------------
+  // বাংলার ফসল — ডিফল্ট ক্যাটাগরি
+  // -------------------------------------------------------------
+  await prisma.fosolCategory.createMany({
+    data: [
+      { name: 'ফসল', nameEn: 'Crops', slug: 'fosol', displayOrder: 1, isVisible: true },
+      { name: 'ফল', nameEn: 'Fruits', slug: 'fol', displayOrder: 2, isVisible: true },
+      { name: 'শাকসবজি', nameEn: 'Vegetables', slug: 'shobji', displayOrder: 3, isVisible: true },
+      { name: 'গাছ', nameEn: 'Trees', slug: 'gach', displayOrder: 4, isVisible: true },
+      { name: 'ঔষধি গাছ', nameEn: 'Medicinal Plants', slug: 'ousudhi', displayOrder: 5, isVisible: true },
+    ],
   })
 
   console.log('✅ সব মেনু, পণ্য, ইনভয়েস, কুরিয়ার ও এজেন্ট লগ সফলভাবে প্রিসমা ডাটাবেসে পুশ হয়েছে!')
