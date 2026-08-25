@@ -142,7 +142,7 @@ export default async function FosolItemPage({
           <span className="text-gray-700 font-medium">{item.title}</span>
         </nav>
 
-        {item.image && item.image.startsWith("/") && (
+        {item.image && (
           <div className="relative w-full h-64 rounded-xl overflow-hidden mb-6">
             <Image
               src={item.image}

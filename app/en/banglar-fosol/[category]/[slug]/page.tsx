@@ -97,7 +97,7 @@ export default async function FosolItemEnPage({
           <span className="text-gray-700 font-medium">{title}</span>
         </nav>
 
-        {item.image && item.image.startsWith("/") && (
+        {item.image && (
           <div className="relative w-full h-64 rounded-xl overflow-hidden mb-6">
             <Image src={item.image} alt={title} fill priority sizes="768px" className="object-cover" />
           </div>

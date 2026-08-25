@@ -112,7 +112,7 @@ export default async function BanglarFosolIndexPage({
                 href={`/banglar-fosol/${item.category.slug}/${item.slug}`}
                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition overflow-hidden group border border-gray-100"
               >
-                {item.image && item.image.startsWith("/") ? (
+                {item.image && (
                   <div className="relative w-full h-48 overflow-hidden">
                     <Image
                       src={item.image}
@@ -121,20 +121,6 @@ export default async function BanglarFosolIndexPage({
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover group-hover:scale-105 transition duration-300"
                     />
-                  </div>
-                ) : (
-                  <div className="w-full h-36 bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
-                    <span className="text-4xl opacity-60">
-                      {item.category.slug === "fosol"
-                        ? "🌾"
-                        : item.category.slug === "fol"
-                          ? "🥭"
-                          : item.category.slug === "shobji"
-                            ? "🥬"
-                            : item.category.slug === "gach"
-                              ? "🌳"
-                              : "🌿"}
-                    </span>
                   </div>
                 )}
                 <div className="p-4">

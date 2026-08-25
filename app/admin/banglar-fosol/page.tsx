@@ -47,6 +47,7 @@ export default function AdminBanglarFosolPage() {
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [newCatName, setNewCatName] = useState("")
   const [newCatNameEn, setNewCatNameEn] = useState("")
   const [creatingCat, setCreatingCat] = useState(false)
@@ -245,12 +246,57 @@ export default function AdminBanglarFosolPage() {
             </div>
           </div>
 
-          <input
-            value={form.image}
-            onChange={(e) => setForm((p) => ({ ...p, image: e.target.value }))}
-            placeholder="Image URL (optional)"
-            className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
-          />
+          {/* Image upload — phone / laptop */}
+          <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+            <label className="block text-sm font-medium text-gray-700">ছবি (ঐচ্ছিক)</label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/jpg"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setUploading(true)
+                try {
+                  const fd = new FormData()
+                  fd.append("file", file)
+                  fd.append("name", form.slug || form.title || "banglar-fosol")
+                  const res = await fetch("/api/upload", { method: "POST", body: fd })
+                  const data = await res.json()
+                  if (res.ok && data.imageUrl) {
+                    setForm((p) => ({ ...p, image: data.imageUrl }))
+                  } else {
+                    alert(data.error || "ছবি আপলোড হয়নি")
+                  }
+                } catch {
+                  alert("ছবি আপলোডে সমস্যা হয়েছে")
+                } finally {
+                  setUploading(false)
+                  e.target.value = ""
+                }
+              }}
+              className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-700 file:text-white file:font-bold file:cursor-pointer hover:file:bg-green-600"
+            />
+            {uploading && (
+              <p className="text-xs text-green-700 font-medium">আপলোড হচ্ছে...</p>
+            )}
+            {form.image && (
+              <div className="flex items-start gap-3 mt-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={form.image}
+                  alt="Preview"
+                  className="w-28 h-28 object-cover rounded-lg border border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((p) => ({ ...p, image: "" }))}
+                  className="text-xs text-red-500 font-bold hover:underline"
+                >
+                  ছবি সরান
+                </button>
+              </div>
+            )}
+          </div>
           <div className="grid sm:grid-cols-3 gap-3">
             <input
               value={form.scientificName}
