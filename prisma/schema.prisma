@@ -7,70 +7,68 @@ datasource db {
 }
 
 model SystemControlCenter {
-  id                    Int     @id @default(1)
-  enableOtpForGuest     Boolean @default(false)
-  defaultLanguage       String  @default("BN")
-  heroYoutubeUrl        String  @default("https://www.youtube.com/watch?v=default")
-  youtubeChannelUrl     String  @default("https://www.youtube.com/@FarmerKamol")
-  facebookPageUrl       String  @default("https://www.facebook.com/farmerkamol")
-  maskCustomerData      Boolean @default(true)
-  disableLiveCourierAPI Boolean @default(true)
-  paperSizeMode         String  @default("POS")
-  invoicePrefix         String  @default("FK")
-  useFreeWhatsAppOnly   Boolean @default(true)
-  useGoogleSMTP         Boolean @default(true)
-  minAmountForPaidSMS   Int     @default(2000)
-  strictTxnUniqueCheck  Boolean @default(true)
-  autoAdjustPrice       Boolean @default(true)
-  qrCodeDestination     String  @default("TRACK")
-  enableReviews         Boolean @default(false)
-  enableCoupons         Boolean @default(false)
-  enableWishlist        Boolean @default(false)
-  enablePaymentGateway  Boolean @default(false)
-  dhakaBaseCharge       Int     @default(75)
-  dhakaExtraPerUnit     Int     @default(20)
-  outsideBaseCharge     Int     @default(120)
-  outsideExtraPerUnit   Int     @default(30)
+  id                        Int     @id @default(1)
+  enableOtpForGuest         Boolean @default(false)
+  defaultLanguage           String  @default("BN")
+  heroYoutubeUrl            String  @default("https://www.youtube.com/watch?v=default")
+  maskCustomerData          Boolean @default(true)
+  disableLiveCourierAPI     Boolean @default(true)
+  paperSizeMode             String  @default("POS")
+  invoicePrefix             String  @default("FK")
+  useFreeWhatsAppOnly       Boolean @default(true)
+  useGoogleSMTP             Boolean @default(true)
+  minAmountForPaidSMS       Int     @default(2000)
+  strictTxnUniqueCheck      Boolean @default(true)
+  autoAdjustPrice           Boolean @default(true)
+  qrCodeDestination         String  @default("TRACK")
+  enableReviews             Boolean @default(false)
+  enableCoupons             Boolean @default(false)
+  enableWishlist            Boolean @default(false)
+  enablePaymentGateway      Boolean @default(false)
+  dhakaBaseCharge           Int     @default(75)
+  dhakaExtraPerUnit         Int     @default(20)
+  outsideBaseCharge         Int     @default(120)
+  outsideExtraPerUnit       Int     @default(30)
   deliveryChargeMode        String  @default("NORMAL")
   normalDhakaBaseCharge     Int     @default(75)
   normalDhakaExtraPerUnit   Int     @default(20)
   normalOutsideBaseCharge   Int     @default(120)
   normalOutsideExtraPerUnit Int     @default(30)
+  facebookPageUrl           String  @default("https://www.facebook.com/farmerkamol")
+  youtubeChannelUrl         String  @default("https://www.youtube.com/@FarmerKamol")
 }
 
 model User {
-  id                 Int                 @id @default(autoincrement())
-  phone              String              @unique
-  name               String?
-  password           String?
-  avatarUrl          String?
-  address            String?
-  districtId         Int?
-  district           String?
-  upazila            String?
-  role               Role                @default(CUSTOMER)
-  isActive           Boolean             @default(true)
-  otp                String?
-  otpExpiry          DateTime?
-  otpAttempts        Int                 @default(0)
-  passwordResetRequested   Boolean   @default(false)
+  id                       Int                 @id @default(autoincrement())
+  phone                    String              @unique
+  name                     String?
+  password                 String?
+  role                     Role                @default(CUSTOMER)
+  isActive                 Boolean             @default(true)
+  walletBalance            Float               @default(0.0)
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  otp                      String?
+  otpExpiry                DateTime?
+  otpAttempts              Int                 @default(0)
+  passwordResetRequested   Boolean             @default(false)
   passwordResetRequestedAt DateTime?
-  
-  walletBalance      Float               @default(0.0)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  agentLogs          AgentLog[]
-  createdOrders      Order[]             @relation("AgentToOrder")
-  customerOrders     Order[]             @relation("CustomerToOrder")
-  reviews            ProductReview[]
-  walletTransactions WalletTransaction[]
-  assignedChats      ChatConversation[]
+  address                  String?
+  upazila                  String?
+  districtId               Int?
+  district                 String?
+  avatarUrl                String?
+  agentLogs                AgentLog[]
+  assignedChats            ChatConversation[]
+  createdOrders            Order[]             @relation("AgentToOrder")
+  customerOrders           Order[]             @relation("CustomerToOrder")
+  reviews                  ProductReview[]
+  walletTransactions       WalletTransaction[]
 }
 
 model Category {
   id            Int        @id @default(autoincrement())
   name          String
-  nameEn        String?
   slug          String     @unique
   description   String?
   displayOrder  Int        @default(0)
@@ -78,13 +76,10 @@ model Category {
   parentId      Int?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  nameEn        String?
   parent        Category?  @relation("CategoryToSub", fields: [parentId], references: [id], onDelete: Cascade)
   subCategories Category[] @relation("CategoryToSub")
   products      Product[]
-}
-enum PriceType {
-  FIXED
-  NEGOTIABLE
 }
 
 model Product {
@@ -92,10 +87,6 @@ model Product {
   name                String
   slug                String                   @unique
   description         String?
-  nameEn              String?
-  slugEn              String?                  @unique
-  descriptionEn       String?
-  nameBanglish        String?
   categoryId          Int?
   pricePerUnit        Float
   discountPrice       Float?
@@ -103,11 +94,15 @@ model Product {
   stockQty            Float
   isOutOfStockVisible Boolean                  @default(true)
   isFeatured          Boolean                  @default(false)
-  isTopSeller         Boolean                  @default(false)
-  priceType           PriceType                @default(FIXED)
   isActive            Boolean                  @default(true)
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
+  priceType           PriceType                @default(FIXED)
+  descriptionEn       String?
+  nameBanglish        String?
+  nameEn              String?
+  slugEn              String?                  @unique
+  isTopSeller         Boolean                  @default(false)
   orderItems          OrderItem[]
   category            Category?                @relation(fields: [categoryId], references: [id])
   batches             ProductBatch[]
@@ -182,44 +177,44 @@ model Coupon {
 }
 
 model Order {
-  id                Int             @id @default(autoincrement())
+  id                Int              @id @default(autoincrement())
   customerId        Int
-  orderSource       OrderSource     @default(WEBSITE)
+  orderSource       OrderSource      @default(WEBSITE)
   createdById       Int
   deliveryAddress   String
-  districtId        Int?
-  district          String?
-  upazila           String?
   customerNote      String?
   internalNote      String?
   totalProductPrice Float
   deliveryCharge    Float
-  discountAmount    Float           @default(0.0)
+  discountAmount    Float            @default(0.0)
   couponId          Int?
   finalCodAmount    Float
   courierProvider   String?
-  courierTrackingId String?         @unique
-  orderStatus       OrderStatus     @default(PENDING)
-  paymentMethod     PaymentMethod   @default(COD)
-  paymentStatus     PaymentStatus   @default(PENDING)
+  courierTrackingId String?          @unique
+  orderStatus       OrderStatus      @default(PENDING)
+  paymentMethod     PaymentMethod    @default(COD)
+  paymentStatus     PaymentStatus    @default(PENDING)
   gatewayName       String?
-  gatewayTxnId      String?         @unique
+  gatewayTxnId      String?          @unique
   gatewayRef        String?
-  paymentAmountPaid Float           @default(0.0)
-  dailySeq          Int             @default(0)
+  paymentAmountPaid Float            @default(0.0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  dailySeq          Int              @default(0)
   collectedAmount   Float?
-  courierPaidAmount Float?          // কুরিয়ার আসলে কত টাকা ফেরত দিয়েছে — collectedAmount-এর সাথে ক্রস-চেকের জন্য (null = এখনো কুরিয়ার পেমেন্ট আপডেট হয়নি)
-  receivedQty       Float?          // null = "পাওয়া যায়নি" (Not Received); সংখ্যা থাকলে "পাওয়া গেছে" (Received) — শুধু PARTIAL_DELIVERY স্ট্যাটাসে প্রাসঙ্গিক
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  district          String?
+  districtId        Int?
+  upazila           String?
+  receivedQty       Float?
+  courierPaidAmount Float?
   courierSummary    CourierSummary?
   invoice           Invoice?
-  coupon            Coupon?         @relation(fields: [couponId], references: [id])
-  creator           User            @relation("AgentToOrder", fields: [createdById], references: [id])
-  customer          User            @relation("CustomerToOrder", fields: [customerId], references: [id], onDelete: Cascade)
+  coupon            Coupon?          @relation(fields: [couponId], references: [id])
+  creator           User             @relation("AgentToOrder", fields: [createdById], references: [id])
+  customer          User             @relation("CustomerToOrder", fields: [customerId], references: [id], onDelete: Cascade)
+  editLogs          OrderEditLog[]
   orderItems        OrderItem[]
   statusLogs        OrderStatusLog[]
-  editLogs          OrderEditLog[]
 }
 
 model OrderStatusLog {
@@ -239,7 +234,7 @@ model OrderEditLog {
   orderId        Int
   editedById     Int
   editedByRole   String
-  changesSummary String   // যেমন: "Price: ৳৫০০ → ৳৬০০, Shipping: ৳১০০ → ৳১৫০"
+  changesSummary String
   createdAt      DateTime @default(now())
   order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
@@ -289,13 +284,13 @@ model Invoice {
 model NavigationMenu {
   id           Int              @id @default(autoincrement())
   title        String
-  titleEn      String?
   url          String
   displayOrder Int              @default(0)
   isVisible    Boolean          @default(true)
   parentId     Int?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+  titleEn      String?
   parentMenu   NavigationMenu?  @relation("MenuToSubMenu", fields: [parentId], references: [id], onDelete: Cascade)
   subMenus     NavigationMenu[] @relation("MenuToSubMenu")
 }
@@ -327,15 +322,156 @@ model Blog {
   title         String
   slug          String   @unique
   content       String
-  titleEn       String?
-  slugEn        String?  @unique
-  contentEn     String?
-  titleBanglish String?
   image         String?
   category      String
   isPublished   Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  contentEn     String?
+  slugEn        String?  @unique
+  titleBanglish String?
+  titleEn       String?
+}
+
+model YoutubeVideo {
+  id            Int      @id @default(autoincrement())
+  title         String
+  youtubeUrl    String
+  displayOrder  Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  description   String?
+  platform      String   @default("YOUTUBE")
+  heroOrder     Int?
+  descriptionEn String?
+  titleEn       String?
+  thumbnailUrl  String?
+}
+
+model GalleryItem {
+  id            Int                @id @default(autoincrement())
+  title         String
+  description   String?
+  displayOrder  Int                @default(0)
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  slug          String             @unique
+  descriptionEn String?
+  titleEn       String?
+  slugEn        String?            @unique
+  images        GalleryItemImage[]
+}
+
+model GalleryItemImage {
+  id            Int         @id @default(autoincrement())
+  galleryItemId Int
+  imageUrl      String
+  displayOrder  Int         @default(0)
+  createdAt     DateTime    @default(now())
+  galleryItem   GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+}
+
+model BlogCategory {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  nameEn String?
+}
+
+// ===================== বাংলার ফসল =====================
+model FosolCategory {
+  id            Int         @id @default(autoincrement())
+  name          String
+  nameEn        String?
+  slug          String      @unique
+  description   String?
+  descriptionEn String?
+  displayOrder  Int         @default(0)
+  isVisible     Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         FosolItem[]
+}
+
+model FosolItem {
+  id             Int           @id @default(autoincrement())
+  title          String
+  slug           String        @unique
+  titleEn        String?
+  slugEn         String?       @unique
+  titleBanglish  String?
+  content        String        @db.Text
+  contentEn      String?       @db.Text
+  image          String?
+  scientificName String?
+  season         String?
+  region         String?
+  uses           String?
+  categoryId     Int
+  category       FosolCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isPublished    Boolean       @default(false)
+  isFeatured     Boolean       @default(false)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([isPublished])
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  role      String   @default("ADMIN")
+}
+
+model CustomerPushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model ChatConversation {
+  id            Int           @id @default(autoincrement())
+  visitorId     String        @unique
+  visitorName   String?
+  visitorPhone  String?
+  status        ChatStatus    @default(OPEN)
+  assignedToId  Int?
+  lastMessageAt DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  assignedTo    User?         @relation(fields: [assignedToId], references: [id])
+  messages      ChatMessage[]
+}
+
+model ChatMessage {
+  id             Int              @id @default(autoincrement())
+  conversationId Int
+  senderType     ChatSenderType
+  senderId       Int?
+  text           String
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
+}
+
+enum PriceType {
+  FIXED
+  NEGOTIABLE
 }
 
 enum Role {
@@ -355,13 +491,13 @@ enum OrderStatus {
   CONFIRMED
   DELIVERY_ONGOING
   DELIVERED
-  PAID_RETURN
-  PARTIAL_DELIVERY
   RETURNED
   CANCELLED
   REFUNDED
   LOST
   DAMAGED
+  PAID_RETURN
+  PARTIAL_DELIVERY
 }
 
 enum OrderSource {
@@ -386,91 +522,6 @@ enum PaymentStatus {
 enum WalletTxnType {
   CREDIT
   DEBIT
-}
-
-model YoutubeVideo {
-  id           Int      @id @default(autoincrement())
-  title        String
-  description  String?
-  youtubeUrl   String
-  platform     String   @default("YOUTUBE")
-  thumbnailUrl String?  // Custom thumbnail (YT + FB)
-  displayOrder Int      @default(0)
-  isActive     Boolean  @default(true)
-  heroOrder    Int?     // null = হিরো স্লাইডে নেই, সংখ্যা = হিরো রোটেশনে ক্রম (০,১,২,৩)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  titleEn      String?
-  descriptionEn String?
-}
-
-model GalleryItem {
-  id          Int                @id @default(autoincrement())
-  title       String
-  titleEn     String?
-  slug        String             @unique
-  slugEn      String?            @unique
-  description String?
-  descriptionEn String?
-  displayOrder Int               @default(0)
-  isActive    Boolean            @default(true)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  images      GalleryItemImage[]
-}
-
-model GalleryItemImage {
-  id            Int          @id @default(autoincrement())
-  galleryItemId Int
-  imageUrl      String
-  displayOrder  Int          @default(0)
-  createdAt     DateTime     @default(now())
-  galleryItem   GalleryItem  @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
-}
-
-model BlogCategory {
-  id     Int     @id @default(autoincrement())
-  name   String  @unique
-  nameEn String?
-}
-model PushSubscription {
-  id        Int      @id @default(autoincrement())
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  role      String   @default("ADMIN") // 👈 "ADMIN" অথবা "AGENT" সেভ হবে
-  createdAt DateTime @default(now())
-}
-model CustomerPushSubscription {
-  id        String   @id @default(cuid())
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  createdAt DateTime @default(now())
-}
-model ChatConversation {
-  id            Int             @id @default(autoincrement())
-  visitorId     String          @unique
-  visitorName   String?
-  visitorPhone  String?
-  status        ChatStatus      @default(OPEN)
-  assignedToId  Int?
-  lastMessageAt DateTime        @default(now())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  assignedTo    User?           @relation(fields: [assignedToId], references: [id])
-  messages      ChatMessage[]
-}
-
-model ChatMessage {
-  id             Int              @id @default(autoincrement())
-  conversationId Int
-  senderType     ChatSenderType
-  senderId       Int?
-  text           String
-  isRead         Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
 enum ChatStatus {

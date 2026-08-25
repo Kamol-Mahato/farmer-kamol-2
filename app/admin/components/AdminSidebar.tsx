@@ -12,6 +12,7 @@ const navItems = [
   { label: "কাস্টমার ম্যানেজমেন্ট", href: "/admin/customers", agentHref: "/agent/customers", agentVisible: true },
   { label: "এজেন্ট ম্যানেজমেন্ট", href: "/admin/agents", agentVisible: false },
   { label: "ব্লগ ম্যানেজমেন্ট", href: "/admin/blog", agentVisible: false },
+  { label: "বাংলার ফসল", href: "/admin/banglar-fosol", agentVisible: false },
   { label: "ভিডিও ম্যানেজমেন্ট", href: "/admin/videos", agentVisible: false },
   { label: "গ্যালারি ম্যানেজমেন্ট", href: "/admin/images", agentVisible: false },
   { label: "ক্যাটাগরি ম্যানেজমেন্ট", href: "/admin/categories", agentVisible: false },
