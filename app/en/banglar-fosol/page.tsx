@@ -22,22 +22,30 @@ export async function generateMetadata() {
   }
 }
 
-export default async function BanglarFosolIndexEn() {
-  const [categories, featured] = await Promise.all([
-    prisma.fosolCategory.findMany({
-      where: { isVisible: true },
-      orderBy: { displayOrder: "asc" },
-      include: {
-        _count: { select: { items: { where: { isPublished: true } } } },
-      },
-    }),
-    prisma.fosolItem.findMany({
-      where: { isPublished: true, isFeatured: true },
-      include: { category: true },
-      orderBy: { updatedAt: "desc" },
-      take: 6,
-    }),
-  ])
+export default async function BanglarFosolIndexEn({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category: catQuery } = await searchParams
+
+  const categories = await prisma.fosolCategory.findMany({
+    where: { isVisible: true },
+    orderBy: { displayOrder: "asc" },
+  })
+
+  const activeSlug = catQuery || "all"
+  const activeCategory =
+    activeSlug === "all" ? null : categories.find((c) => c.slug === activeSlug)
+
+  const items = await prisma.fosolItem.findMany({
+    where: {
+      isPublished: true,
+      ...(activeCategory ? { categoryId: activeCategory.id } : {}),
+    },
+    include: { category: true },
+    orderBy: { updatedAt: "desc" },
+  })
 
   const schema = {
     "@context": "https://schema.org",
@@ -49,81 +57,101 @@ export default async function BanglarFosolIndexEn() {
 
   return (
     <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+      />
       <Breadcrumb
         items={[
           { label: "Home", href: "/en" },
           { label: "Banglar Fosol" },
         ]}
       />
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-extrabold text-green-900">Banglar Fosol</h1>
-          <p className="text-gray-500 mt-2 max-w-2xl mx-auto text-sm sm:text-base">
-            Crops, fruits, vegetables, trees and medicinal plants of Bangladesh — in one place.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-12">
+      <div className="max-w-6xl mx-auto px-4 py-12 pt-8 text-center">
+        <h1 className="text-2xl font-bold text-green-800 mb-2">Banglar Fosol</h1>
+        <p className="text-gray-500 mb-8">
+          Crops, fruits, vegetables, trees and medicinal plants of Bangladesh — in one place
+        </p>
+
+        <div className="flex gap-2 flex-wrap justify-center mb-10">
+          <Link
+            href="/en/banglar-fosol"
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+              activeSlug === "all"
+                ? "bg-green-700 text-white"
+                : "bg-green-100 text-green-800 hover:bg-green-200"
+            }`}
+          >
+            All
+          </Link>
           {categories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/en/banglar-fosol/${cat.slug}`}
-              className="bg-white border border-green-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md hover:border-green-300 transition"
+              href={`/en/banglar-fosol?category=${cat.slug}`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                activeSlug === cat.slug
+                  ? "bg-green-700 text-white"
+                  : "bg-green-100 text-green-800 hover:bg-green-200"
+              }`}
             >
-              <div className="text-2xl mb-2">
-                {cat.slug === "fosol"
-                  ? "🌾"
-                  : cat.slug === "fol"
-                    ? "🥭"
-                    : cat.slug === "shobji"
-                      ? "🥬"
-                      : cat.slug === "gach"
-                        ? "🌳"
-                        : "🌿"}
-              </div>
-              <h2 className="font-bold text-green-800 text-sm">{cat.nameEn || cat.name}</h2>
-              <p className="text-xs text-gray-400 mt-1">{cat._count.items} items</p>
+              {cat.nameEn || cat.name}
             </Link>
           ))}
         </div>
 
-        {featured.length > 0 && (
-          <section>
-            <h2 className="text-xl font-bold text-green-900 mb-4">Featured</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {featured.map((item) => {
-                const href = `/en/banglar-fosol/${item.category.slug}/${item.slugEn || item.slug}`
-                return (
-                  <Link
-                    key={item.id}
-                    href={href}
-                    className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden group border border-green-50"
-                  >
-                    {item.image && item.image.startsWith("/") && (
-                      <div className="relative w-full h-40 overflow-hidden">
-                        <Image
-                          src={item.image}
-                          alt={item.titleEn || item.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition duration-300"
-                        />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        {item.category.nameEn || item.category.name}
-                      </span>
-                      <h3 className="font-bold text-green-800 mt-2">
-                        {item.titleEn || item.title}
-                      </h3>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
+        {items.length === 0 ? (
+          <p className="text-gray-400 py-16">No items in this section yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={`/en/banglar-fosol/${item.category.slug}/${item.slugEn || item.slug}`}
+                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition overflow-hidden group border border-gray-100"
+              >
+                {item.image && item.image.startsWith("/") ? (
+                  <div className="relative w-full h-48 overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={item.titleEn || item.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition duration-300"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-36 bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+                    <span className="text-4xl opacity-60">
+                      {item.category.slug === "fosol"
+                        ? "🌾"
+                        : item.category.slug === "fol"
+                          ? "🥭"
+                          : item.category.slug === "shobji"
+                            ? "🥬"
+                            : item.category.slug === "gach"
+                              ? "🌳"
+                              : "🌿"}
+                    </span>
+                  </div>
+                )}
+                <div className="p-4">
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                    {item.category.nameEn || item.category.name}
+                  </span>
+                  <h2 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition leading-snug">
+                    {item.titleEn || item.title}
+                  </h2>
+                  {item.scientificName && (
+                    <p className="text-xs text-gray-400 italic mt-1">{item.scientificName}</p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    {item.updatedAt.toLocaleDateString("en-GB")}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </div>
