@@ -112,7 +112,7 @@ export default async function FosolCategoryPage({
         {items.length === 0 ? (
           <p className="text-gray-400 py-16">এই ক্যাটাগরিতে এখনো কোনো আইটেম নেই।</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 text-left">
             {items.map((item) => (
               <Link
                 key={item.id}
