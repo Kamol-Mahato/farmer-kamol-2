@@ -103,6 +103,7 @@ model Product {
   nameEn              String?
   slugEn              String?                  @unique
   isTopSeller         Boolean                  @default(false)
+  homeOrder           Int?
   orderItems          OrderItem[]
   category            Category?                @relation(fields: [categoryId], references: [id])
   batches             ProductBatch[]
@@ -331,6 +332,7 @@ model Blog {
   slugEn        String?  @unique
   titleBanglish String?
   titleEn       String?
+  homeOrder     Int?
 }
 
 model YoutubeVideo {
@@ -379,7 +381,6 @@ model BlogCategory {
   nameEn String?
 }
 
-// ===================== বাংলার ফসল =====================
 model FosolCategory {
   id            Int         @id @default(autoincrement())
   name          String
@@ -401,21 +402,21 @@ model FosolItem {
   titleEn        String?
   slugEn         String?       @unique
   titleBanglish  String?
-  content        String        @db.Text
-  contentEn      String?       @db.Text
+  content        String
+  contentEn      String?
   image          String?
   scientificName String?
   season         String?
   region         String?
   uses           String?
   categoryId     Int
-  category       FosolCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   isPublished    Boolean       @default(false)
   isFeatured     Boolean       @default(false)
   seoTitle       String?
   seoDescription String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  category       FosolCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
   @@index([isPublished])

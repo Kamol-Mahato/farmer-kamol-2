@@ -3,6 +3,8 @@ import HeroSlider from "./components/HeroSlider"
 import { prisma } from "@/lib/prisma"
 import ProductCard from "./components/ProductCard"
 import BlogSection from "./components/BlogSection"
+import TestimonialSection from "./components/TestimonialSection"
+import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections"
 import type { Metadata } from "next"
 import NoticeModal from "./components/NoticeModal" // এটি যোগ করুন
 import VideoSection from "./components/VideoSection"
@@ -33,13 +35,9 @@ export default async function HomePage() {
     blogs,
     videos,
     heroVideos,
+    reviews,
   ] = await Promise.all([
-    prisma.product.findMany({
-      where: { isActive: true },
-      include: { images: true, category: true },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
+    getHomeProducts(),
     prisma.systemControlCenter.findUnique({ where: { id: 1 } }),
     prisma.product.findMany({
       where: { isActive: true, isFeatured: true },
@@ -65,11 +63,7 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       take: 2,
     }),
-    prisma.blog.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
+    getHomeBlogs("bn"),
     prisma.youtubeVideo.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: "asc" },
@@ -79,6 +73,12 @@ export default async function HomePage() {
       where: { heroOrder: { not: null } },
       orderBy: { heroOrder: "asc" },
       select: { id: true, youtubeUrl: true },
+    }),
+    prisma.productReview.findMany({
+      where: { isApproved: true },
+      include: { user: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 30,
     }),
   ])
 
@@ -131,27 +131,7 @@ export default async function HomePage() {
       />
 
       {/* Reviews — Footer-এর ঠিক আগে */}
-      <div className="bg-yellow-50 py-6 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-2">
-          <h2 className="text-2xl font-bold text-green-800">আমাদের সন্তুষ্ট গ্রাহকদের অভিজ্ঞতা</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: "রহিমা বেগম", location: "ঢাকা", text: "ইউটিউবে ভিডিও দেখে কিনেছিলাম,সরিষার তেলে সত্যিই খাঁটি গন্ধ আর স্বাদ অসাধারণ।পরে লাগলে আবার কিনবো।", stars: 5 },
-            ].map((review) => (
-              <div key={review.name} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
-                <div className="text-yellow-500 mb-2 text-lg">
-                  {"★".repeat(review.stars)}{"☆".repeat(5 - review.stars)}
-                </div>
-                <p className="text-gray-600 text-sm mb-4">"{review.text}"</p>
-                <p className="font-bold text-green-800">{review.name}</p>
-                <p className="text-gray-400 text-xl">{review.location}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <TestimonialSection reviews={reviews} />
     </div>
   )
 }
