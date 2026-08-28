@@ -22,6 +22,7 @@ export default function AdminBlogPage() {
     image: "",
     category: "",
     isPublished: false,
+    homeOrder: "" as string | number,
   })
 
   // ২. ব্লগ লিস্ট এবং ক্যাটাগরি লিস্ট ফেচ করা
@@ -70,7 +71,7 @@ export default function AdminBlogPage() {
       body: JSON.stringify(form),
     })
     if (res.ok) {
-      setForm({ title: "", slug: "", titleEn: "", slugEn: "", titleBanglish: "", content: "", contentEn: "", image: "", category: "", isPublished: false })
+      setForm({ title: "", slug: "", titleEn: "", slugEn: "", titleBanglish: "", content: "", contentEn: "", image: "", category: "", isPublished: false, homeOrder: "" })
       setEditingId(null)
       const data = await fetch("/api/blog").then(r => r.json())
       setBlogs(data)
@@ -91,13 +92,14 @@ export default function AdminBlogPage() {
       image: blog.image || "",
       category: blog.category,
       isPublished: blog.isPublished,
+      homeOrder: blog.homeOrder ?? "",
     })
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   function handleCancelEdit() {
     setEditingId(null)
-    setForm({ title: "", slug: "", titleEn: "", slugEn: "", titleBanglish: "", content: "", contentEn: "", image: "", category: "", isPublished: false })
+    setForm({ title: "", slug: "", titleEn: "", slugEn: "", titleBanglish: "", content: "", contentEn: "", image: "", category: "", isPublished: false, homeOrder: "" })
   }
 
   async function handleDelete(id: number) {
@@ -205,6 +207,21 @@ export default function AdminBlogPage() {
             />
             Publish করবেন?
           </label>
+          <div className="mt-3">
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Home Page PIN (1–6) — খালি রাখলে auto
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={6}
+              name="homeOrder"
+              value={form.homeOrder}
+              onChange={handleChange}
+              placeholder="খালি = PIN নেই"
+              className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500 w-40"
+            />
+          </div>
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
