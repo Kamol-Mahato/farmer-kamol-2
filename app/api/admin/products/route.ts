@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 import { verifyAdminOrAgent } from "@/lib/adminAuth"
 import { sanitizeHtml } from "@/lib/sanitize"
 import { sendPushToCustomers } from "@/lib/webpush"
-                                                                                                                              
+
 export async function GET() {
   const isAuthorized = await verifyAdminOrAgent()
   if (!isAuthorized) {
@@ -16,10 +16,7 @@ export async function GET() {
       include: { category: true, images: true },
       orderBy: { createdAt: "desc" },
     })
-    revalidatePath("/")
-    revalidatePath("/en")
-    revalidatePath("/shop")
-    revalidatePath("/en/shop")
+
     return NextResponse.json(products)
   } catch (error) {
     return NextResponse.json({ error: "সমস্যা হয়েছে" }, { status: 500 })
@@ -84,15 +81,16 @@ export async function POST(request: Request) {
         description: description ? sanitizeHtml(description) : description,
         descriptionEn: descriptionEn ? sanitizeHtml(descriptionEn) : null,
         categoryId: categoryId || null,
-        pricePerUnit,
-        discountPrice,
+        pricePerUnit: Number(pricePerUnit),
+        discountPrice: discountPrice ? Number(discountPrice) : null,
         unit,
-        stockQty,
-        isFeatured,
-        isTopSeller,
-        isActive,
-        isOutOfStockVisible,
+        stockQty: Number(stockQty),
+        isFeatured: Boolean(isFeatured),
+        isTopSeller: Boolean(isTopSeller),
+        isActive: isActive ?? true,
+        isOutOfStockVisible: isOutOfStockVisible ?? true,
         priceType: priceType || "FIXED",
+        homeOrder: homeOrder ? Number(homeOrder) : null, // Fix: homeOrder যুক্ত করা হয়েছে
         images: (imageUrls && imageUrls.length > 0)
           ? {
               create: imageUrls.map((url: string, idx: number) => ({
@@ -110,6 +108,13 @@ export async function POST(request: Request) {
           : undefined,
       },
     })
+
+    // Revalidate paths for instant updates
+    revalidatePath("/")
+    revalidatePath("/en")
+    revalidatePath("/shop")
+    revalidatePath("/en/shop")
+
     if (product.isActive) {
       sendPushToCustomers(
         "নতুন পণ্য এসেছে! 🌾",
@@ -117,6 +122,7 @@ export async function POST(request: Request) {
         `/shop/${product.slug}`
       ).catch((err) => console.error("Push notify error:", err))
     }
+
     return NextResponse.json(product)
   } catch (error: any) {
     if (error.code === "P2002") {
