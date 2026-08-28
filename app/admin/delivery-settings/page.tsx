@@ -125,7 +125,7 @@ export default function AdminDeliverySettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-green-800 mb-8">ডেলিভারি充电 সেটিংস</h1>
+      <h1 className="text-3xl font-bold text-green-800 mb-8">ডেলিভারি চার্জ সেটিংস</h1>
 
       <div className="bg-white rounded-xl shadow p-6 mb-8">
         <h2 className="text-lg font-bold text-gray-700 mb-3">দ্রুত মোড পরিবর্তন</h2>
