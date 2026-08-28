@@ -31,6 +31,9 @@ export async function POST(req: Request) {
       image: body.image || null,
       category: body.category,
       isPublished: body.isPublished,
+      homeOrder: body.homeOrder === "" || body.homeOrder === null || body.homeOrder === undefined
+        ? null
+        : Number(body.homeOrder),
     }
   })
 

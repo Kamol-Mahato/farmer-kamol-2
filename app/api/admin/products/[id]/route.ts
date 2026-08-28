@@ -56,6 +56,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         isActive: body.isActive,
         isOutOfStockVisible: body.isOutOfStockVisible,
         priceType: body.priceType || "FIXED",
+        homeOrder: body.homeOrder === "" || body.homeOrder === null || body.homeOrder === undefined
+          ? null
+          : Number(body.homeOrder),
         // ✅ একাধিক ছবি থাকলে পুরনো সব ছবি মুছে নতুন সবগুলো সেভ হবে, প্রথমটা isPrimary
         images: (body.imageUrls && body.imageUrls.length > 0)
           ? {

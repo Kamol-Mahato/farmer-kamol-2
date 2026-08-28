@@ -46,6 +46,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       image: body.image,
       category: body.category,
       isPublished: body.isPublished,
+      homeOrder: body.homeOrder === "" || body.homeOrder === null || body.homeOrder === undefined
+        ? null
+        : Number(body.homeOrder),
     },
   })
   revalidatePath("/")

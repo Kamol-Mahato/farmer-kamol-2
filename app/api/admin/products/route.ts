@@ -55,6 +55,7 @@ export async function POST(request: Request) {
       isActive,
       isOutOfStockVisible,
       priceType,
+      homeOrder,
     } = body
 
     if (!name || !String(name).trim()) {

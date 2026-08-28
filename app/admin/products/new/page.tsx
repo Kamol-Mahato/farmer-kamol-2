@@ -38,6 +38,7 @@ export default function NewProductPage() {
     isActive: true,
     isOutOfStockVisible: true,
     priceType: "FIXED" as "FIXED" | "NEGOTIABLE",
+    homeOrder: "" as string | number,
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -359,6 +360,22 @@ export default function NewProductPage() {
             <input type="checkbox" name="isOutOfStockVisible" checked={form.isOutOfStockVisible} onChange={handleChange} className="w-4 h-4 accent-green-600" />
             <span className="text-sm text-gray-700">স্টক শেষে দেখাবে</span>
           </label>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Home Page PIN (1–6) — খালি রাখলে auto
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={6}
+            name="homeOrder"
+            value={form.homeOrder}
+            onChange={handleChange}
+            placeholder="খালি = PIN নেই"
+            className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500 w-40"
+          />
         </div>
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
