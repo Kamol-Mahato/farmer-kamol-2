@@ -12,9 +12,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "সব ফিল্ড আবশ্যক" }, { status: 400 })
     }
 
-    if (typeof newPassword !== "string" || newPassword.length < 8) {
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
       return NextResponse.json(
-        { error: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে" },
+        { error: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে" },
         { status: 400 }
       )
     }
