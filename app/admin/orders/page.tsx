@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { generateCustomId } from "@/lib/orderUtils"
+import { generateCustomId } from "@/lib/orderIdUtils"
 import { updateOrderStatus } from "@/lib/orderStatusClient"
 import OrderDetailModal from "./OrderDetailModal"
 import { downloadOrdersCsv } from "@/lib/exportOrdersCsv"
