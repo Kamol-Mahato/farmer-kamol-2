@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { generateCustomId, resolveOrderIdFromCustomId } from "@/lib/orderUtils"
+import { generateCustomId, resolveOrderIdFromCustomId } from "@/lib/orderIdUtils"
 import { checkAndIncrementRate } from "@/lib/rateLimiter"
 
 export async function GET(req: NextRequest) {
