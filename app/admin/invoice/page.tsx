@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams, usePathname } from "next/navigation"
 import QRCode from "qrcode"
 import Barcode from "react-barcode"
-import { generateCustomId } from "@/lib/orderUtils"
+import { generateCustomId } from "@/lib/orderIdUtils"
 
 interface OrderItem {
   id: number

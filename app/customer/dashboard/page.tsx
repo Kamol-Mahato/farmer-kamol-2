@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { generateCustomId } from "@/lib/orderUtils"
+import { generateCustomId } from "@/lib/orderIdUtils"
 
 
 interface OrderItem {

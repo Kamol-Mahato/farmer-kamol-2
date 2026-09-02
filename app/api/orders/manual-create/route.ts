@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { verifyAdminOrAgent } from "@/lib/adminAuth"
 import { sendPushToAdmin } from "@/lib/webpush"
-import { getBangladeshDayBoundaries, getUnitToKgMultiplier, generateCustomId } from "@/lib/orderUtils"
+import { getBangladeshDayBoundaries, getUnitToKgMultiplier, generateCustomId } from "@/lib/orderIdUtils"
 
 const VALID_SOURCES = ["WEBSITE", "MESSENGER", "WHATSAPP", "CALL", "AGENT_MANUAL"]
 
