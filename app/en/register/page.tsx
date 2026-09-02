@@ -39,10 +39,10 @@ export default function RegisterPageEn() {
         setError("Enter a valid 11-digit mobile number (e.g. 017XXXXXXXX)")
         return
       }
-      if (password.length < 4) {
-      setError("Password must be at least 4 characters")
-      return
-    }
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters")
+        return
+      }
     if (password !== confirmPassword) {
       setError("Passwords do not match")
       return
@@ -144,7 +144,7 @@ export default function RegisterPageEn() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-1">Must be at least 4 characters</p>
+            <p className="text-xs text-gray-400 mt-1">Must be at least 6 characters</p>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
@@ -200,7 +200,7 @@ export default function RegisterPageEn() {
           <button
             type="button"
             onClick={handleRegister}
-            disabled={loading || !name || !isValidBDPhone(phone) || password.length < 4 || password !== confirmPassword}
+            disabled={loading || !name || !isValidBDPhone(phone) || password.length < 6 || password !== confirmPassword}
             className="w-full bg-green-700 text-white py-3.5 rounded-lg font-bold text-lg
                        transition-all duration-150
                        active:bg-green-800 active:scale-[0.98] touch-manipulation

@@ -50,15 +50,29 @@ export default function AnnouncementBar() {
     year: "numeric",
   })
 
+  // বাংলা ভার্সনে ইংরেজি তারিখ কনভার্ট করার জন্য লোকাল ফরম্যাট (যেমন: ২ সেপ্টেম্বর, ২০২৬)
+  const englishDateInBengali = now.toLocaleDateString("bn-BD", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+
+  // বাংলা ভার্সনে মোবাইলের জন্য ছোট ইংরেজি তারিখ (যেমন: ২ সেপ্টে, ২০২৬)
+  const englishDateInBengaliShort = now.toLocaleDateString("bn-BD", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })
+
   const itemsDesktop =
     locale === "en"
       ? [timeStr, englishDateStr, "Rainy Season"]
-      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ`, `${bDate.ritu} কাল`]
+      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ (${englishDateInBengali})`, `${bDate.ritu} কাল`]
 
   const itemsMobile =
     locale === "en"
       ? [timeStr, englishDateShort, "Rainy Season"]
-      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month},\n${bDate.yearBn} বঙ্গাব্দ`, `${bDate.ritu} কাল`]
+      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ\n(${englishDateInBengaliShort})`, `${bDate.ritu} কাল`]
 
   return (
     <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-xs md:text-sm font-bold z-[60] flex items-center h-8">

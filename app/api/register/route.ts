@@ -26,12 +26,12 @@ if (!rateCheck.allowed) {
   )
 }
 
-    if (typeof password !== "string" || password.length < 8) {
-      return NextResponse.json(
-        { error: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে" },
-        { status: 400 }
-      )
-    }
+if (typeof password !== "string" || password.length < 6) {
+  return NextResponse.json(
+    { error: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে" },
+    { status: 400 }
+  )
+}
 
     const existingUser = await prisma.user.findUnique({ where: { phone } })
 
