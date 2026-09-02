@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { verifyAdminOrAgent } from "@/lib/adminAuth"
+import sharp from "sharp"
 
 // 🔒 build-time এ env variable না থাকলেও crash না করার জন্য lazy init
 let supabase: ReturnType<typeof createClient> | null = null
@@ -77,11 +78,33 @@ export async function POST(request: Request) {
     const uniqueSuffix = Date.now().toString().slice(-6)
     const filename = `${slug}-${uniqueSuffix}.${ext}`
 
+    // ✅ ছবি resize + compress করা (আপলোডের সময় একবারই হয়, কাস্টমারের রিকোয়েস্টে কোনো এক্সট্রা RAM/লোড লাগে না)
+    const rawBuffer = Buffer.from(await file.arrayBuffer())
+
+    let uploadBuffer: Buffer = rawBuffer
+    try {
+      let pipeline = sharp(rawBuffer).resize({
+        width: 1200,
+        withoutEnlargement: true,
+      })
+
+      if (file.type === "image/png") {
+        pipeline = pipeline.png({ quality: 80, compressionLevel: 9 })
+      } else if (file.type === "image/webp") {
+        pipeline = pipeline.webp({ quality: 80 })
+      } else {
+        pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true })
+      }
+
+      uploadBuffer = await pipeline.toBuffer()
+    } catch (err) {
+      console.error("Sharp resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:", err)
+    }
+
     // ✅ Supabase Storage-এ আপলোড করা (filesystem-এর বদলে)
-    const buffer = Buffer.from(await file.arrayBuffer())
     const { error: uploadError } = await getSupabase().storage
       .from(process.env.SUPABASE_BUCKET!)
-      .upload(filename, buffer, { contentType: file.type })
+      .upload(filename, uploadBuffer, { contentType: file.type })
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError)
