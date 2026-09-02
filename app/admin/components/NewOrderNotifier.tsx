@@ -87,9 +87,38 @@ export default function NewOrderNotifier() {
 
   useEffect(() => {
     checkNewOrders()
-    // ✅ push কাজ না করলেও (পারমিশন বন্ধ, ব্রাউজার সাপোর্ট না করলে) polling ব্যাকআপ হিসেবে থাকছে
-    const interval = setInterval(checkNewOrders, 15000)
-    return () => clearInterval(interval)
+
+    let interval: ReturnType<typeof setInterval> | null = null
+
+    // ✅ শুধু ট্যাব active/visible থাকলে polling চলবে, ব্যাকগ্রাউন্ডে পড়ে থাকলে বন্ধ — DB চাপ কমাতে
+    function startPolling() {
+      if (interval) return
+      interval = setInterval(checkNewOrders, 30000)
+    }
+
+    function stopPolling() {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        checkNewOrders()
+        startPolling()
+      } else {
+        stopPolling()
+      }
+    }
+
+    if (document.visibilityState === "visible") startPolling()
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      stopPolling()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
   }, [checkNewOrders])
 
   // ✅ Service Worker push event থেকে সরাসরি real-time আপডেট

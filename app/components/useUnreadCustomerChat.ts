@@ -25,7 +25,32 @@ export function useUnreadCustomerChat() {
 
   useEffect(() => {
     fetchUnread()
-    const poll = setInterval(fetchUnread, 30000)
+
+    let poll: ReturnType<typeof setInterval> | null = null
+
+    function startPolling() {
+      if (poll) return
+      poll = setInterval(fetchUnread, 45000)
+    }
+
+    function stopPolling() {
+      if (poll) {
+        clearInterval(poll)
+        poll = null
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        fetchUnread()
+        startPolling()
+      } else {
+        stopPolling()
+      }
+    }
+
+    if (document.visibilityState === "visible") startPolling()
+    document.addEventListener("visibilitychange", handleVisibilityChange)
 
     let ws: WebSocket | null = null
     try {
@@ -41,7 +66,8 @@ export function useUnreadCustomerChat() {
     }
 
     return () => {
-      clearInterval(poll)
+      stopPolling()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
       ws?.close()
     }
   }, [fetchUnread])

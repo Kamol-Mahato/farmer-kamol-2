@@ -4,6 +4,8 @@ import { siteConfig } from "@/lib/siteConfig";
 
 const BASE_URL = siteConfig.domain.url;
 
+export const revalidate = 3600; // ১ ঘণ্টা caching — প্রতিটা crawler hit-এ DB query হবে না, SEO-তে প্রভাব পড়বে না
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "daily" as const, priority: 1 },
