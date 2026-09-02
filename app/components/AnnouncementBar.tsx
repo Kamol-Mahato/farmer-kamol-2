@@ -14,8 +14,9 @@ export default function AnnouncementBar() {
   const [now, setNow] = useState(new Date())
   const [rotateIndex, setRotateIndex] = useState(0)
 
-  // ইনডেক্স ০ = পতাকা (২.৫ সে.), ১ = সময়, ২ = তারিখ, ৩ = ঋতু (প্রতিটা ৫ সে.)
-  const rotateDurations = [2500, 5000, 5000, 5000]
+  // ইনডেক্স ০ = পতাকা (২.৫ সে.), ১ = সময়, ২ = ইংরেজি তারিখ, ৩ = বাংলা তারিখ, ৪ = ঋতু (প্রতিটা ৫ সে.)
+  // বাংলা ভার্সনে ৫টি স্টেপ হবে, ইংরেজি ভার্সনে ৪টি স্টেপ হবে (কারণ সেখানে আলাদা বাংলা তারিখ নেই)
+  const rotateDurations = locale === "en" ? [2500, 5000, 5000, 5000] : [2500, 5000, 5000, 5000, 5000]
 
   useEffect(() => {
     setMounted(true)
@@ -50,29 +51,39 @@ export default function AnnouncementBar() {
     year: "numeric",
   })
 
-  // বাংলা ভার্সনে ইংরেজি তারিখ কনভার্ট করার জন্য লোকাল ফরম্যাট (যেমন: ২ সেপ্টেম্বর, ২০২৬)
+  // বাংলা ভার্সনে ইংরেজি তারিখটি বাংলা হরফে দেখানোর জন্য ফরম্যাট
   const englishDateInBengali = now.toLocaleDateString("bn-BD", {
     day: "numeric",
     month: "long",
     year: "numeric",
   })
 
-  // বাংলা ভার্সনে মোবাইলের জন্য ছোট ইংরেজি তারিখ (যেমন: ২ সেপ্টে, ২০২৬)
   const englishDateInBengaliShort = now.toLocaleDateString("bn-BD", {
     day: "numeric",
     month: "short",
     year: "numeric",
   })
 
-  const itemsDesktop =
-    locale === "en"
-      ? [timeStr, englishDateStr, "Rainy Season"]
-      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ (${englishDateInBengali})`, `${bDate.ritu} কাল`]
+  // ইংরেজি ভার্সনের আইটেম লিস্ট (আগের মতোই ৩টি আইটেম)
+  const itemsDesktopEn = [timeStr, englishDateStr, "Rainy Season"]
+  const itemsMobileEn = [timeStr, englishDateShort, "Rainy Season"]
 
-  const itemsMobile =
-    locale === "en"
-      ? [timeStr, englishDateShort, "Rainy Season"]
-      : [timeStr, `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ\n(${englishDateInBengaliShort})`, `${bDate.ritu} কাল`]
+  // বাংলা ভার্সনের আইটেম লিস্ট (১ম: সময়, ২য়: ইংরেজি তারিখ, ৩য়: বাংলা তারিখ, ৪র্থ: ঋতু)
+  const itemsDesktopBn = [
+    timeStr, 
+    englishDateInBengali, 
+    `${bDate.dayBnOrdinal} ${bDate.month}, ${bDate.yearBn} বঙ্গাব্দ`, 
+    `${bDate.ritu} কাল`
+  ]
+  const itemsMobileBn = [
+    timeStr, 
+    englishDateInBengaliShort, 
+    `${bDate.dayBnOrdinal} ${bDate.month},\n${bDate.yearBn} বঙ্গাব্দ`, 
+    `${bDate.ritu} কাল`
+  ]
+
+  const itemsDesktop = locale === "en" ? itemsDesktopEn : itemsDesktopBn
+  const itemsMobile = locale === "en" ? itemsMobileEn : itemsMobileBn
 
   return (
     <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-xs md:text-sm font-bold z-[60] flex items-center h-8">
