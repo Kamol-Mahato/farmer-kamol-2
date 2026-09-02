@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { generateCustomId } from "@/lib/orderUtils"
+import { generateCustomId } from "@/lib/orderIdUtils"
 import { updateOrderStatus } from "@/lib/orderStatusClient"
 import { getAllowedNextStatuses, UserRole } from "@/lib/orderStatusRules"
 import PaymentConfirm from "./[id]/PaymentConfirm"
