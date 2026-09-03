@@ -71,7 +71,7 @@ function buildWhatsAppLink(productName: string) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
-function TopSellerCard({ product }: { product: Product }) {
+function TopSellerCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const pathname = usePathname()
   const locale = getLocaleFromPath(pathname)
   const [added, setAdded] = useState(false)
@@ -114,6 +114,7 @@ function TopSellerCard({ product }: { product: Product }) {
             fill
             sizes="(max-width: 768px) 65vw, 400px"
             className="object-cover group-hover:scale-135 transition duration-300"
+            priority={priority}
           />
           {savePercent !== null && !isOutOfStock && (
             <span className="absolute top-1.5 right-1.5 z-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-save-pop">
@@ -250,8 +251,8 @@ export default function TopSellerSection({ products }: { products: Product[] }) 
 
         {/* ✅ PC — আগের মতোই পাশাপাশি গ্রিড */}
         <div className="hidden md:grid md:grid-cols-2 gap-6">
-          {products.map((product) => (
-            <TopSellerCard key={product.id} product={product} />
+          {products.map((product, i) => (
+            <TopSellerCard key={product.id} product={product} priority={i === 0} />
           ))}
         </div>
 
@@ -261,9 +262,9 @@ export default function TopSellerSection({ products }: { products: Product[] }) 
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${mobileIndex * 100}%)` }}
           >
-            {products.map((product) => (
+            {products.map((product, i) => (
               <div key={product.id} className="w-full shrink-0">
-                <TopSellerCard product={product} />
+                <TopSellerCard product={product} priority={i === 0} />
               </div>
             ))}
           </div>

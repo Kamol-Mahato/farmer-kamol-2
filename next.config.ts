@@ -6,7 +6,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co;
+  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl;
   font-src 'self' data:;
   connect-src 'self' https://pvixtqqcegfbxkhxogww.supabase.co ${isDev ? "ws://localhost:* ws:" : ""};
   frame-src 'self' https://www.youtube.com https://youtube.com;
@@ -23,15 +23,8 @@ const nextConfig = {
   allowedDevOrigins: ['3000-firebase-farmer-kamolgit-1781445602919.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev'],
   poweredByHeader: false,
   images: {
-    unoptimized: true, // Render free-এ sharp optimizer ভারী, তাই আপাতত true রাখুন
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'pvixtqqcegfbxkhxogww.supabase.co',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    loader: 'custom',
+    loaderFile: './lib/imageLoader.ts', // Render-এর বদলে images.weserv.nl দিয়ে resize/WebP হবে — সার্ভারে কোনো লোড নেই
     minimumCacheTTL: 86400, // ২৪ ঘণ্টা image cache
   },
   async headers() {
