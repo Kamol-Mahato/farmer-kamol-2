@@ -41,6 +41,19 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
+      {
+        // ✅ পুরনো uploads ও static tool ফাইলগুলো ব্রাউজারে ১ বছর cache থাকবে (Lighthouse: efficient cache lifetimes)
+        source: '/uploads/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/tools/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ]
   },
 };

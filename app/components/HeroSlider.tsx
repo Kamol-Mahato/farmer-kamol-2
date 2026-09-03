@@ -248,8 +248,12 @@ type MobileQueueItem =
               <p className="text-green-300 text-sm">কোনো ফিচার্ড পণ্য নেই</p>
             </div>
           ) : (
-            featuredProducts.map((p, i) =>
-              renderProductSlide(p, p.id, `transition-opacity duration-700 ${pcProductIndex === i ? "opacity-100" : "opacity-0"}`, i === 0)
+            // ✅ শুধু বর্তমানে visible প্রোডাক্টটাই mount হবে — বাকিগুলো আর ব্যাকগ্রাউন্ডে প্রিলোড হবে না (Lighthouse: image delivery ফিক্স)
+            renderProductSlide(
+              featuredProducts[pcProductIndex],
+              featuredProducts[pcProductIndex].id,
+              "opacity-100 animate-fadeIn",
+              pcProductIndex === 0
             )
           )}
           {featuredProducts.length > 1 && (
