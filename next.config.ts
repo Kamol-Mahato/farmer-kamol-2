@@ -4,11 +4,11 @@ const isDev = process.env.NODE_ENV !== "production"
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""};
+  script-src 'self' 'unsafe-inline' https://googletagmanager.com https://google-analytics.com ${isDev ? "'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl;
+  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl https://google-analytics.com https://googletagmanager.com;
   font-src 'self' data:;
-  connect-src 'self' https://pvixtqqcegfbxkhxogww.supabase.co ${isDev ? "ws://localhost:* ws:" : ""};
+  connect-src 'self' https://pvixtqqcegfbxkhxogww.supabase.co https://google-analytics.com https://doubleclick.net ${isDev ? "ws://localhost:* ws:" : ""};
   frame-src 'self' https://www.youtube.com https://youtube.com;
   media-src 'self' blob:;
   worker-src 'self' blob:;
