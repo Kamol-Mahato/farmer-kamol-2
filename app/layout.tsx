@@ -61,15 +61,19 @@ export default async function RootLayout({
 
   return (
     <html lang={lang}>
+      <head>
+        <link rel="preconnect" href="https://images.weserv.nl" />
+        <link rel="preconnect" href="https://pvixtqqcegfbxkhxogww.supabase.co" crossOrigin="anonymous" />
+      </head>
       <body className={`${hindSiliguri.variable} ${hindSiliguri.className} antialiased bg-gray-50 flex flex-col min-h-screen`}>
       <OrganizationSchema lang={lang} />
         <Suspense fallback={null}>
           <TopLoadingBar />
         </Suspense>
-        <EnterKeyNav />
+       <EnterKeyNav />
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* গুগল অ্যানালিটিক্স কম্পোনেন্ট */}
-        <GoogleAnalytics gaId={siteConfig.analytics.gaId || 'G-8ZRHT134HL'} />
+        <GoogleAnalytics gaId="G-7Z6956LM2H" />
       </body>
     </html>
   )
