@@ -1,6 +1,7 @@
 "use client"
 import { usePathname } from "next/navigation"
 import { getLocaleFromPath } from "@/lib/i18n"
+import { sendGAEvent } from '@next/third-parties/google'
 
 export default function FloatingWhatsAppButton() {
   const pathname = usePathname()
@@ -14,6 +15,7 @@ export default function FloatingWhatsAppButton() {
         rel="noopener noreferrer"
         aria-label={locale === "en" ? "Contact us on WhatsApp" : "WhatsApp-এ যোগাযোগ করুন"}
         className="wa-float-btn fixed right-4 bottom-20 md:bottom-6 z-[60] bg-[#25D366] hover:bg-[#1ebe57] hover:scale-110 text-white w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200"
+        onClick={() => sendGAEvent({ event: 'whatsapp_click', value: 'floating_button' })}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

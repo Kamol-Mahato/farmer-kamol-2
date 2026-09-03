@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
 import { getSavePercent } from "@/lib/pricing"
+import { sendGAEvent } from '@next/third-parties/google'
 
 type Product = {
   id: number
@@ -123,7 +124,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
     return () => imgObserver.disconnect()
   }, [])
 
-  function handleAddToCart() {
+ function handleAddToCart() {
     // ✅ key: "farmer_kamol_cart" — সব জায়গায় একই
     const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]")
     const existing = cart.find((i: { id: number }) => i.id === product.id)
@@ -144,6 +145,20 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
     localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart))
     // ✅ custom event — same tab-এও কাজ করবে
     window.dispatchEvent(new CustomEvent("cartUpdated"))
+
+    // 📊 GA4 Add to Cart Tracking
+    sendGAEvent({
+      event: 'add_to_cart',
+      value: product.name,
+      ecommerce: {
+        items: [{
+          item_id: String(product.id),
+          item_name: product.name,
+          price: savePercent !== null ? product.discountPrice : product.pricePerUnit,
+          quantity: 1
+        }]
+      }
+    })
 
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -248,6 +263,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
             href={buildWhatsAppLink(product.name)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => sendGAEvent({ event: 'whatsapp_product_click', value: product.name })}
             className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-500 active:scale-95 transition"
           >
             💬 WhatsApp এ যোগাযোগ করুন
@@ -270,6 +286,7 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
             <Link
               ref={btnRef}
               href={isOutOfStock ? "#" : localizeHref(`/order?productId=${product.id}`, locale)}
+              onClick={() => sendGAEvent({ event: 'begin_checkout_click', value: product.name })}
               className={`flex-1 py-2 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap flex items-center justify-center text-center transition ${
                 isOutOfStock
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
