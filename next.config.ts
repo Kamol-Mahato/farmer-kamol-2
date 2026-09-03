@@ -7,9 +7,9 @@ const cspHeader = `
   script-src 'self' 'unsafe-inline' https://googletagmanager.com https://google-analytics.com ${isDev ? "'unsafe-eval'" : ""};
   script-src-elem 'self' 'unsafe-inline' https://googletagmanager.com https://google-analytics.com https://*.google-analytics.com;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://supabase.co https://weserv.nl https://google-analytics.com https://googletagmanager.com https://*.google-analytics.com;
+  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl https://google-analytics.com https://googletagmanager.com https://*.google-analytics.com;
   font-src 'self' data:;
-  connect-src 'self' https://supabase.co https://google-analytics.com https://*.google-analytics.com https://doubleclick.net ${isDev ? "ws://localhost:* ws:" : ""};
+  connect-src 'self' https://pvixtqqcegfbxkhxogww.supabase.co https://google-analytics.com https://*.google-analytics.com https://doubleclick.net ${isDev ? "ws://localhost:* ws:" : ""};
   frame-src 'self' https://youtube.com https://youtube.com;
   media-src 'self' blob:;
   worker-src 'self' blob:;
