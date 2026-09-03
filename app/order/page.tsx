@@ -6,6 +6,7 @@ import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
 import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
 import { normalizePhone, isValidBDPhone } from "@/lib/phone"
 import { siteConfig } from "@/lib/siteConfig"
+import { sendGAEvent } from '@next/third-parties/google'
 
 interface ProductData {
   name: string
@@ -293,12 +294,31 @@ const deliveryCharge = deliverySettings.mode === "FREE"
           trxId: form.paymentMethod === "GATEWAY" ? form.trxId.trim() : null,
         }),
       })
-      const data = await res.json()
+     const data = await res.json()
       if (!res.ok) {
         setError(data.error || "সমস্যা হয়েছে")
         setLoading(false)
         return
       }
+
+     // 📊 GA4 Purchase Tracking (অর্ডার সফল হলে ট্র্যাকিং)
+      if (product) {
+        sendGAEvent({
+          event: 'purchase',
+          ecommerce: {
+            transaction_id: data.orderId || String(Date.now()), 
+            value: totalPrice + deliveryCharge,
+            currency: 'BDT',
+            items: [{
+              item_id: String(productId || "0"),
+              item_name: product.name,
+              price: product.pricePerUnit,
+              quantity: Number(form.quantity) || 1
+            }]
+          }
+        })
+      }
+
       setSuccess(true)
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch {
