@@ -5,6 +5,24 @@ import Link from "next/link"
 import Image from "next/image"
 import { siteConfig } from "@/lib/siteConfig"
 
+const galleryImages = [
+  {
+    src: "/uploads/header-1st-about.jpg",
+    alt: "Farmer Kamol খামার — সারইল গ্রামের মাঠ",
+    caption: "খামারের মাঠ",
+  },
+  {
+    src: "/uploads/header-2nd-about.jpg",
+    alt: "Farmer Kamol — পশুপালন ও প্রাকৃতিক পরিবেশ",
+    caption: "পশু ও প্রকৃতি",
+  },
+  {
+    src: "/uploads/header-3rd-about.jpg",
+    alt: "Farmer Kamol — ফসল ও সমন্বিত কৃষি",
+    caption: "ফসলের মাঠ",
+  },
+]
+
 const pillars = [
   {
     id: 1,
@@ -58,7 +76,7 @@ export default function AboutPage() {
 
   return (
     <main className="bg-[#F6F1E7] min-h-screen text-[#241C15]">
-      {/* ===== HERO — একটামাত্র শক্তিশালী ছবি, কোনো এলোমেলো গ্রিড নেই ===== */}
+      {/* ===== HERO ===== */}
       <section className="relative overflow-hidden bg-[#2E2118] text-white">
         <div className="absolute inset-0">
           <Image
@@ -67,24 +85,26 @@ export default function AboutPage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-45 scale-105"
+            className="object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2E2118] via-[#2E2118]/70 to-[#2E2118]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2E2118] via-[#2E2118]/75 to-[#2E2118]/45" />
           <div
-            className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
+            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
             style={{
-              backgroundImage:
-                "radial-gradient(circle, #F6F1E7 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle, #F6F1E7 1px, transparent 1px)",
               backgroundSize: "22px 22px",
             }}
           />
         </div>
 
-        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.15] mb-6 text-balance">
+        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-16 pb-14 sm:pt-24 sm:pb-20 text-center">
+          <p className="text-[#D9A441] text-sm font-semibold tracking-wide mb-3">
+            {siteConfig.brand.founderName} · {siteConfig.brand.founderNameBn}
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.2] mb-4 text-balance">
             মাটির মানুষের গল্প
-            <span className="block w-16 h-1 bg-[#D9A441] rounded-full mx-auto mt-5" />
           </h1>
+          <span className="block w-14 h-1 bg-[#D9A441] rounded-full mx-auto mb-5" />
           <p className="text-[#E8DFCF] text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
             {siteConfig.brand.slogan} — সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রাম থেকে খাঁটি প্রাকৃতিক পণ্য,
             কোনো মধ্যস্থতাকারী ছাড়া।
@@ -92,8 +112,56 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ===== FOUNDER STORY — এই পেজের প্রাণকেন্দ্র ===== */}
-      <section className="max-w-4xl mx-auto px-4 py-16 sm:py-24">
+      {/* ===== IMAGE GALLERY — Desktop hover + Mobile swipe ===== */}
+      <section className="max-w-5xl mx-auto px-4 -mt-6 sm:-mt-8 relative z-20">
+        {/* Desktop Grid */}
+        <div className="hidden md:grid grid-cols-3 gap-4">
+          {galleryImages.map((img) => (
+            <div
+              key={img.src}
+              className="group relative rounded-xl overflow-hidden aspect-[4/3] shadow-[0_8px_30px_rgba(46,33,24,0.12)]"
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                sizes="(max-width: 1024px) 33vw, 320px"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2E2118]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                <p className="text-white text-sm font-semibold tracking-wide">{img.caption}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile Snap Slider */}
+        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-3 pb-1 -mx-1 px-1 scrollbar-hide">
+          {galleryImages.map((img) => (
+            <div
+              key={img.src}
+              className="snap-start shrink-0 w-[82%] rounded-xl overflow-hidden aspect-[4/3] relative shadow-md"
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                sizes="82vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2E2118]/70 via-transparent to-transparent" />
+              <p className="absolute bottom-3 left-3 text-white text-sm font-semibold drop-shadow">
+                {img.caption}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className="md:hidden text-center text-xs text-[#5A4A3A]/70 mt-2">← সোয়াইপ করুন →</p>
+      </section>
+
+      {/* ===== FOUNDER STORY ===== */}
+      <section className="max-w-4xl mx-auto px-4 py-14 sm:py-20">
         <div className="flex flex-col md:flex-row gap-10 md:gap-14 items-start">
           <div className="w-full md:w-[240px] shrink-0 mx-auto md:mx-0 group">
             <div className="relative w-40 h-40 sm:w-52 sm:h-52 md:w-full md:h-64 mx-auto rounded-full md:rounded-2xl overflow-hidden ring-4 ring-[#F6F1E7] shadow-[0_8px_30px_rgba(46,33,24,0.15)]">
@@ -106,7 +174,7 @@ export default function AboutPage() {
               />
             </div>
             <div className="text-center md:text-left mt-4">
-              <p className="font-bold text-lg">{siteConfig.brand.founderNameBn}</p>
+              <p className="font-bold text-lg text-[#2E2118]">{siteConfig.brand.founderNameBn}</p>
               <p className="text-sm text-[#5A4A3A]">প্রতিষ্ঠাতা, {siteConfig.brand.name}</p>
               <p className="text-sm text-[#5A4A3A] mt-1">
                 {siteConfig.address.village}, {siteConfig.address.locality}, {siteConfig.address.region}
@@ -117,14 +185,14 @@ export default function AboutPage() {
           <div className="flex-1">
             <p className="relative text-xl sm:text-2xl font-semibold leading-snug mb-6 text-[#2E2118] pl-6">
               <span className="absolute left-0 top-0 text-4xl sm:text-5xl leading-none text-[#D9A441] font-bold select-none">
-                &ldquo;
+                “
               </span>
               আমি কমল। বাংলা সাহিত্যে স্নাতক করেছি, কিন্তু আমার আসল পরিচয় বইয়ের পাতায় নয় —
               সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রামের মাটিতে।
             </p>
             <div className="space-y-4 text-[#4A3B2C] leading-relaxed text-[15px] sm:text-base">
               <p>
-                নিজেকে বলি <span className="font-semibold text-[#2E2118]">&quot;মাটির মানুষ&quot;</span> —
+                নিজেকে বলি <span className="font-semibold text-[#2E2118]">“মাটির মানুষ”</span> —
                 ঢাকায় চাকরি করলেও শিকড় থেকে যায় গ্রামের মাঠে, খামারে।
               </p>
               <p>
@@ -142,7 +210,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* মিশন ও ভিশন — পরিষ্কার, সাজানো টাইপোগ্রাফি, কোনো ইমোজি বা রঙিন বক্স ছাড়াই */}
+        {/* Mission & Vision */}
         <div className="mt-14 sm:mt-16 grid sm:grid-cols-2 gap-10 sm:gap-0 sm:divide-x sm:divide-[#D9CBB4] border-t border-[#D9CBB4] pt-10">
           <div className="sm:pr-10">
             <h2 className="text-sm font-bold tracking-wide text-[#A15C38] mb-3">মিশন</h2>
@@ -163,7 +231,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ===== সমন্বিত কৃষির চক্র (PILLARS) ===== */}
+      {/* ===== PILLARS ===== */}
       <section className="bg-white border-y border-[#E9E0CE]">
         <div className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
           <div className="mb-12 max-w-xl">
@@ -225,7 +293,6 @@ export default function AboutPage() {
                     </div>
                   </div>
 
-                  {/* চক্রের সংযোগ চিহ্ন — শেষ আইটেম বাদে প্রতিটির নিচে */}
                   {idx < pillars.length - 1 && (
                     <div className="flex justify-center -mt-3 mb-3">
                       <span className="w-8 h-8 rounded-full bg-[#F6F1E7] border border-[#E9E0CE] flex items-center justify-center text-[#A15C38] text-sm">
@@ -236,7 +303,7 @@ export default function AboutPage() {
                 </article>
               )
             })}
-            {/* চক্র সম্পূর্ণ হওয়ার ইঙ্গিত — মাটি আবার ফসলে ফিরে যায় */}
+
             <div className="flex items-center justify-center gap-2 pt-2 text-sm text-[#5A4A3A]">
               <span className="text-[#A15C38]">↺</span>
               <span>মাটি আবার নতুন ফসলে ফিরে যায় — চক্র সম্পূর্ণ হয়</span>
