@@ -107,12 +107,9 @@ export default function AboutPage() {
             </div>
             <div className="text-center md:text-left mt-4">
               <p className="font-bold text-lg">{siteConfig.brand.founderNameBn}</p>
-              <p className="text-sm text-[#5A4A3A]">
-                প্রতিষ্ঠাতা, {siteConfig.brand.name}
-              </p>
+              <p className="text-sm text-[#5A4A3A]">প্রতিষ্ঠাতা, {siteConfig.brand.name}</p>
               <p className="text-sm text-[#5A4A3A] mt-1">
-                {siteConfig.address.village}, {siteConfig.address.locality},{" "}
-                {siteConfig.address.region}
+                {siteConfig.address.village}, {siteConfig.address.locality}, {siteConfig.address.region}
               </p>
             </div>
           </div>
@@ -148,18 +145,14 @@ export default function AboutPage() {
         {/* মিশন ও ভিশন — পরিষ্কার, সাজানো টাইপোগ্রাফি, কোনো ইমোজি বা রঙিন বক্স ছাড়াই */}
         <div className="mt-14 sm:mt-16 grid sm:grid-cols-2 gap-10 sm:gap-0 sm:divide-x sm:divide-[#D9CBB4] border-t border-[#D9CBB4] pt-10">
           <div className="sm:pr-10">
-            <h2 className="text-sm font-bold tracking-wide text-[#A15C38] mb-3">
-              মিশন
-            </h2>
+            <h2 className="text-sm font-bold tracking-wide text-[#A15C38] mb-3">মিশন</h2>
             <p className="text-[#4A3B2C] leading-relaxed text-[15px]">
               খাঁটি, ভেজালমুক্ত ও স্বচ্ছ প্রক্রিয়ায় উৎপাদিত প্রাকৃতিক খাদ্যপণ্য সরাসরি কৃষকের ঘর থেকে
               বাংলাদেশের প্রতিটি ঘরে পৌঁছে দেওয়া।
             </p>
           </div>
           <div className="sm:pl-10">
-            <h2 className="text-sm font-bold tracking-wide text-[#A15C38] mb-3">
-              ভিশন
-            </h2>
+            <h2 className="text-sm font-bold tracking-wide text-[#A15C38] mb-3">ভিশন</h2>
             <ul className="text-[#4A3B2C] leading-relaxed text-[15px] space-y-2">
               <li>কৃষকের জন্য নির্ভরযোগ্য বাজার গড়ে তোলা</li>
               <li>ভেজালের বিরুদ্ধে প্রতিরোধ গড়া</li>
@@ -174,9 +167,7 @@ export default function AboutPage() {
       <section className="bg-white border-y border-[#E9E0CE]">
         <div className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
           <div className="mb-12 max-w-xl">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#2E2118] mb-3">
-              আমাদের কাজের ভিত্তি
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#2E2118] mb-3">আমাদের কাজের ভিত্তি</h2>
             <p className="text-[#5A4A3A] text-[15px] leading-relaxed">
               ফসল, পশু আর মাটি — এই তিনটে একে অপরের সাথে জড়িয়ে একটা চক্র তৈরি করে। একটির বর্জ্য
               আরেকটির খাদ্য, আর সেই চক্রই আমাদের খামারের ভিত্তি।
@@ -186,7 +177,6 @@ export default function AboutPage() {
           <div className="flex flex-col gap-6">
             {pillars.map((p, idx) => {
               const isOpen = openId === p.id
-
               return (
                 <article key={p.id} className="relative">
                   <div className="flex flex-col md:flex-row gap-6 md:gap-8 border-b border-[#E9E0CE] pb-8 last:border-b-0">
@@ -204,20 +194,12 @@ export default function AboutPage() {
                       <span className="text-xs font-bold text-[#A15C38] tracking-wide">
                         {String(idx + 1).padStart(2, "0")}
                       </span>
-
-                      <h3 className="text-xl font-bold text-[#2E2118] mt-1 mb-2">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4A3B2C] leading-relaxed text-[15px]">
-                        {p.preview}
-                      </p>
+                      <h3 className="text-xl font-bold text-[#2E2118] mt-1 mb-2">{p.title}</h3>
+                      <p className="text-[#4A3B2C] leading-relaxed text-[15px]">{p.preview}</p>
 
                       <div
                         className={`overflow-hidden transition-all duration-300 ${
-                          isOpen
-                            ? "max-h-[500px] opacity-100 mt-4"
-                            : "max-h-0 opacity-0"
+                          isOpen ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"
                         }`}
                       >
                         <ul className="space-y-2 text-sm text-[#4A3B2C]">
@@ -228,7 +210,6 @@ export default function AboutPage() {
                             </li>
                           ))}
                         </ul>
-
                         <p className="mt-4 text-sm font-medium text-[#2E2118] border-l-2 border-[#A15C38] pl-4">
                           {p.quote}
                         </p>
@@ -255,7 +236,6 @@ export default function AboutPage() {
                 </article>
               )
             })}
-
             {/* চক্র সম্পূর্ণ হওয়ার ইঙ্গিত — মাটি আবার ফসলে ফিরে যায় */}
             <div className="flex items-center justify-center gap-2 pt-2 text-sm text-[#5A4A3A]">
               <span className="text-[#A15C38]">↺</span>
@@ -270,25 +250,17 @@ export default function AboutPage() {
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
-            backgroundImage:
-              "radial-gradient(circle, #F6F1E7 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, #F6F1E7 1px, transparent 1px)",
             backgroundSize: "22px 22px",
           }}
         />
-
         <div className="relative max-w-3xl mx-auto px-4 py-16 sm:py-20 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">
-            স্বচ্ছতাই আমাদের বিশ্বাস
-          </h2>
-
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">স্বচ্ছতাই আমাদের বিশ্বাস</h2>
           <p className="text-[#D9CBB4] text-sm sm:text-base leading-relaxed mb-8 max-w-xl mx-auto">
             প্রতিটি পণ্যের উৎপাদন প্রক্রিয়া আমরা YouTube চ্যানেল{" "}
-            <span className="text-[#D9A441] font-semibold">
-              {siteConfig.brand.youtubeHandle}
-            </span>
-            -এ ভিডিওর মাধ্যমে দেখাই — দেখে নিশ্চিত হয়ে কিনুন।
+            <span className="text-[#D9A441] font-semibold">{siteConfig.brand.youtubeHandle}</span>-এ
+            ভিডিওর মাধ্যমে দেখাই — দেখে নিশ্চিত হয়ে কিনুন।
           </p>
-
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
               href={siteConfig.social.youtube}
@@ -298,7 +270,6 @@ export default function AboutPage() {
             >
               YouTube চ্যানেল দেখুন
             </a>
-
             <Link
               href="/media/video"
               className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white font-semibold px-6 py-3 rounded-full text-sm transition"
@@ -312,32 +283,24 @@ export default function AboutPage() {
       {/* ===== FINAL CTA ===== */}
       <section className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
         <div className="bg-white border border-[#E9E0CE] rounded-2xl px-6 py-12 sm:py-14 text-center shadow-[0_10px_40px_rgba(46,33,24,0.06)]">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#2E2118] mb-3">
-            খামারের স্বাদ আপনার টেবিলে
-          </h2>
-
+          <h2 className="text-xl sm:text-2xl font-bold text-[#2E2118] mb-3">খামারের স্বাদ আপনার টেবিলে</h2>
           <p className="text-[#5A4A3A] text-sm sm:text-base mb-8">
             খাঁটি মধু, ঘি, সরিষার তেল — সরাসরি অর্ডার করুন অথবা যোগাযোগ করুন।
           </p>
-
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/shop"
               className="group bg-[#2E2118] hover:bg-[#241C15] text-white font-bold px-6 py-3 rounded-full text-sm transition inline-flex items-center gap-2"
             >
               পণ্য দেখুন
-              <span className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
-
             <Link
               href="/contact"
               className="border border-[#2E2118] text-[#2E2118] hover:bg-[#2E2118] hover:text-white font-bold px-6 py-3 rounded-full text-sm transition"
             >
               যোগাযোগ
             </Link>
-
             <a
               href={`https://wa.me/${siteConfig.contact.whatsapp}`}
               target="_blank"
