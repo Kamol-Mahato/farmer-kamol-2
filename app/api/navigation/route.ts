@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const menus = await prisma.navigationMenu.findMany({
@@ -12,11 +12,11 @@ export async function GET() {
         include: {
           subMenus: {
             where: { isVisible: true },
-            orderBy: { displayOrder: "asc" }
-          }
-        }
-      }
-    }
-  })
-  return NextResponse.json(menus)
+            orderBy: { displayOrder: "asc" },
+          },
+        },
+      },
+    },
+  });
+  return NextResponse.json(menus);
 }

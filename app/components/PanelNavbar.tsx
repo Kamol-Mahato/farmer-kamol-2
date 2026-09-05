@@ -1,7 +1,7 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 function getMobileTitle(pathname: string): string {
   const map: { prefix: string; title: string }[] = [
@@ -14,9 +14,9 @@ function getMobileTitle(pathname: string): string {
     { prefix: "/agent/orders", title: "আমার অর্ডার সমূহ" },
     { prefix: "/agent/customers", title: "কাস্টমার" },
     { prefix: "/agent", title: "ড্যাশবোর্ড" },
-  ]
-  const match = map.find((m) => pathname.startsWith(m.prefix))
-  return match ? match.title : ""
+  ];
+  const match = map.find((m) => pathname.startsWith(m.prefix));
+  return match ? match.title : "";
 }
 
 export default function PanelNavbar({
@@ -28,19 +28,22 @@ export default function PanelNavbar({
     { label: "Admin Products", href: "/admin/products" },
   ],
 }: {
-  rightSlot: React.ReactNode
-  leftSlot?: React.ReactNode
-  homeHref?: string
-  navLinks?: { label: React.ReactNode; href: string }[]
+  rightSlot: React.ReactNode;
+  leftSlot?: React.ReactNode;
+  homeHref?: string;
+  navLinks?: { label: React.ReactNode; href: string }[];
 }) {
-  const pathname = usePathname()
-  const mobileTitle = getMobileTitle(pathname || "")
+  const pathname = usePathname();
+  const mobileTitle = getMobileTitle(pathname || "");
   return (
     <nav className="sticky top-0 z-[60] w-full bg-green-800 text-white py-1.5 px-3 md:px-4 shadow-md">
       {/* full width — no max-w-7xl so desktop-site / wide view has no empty right gap */}
       <div className="w-full flex items-center gap-2 md:gap-3">
         {leftSlot}
-        <Link href={homeHref} className="flex items-center gap-2 md:gap-3 shrink-0">
+        <Link
+          href={homeHref}
+          className="flex items-center gap-2 md:gap-3 shrink-0"
+        >
           <Image
             src="/uploads/kamol.png"
             alt="Farmer Kamol"
@@ -60,7 +63,9 @@ export default function PanelNavbar({
 
         {mobileTitle && (
           <div className="flex md:hidden flex-1 justify-center min-w-0">
-            <span className="text-sm font-bold text-white truncate">{mobileTitle}</span>
+            <span className="text-sm font-bold text-white truncate">
+              {mobileTitle}
+            </span>
           </div>
         )}
 
@@ -81,5 +86,5 @@ export default function PanelNavbar({
         </div>
       </div>
     </nav>
-  )
+  );
 }

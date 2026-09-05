@@ -1,192 +1,249 @@
-"use client"
-import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { getSavePercent } from "@/lib/pricing"
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { getSavePercent } from "@/lib/pricing";
 
 type Product = {
-  id: number
-  name: string
-  slug: string
-  pricePerUnit: number
-  discountPrice: number | null
-  unit: string
-  images: { imageUrl: string; isPrimary: boolean }[]
-}
+  id: number;
+  name: string;
+  slug: string;
+  pricePerUnit: number;
+  discountPrice: number | null;
+  unit: string;
+  images: { imageUrl: string; isPrimary: boolean }[];
+};
 
 type HeroVideo = {
-  id: number
-  youtubeUrl: string
-}
+  id: number;
+  youtubeUrl: string;
+};
 
 interface YTMessage {
-  event?: string
-  info?: number
+  event?: string;
+  info?: number;
 }
 
 // ✅ যেকোনো ফরম্যাটের YouTube লিংক থেকে সঠিক embed URL বানানো (jsapi enabled — ভিডিও শেষ হওয়া detect করার জন্য)
 function toYoutubeEmbedUrl(url: string) {
-  const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/)
-  const videoId = match ? match[1] : null
-  if (!videoId) return null
-  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0`
+  const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
+  const videoId = match ? match[1] : null;
+  if (!videoId) return null;
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0`;
 }
 
 // ✅ iframe লোড হওয়ার পর YouTube-কে "onStateChange" ইভেন্ট পাঠাতে বলা (postMessage API)
 function startListening(iframe: HTMLIFrameElement | null) {
-  if (!iframe || !iframe.contentWindow) return
-  iframe.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*")
-  iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "addEventListener", args: ["onStateChange"] }), "*")
+  if (!iframe || !iframe.contentWindow) return;
+  iframe.contentWindow.postMessage(
+    JSON.stringify({ event: "listening", id: 1 }),
+    "*",
+  );
+  iframe.contentWindow.postMessage(
+    JSON.stringify({
+      event: "command",
+      func: "addEventListener",
+      args: ["onStateChange"],
+    }),
+    "*",
+  );
 }
 
 type MobileQueueItem =
-  | { kind: "video"; videoIdx: number }
-  | { kind: "product"; productIdx: number }
+  { kind: "video"; videoIdx: number } | { kind: "product"; productIdx: number };
 
-  export default function HeroSlider({
-    featuredProducts = [],
-    heroVideos = [],
-  }: {
-    featuredProducts?: Product[]
-    heroVideos?: HeroVideo[]
-  }) {
-    // ===== ভিডিও লোড একটু দেরি করে শুরু হবে, যাতে প্রথমে ছবি/টেক্সট দ্রুত দেখা যায় (Speed Index ফিক্স) =====
-        const [videoReady, setVideoReady] = useState(false)
-    useEffect(() => {
-      const t = setTimeout(() => setVideoReady(true), 500)
-      return () => clearTimeout(t)
-    }, [])
-    // ===== PC: ভিডিও ও প্রোডাক্ট আলাদা আলাদাভাবে চলবে =====
-    const [pcVideoIndex, setPcVideoIndex] = useState(0)
-    const [pcProductIndex, setPcProductIndex] = useState(0)
-    const pcIframeRef = useRef<HTMLIFrameElement>(null)
-    const [pcMuted, setPcMuted] = useState(true)
+export default function HeroSlider({
+  featuredProducts = [],
+  heroVideos = [],
+}: {
+  featuredProducts?: Product[];
+  heroVideos?: HeroVideo[];
+}) {
+  // ===== ভিডিও লোড একটু দেরি করে শুরু হবে, যাতে প্রথমে ছবি/টেক্সট দ্রুত দেখা যায় (Speed Index ফিক্স) =====
+  const [videoReady, setVideoReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVideoReady(true), 500);
+    return () => clearTimeout(t);
+  }, []);
+  // ===== PC: ভিডিও ও প্রোডাক্ট আলাদা আলাদাভাবে চলবে =====
+  const [pcVideoIndex, setPcVideoIndex] = useState(0);
+  const [pcProductIndex, setPcProductIndex] = useState(0);
+  const pcIframeRef = useRef<HTMLIFrameElement>(null);
+  const [pcMuted, setPcMuted] = useState(true);
 
   // ===== Mobile: ভিডিও + প্রোডাক্ট মিলিয়ে একটাই queue =====
-  const [mobileQueueIndex, setMobileQueueIndex] = useState(0)
-  const mobileIframeRef = useRef<HTMLIFrameElement>(null)
-  const [mobileMuted, setMobileMuted] = useState(true)
+  const [mobileQueueIndex, setMobileQueueIndex] = useState(0);
+  const mobileIframeRef = useRef<HTMLIFrameElement>(null);
+  const [mobileMuted, setMobileMuted] = useState(true);
 
-  const hasVideos = heroVideos.length > 0
+  const hasVideos = heroVideos.length > 0;
 
   // Mobile queue বানানো: ভিডিও ১ → সব প্রোডাক্ট → ভিডিও ২ → সব প্রোডাক্ট → ...
-  const mobileQueue: MobileQueueItem[] = []
+  const mobileQueue: MobileQueueItem[] = [];
   if (hasVideos) {
     heroVideos.forEach((_, vIdx) => {
-      mobileQueue.push({ kind: "video", videoIdx: vIdx })
+      mobileQueue.push({ kind: "video", videoIdx: vIdx });
       featuredProducts.forEach((_, pIdx) => {
-        mobileQueue.push({ kind: "product", productIdx: pIdx })
-      })
-    })
+        mobileQueue.push({ kind: "product", productIdx: pIdx });
+      });
+    });
   } else {
-    featuredProducts.forEach((_, pIdx) => mobileQueue.push({ kind: "product", productIdx: pIdx }))
+    featuredProducts.forEach((_, pIdx) =>
+      mobileQueue.push({ kind: "product", productIdx: pIdx }),
+    );
   }
-  const mobileTotal = mobileQueue.length || 1
-  const safeMobileIndex = mobileQueueIndex % mobileTotal
-  const currentMobileItem = mobileQueue[safeMobileIndex]
+  const mobileTotal = mobileQueue.length || 1;
+  const safeMobileIndex = mobileQueueIndex % mobileTotal;
+  const currentMobileItem = mobileQueue[safeMobileIndex];
 
   // ===== PC: প্রোডাক্ট অটো-স্লাইড (২.৫ সেকেন্ড পরপর) =====
   useEffect(() => {
-    if (featuredProducts.length === 0) return
+    if (featuredProducts.length === 0) return;
     const timer = setInterval(() => {
-      setPcProductIndex(prev => (prev + 1) % featuredProducts.length)
-    }, 2500)
-    return () => clearInterval(timer)
-  }, [featuredProducts.length])
+      setPcProductIndex((prev) => (prev + 1) % featuredProducts.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [featuredProducts.length]);
 
   // ===== Mobile: প্রোডাক্ট আইটেমে থাকলে ২ সেকেন্ড পর পরের আইটেমে যাওয়া =====
   useEffect(() => {
-    if (!currentMobileItem || currentMobileItem.kind !== "product") return
+    if (!currentMobileItem || currentMobileItem.kind !== "product") return;
     const timer = setTimeout(() => {
-      setMobileQueueIndex(prev => (prev + 1) % mobileTotal)
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [safeMobileIndex, currentMobileItem, mobileTotal])
+      setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [safeMobileIndex, currentMobileItem, mobileTotal]);
 
   // ===== YouTube "ভিডিও শেষ" ইভেন্ট শোনা (PC ও Mobile দুই জায়গার জন্য) =====
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
-      if (e.origin !== "https://www.youtube.com") return
-      let data: YTMessage
+      if (e.origin !== "https://www.youtube.com") return;
+      let data: YTMessage;
       try {
-        data = JSON.parse(e.data) as YTMessage
+        data = JSON.parse(e.data) as YTMessage;
       } catch {
-        return
+        return;
       }
-      if (data.event !== "onStateChange" || data.info !== 0) return // info === 0 মানে ভিডিও শেষ
+      if (data.event !== "onStateChange" || data.info !== 0) return; // info === 0 মানে ভিডিও শেষ
       if (e.source === pcIframeRef.current?.contentWindow) {
-        setPcVideoIndex(prev => (prev + 1) % (heroVideos.length || 1))
+        setPcVideoIndex((prev) => (prev + 1) % (heroVideos.length || 1));
       }
       if (e.source === mobileIframeRef.current?.contentWindow) {
-        setMobileQueueIndex(prev => (prev + 1) % mobileTotal)
+        setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
       }
     }
-    window.addEventListener("message", handleMessage)
-    return () => window.removeEventListener("message", handleMessage)
-  }, [heroVideos.length, mobileTotal])
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [heroVideos.length, mobileTotal]);
 
-    function togglePcMute() {
-    const iframe = pcIframeRef.current
-    if (!iframe?.contentWindow) return
-    const nextMuted = !pcMuted
+  function togglePcMute() {
+    const iframe = pcIframeRef.current;
+    if (!iframe?.contentWindow) return;
+    const nextMuted = !pcMuted;
     iframe.contentWindow.postMessage(
-      JSON.stringify({ event: "command", func: nextMuted ? "mute" : "unMute", args: [] }),
-      "*"
-    )
-    setPcMuted(nextMuted)
+      JSON.stringify({
+        event: "command",
+        func: nextMuted ? "mute" : "unMute",
+        args: [],
+      }),
+      "*",
+    );
+    setPcMuted(nextMuted);
   }
 
   function toggleMobileMute() {
-    const iframe = mobileIframeRef.current
-    if (!iframe?.contentWindow) return
-    const nextMuted = !mobileMuted
+    const iframe = mobileIframeRef.current;
+    if (!iframe?.contentWindow) return;
+    const nextMuted = !mobileMuted;
     iframe.contentWindow.postMessage(
-      JSON.stringify({ event: "command", func: nextMuted ? "mute" : "unMute", args: [] }),
-      "*"
-    )
-    setMobileMuted(nextMuted)
+      JSON.stringify({
+        event: "command",
+        func: nextMuted ? "mute" : "unMute",
+        args: [],
+      }),
+      "*",
+    );
+    setMobileMuted(nextMuted);
   }
 
-  function pcPrevVideo() { setPcVideoIndex(p => (p - 1 + heroVideos.length) % heroVideos.length); setPcMuted(true) }
-  function pcNextVideo() { setPcVideoIndex(p => (p + 1) % heroVideos.length); setPcMuted(true) }
-  function pcPrevProduct() { setPcProductIndex(p => (p - 1 + featuredProducts.length) % featuredProducts.length) }
-  function pcNextProduct() { setPcProductIndex(p => (p + 1) % featuredProducts.length) }
+  function pcPrevVideo() {
+    setPcVideoIndex((p) => (p - 1 + heroVideos.length) % heroVideos.length);
+    setPcMuted(true);
+  }
+  function pcNextVideo() {
+    setPcVideoIndex((p) => (p + 1) % heroVideos.length);
+    setPcMuted(true);
+  }
+  function pcPrevProduct() {
+    setPcProductIndex(
+      (p) => (p - 1 + featuredProducts.length) % featuredProducts.length,
+    );
+  }
+  function pcNextProduct() {
+    setPcProductIndex((p) => (p + 1) % featuredProducts.length);
+  }
 
-    function mobilePrev() { setMobileQueueIndex(p => (p - 1 + mobileTotal) % mobileTotal); setMobileMuted(true) }
-  function mobileNext() { setMobileQueueIndex(p => (p + 1) % mobileTotal); setMobileMuted(true) }
+  function mobilePrev() {
+    setMobileQueueIndex((p) => (p - 1 + mobileTotal) % mobileTotal);
+    setMobileMuted(true);
+  }
+  function mobileNext() {
+    setMobileQueueIndex((p) => (p + 1) % mobileTotal);
+    setMobileMuted(true);
+  }
 
-  const pcEmbedUrl = hasVideos ? toYoutubeEmbedUrl(heroVideos[pcVideoIndex % heroVideos.length]?.youtubeUrl || "") : null
+  const pcEmbedUrl = hasVideos
+    ? toYoutubeEmbedUrl(
+        heroVideos[pcVideoIndex % heroVideos.length]?.youtubeUrl || "",
+      )
+    : null;
   const mobileEmbedUrl =
     currentMobileItem?.kind === "video" && hasVideos
-      ? toYoutubeEmbedUrl(heroVideos[currentMobileItem.videoIdx]?.youtubeUrl || "")
-      : null
+      ? toYoutubeEmbedUrl(
+          heroVideos[currentMobileItem.videoIdx]?.youtubeUrl || "",
+        )
+      : null;
 
-      function renderProductSlide(p: Product, key: number | string, extraClass: string, isPriority: boolean = false) {
-        const imageUrl = p.images?.[0]?.imageUrl || "/uploads/1781611130414-modhu.jpg"
-        const savePercent = getSavePercent(p.pricePerUnit, p.discountPrice)
-        return (
-          <div key={key} className={`absolute inset-0 ${extraClass}`}>
-            <Image
-              src={imageUrl}
-              alt={p.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              priority={isPriority}
-            />
+  function renderProductSlide(
+    p: Product,
+    key: number | string,
+    extraClass: string,
+    isPriority: boolean = false,
+  ) {
+    const imageUrl =
+      p.images?.[0]?.imageUrl || "/uploads/1781611130414-modhu.jpg";
+    const savePercent = getSavePercent(p.pricePerUnit, p.discountPrice);
+    return (
+      <div key={key} className={`absolute inset-0 ${extraClass}`}>
+        <Image
+          src={imageUrl}
+          alt={p.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+          priority={isPriority}
+        />
         {savePercent !== null && (
           <span className="absolute top-1.5 right-1.5 z-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-save-pop">
             {savePercent}% সেভ
           </span>
         )}
         <div className="absolute bottom-0 right-0 bg-white/60 backdrop-blur-sm px-1.5 py-0.5 md:px-2 md:py-1 rounded-tl-2xl flex flex-col items-end gap-0.5 md:gap-1 text-right">
-          <h3 className="text-xs md:text-base font-bold text-green-900">{p.name}</h3>
-          <p className="text-black text-[10px] md:text-xs font-semibold">{p.unit}</p>
+          <h3 className="text-xs md:text-base font-bold text-green-900">
+            {p.name}
+          </h3>
+          <p className="text-black text-[10px] md:text-xs font-semibold">
+            {p.unit}
+          </p>
           <div className="flex items-baseline gap-1">
             {savePercent !== null && (
-              <span className="text-[10px] md:text-xs text-gray-500 line-through">৳ {p.pricePerUnit}</span>
+              <span className="text-[10px] md:text-xs text-gray-500 line-through">
+                ৳ {p.pricePerUnit}
+              </span>
             )}
-            <p className="text-black text-sm md:text-lg font-extrabold">৳ {savePercent !== null ? p.discountPrice : p.pricePerUnit}</p>
+            <p className="text-black text-sm md:text-lg font-extrabold">
+              ৳ {savePercent !== null ? p.discountPrice : p.pricePerUnit}
+            </p>
           </div>
           <Link
             href={`/order?productId=${p.id}`}
@@ -196,13 +253,14 @@ type MobileQueueItem =
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
-        Farmer Kamol - সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
+        Farmer Kamol - সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার তেল
+        ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
       </h1>
 
       {/* ── PC LAYOUT ── */}
@@ -225,7 +283,7 @@ type MobileQueueItem =
               <p className="text-green-300 text-sm">কোনো ভিডিও লাইভ করা নেই</p>
             </div>
           )}
-                    {pcEmbedUrl && videoReady && (
+          {pcEmbedUrl && videoReady && (
             <button
               onClick={togglePcMute}
               className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
@@ -235,8 +293,18 @@ type MobileQueueItem =
           )}
           {heroVideos.length > 1 && (
             <>
-              <button onClick={pcPrevVideo} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition">‹</button>
-              <button onClick={pcNextVideo} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition">›</button>
+              <button
+                onClick={pcPrevVideo}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition"
+              >
+                ‹
+              </button>
+              <button
+                onClick={pcNextVideo}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition"
+              >
+                ›
+              </button>
             </>
           )}
         </div>
@@ -253,13 +321,23 @@ type MobileQueueItem =
               featuredProducts[pcProductIndex],
               featuredProducts[pcProductIndex].id,
               "opacity-100 animate-fadeIn",
-              pcProductIndex === 0
+              pcProductIndex === 0,
             )
           )}
           {featuredProducts.length > 1 && (
             <>
-              <button onClick={pcPrevProduct} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition">‹</button>
-              <button onClick={pcNextProduct} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition">›</button>
+              <button
+                onClick={pcPrevProduct}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition"
+              >
+                ‹
+              </button>
+              <button
+                onClick={pcNextProduct}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center text-lg transition"
+              >
+                ›
+              </button>
             </>
           )}
         </div>
@@ -268,7 +346,9 @@ type MobileQueueItem =
       {/* ── MOBILE LAYOUT — ভিডিও ও প্রোডাক্ট একই queue-তে, ‹ › দিয়ে পুরো queue-তে ঘোরা যাবে ── */}
       <div className="md:hidden">
         <div className="relative" style={{ paddingTop: "56.25%" }}>
-        {currentMobileItem?.kind === "video" && mobileEmbedUrl && videoReady ? (
+          {currentMobileItem?.kind === "video" &&
+          mobileEmbedUrl &&
+          videoReady ? (
             <iframe
               key={`m-${safeMobileIndex}`}
               ref={mobileIframeRef}
@@ -279,29 +359,47 @@ type MobileQueueItem =
               scrolling="no"
               onLoad={(e) => startListening(e.currentTarget)}
             />
-          ) : currentMobileItem?.kind === "product" && featuredProducts[currentMobileItem.productIdx] ? (
-            renderProductSlide(featuredProducts[currentMobileItem.productIdx], `m-${safeMobileIndex}`, "opacity-100", safeMobileIndex === 0)
+          ) : currentMobileItem?.kind === "product" &&
+            featuredProducts[currentMobileItem.productIdx] ? (
+            renderProductSlide(
+              featuredProducts[currentMobileItem.productIdx],
+              `m-${safeMobileIndex}`,
+              "opacity-100",
+              safeMobileIndex === 0,
+            )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">কোনো কনটেন্ট নেই</p>
             </div>
           )}
-                    {currentMobileItem?.kind === "video" && mobileEmbedUrl && videoReady && (
-            <button
-              onClick={toggleMobileMute}
-              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
-            >
-              {mobileMuted ? "🔇 Unmute" : "🔊 Mute"}
-            </button>
-          )}
+          {currentMobileItem?.kind === "video" &&
+            mobileEmbedUrl &&
+            videoReady && (
+              <button
+                onClick={toggleMobileMute}
+                className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
+              >
+                {mobileMuted ? "🔇 Unmute" : "🔊 Mute"}
+              </button>
+            )}
           {mobileTotal > 1 && (
             <>
-              <button onClick={mobilePrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center transition">‹</button>
-              <button onClick={mobileNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center transition">›</button>
+              <button
+                onClick={mobilePrev}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center transition"
+              >
+                ‹
+              </button>
+              <button
+                onClick={mobileNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center transition"
+              >
+                ›
+              </button>
             </>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

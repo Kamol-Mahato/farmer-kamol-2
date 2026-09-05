@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
-import { verifyAdminOnly, verifyAdminOrAgent } from "@/lib/adminAuth"
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAdminOnly, verifyAdminOrAgent } from "@/lib/adminAuth";
 
 // লগইন পেজ — কখনোই চেক হবে না, নাহলে redirect loop হবে
 const PUBLIC_PATHS = [
@@ -11,7 +11,7 @@ const PUBLIC_PATHS = [
   "/api/admin/forgot-password",
   "/api/admin/verify-otp",
   "/api/admin/reset-password",
-]
+];
 
 // এই prefix গুলোতে ADMIN এবং AGENT দুজনেই ঢুকতে পারবে
 const AGENT_ALLOWED_PREFIXES = [
@@ -24,48 +24,54 @@ const AGENT_ALLOWED_PREFIXES = [
   "/admin/chat",
   "/agent",
   "/api/agent",
-]
+];
 
 // শুধু এই prefix গুলোতেই admin/agent auth চেক হবে — বাকি কোনো পেজে auth চেক হবে না
-const ADMIN_AGENT_PREFIXES = ["/api/admin", "/admin", "/agent", "/api/agent"]
+const ADMIN_AGENT_PREFIXES = ["/api/admin", "/admin", "/agent", "/api/agent"];
 
 export async function proxy(request: NextRequest) {
-  const path = request.nextUrl.pathname
-  const isAdminOrAgentRoute = ADMIN_AGENT_PREFIXES.some((p) => path.startsWith(p))
+  const path = request.nextUrl.pathname;
+  const isAdminOrAgentRoute = ADMIN_AGENT_PREFIXES.some((p) =>
+    path.startsWith(p),
+  );
 
   if (isAdminOrAgentRoute) {
-    const isApiRoute = path.startsWith("/api/")
+    const isApiRoute = path.startsWith("/api/");
 
     if (PUBLIC_PATHS.some((p) => path.startsWith(p))) {
-      return NextResponse.next()
+      return NextResponse.next();
     }
 
-    const isAgentAllowed = AGENT_ALLOWED_PREFIXES.some((p) => path.startsWith(p))
+    const isAgentAllowed = AGENT_ALLOWED_PREFIXES.some((p) =>
+      path.startsWith(p),
+    );
     const user = isAgentAllowed
       ? await verifyAdminOrAgent()
-      : await verifyAdminOnly()
+      : await verifyAdminOnly();
 
     if (!user) {
       if (isApiRoute) {
         return NextResponse.json(
           { error: "অনুমতি নেই, দয়া করে লগইন করুন" },
-          { status: 401 }
-        )
+          { status: 401 },
+        );
       }
-      const loginPath = path.startsWith("/agent") ? "/agent/login" : "/admin/login"
-      return NextResponse.redirect(new URL(loginPath, request.url))
+      const loginPath = path.startsWith("/agent")
+        ? "/agent/login"
+        : "/admin/login";
+      return NextResponse.redirect(new URL(loginPath, request.url));
     }
   }
 
   // 🌐 প্রতিটা পেজের path root layout-কে জানিয়ে দেওয়া হচ্ছে,
   // যাতে EN পেজে lang="en" আর BN পেজে lang="bn" ঠিকভাবে বসে
-  const response = NextResponse.next()
-  response.headers.set("x-pathname", path)
-  return response
+  const response = NextResponse.next();
+  response.headers.set("x-pathname", path);
+  return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|robots.txt|sitemap.xml|images|uploads).*)"
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|robots.txt|sitemap.xml|images|uploads).*)",
   ],
-}
+};

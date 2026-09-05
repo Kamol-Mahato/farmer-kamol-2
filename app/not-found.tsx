@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siteConfig } from "@/lib/siteConfig"
+import { siteConfig } from "@/lib/siteConfig";
 export default function NotFound() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center  px-2 text-center">
@@ -11,9 +11,12 @@ export default function NotFound() {
         height={80}
         className="w-14 h-14 rounded-full mb-3 object-cover"
       />
-      <h1 className="text-2xl font-bold text-green-800 mb-2">পেজটি খুঁজে পাওয়া যায়নি</h1>
+      <h1 className="text-2xl font-bold text-green-800 mb-2">
+        পেজটি খুঁজে পাওয়া যায়নি
+      </h1>
       <p className="text-gray-500 mb-4 text-sm max-w-sm">
-        আপনি যে পেজটি খুঁজছেন তা সরানো হয়েছে বা আর নেই। আমাদের শপ থেকে পছন্দের পণ্য দেখুন, অথবা আমাদের খামারের ভিডিও দেখুন।
+        আপনি যে পেজটি খুঁজছেন তা সরানো হয়েছে বা আর নেই। আমাদের শপ থেকে পছন্দের
+        পণ্য দেখুন, অথবা আমাদের খামারের ভিডিও দেখুন।
       </p>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link
@@ -35,6 +38,6 @@ export default function NotFound() {
           ভিডিও দেখুন
         </Link>
       </div>
-      </div>
+    </div>
   );
 }

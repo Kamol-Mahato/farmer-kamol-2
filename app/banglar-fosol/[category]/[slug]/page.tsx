@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/prisma"
-import { siteConfig } from "@/lib/siteConfig"
-import Link from "next/link"
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import { safeJsonLd } from "@/lib/jsonLd"
-import { cache } from "react"
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/siteConfig";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { safeJsonLd } from "@/lib/jsonLd";
+import { cache } from "react";
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 const getItem = cache(async (categorySlug: string, slug: string) => {
   return prisma.fosolItem.findFirst({
@@ -16,23 +16,24 @@ const getItem = cache(async (categorySlug: string, slug: string) => {
       category: { slug: categorySlug, isVisible: true },
     },
     include: { category: true },
-  })
-})
+  });
+});
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string; slug: string }>
+  params: Promise<{ category: string; slug: string }>;
 }) {
-  const { category, slug } = await params
-  const item = await getItem(category, slug)
-  if (!item) return { title: `পাওয়া যায়নি | ${siteConfig.brand.name}` }
+  const { category, slug } = await params;
+  const item = await getItem(category, slug);
+  if (!item) return { title: `পাওয়া যায়নি | ${siteConfig.brand.name}` };
 
-  const title = item.seoTitle || `${item.title} | বাংলার ফসল | ${siteConfig.brand.name}`
+  const title =
+    item.seoTitle || `${item.title} | বাংলার ফসল | ${siteConfig.brand.name}`;
   const description =
     item.seoDescription ||
     item.content.replace(/<[^>]+>/g, "").slice(0, 160) ||
-    `${item.title} — ${item.category.name}`
+    `${item.title} — ${item.category.name}`;
 
   return {
     title,
@@ -49,27 +50,39 @@ export async function generateMetadata({
     openGraph: {
       title: item.title,
       description,
-      images: item.image ? [item.image.startsWith("http") ? item.image : `${siteConfig.domain.url}${item.image}`] : undefined,
+      images: item.image
+        ? [
+            item.image.startsWith("http")
+              ? item.image
+              : `${siteConfig.domain.url}${item.image}`,
+          ]
+        : undefined,
     },
-  }
+  };
 }
 
 export default async function FosolItemPage({
   params,
 }: {
-  params: Promise<{ category: string; slug: string }>
+  params: Promise<{ category: string; slug: string }>;
 }) {
-  const { category, slug } = await params
-  const item = await getItem(category, slug)
-  if (!item) notFound()
+  const { category, slug } = await params;
+  const item = await getItem(category, slug);
+  if (!item) notFound();
 
-  const pageUrl = `${siteConfig.domain.url}/banglar-fosol/${item.category.slug}/${item.slug}`
+  const pageUrl = `${siteConfig.domain.url}/banglar-fosol/${item.category.slug}/${item.slug}`;
 
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: item.title,
-    image: item.image ? [item.image.startsWith("http") ? item.image : `${siteConfig.domain.url}${item.image}`] : undefined,
+    image: item.image
+      ? [
+          item.image.startsWith("http")
+            ? item.image
+            : `${siteConfig.domain.url}${item.image}`,
+        ]
+      : undefined,
     datePublished: item.createdAt.toISOString(),
     dateModified: item.updatedAt.toISOString(),
     author: { "@type": "Person", name: siteConfig.brand.founderNameBn },
@@ -82,13 +95,18 @@ export default async function FosolItemPage({
       },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
-  }
+  };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "হোম", item: siteConfig.domain.url },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "হোম",
+        item: siteConfig.domain.url,
+      },
       {
         "@type": "ListItem",
         position: 2,
@@ -103,7 +121,7 @@ export default async function FosolItemPage({
       },
       { "@type": "ListItem", position: 4, name: item.title, item: pageUrl },
     ],
-  }
+  };
 
   const related = await prisma.fosolItem.findMany({
     where: {
@@ -113,7 +131,7 @@ export default async function FosolItemPage({
     },
     take: 4,
     orderBy: { updatedAt: "desc" },
-  })
+  });
 
   return (
     <>
@@ -135,7 +153,10 @@ export default async function FosolItemPage({
             বাংলার ফসল
           </Link>
           <span className="mx-1.5">/</span>
-          <Link href={`/banglar-fosol/${item.category.slug}`} className="hover:text-green-700">
+          <Link
+            href={`/banglar-fosol/${item.category.slug}`}
+            className="hover:text-green-700"
+          >
             {item.category.name}
           </Link>
           <span className="mx-1.5">/</span>
@@ -158,9 +179,13 @@ export default async function FosolItemPage({
         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
           {item.category.name}
         </span>
-        <h1 className="text-3xl font-bold text-green-800 mt-3 mb-2">{item.title}</h1>
+        <h1 className="text-3xl font-bold text-green-800 mt-3 mb-2">
+          {item.title}
+        </h1>
         {item.scientificName && (
-          <p className="text-sm text-gray-500 italic mb-3">{item.scientificName}</p>
+          <p className="text-sm text-gray-500 italic mb-3">
+            {item.scientificName}
+          </p>
         )}
 
         <div className="flex flex-wrap gap-2 mb-6 text-xs">
@@ -188,13 +213,17 @@ export default async function FosolItemPage({
 
         {related.length > 0 && (
           <div className="mt-12 border-t border-gray-100 pt-8">
-            <h2 className="text-lg font-bold text-green-900 mb-4">একই ক্যাটাগরির আরও</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {related.map((r) => (
+            <h2 className="text-lg font-bold text-green-900 mb-4">
+              একই ক্যাটাগরির আরও
+            </h2>
+            {/* grid-cols-3 ব্যবহারের ফলে মোবাইল এবং ডেক্সটপ সব স্ক্রিনেই লাইনে ৩টি করে দেখাবে */}
+            <div className="grid grid-cols-3 gap-3">
+              {/* slice(0, 12) দিয়ে সর্বোচ্চ ১২টি আইটেম নির্দিষ্ট করা হয়েছে */}
+              {related.slice(0, 12).map((r) => (
                 <Link
                   key={r.id}
                   href={`/banglar-fosol/${item.category.slug}/${r.slug}`}
-                  className="block px-4 py-3 rounded-xl border border-green-100 hover:bg-green-50 text-green-800 font-medium text-sm"
+                  className="block px-4 py-3 rounded-xl border border-green-100 hover:bg-green-50 text-green-800 font-medium text-xs sm:text-sm text-center truncate"
                 >
                   {r.title}
                 </Link>
@@ -204,5 +233,5 @@ export default async function FosolItemPage({
         )}
       </div>
     </>
-  )
+  );
 }

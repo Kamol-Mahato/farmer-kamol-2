@@ -1,19 +1,19 @@
-import { prisma } from "@/lib/prisma"
-import { NextRequest, NextResponse } from "next/server"
-import { verifyAdminOrAgent } from "@/lib/adminAuth"
+import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAdminOrAgent } from "@/lib/adminAuth";
 
 // ✅ এই route কখনো cache হবে না — প্রতিবার সত্যিই ডাটাবেস থেকে fresh ডেটা আনবে
-export const dynamic = "force-dynamic"
-export const revalidate = 0
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
-  const isAuthorized = await verifyAdminOrAgent()
+  const isAuthorized = await verifyAdminOrAgent();
   if (!isAuthorized) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const { searchParams } = new URL(req.url)
-    const afterId = parseInt(searchParams.get("afterId") || "0")
+    const { searchParams } = new URL(req.url);
+    const afterId = parseInt(searchParams.get("afterId") || "0");
 
     const newOrders = await prisma.order.findMany({
       where: { id: { gt: afterId } },
@@ -24,11 +24,11 @@ export async function GET(req: NextRequest) {
         finalCodAmount: true,
         customer: { select: { name: true } },
       },
-    })
+    });
 
-    return NextResponse.json(newOrders)
+    return NextResponse.json(newOrders);
   } catch (error) {
-    console.error("নতুন অর্ডার চেক করতে সমস্যা হয়েছে", error)
-    return NextResponse.json([], { status: 500 })
+    console.error("নতুন অর্ডার চেক করতে সমস্যা হয়েছে", error);
+    return NextResponse.json([], { status: 500 });
   }
 }

@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { verifyAdminOrAgent } from "@/lib/adminAuth"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyAdminOrAgent } from "@/lib/adminAuth";
 
 export async function GET() {
-  const currentUser = await verifyAdminOrAgent()
+  const currentUser = await verifyAdminOrAgent();
   if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -24,7 +24,7 @@ export async function GET() {
           select: { id: true },
         },
       },
-    })
+    });
 
     const result = customers.map((c) => ({
       id: c.id,
@@ -35,11 +35,11 @@ export async function GET() {
       createdAt: c.createdAt,
       totalOrders: c.customerOrders.length,
       passwordResetRequested: c.passwordResetRequested,
-    }))
+    }));
 
-    return NextResponse.json(result)
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Customers fetch error:", error)
-    return NextResponse.json({ error: "ডেটা লোড হয়নি" }, { status: 500 })
+    console.error("Customers fetch error:", error);
+    return NextResponse.json({ error: "ডেটা লোড হয়নি" }, { status: 500 });
   }
 }

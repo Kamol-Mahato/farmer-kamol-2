@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma"
-import GalleryCard from "./components/GalleryCard"
-import type { Metadata } from "next"
-import { siteConfig } from "@/lib/siteConfig"
+import { prisma } from "@/lib/prisma";
+import GalleryCard from "./components/GalleryCard";
+import type { Metadata } from "next";
+import { siteConfig } from "@/lib/siteConfig";
 
-export const revalidate = 86400
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: `মিডিয়া গ্যালারি - ${siteConfig.brand.name}`,
@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/media/image",
   },
-}
+};
 export default async function GalleryPage() {
   const items = await prisma.galleryItem.findMany({
     where: { isActive: true },
     include: { images: { orderBy: { displayOrder: "asc" } } },
     orderBy: { displayOrder: "asc" },
-  })
+  });
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="text-center mb-8">
@@ -26,7 +26,9 @@ export default async function GalleryPage() {
         </h1>
       </div>
       {items.length === 0 ? (
-        <p className="text-center text-gray-400 py-20">এখনো কোনো গ্যালারি ছবি যোগ করা হয়নি।</p>
+        <p className="text-center text-gray-400 py-20">
+          এখনো কোনো গ্যালারি ছবি যোগ করা হয়নি।
+        </p>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {items.map((item) => (
@@ -35,5 +37,5 @@ export default async function GalleryPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

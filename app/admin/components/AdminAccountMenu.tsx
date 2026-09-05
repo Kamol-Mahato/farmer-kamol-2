@@ -1,102 +1,104 @@
-"use client"
-import { useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
-import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload"
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload";
 
 // ✅ Base64 public key কে ব্রাউজারের বোঝার মতো ফরম্যাটে কনভার্ট করে
 function urlBase64ToUint8Array(base64String: string) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
-  const rawData = window.atob(base64)
-  const outputArray = new Uint8Array(rawData.length)
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; i++) {
-    outputArray[i] = rawData.charCodeAt(i)
+    outputArray[i] = rawData.charCodeAt(i);
   }
-  return outputArray
+  return outputArray;
 }
 
 export default function AdminAccountMenu() {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [isAgent, setIsAgent] = useState(false)
-  const [supported, setSupported] = useState(true)
-  const [pushEnabled, setPushEnabled] = useState(false)
-  const [pushLoading, setPushLoading] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isAgent, setIsAgent] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/agent/me")
       .then((r) => r.json())
       .then((data) => setIsAgent(!!data.agent))
-      .catch(() => setIsAgent(false))
+      .catch(() => setIsAgent(false));
 
     fetch("/api/profile/avatar")
       .then((r) => r.json())
       .then((data) => {
-        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl)
+        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl);
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setSupported(false)
-      return
+      setSupported(false);
+      return;
     }
     navigator.serviceWorker.register("/sw.js").then((reg) => {
       reg.pushManager.getSubscription().then((sub) => {
-        if (sub) setPushEnabled(true)
-      })
-    })
-  }, [])
+        if (sub) setPushEnabled(true);
+      });
+    });
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpen(false)
+        setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   async function handleEnablePush() {
-    setPushLoading(true)
+    setPushLoading(true);
     try {
-      const permission = await Notification.requestPermission()
+      const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        alert("Notification অনুমতি দেওয়া হয়নি")
-        setPushLoading(false)
-        return
+        alert("Notification অনুমতি দেওয়া হয়নি");
+        setPushLoading(false);
+        return;
       }
 
-      const reg = await navigator.serviceWorker.register("/sw.js")
-      const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY as string
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY as string;
 
       const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
-      })
+      });
 
       await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription),
-      })
+      });
 
-      setPushEnabled(true)
+      setPushEnabled(true);
     } catch (err) {
-      console.error(err)
-      alert("সমস্যা হয়েছে, আবার চেষ্টা করুন")
+      console.error(err);
+      alert("সমস্যা হয়েছে, আবার চেষ্টা করুন");
     } finally {
-      setPushLoading(false)
+      setPushLoading(false);
     }
   }
 
   async function handleLogout() {
-    await fetch(isAgent ? "/api/agent/logout" : "/api/admin/logout", { method: "POST" })
-    router.push(isAgent ? "/agent/login" : "/admin/login")
+    await fetch(isAgent ? "/api/agent/logout" : "/api/admin/logout", {
+      method: "POST",
+    });
+    router.push(isAgent ? "/agent/login" : "/admin/login");
   }
 
   return (
@@ -108,10 +110,25 @@ export default function AdminAccountMenu() {
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+          <img
+            src={avatarUrl}
+            alt="Avatar"
+            className="w-full h-full object-cover rounded-full"
+          />
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2.5}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
           </svg>
         )}
       </button>
@@ -129,7 +146,9 @@ export default function AdminAccountMenu() {
           {supported && (
             <div className="px-4 py-2 border-b border-gray-100">
               {pushEnabled ? (
-                <p className="text-sm text-green-700 font-semibold flex items-center gap-1.5">🔔 Push Notification চালু আছে</p>
+                <p className="text-sm text-green-700 font-semibold flex items-center gap-1.5">
+                  🔔 Push Notification চালু আছে
+                </p>
               ) : (
                 <button
                   onClick={handleEnablePush}
@@ -150,5 +169,5 @@ export default function AdminAccountMenu() {
         </div>
       )}
     </div>
-  )
+  );
 }

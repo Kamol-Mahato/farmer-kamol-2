@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import { siteConfig } from "@/lib/siteConfig"
+import type { Metadata } from "next";
+import { siteConfig } from "@/lib/siteConfig";
 
-const pageTitle = `আমাদের সম্পর্কে - সমন্বিত কৃষি, পশুপালন ও ফসল চাষ | ${siteConfig.brand.name}`
-const pageDescription = `${siteConfig.brand.name}-এর গল্প, মিশন ও ভিশন — সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রাম থেকে সমন্বিত কৃষিতে খাঁটি মধু, ঘি ও সরিষার তেল সরাসরি খামার থেকে আপনার দরজায়।`
-const pageUrl = `${siteConfig.domain.url}/about`
-const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`
+const pageTitle = `আমাদের সম্পর্কে - সমন্বিত কৃষি, পশুপালন ও ফসল চাষ | ${siteConfig.brand.name}`;
+const pageDescription = `${siteConfig.brand.name}-এর গল্প, মিশন ও ভিশন — সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রাম থেকে সমন্বিত কৃষিতে খাঁটি মধু, ঘি ও সরিষার তেল সরাসরি খামার থেকে আপনার দরজায়।`;
+const pageUrl = `${siteConfig.domain.url}/about`;
+const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`;
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-}
+};
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -154,9 +154,13 @@ const jsonLd = {
       ],
     },
   ],
-}
+};
 
-export default function AboutLayout({ children }: { children: React.ReactNode }) {
+export default function AboutLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <script
@@ -165,5 +169,5 @@ export default function AboutLayout({ children }: { children: React.ReactNode })
       />
       {children}
     </>
-  )
+  );
 }

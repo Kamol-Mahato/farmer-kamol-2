@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/prisma"
-import { getCustomerId } from "@/lib/customerAuth"
-import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { getCustomerId } from "@/lib/customerAuth";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const customerId = await getCustomerId()
+  const customerId = await getCustomerId();
 
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })
+    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
   }
 
   try {
@@ -17,10 +17,13 @@ export async function GET() {
         courierSummary: true,
       },
       orderBy: { createdAt: "desc" },
-    })
-    return NextResponse.json(orders)
+    });
+    return NextResponse.json(orders);
   } catch (error) {
-    console.error("CUSTOMER ORDERS API ERROR:", error)
-    return NextResponse.json({ error: "অর্ডার লোড করা যায়নি" }, { status: 500 })
+    console.error("CUSTOMER ORDERS API ERROR:", error);
+    return NextResponse.json(
+      { error: "অর্ডার লোড করা যায়নি" },
+      { status: 500 },
+    );
   }
 }

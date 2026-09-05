@@ -1,9 +1,9 @@
-"use client"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { normalizePhone, isValidBDPhone } from "@/lib/phone"
-import { siteConfig } from "@/lib/siteConfig"
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { normalizePhone, isValidBDPhone } from "@/lib/phone";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface User {
   name?: string;
@@ -22,7 +22,7 @@ const STATUS_EN: Record<string, string> = {
   REFUNDED: "Refunded",
   LOST: "Lost",
   DAMAGED: "Damaged",
-}
+};
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -36,131 +36,133 @@ const STATUS_COLOR: Record<string, string> = {
   REFUNDED: "bg-gray-50 text-gray-700 border-gray-200",
   LOST: "bg-red-50 text-red-700 border-red-200",
   DAMAGED: "bg-red-50 text-red-700 border-red-200",
-}
+};
 
 interface TrackResult {
-  orderId: string
-  orderStatus: string
-  courierProvider: string | null
-  courierStatus: string | null
-  createdAt: string
+  orderId: string;
+  orderStatus: string;
+  courierProvider: string | null;
+  courierStatus: string | null;
+  createdAt: string;
 }
 
 export default function LoginPageEn() {
-  const router = useRouter()
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-  const [showForgot, setShowForgot] = useState(false)
-  const [forgotPhone, setForgotPhone] = useState("")
-  const [forgotMsg, setForgotMsg] = useState("")
-  const [forgotError, setForgotError] = useState("")
-  const [forgotLoading, setForgotLoading] = useState(false)
+  const router = useRouter();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [forgotMsg, setForgotMsg] = useState("");
+  const [forgotError, setForgotError] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
   // 🔍 Order track
-  const [trackOrderId, setTrackOrderId] = useState("")
-  const [trackLoading, setTrackLoading] = useState(false)
-  const [trackError, setTrackError] = useState("")
-  const [trackResult, setTrackResult] = useState<TrackResult | null>(null)
+  const [trackOrderId, setTrackOrderId] = useState("");
+  const [trackLoading, setTrackLoading] = useState(false);
+  const [trackError, setTrackError] = useState("");
+  const [trackResult, setTrackResult] = useState<TrackResult | null>(null);
 
   useEffect(() => {
-    setError("")
-    const storedUser = localStorage.getItem("user")
+    setError("");
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser))
+        setUser(JSON.parse(storedUser));
       } catch {
-        localStorage.removeItem("user")
+        localStorage.removeItem("user");
       }
     }
-  }, [])
+  }, []);
 
   function handleLogout() {
-    localStorage.removeItem("user")
-    setUser(null)
-    window.dispatchEvent(new Event("storage"))
-    router.refresh()
+    localStorage.removeItem("user");
+    setUser(null);
+    window.dispatchEvent(new Event("storage"));
+    router.refresh();
   }
 
   async function handleTrackSearch(e: React.FormEvent) {
-    e.preventDefault()
-    const trimmed = trackOrderId.trim()
+    e.preventDefault();
+    const trimmed = trackOrderId.trim();
     if (!trimmed) {
-      setTrackError("Please enter Order ID")
-      return
+      setTrackError("Please enter Order ID");
+      return;
     }
-    setTrackLoading(true)
-    setTrackError("")
-    setTrackResult(null)
+    setTrackLoading(true);
+    setTrackError("");
+    setTrackResult(null);
     try {
-      const res = await fetch(`/api/orders/track?orderId=${encodeURIComponent(trimmed)}`)
-      const data = await res.json()
+      const res = await fetch(
+        `/api/orders/track?orderId=${encodeURIComponent(trimmed)}`,
+      );
+      const data = await res.json();
       if (!res.ok) {
-        setTrackError(data.error || "Something went wrong")
-        return
+        setTrackError(data.error || "Something went wrong");
+        return;
       }
-      setTrackResult(data)
+      setTrackResult(data);
     } catch {
-      setTrackError("Could not connect to server")
+      setTrackError("Could not connect to server");
     } finally {
-      setTrackLoading(false)
+      setTrackLoading(false);
     }
   }
 
   async function handleForgotPassword() {
-    if (forgotLoading) return
-    setForgotError("")
-    setForgotMsg("")
+    if (forgotLoading) return;
+    setForgotError("");
+    setForgotMsg("");
     if (!forgotPhone) {
-      setForgotError("Enter your mobile number")
-      return
+      setForgotError("Enter your mobile number");
+      return;
     }
-    setForgotLoading(true)
+    setForgotLoading(true);
     try {
       const res = await fetch("/api/forgot-password-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: forgotPhone }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setForgotError(data.error || "Something went wrong")
-        return
+        setForgotError(data.error || "Something went wrong");
+        return;
       }
-      setForgotMsg(data.message)
+      setForgotMsg(data.message);
     } catch {
-      setForgotError("Something went wrong, please try again")
+      setForgotError("Something went wrong, please try again");
     } finally {
-      setForgotLoading(false)
+      setForgotLoading(false);
     }
   }
 
   async function handleLogin() {
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, password }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Login failed")
-        setLoading(false)
-        return
+        setError(data.error || "Login failed");
+        setLoading(false);
+        return;
       }
-      localStorage.setItem("user", JSON.stringify(data.user))
-      setUser(data.user)
-      window.dispatchEvent(new Event("storage"))
-      setLoading(false)
-      router.push("/en/customer/dashboard")
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      window.dispatchEvent(new Event("storage"));
+      setLoading(false);
+      router.push("/en/customer/dashboard");
     } catch (err) {
-      console.error(err)
-      setError("Something went wrong, please try again")
-      setLoading(false)
+      console.error(err);
+      setError("Something went wrong, please try again");
+      setLoading(false);
     }
   }
 
@@ -169,7 +171,10 @@ export default function LoginPageEn() {
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
         {/* 🔍 Search by Order ID */}
         <div className="mb-6 pb-6 border-b border-gray-100">
-          <p className="font-bold text-green-800 text-center text-sm mb-3"> Search by Order ID</p>
+          <p className="font-bold text-green-800 text-center text-sm mb-3">
+            {" "}
+            Search by Order ID
+          </p>
           <form onSubmit={handleTrackSearch} className="flex gap-2">
             <input
               type="text"
@@ -187,13 +192,17 @@ export default function LoginPageEn() {
             </button>
           </form>
           {trackError && (
-            <p className="text-red-500 text-xs text-center mt-2 font-medium">{trackError}</p>
+            <p className="text-red-500 text-xs text-center mt-2 font-medium">
+              {trackError}
+            </p>
           )}
           {trackResult && (
             <div className="mt-3 bg-green-50 border border-green-100 rounded-xl p-3 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Order ID</span>
-                <span className="font-bold text-gray-900 tracking-wider text-sm">{trackResult.orderId}</span>
+                <span className="font-bold text-gray-900 tracking-wider text-sm">
+                  {trackResult.orderId}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Date</span>
@@ -205,10 +214,12 @@ export default function LoginPageEn() {
                 <span className="text-xs text-gray-500">Status</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                    STATUS_COLOR[trackResult.orderStatus] || "bg-gray-50 text-gray-700 border-gray-200"
+                    STATUS_COLOR[trackResult.orderStatus] ||
+                    "bg-gray-50 text-gray-700 border-gray-200"
                   }`}
                 >
-                  {STATUS_EN[trackResult.orderStatus] || trackResult.orderStatus}
+                  {STATUS_EN[trackResult.orderStatus] ||
+                    trackResult.orderStatus}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -216,7 +227,9 @@ export default function LoginPageEn() {
                 <span className="text-sm font-medium text-gray-700">
                   {trackResult.courierProvider || trackResult.courierStatus
                     ? `${trackResult.courierProvider || ""}${
-                        trackResult.courierProvider && trackResult.courierStatus ? " • " : ""
+                        trackResult.courierProvider && trackResult.courierStatus
+                          ? " • "
+                          : ""
                       }${trackResult.courierStatus || ""}`
                     : "—"}
                 </span>
@@ -226,8 +239,12 @@ export default function LoginPageEn() {
         </div>
 
         <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-green-800">{siteConfig.brand.nameEn}</h1>
-          <p className="text-sm text-yellow-600 mt-1">From Our Farm To Your Door</p>
+          <h1 className="text-2xl font-bold text-green-800">
+            {siteConfig.brand.nameEn}
+          </h1>
+          <p className="text-sm text-yellow-600 mt-1">
+            From Our Farm To Your Door
+          </p>
         </div>
         {user ? (
           <div className="text-center">
@@ -279,12 +296,16 @@ export default function LoginPageEn() {
                   required
                   placeholder="01XXXXXXXXX"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 13))}
+                  onChange={(e) =>
+                    setPhone(e.target.value.replace(/\D/g, "").slice(0, 13))
+                  }
                   onBlur={(e) => setPhone(normalizePhone(e.target.value))}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-[16px] focus:outline-none focus:border-green-500 touch-manipulation"
                 />
                 {phone.length > 0 && (
-                  <p className={`text-xs mt-1.5 ${isValidBDPhone(phone) ? "text-green-600" : "text-orange-600"}`}>
+                  <p
+                    className={`text-xs mt-1.5 ${isValidBDPhone(phone) ? "text-green-600" : "text-orange-600"}`}
+                  >
                     {isValidBDPhone(phone)
                       ? "✓ Valid format"
                       : `Enter ${11 - phone.length > 0 ? 11 - phone.length : 0} more digit(s) (11 digits total)`}
@@ -310,13 +331,39 @@ export default function LoginPageEn() {
                     tabIndex={-1}
                   >
                     {showPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+                        />
                       </svg>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -365,15 +412,15 @@ export default function LoginPageEn() {
                   "Login"
                 )}
               </button>
-              </form>
+            </form>
             <p className="text-center text-sm mt-4">
               <button
                 type="button"
                 onClick={() => {
-                  setShowForgot(!showForgot)
-                  setForgotMsg("")
-                  setForgotError("")
-                  setForgotPhone("")
+                  setShowForgot(!showForgot);
+                  setForgotMsg("");
+                  setForgotError("");
+                  setForgotPhone("");
                 }}
                 className="text-yellow-700 font-medium hover:underline"
               >
@@ -383,7 +430,9 @@ export default function LoginPageEn() {
             {showForgot && (
               <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 mt-3 text-left">
                 {forgotMsg ? (
-                  <p className="text-green-700 text-sm font-medium text-center">{forgotMsg}</p>
+                  <p className="text-green-700 text-sm font-medium text-center">
+                    {forgotMsg}
+                  </p>
                 ) : (
                   <>
                     <p className="text-gray-600 text-xs mb-2">
@@ -393,13 +442,23 @@ export default function LoginPageEn() {
                       type="tel"
                       placeholder="01XXXXXXXXX"
                       value={forgotPhone}
-                      onChange={(e) => setForgotPhone(e.target.value.replace(/\D/g, "").slice(0, 13))}
-                      onBlur={(e) => setForgotPhone(normalizePhone(e.target.value))}
+                      onChange={(e) =>
+                        setForgotPhone(
+                          e.target.value.replace(/\D/g, "").slice(0, 13),
+                        )
+                      }
+                      onBlur={(e) =>
+                        setForgotPhone(normalizePhone(e.target.value))
+                      }
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-yellow-400"
                     />
                     {forgotPhone.length > 0 && !isValidBDPhone(forgotPhone) && (
                       <p className="text-orange-600 text-xs mb-2">
-                        Enter {11 - forgotPhone.length > 0 ? 11 - forgotPhone.length : 0} more digit(s) (11 digits total)
+                        Enter{" "}
+                        {11 - forgotPhone.length > 0
+                          ? 11 - forgotPhone.length
+                          : 0}{" "}
+                        more digit(s) (11 digits total)
                       </p>
                     )}
                     {forgotError && (
@@ -416,7 +475,10 @@ export default function LoginPageEn() {
                   </>
                 )}
                 <p className="text-center text-xs text-gray-500 mt-3 pt-3 border-t border-yellow-200">
-                  <Link href="/en/reset-password" className="hover:underline font-medium">
+                  <Link
+                    href="/en/reset-password"
+                    className="hover:underline font-medium"
+                  >
                     Got a code? Set your password
                   </Link>
                 </p>
@@ -424,7 +486,10 @@ export default function LoginPageEn() {
             )}
             <p className="text-center text-sm text-gray-500 mt-6">
               New customer?{" "}
-              <Link href="/en/register" className="text-green-700 font-bold hover:underline">
+              <Link
+                href="/en/register"
+                className="text-green-700 font-bold hover:underline"
+              >
                 Create an Account
               </Link>
             </p>
@@ -432,5 +497,5 @@ export default function LoginPageEn() {
         )}
       </div>
     </div>
-  )
+  );
 }

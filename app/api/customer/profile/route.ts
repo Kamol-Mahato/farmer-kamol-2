@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/prisma"
-import { getCustomerId } from "@/lib/customerAuth"
-import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { getCustomerId } from "@/lib/customerAuth";
+import { NextRequest, NextResponse } from "next/server";
 
 // প্রোফাইল ডেটা আনা — order/cart পেজে auto-fill এর জন্য
 export async function GET() {
-  const customerId = await getCustomerId()
+  const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })
+    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
   }
 
   try {
@@ -21,29 +21,32 @@ export async function GET() {
         upazila: true,
         address: true,
       },
-    })
+    });
 
     if (!user) {
-      return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })
+      return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
     }
 
-    return NextResponse.json(user)
+    return NextResponse.json(user);
   } catch (error) {
-    console.error("CUSTOMER PROFILE GET ERROR:", error)
-    return NextResponse.json({ error: "প্রোফাইল লোড করা যায়নি" }, { status: 500 })
+    console.error("CUSTOMER PROFILE GET ERROR:", error);
+    return NextResponse.json(
+      { error: "প্রোফাইল লোড করা যায়নি" },
+      { status: 500 },
+    );
   }
 }
 
 // প্রোফাইল আপডেট — Settings পেজ থেকে কাস্টমার নাম/ঠিকানা বদলাবে
 export async function PUT(req: NextRequest) {
-  const customerId = await getCustomerId()
+  const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 })
+    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
   }
 
   try {
-    const body = await req.json()
-    const { name, district, districtId, upazila, address } = body
+    const body = await req.json();
+    const { name, district, districtId, upazila, address } = body;
 
     const updated = await prisma.user.update({
       where: { id: customerId },
@@ -62,11 +65,11 @@ export async function PUT(req: NextRequest) {
         upazila: true,
         address: true,
       },
-    })
+    });
 
-    return NextResponse.json(updated)
+    return NextResponse.json(updated);
   } catch (error) {
-    console.error("CUSTOMER PROFILE UPDATE ERROR:", error)
-    return NextResponse.json({ error: "আপডেট করা যায়নি" }, { status: 500 })
+    console.error("CUSTOMER PROFILE UPDATE ERROR:", error);
+    return NextResponse.json({ error: "আপডেট করা যায়নি" }, { status: 500 });
   }
 }

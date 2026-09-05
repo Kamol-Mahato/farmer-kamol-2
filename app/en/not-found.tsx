@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siteConfig } from "@/lib/siteConfig"
+import { siteConfig } from "@/lib/siteConfig";
 export default function NotFound() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center  px-2 text-center">
@@ -13,7 +13,8 @@ export default function NotFound() {
       />
       <h1 className="text-2xl font-bold text-green-800 mb-2">Page Not Found</h1>
       <p className="text-gray-500 mb-6 text-sm max-w-sm">
-        The page you're looking for has been moved or no longer exists. Browse our shop for your favorite products, or watch videos from our farm.
+        The page you're looking for has been moved or no longer exists. Browse
+        our shop for your favorite products, or watch videos from our farm.
       </p>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link
@@ -35,6 +36,6 @@ export default function NotFound() {
           Watch Videos
         </Link>
       </div>
-      </div>
+    </div>
   );
 }

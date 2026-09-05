@@ -1,12 +1,11 @@
 import PolicyPage from "@/app/components/PolicyPage";
 import { Metadata } from "next";
-import { safeJsonLd } from "@/lib/jsonLd"
-import { siteConfig } from "@/lib/siteConfig"
+import { safeJsonLd } from "@/lib/jsonLd";
+import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: `প্রশ্ন ও উত্তর (FAQ) | ${siteConfig.brand.name}`,
-  description:
-    `${siteConfig.brand.name}-এর পণ্য, অর্ডার, ডেলিভারি ও রিটার্ন সংক্রান্ত সাধারণ প্রশ্নের উত্তর। ${siteConfig.address.region}এর খাঁটি মধু, ঘি, সরিষার তেল ও চীনা হাঁসের বাচ্চা সম্পর্কে জানুন।`,
+  description: `${siteConfig.brand.name}-এর পণ্য, অর্ডার, ডেলিভারি ও রিটার্ন সংক্রান্ত সাধারণ প্রশ্নের উত্তর। ${siteConfig.address.region}এর খাঁটি মধু, ঘি, সরিষার তেল ও চীনা হাঁসের বাচ্চা সম্পর্কে জানুন।`,
   alternates: {
     canonical: "/faq",
     languages: {
@@ -48,7 +47,6 @@ const faqGroups = [
         q: "আপনাদের খামারের কার্যক্রম কি অনলাইনে দেখা যায়?",
         a: "হ্যাঁ। আমাদের Facebook ও YouTube চ্যানেলে খামারের বিভিন্ন কার্যক্রম, উৎপাদন প্রক্রিয়া এবং কৃষিভিত্তিক শিক্ষামূলক ভিডিও নিয়মিত প্রকাশ করা হয়।",
       },
-
     ],
   },
   {
@@ -120,7 +118,7 @@ const faqGroups = [
         q: "অর্ডার করার জন্য কি অ্যাকাউন্ট খুলতে হবে?",
         a: "না। অতিথি (Guest) হিসেবেও অর্ডার করা যায়। তবে অ্যাকাউন্ট খুললে ভবিষ্যতে অর্ডার হিস্টোরি ও স্ট্যাটাস সহজে দেখতে পারবেন।",
       },
-      
+
       {
         q: "পেমেন্ট করার পরে কী করতে হবে?",
         a: "বিকাশ, নগদ বা রকেটে পেমেন্ট সম্পন্ন করার পর ট্রানজেকশন নম্বর সংরক্ষণ করুন। প্রয়োজন হলে আমাদের টিম যাচাইয়ের জন্য সেটি চাইতে পারে।",
@@ -198,7 +196,7 @@ export default function FaqPage() {
           "@type": "Answer",
           text: item.a,
         },
-      }))
+      })),
     ),
   };
 
@@ -209,38 +207,38 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
       <PolicyPage title="প্রশ্ন ও উত্তর">
-  <div className="space-y-4">
-    {faqGroups.map((group) => (
-      <details
-        key={group.category}
-        className="border border-gray-200 rounded-lg bg-white shadow-sm"
-      >
-        <summary className="cursor-pointer px-5 py-4 font-semibold text-lg text-green-700">
-          {group.category}
-        </summary>
+        <div className="space-y-4">
+          {faqGroups.map((group) => (
+            <details
+              key={group.category}
+              className="border border-gray-200 rounded-lg bg-white shadow-sm"
+            >
+              <summary className="cursor-pointer px-5 py-4 font-semibold text-lg text-green-700">
+                {group.category}
+              </summary>
 
-        <div className="px-5 pb-5">
-          <div className="space-y-3">
-            {group.items.map((item) => (
-              <details
-                key={item.q}
-                className="border-b border-gray-100 pb-3"
-              >
-                <summary className="cursor-pointer font-medium text-gray-900 py-2">
-                  {item.q}
-                </summary>
+              <div className="px-5 pb-5">
+                <div className="space-y-3">
+                  {group.items.map((item) => (
+                    <details
+                      key={item.q}
+                      className="border-b border-gray-100 pb-3"
+                    >
+                      <summary className="cursor-pointer font-medium text-gray-900 py-2">
+                        {item.q}
+                      </summary>
 
-                <p className="text-gray-600 mt-2 leading-relaxed">
-                  {item.a}
-                </p>
-              </details>
-            ))}
-          </div>
+                      <p className="text-gray-600 mt-2 leading-relaxed">
+                        {item.a}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
         </div>
-      </details>
-    ))}
-  </div>
-</PolicyPage>
+      </PolicyPage>
     </>
   );
 }

@@ -1,27 +1,27 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
 type Settings = {
-  enableOtpForGuest: boolean
-  defaultLanguage: string
-  heroYoutubeUrl: string
-  youtubeChannelUrl: string
-  facebookPageUrl: string
-  maskCustomerData: boolean
-  disableLiveCourierAPI: boolean
-  paperSizeMode: string
-  invoicePrefix: string
-  useFreeWhatsAppOnly: boolean
-  useGoogleSMTP: boolean
-  minAmountForPaidSMS: number
-  strictTxnUniqueCheck: boolean
-  autoAdjustPrice: boolean
-  qrCodeDestination: string
-  enableReviews: boolean
-  enableCoupons: boolean
-  enableWishlist: boolean
-  enablePaymentGateway: boolean
-}
+  enableOtpForGuest: boolean;
+  defaultLanguage: string;
+  heroYoutubeUrl: string;
+  youtubeChannelUrl: string;
+  facebookPageUrl: string;
+  maskCustomerData: boolean;
+  disableLiveCourierAPI: boolean;
+  paperSizeMode: string;
+  invoicePrefix: string;
+  useFreeWhatsAppOnly: boolean;
+  useGoogleSMTP: boolean;
+  minAmountForPaidSMS: number;
+  strictTxnUniqueCheck: boolean;
+  autoAdjustPrice: boolean;
+  qrCodeDestination: string;
+  enableReviews: boolean;
+  enableCoupons: boolean;
+  enableWishlist: boolean;
+  enablePaymentGateway: boolean;
+};
 
 // ✅ একটা টগল সুইচ — ক্লিক করলেই সাথে সাথে সেভ হয়ে যাবে (notification on/off-এর মতো)
 function ToggleRow({
@@ -32,12 +32,12 @@ function ToggleRow({
   disabled,
   comingSoon,
 }: {
-  label: string
-  description: string
-  checked: boolean
-  onChange: (val: boolean) => void
-  disabled?: boolean
-  comingSoon?: boolean
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (val: boolean) => void;
+  disabled?: boolean;
+  comingSoon?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-100 last:border-0">
@@ -66,80 +66,97 @@ function ToggleRow({
         />
       </button>
     </div>
-  )
+  );
 }
 
 export default function AdminSystemSettingsPage() {
-  const [settings, setSettings] = useState<Settings | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [savingField, setSavingField] = useState<string | null>(null)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingField, setSavingField] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function fetchSettings() {
     try {
-      const res = await fetch("/api/admin/settings/system")
-      const data = await res.json()
+      const res = await fetch("/api/admin/settings/system");
+      const data = await res.json();
       if (res.ok) {
-        setSettings(data)
+        setSettings(data);
       } else {
-        setError(data.error || "লোড করা যায়নি")
+        setError(data.error || "লোড করা যায়নি");
       }
     } catch {
-      setError("লোড করা যায়নি")
+      setError("লোড করা যায়নি");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  useEffect(() => { fetchSettings() }, [])
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   // ✅ যেকোনো একটা ফিল্ড বদলালেই সাথে সাথে সেভ — টগলের জন্য (auto-save)
-  async function updateField(field: keyof Settings, value: boolean | string | number) {
-    if (!settings) return
-    const prev = settings
-    setSettings({ ...settings, [field]: value }) // optimistic update
-    setSavingField(field)
-    setError("")
-    setSuccess("")
+  async function updateField(
+    field: keyof Settings,
+    value: boolean | string | number,
+  ) {
+    if (!settings) return;
+    const prev = settings;
+    setSettings({ ...settings, [field]: value }); // optimistic update
+    setSavingField(field);
+    setError("");
+    setSuccess("");
     try {
       const res = await fetch("/api/admin/settings/system", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [field]: value }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setSettings(prev) // rollback
-        setError(data.error || "সংরক্ষণ করা যায়নি")
-        return
+        setSettings(prev); // rollback
+        setError(data.error || "সংরক্ষণ করা যায়নি");
+        return;
       }
-      setSettings(data)
-      setSuccess("✅ সংরক্ষণ হয়েছে")
-      setTimeout(() => setSuccess(""), 2000)
+      setSettings(data);
+      setSuccess("✅ সংরক্ষণ হয়েছে");
+      setTimeout(() => setSuccess(""), 2000);
     } catch {
-      setSettings(prev) // rollback
-      setError("সংরক্ষণ করা যায়নি")
+      setSettings(prev); // rollback
+      setError("সংরক্ষণ করা যায়নি");
     } finally {
-      setSavingField(null)
+      setSavingField(null);
     }
   }
 
-  if (loading || !settings) return <div className="text-center py-20 text-gray-500">লোড হচ্ছে...</div>
+  if (loading || !settings)
+    return <div className="text-center py-20 text-gray-500">লোড হচ্ছে...</div>;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-green-800 mb-2">সিস্টেম কন্ট্রোল সেন্টার</h1>
-      <p className="text-sm text-gray-400 mb-8">সাইটের বড় ফিচারগুলো এখান থেকে চালু/বন্ধ করা যাবে</p>
+      <h1 className="text-3xl font-bold text-green-800 mb-2">
+        সিস্টেম কন্ট্রোল সেন্টার
+      </h1>
+      <p className="text-sm text-gray-400 mb-8">
+        সাইটের বড় ফিচারগুলো এখান থেকে চালু/বন্ধ করা যাবে
+      </p>
 
-      {error && <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">{error}</p>}
-      {success && <p className="text-green-600 text-sm mb-4 font-semibold">{success}</p>}
+      {error && (
+        <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className="text-green-600 text-sm mb-4 font-semibold">{success}</p>
+      )}
 
       {/* গ্রুপ ১ — বড় ফিচার টগল (এখনো নির্মাণাধীন) */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h2 className="text-lg font-bold text-green-700 mb-1">বড় ফিচার</h2>
         <p className="text-xs text-gray-400 mb-3">
-          এই টগলগুলো ভবিষ্যতের ফিচারের জন্য প্রস্তুত রাখা — ফিচার তৈরি হওয়ার আগ পর্যন্ত অন করলেও কোনো প্রভাব পড়বে না
+          এই টগলগুলো ভবিষ্যতের ফিচারের জন্য প্রস্তুত রাখা — ফিচার তৈরি হওয়ার আগ
+          পর্যন্ত অন করলেও কোনো প্রভাব পড়বে না
         </p>
         <ToggleRow
           label="Customer Review"
@@ -235,7 +252,9 @@ export default function AdminSystemSettingsPage() {
         <h2 className="text-lg font-bold text-green-700 mb-4">অন্যান্য মান</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">ডিফল্ট ভাষা</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ডিফল্ট ভাষা
+            </label>
             <select
               value={settings.defaultLanguage}
               onChange={(e) => updateField("defaultLanguage", e.target.value)}
@@ -246,7 +265,9 @@ export default function AdminSystemSettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">ইনভয়েস প্রিন্ট সাইজ</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ইনভয়েস প্রিন্ট সাইজ
+            </label>
             <select
               value={settings.paperSizeMode}
               onChange={(e) => updateField("paperSizeMode", e.target.value)}
@@ -257,70 +278,102 @@ export default function AdminSystemSettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">ইনভয়েস প্রিফিক্স</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ইনভয়েস প্রিফিক্স
+            </label>
             <input
               type="text"
               value={settings.invoicePrefix}
-              onChange={(e) => setSettings({ ...settings, invoicePrefix: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, invoicePrefix: e.target.value })
+              }
               onBlur={(e) => updateField("invoicePrefix", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">QR কোড ডেস্টিনেশন</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              QR কোড ডেস্টিনেশন
+            </label>
             <input
               type="text"
               value={settings.qrCodeDestination}
-              onChange={(e) => setSettings({ ...settings, qrCodeDestination: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, qrCodeDestination: e.target.value })
+              }
               onBlur={(e) => updateField("qrCodeDestination", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">পেইড SMS-এর ন্যূনতম অর্ডার মূল্য</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              পেইড SMS-এর ন্যূনতম অর্ডার মূল্য
+            </label>
             <input
               type="number"
               value={settings.minAmountForPaidSMS}
-              onChange={(e) => setSettings({ ...settings, minAmountForPaidSMS: Number(e.target.value) })}
-              onBlur={(e) => updateField("minAmountForPaidSMS", Number(e.target.value))}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  minAmountForPaidSMS: Number(e.target.value),
+                })
+              }
+              onBlur={(e) =>
+                updateField("minAmountForPaidSMS", Number(e.target.value))
+              }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
-                    <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">ডিফল্ট হিরো ইউটিউব URL</label>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ডিফল্ট হিরো ইউটিউব URL
+            </label>
             <input
               type="text"
               value={settings.heroYoutubeUrl}
-              onChange={(e) => setSettings({ ...settings, heroYoutubeUrl: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, heroYoutubeUrl: e.target.value })
+              }
               onBlur={(e) => updateField("heroYoutubeUrl", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">YouTube চ্যানেল (Subscribe বাটন)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              YouTube চ্যানেল (Subscribe বাটন)
+            </label>
             <input
               type="text"
               value={settings.youtubeChannelUrl || ""}
-              onChange={(e) => setSettings({ ...settings, youtubeChannelUrl: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, youtubeChannelUrl: e.target.value })
+              }
               onBlur={(e) => updateField("youtubeChannelUrl", e.target.value)}
               placeholder="https://www.youtube.com/@FarmerKamol"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Facebook পেজ (Follow বাটন)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Facebook পেজ (Follow বাটন)
+            </label>
             <input
               type="text"
               value={settings.facebookPageUrl || ""}
-              onChange={(e) => setSettings({ ...settings, facebookPageUrl: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, facebookPageUrl: e.target.value })
+              }
               onBlur={(e) => updateField("facebookPageUrl", e.target.value)}
               placeholder="https://www.facebook.com/farmerkamol"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-3">টেক্সট/নাম্বার ফিল্ড থেকে বাইরে ক্লিক করলেই (blur) স্বয়ংক্রিয়ভাবে সেভ হয়ে যাবে</p>
+        <p className="text-xs text-gray-400 mt-3">
+          টেক্সট/নাম্বার ফিল্ড থেকে বাইরে ক্লিক করলেই (blur) স্বয়ংক্রিয়ভাবে
+          সেভ হয়ে যাবে
+        </p>
       </div>
     </div>
-  )
+  );
 }

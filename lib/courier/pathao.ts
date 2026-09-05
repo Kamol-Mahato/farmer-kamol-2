@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma";
 
 // ✅ Pathao API-এর credential ও mode .env থেকে আসবে — কোড কখনো বদলাতে হবে না,
 // শুধু .env-এ PATHAO_MODE=sandbox/production বদলালেই environment বদলে যাবে
-const PATHAO_MODE = process.env.PATHAO_MODE || "sandbox"
+const PATHAO_MODE = process.env.PATHAO_MODE || "sandbox";
 
 const PATHAO_CONFIG = {
   sandbox: {
@@ -19,24 +19,29 @@ const PATHAO_CONFIG = {
     username: process.env.PATHAO_USERNAME,
     password: process.env.PATHAO_PASSWORD,
   },
-}
+};
 
 function getConfig() {
-  return PATHAO_CONFIG[PATHAO_MODE as "sandbox" | "production"]
+  return PATHAO_CONFIG[PATHAO_MODE as "sandbox" | "production"];
 }
 
-let cachedToken: { token: string; expiresAt: number } | null = null
+let cachedToken: { token: string; expiresAt: number } | null = null;
 
 async function getAccessToken(): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now()) {
-    return cachedToken.token
+    return cachedToken.token;
   }
 
-  const config = getConfig()
-  if (!config.clientId || !config.clientSecret || !config.username || !config.password) {
+  const config = getConfig();
+  if (
+    !config.clientId ||
+    !config.clientSecret ||
+    !config.username ||
+    !config.password
+  ) {
     throw new Error(
-      `Pathao ${PATHAO_MODE} credentials .env-এ সেট করা নেই — PATHAO_${PATHAO_MODE === "sandbox" ? "SANDBOX_" : ""}CLIENT_ID ইত্যাদি চেক করো`
-    )
+      `Pathao ${PATHAO_MODE} credentials .env-এ সেট করা নেই — PATHAO_${PATHAO_MODE === "sandbox" ? "SANDBOX_" : ""}CLIENT_ID ইত্যাদি চেক করো`,
+    );
   }
 
   const res = await fetch(`${config.baseUrl}/aladdin/api/v1/issue-token`, {
@@ -49,73 +54,87 @@ async function getAccessToken(): Promise<string> {
       password: config.password,
       grant_type: "password",
     }),
-  })
+  });
 
   if (!res.ok) {
-    const errBody = await res.text()
-    throw new Error(`Pathao token নেওয়া যায়নি: ${res.status} ${errBody}`)
+    const errBody = await res.text();
+    throw new Error(`Pathao token নেওয়া যায়নি: ${res.status} ${errBody}`);
   }
 
-  const data = await res.json()
+  const data = await res.json();
   cachedToken = {
     token: data.access_token,
     expiresAt: Date.now() + 23 * 60 * 60 * 1000,
-  }
-  return cachedToken.token
+  };
+  return cachedToken.token;
 }
 
 export async function isCourierApiEnabled(): Promise<boolean> {
-  const settings = await prisma.systemControlCenter.findUnique({ where: { id: 1 } })
-  return settings ? !settings.disableLiveCourierAPI : false
+  const settings = await prisma.systemControlCenter.findUnique({
+    where: { id: 1 },
+  });
+  return settings ? !settings.disableLiveCourierAPI : false;
 }
 
 export async function getPathaoCities() {
-  const enabled = await isCourierApiEnabled()
-  if (!enabled) throw new Error("Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)")
+  const enabled = await isCourierApiEnabled();
+  if (!enabled)
+    throw new Error(
+      "Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)",
+    );
 
-  const config = getConfig()
-  const token = await getAccessToken()
+  const config = getConfig();
+  const token = await getAccessToken();
 
   const res = await fetch(`${config.baseUrl}/aladdin/api/v1/city-list`, {
     headers: { Authorization: `Bearer ${token}` },
-  })
-  if (!res.ok) throw new Error(`City list আনা যায়নি: ${res.status}`)
-  const data = await res.json()
-  return data.data?.data || []
+  });
+  if (!res.ok) throw new Error(`City list আনা যায়নি: ${res.status}`);
+  const data = await res.json();
+  return data.data?.data || [];
 }
 
 export async function getPathaoStores() {
-  const enabled = await isCourierApiEnabled()
-  if (!enabled) throw new Error("Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)")
+  const enabled = await isCourierApiEnabled();
+  if (!enabled)
+    throw new Error(
+      "Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)",
+    );
 
-  const config = getConfig()
-  const token = await getAccessToken()
+  const config = getConfig();
+  const token = await getAccessToken();
 
   const res = await fetch(`${config.baseUrl}/aladdin/api/v1/stores`, {
     headers: { Authorization: `Bearer ${token}` },
-  })
-  if (!res.ok) throw new Error(`Store list আনা যায়নি: ${res.status}`)
-  const data = await res.json()
-  return data.data?.data || []
+  });
+  if (!res.ok) throw new Error(`Store list আনা যায়নি: ${res.status}`);
+  const data = await res.json();
+  return data.data?.data || [];
 }
 
 export async function createPathaoStore(params: {
-  name: string
-  contactName: string
-  contactNumber: string
-  address: string
-  cityId: number
-  zoneId: number
+  name: string;
+  contactName: string;
+  contactNumber: string;
+  address: string;
+  cityId: number;
+  zoneId: number;
 }) {
-  const enabled = await isCourierApiEnabled()
-  if (!enabled) throw new Error("Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)")
+  const enabled = await isCourierApiEnabled();
+  if (!enabled)
+    throw new Error(
+      "Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)",
+    );
 
-  const config = getConfig()
-  const token = await getAccessToken()
+  const config = getConfig();
+  const token = await getAccessToken();
 
   const res = await fetch(`${config.baseUrl}/aladdin/api/v1/stores`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({
       name: params.name,
       contact_name: params.contactName,
@@ -125,35 +144,41 @@ export async function createPathaoStore(params: {
       city_id: params.cityId,
       zone_id: params.zoneId,
     }),
-  })
+  });
   if (!res.ok) {
-    const errBody = await res.text()
-    throw new Error(`Store বানানো যায়নি: ${res.status} ${errBody}`)
+    const errBody = await res.text();
+    throw new Error(`Store বানানো যায়নি: ${res.status} ${errBody}`);
   }
-  const data = await res.json()
-  return data.data
+  const data = await res.json();
+  return data.data;
 }
 
 // ✅ একটা অর্ডার Pathao-তে বুক করা — সফল হলে consignment_id রিটার্ন করবে
 export async function createPathaoOrder(params: {
-  storeId: number
-  merchantOrderId: string
-  recipientName: string
-  recipientPhone: string
-  recipientAddress: string
-  amountToCollect: number
-  itemDescription: string
-  itemQuantity: number
+  storeId: number;
+  merchantOrderId: string;
+  recipientName: string;
+  recipientPhone: string;
+  recipientAddress: string;
+  amountToCollect: number;
+  itemDescription: string;
+  itemQuantity: number;
 }) {
-  const enabled = await isCourierApiEnabled()
-  if (!enabled) throw new Error("Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)")
+  const enabled = await isCourierApiEnabled();
+  if (!enabled)
+    throw new Error(
+      "Courier API এখন বন্ধ আছে (System Control Center থেকে চালু করো)",
+    );
 
-  const config = getConfig()
-  const token = await getAccessToken()
+  const config = getConfig();
+  const token = await getAccessToken();
 
   const res = await fetch(`${config.baseUrl}/aladdin/api/v1/orders`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({
       store_id: params.storeId,
       merchant_order_id: params.merchantOrderId,
@@ -168,18 +193,20 @@ export async function createPathaoOrder(params: {
       item_description: params.itemDescription,
       amount_to_collect: params.amountToCollect,
     }),
-  })
+  });
 
-  const data = await res.json()
+  const data = await res.json();
 
   if (!res.ok || data.code !== 200) {
-    throw new Error(`Pathao order বুক করা যায়নি: ${data.message || res.status}`)
+    throw new Error(
+      `Pathao order বুক করা যায়নি: ${data.message || res.status}`,
+    );
   }
 
   return {
     consignmentId: data.data.consignment_id as string,
     trackingCode: data.data.merchant_order_id as string,
-  }
+  };
 }
 
-export { getAccessToken, getConfig, PATHAO_MODE }
+export { getAccessToken, getConfig, PATHAO_MODE };

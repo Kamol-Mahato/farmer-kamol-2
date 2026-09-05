@@ -1,46 +1,46 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { connectChatSocket } from "@/lib/chatSocket"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { connectChatSocket } from "@/lib/chatSocket";
 
 type LastMessage = {
-  id: number
-  text: string
-  senderType: string
-  createdAt: string
-} | null
+  id: number;
+  text: string;
+  senderType: string;
+  createdAt: string;
+} | null;
 
 type ConversationItem = {
-  id: number
-  visitorId: string
-  visitorName: string | null
-  visitorPhone: string | null
-  status: "OPEN" | "CLOSED"
-  lastMessageAt: string
-  createdAt: string
-  assignedTo: { id: number; name: string | null } | null
-  unreadCount: number
-  lastMessage: LastMessage
-}
+  id: number;
+  visitorId: string;
+  visitorName: string | null;
+  visitorPhone: string | null;
+  status: "OPEN" | "CLOSED";
+  lastMessageAt: string;
+  createdAt: string;
+  assignedTo: { id: number; name: string | null } | null;
+  unreadCount: number;
+  lastMessage: LastMessage;
+};
 
 type ChatMessage = {
-  id: number
-  senderType: "SYSTEM" | "CUSTOMER" | "ADMIN" | "AGENT"
-  senderId: number | null
-  text: string
-  isRead: boolean
-  createdAt: string
-}
+  id: number;
+  senderType: "SYSTEM" | "CUSTOMER" | "ADMIN" | "AGENT";
+  senderId: number | null;
+  text: string;
+  isRead: boolean;
+  createdAt: string;
+};
 
 type ConversationDetail = {
-  id: number
-  visitorId: string
-  visitorName: string | null
-  visitorPhone: string | null
-  status: "OPEN" | "CLOSED"
-  assignedTo: { id: number; name: string | null } | null
-  messages: ChatMessage[]
-}
+  id: number;
+  visitorId: string;
+  visitorName: string | null;
+  visitorPhone: string | null;
+  status: "OPEN" | "CLOSED";
+  assignedTo: { id: number; name: string | null } | null;
+  messages: ChatMessage[];
+};
 
 function formatTime(iso: string) {
   try {
@@ -49,93 +49,93 @@ function formatTime(iso: string) {
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
-    })
+    });
   } catch {
-    return iso
+    return iso;
   }
 }
 
 function previewText(text: string, max = 60) {
-  const t = text.replace(/\s+/g, " ").trim()
-  return t.length > max ? t.slice(0, max) + "…" : t
+  const t = text.replace(/\s+/g, " ").trim();
+  return t.length > max ? t.slice(0, max) + "…" : t;
 }
 
 export default function AdminChatPage() {
-  const [conversations, setConversations] = useState<ConversationItem[]>([])
-  const [filter, setFilter] = useState<"OPEN" | "CLOSED" | "ALL">("OPEN")
-  const [loadingList, setLoadingList] = useState(true)
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const selectedIdRef = useRef<number | null>(null)
-  const [detail, setDetail] = useState<ConversationDetail | null>(null)
-  const [loadingDetail, setLoadingDetail] = useState(false)
-  const [replyText, setReplyText] = useState("")
-  const [sending, setSending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [live, setLive] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const wsRef = useRef<WebSocket | null>(null)
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const fetchListRef = useRef<() => void>(() => {})
+  const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [filter, setFilter] = useState<"OPEN" | "CLOSED" | "ALL">("OPEN");
+  const [loadingList, setLoadingList] = useState(true);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const selectedIdRef = useRef<number | null>(null);
+  const [detail, setDetail] = useState<ConversationDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchListRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    selectedIdRef.current = selectedId
-  }, [selectedId])
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const fetchList = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/chat?status=${filter}`)
-      const data = await res.json()
-      if (res.ok) setConversations(data.conversations || [])
+      const res = await fetch(`/api/admin/chat?status=${filter}`);
+      const data = await res.json();
+      if (res.ok) setConversations(data.conversations || []);
     } catch {
       /* ignore */
     } finally {
-      setLoadingList(false)
+      setLoadingList(false);
     }
-  }, [filter])
+  }, [filter]);
 
   useEffect(() => {
     fetchListRef.current = () => {
-      void fetchList()
-    }
-  }, [fetchList])
+      void fetchList();
+    };
+  }, [fetchList]);
 
   const fetchDetail = useCallback(async (id: number, silent = false) => {
-    if (!silent) setLoadingDetail(true)
+    if (!silent) setLoadingDetail(true);
     try {
-      const res = await fetch(`/api/admin/chat/${id}`)
-      const data = await res.json()
+      const res = await fetch(`/api/admin/chat/${id}`);
+      const data = await res.json();
       if (res.ok) {
-        setDetail(data.conversation)
+        setDetail(data.conversation);
         setConversations((prev) =>
-          prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c))
-        )
+          prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
+        );
       } else {
-        setError(data.error || "লোড ব্যর্থ")
+        setError(data.error || "লোড ব্যর্থ");
       }
     } catch {
-      setError("নেটওয়ার্ক সমস্যা")
+      setError("নেটওয়ার্ক সমস্যা");
     } finally {
-      if (!silent) setLoadingDetail(false)
+      if (!silent) setLoadingDetail(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    setLoadingList(true)
-    fetchList()
-  }, [fetchList])
+    setLoadingList(true);
+    fetchList();
+  }, [fetchList]);
 
   // WebSocket real-time
   useEffect(() => {
-    let closedByUs = false
+    let closedByUs = false;
 
     const connect = () => {
       if (wsRef.current) {
         try {
-          wsRef.current.close()
+          wsRef.current.close();
         } catch {
           /* ignore */
         }
@@ -144,66 +144,70 @@ export default function AdminChatPage() {
       const ws = connectChatSocket({
         onConnected: () => setLive(true),
         onMessage: (data) => {
-          const msg = data as ChatMessage & { conversationId: number }
+          const msg = data as ChatMessage & { conversationId: number };
 
           if (selectedIdRef.current === msg.conversationId) {
             setDetail((prev) => {
-              if (!prev || prev.id !== msg.conversationId) return prev
-              if (prev.messages.some((m) => m.id === msg.id)) return prev
+              if (!prev || prev.id !== msg.conversationId) return prev;
+              if (prev.messages.some((m) => m.id === msg.id)) return prev;
               const withoutTemp = prev.messages.filter(
                 (m) =>
-                  !(m.id > 1e12 && m.text === msg.text && (m.senderType === "ADMIN" || m.senderType === "AGENT"))
-              )
-              return { ...prev, messages: [...withoutTemp, msg] }
-            })
+                  !(
+                    m.id > 1e12 &&
+                    m.text === msg.text &&
+                    (m.senderType === "ADMIN" || m.senderType === "AGENT")
+                  ),
+              );
+              return { ...prev, messages: [...withoutTemp, msg] };
+            });
           }
 
           setConversations((prev) => {
-            const idx = prev.findIndex((c) => c.id === msg.conversationId)
+            const idx = prev.findIndex((c) => c.id === msg.conversationId);
             const lastMessage = {
               id: msg.id,
               text: msg.text,
               senderType: msg.senderType,
               createdAt: msg.createdAt,
-            }
-            const isViewing = selectedIdRef.current === msg.conversationId
-            const isCustomer = msg.senderType === "CUSTOMER"
+            };
+            const isViewing = selectedIdRef.current === msg.conversationId;
+            const isCustomer = msg.senderType === "CUSTOMER";
 
             if (idx === -1) {
-              fetchListRef.current()
-              return prev
+              fetchListRef.current();
+              return prev;
             }
 
-            const next = [...prev]
-            const item = { ...next[idx] }
-            item.lastMessage = lastMessage
-            item.lastMessageAt = msg.createdAt
-            item.status = "OPEN"
+            const next = [...prev];
+            const item = { ...next[idx] };
+            item.lastMessage = lastMessage;
+            item.lastMessageAt = msg.createdAt;
+            item.status = "OPEN";
             if (isCustomer && !isViewing) {
-              item.unreadCount = (item.unreadCount || 0) + 1
+              item.unreadCount = (item.unreadCount || 0) + 1;
             }
-            next.splice(idx, 1)
-            next.unshift(item)
-            return next
-          })
+            next.splice(idx, 1);
+            next.unshift(item);
+            return next;
+          });
         },
         onConversation: (data) => {
           const conv = data as {
-            id: number
-            visitorName: string | null
-            visitorPhone: string | null
-            status: "OPEN" | "CLOSED"
-            lastMessageAt: string
-            lastMessage: LastMessage
-          }
+            id: number;
+            visitorName: string | null;
+            visitorPhone: string | null;
+            status: "OPEN" | "CLOSED";
+            lastMessageAt: string;
+            lastMessage: LastMessage;
+          };
 
           setConversations((prev) => {
-            const idx = prev.findIndex((c) => c.id === conv.id)
+            const idx = prev.findIndex((c) => c.id === conv.id);
             if (idx === -1) {
-              fetchListRef.current()
-              return prev
+              fetchListRef.current();
+              return prev;
             }
-            const next = [...prev]
+            const next = [...prev];
             next[idx] = {
               ...next[idx],
               visitorName: conv.visitorName,
@@ -211,9 +215,9 @@ export default function AdminChatPage() {
               status: conv.status,
               lastMessageAt: conv.lastMessageAt,
               lastMessage: conv.lastMessage,
-            }
-            return next
-          })
+            };
+            return next;
+          });
 
           if (selectedIdRef.current === conv.id) {
             setDetail((prev) =>
@@ -224,50 +228,50 @@ export default function AdminChatPage() {
                     visitorName: conv.visitorName,
                     visitorPhone: conv.visitorPhone,
                   }
-                : prev
-            )
+                : prev,
+            );
           }
         },
         onError: () => setLive(false),
         onClose: () => {
-          setLive(false)
+          setLive(false);
           if (!closedByUs) {
-            reconnectTimer.current = setTimeout(connect, 2000)
+            reconnectTimer.current = setTimeout(connect, 2000);
           }
         },
-      })
-      wsRef.current = ws
-    }
+      });
+      wsRef.current = ws;
+    };
 
-    connect()
+    connect();
 
     return () => {
-      closedByUs = true
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
-      wsRef.current?.close()
-      wsRef.current = null
-      setLive(false)
-    }
-  }, [])
+      closedByUs = true;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      wsRef.current?.close();
+      wsRef.current = null;
+      setLive(false);
+    };
+  }, []);
 
   useEffect(() => {
-    if (detail?.messages) scrollToBottom()
-  }, [detail?.messages?.length])
+    if (detail?.messages) scrollToBottom();
+  }, [detail?.messages?.length]);
 
   async function openConversation(id: number) {
-    setSelectedId(id)
-    setError(null)
-    setReplyText("")
-    await fetchDetail(id)
+    setSelectedId(id);
+    setError(null);
+    setReplyText("");
+    await fetchDetail(id);
   }
 
   async function handleReply(e: React.FormEvent) {
-    e.preventDefault()
-    if (!selectedId || !replyText.trim() || sending) return
-    setSending(true)
-    setError(null)
-    const text = replyText.trim()
-    setReplyText("")
+    e.preventDefault();
+    if (!selectedId || !replyText.trim() || sending) return;
+    setSending(true);
+    setError(null);
+    const text = replyText.trim();
+    setReplyText("");
 
     const temp: ChatMessage = {
       id: Date.now(),
@@ -276,57 +280,61 @@ export default function AdminChatPage() {
       text,
       isRead: true,
       createdAt: new Date().toISOString(),
-    }
+    };
     setDetail((prev) =>
-      prev ? { ...prev, messages: [...prev.messages, temp] } : prev
-    )
+      prev ? { ...prev, messages: [...prev.messages, temp] } : prev,
+    );
 
     try {
       const res = await fetch(`/api/admin/chat/${selectedId}/reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "পাঠাতে ব্যর্থ")
-        await fetchDetail(selectedId)
+        setError(data.error || "পাঠাতে ব্যর্থ");
+        await fetchDetail(selectedId);
       }
     } catch {
-      setError("নেটওয়ার্ক সমস্যা")
+      setError("নেটওয়ার্ক সমস্যা");
     } finally {
-      setSending(false)
+      setSending(false);
     }
   }
 
   async function toggleStatus() {
-    if (!detail) return
-    const next = detail.status === "OPEN" ? "CLOSED" : "OPEN"
+    if (!detail) return;
+    const next = detail.status === "OPEN" ? "CLOSED" : "OPEN";
     try {
       const res = await fetch(`/api/admin/chat/${detail.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: next }),
-      })
+      });
       if (res.ok) {
-        setDetail((prev) => (prev ? { ...prev, status: next } : prev))
-        fetchList()
+        setDetail((prev) => (prev ? { ...prev, status: next } : prev));
+        fetchList();
       }
     } catch {
       /* ignore */
     }
   }
 
-  const totalUnread = conversations.reduce((s, c) => s + c.unreadCount, 0)
+  const totalUnread = conversations.reduce((s, c) => s + c.unreadCount, 0);
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-10">
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-2xl sm:text-3xl font-bold text-green-800">লাইভ চ্যাট</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-green-800">
+            লাইভ চ্যাট
+          </h1>
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              live ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+              live
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
             }`}
           >
             {live ? "● WebSocket" : "○ সংযোগ..."}
@@ -352,8 +360,8 @@ export default function AdminChatPage() {
                 ? f === "OPEN"
                   ? "bg-green-600 text-white border-green-600"
                   : f === "CLOSED"
-                  ? "bg-gray-600 text-white border-gray-600"
-                  : "bg-black text-white border-black"
+                    ? "bg-gray-600 text-white border-gray-600"
+                    : "bg-black text-white border-black"
                 : "border-gray-300 text-gray-600 hover:bg-gray-50"
             }`}
           >
@@ -369,12 +377,16 @@ export default function AdminChatPage() {
           </div>
           <div className="overflow-y-auto flex-1">
             {loadingList ? (
-              <p className="text-center text-gray-400 py-10 text-sm">লোড হচ্ছে...</p>
+              <p className="text-center text-gray-400 py-10 text-sm">
+                লোড হচ্ছে...
+              </p>
             ) : conversations.length === 0 ? (
-              <p className="text-center text-gray-400 py-10 text-sm">কোনো চ্যাট নেই</p>
+              <p className="text-center text-gray-400 py-10 text-sm">
+                কোনো চ্যাট নেই
+              </p>
             ) : (
               conversations.map((c) => {
-                const active = selectedId === c.id
+                const active = selectedId === c.id;
                 return (
                   <button
                     key={c.id}
@@ -387,7 +399,9 @@ export default function AdminChatPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-sm text-gray-800 truncate">
-                            {c.visitorName || c.visitorPhone || `ভিজিটর #${c.id}`}
+                            {c.visitorName ||
+                              c.visitorPhone ||
+                              `ভিজিটর #${c.id}`}
                           </span>
                           {c.unreadCount > 0 && (
                             <span className="shrink-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -402,10 +416,14 @@ export default function AdminChatPage() {
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
-                        <p className="text-[10px] text-gray-400">{formatTime(c.lastMessageAt)}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {formatTime(c.lastMessageAt)}
+                        </p>
                         <span
                           className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                            c.status === "OPEN" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                            c.status === "OPEN"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-500"
                           }`}
                         >
                           {c.status === "OPEN" ? "খোলা" : "বন্ধ"}
@@ -413,7 +431,7 @@ export default function AdminChatPage() {
                       </div>
                     </div>
                   </button>
-                )
+                );
               })
             )}
           </div>
@@ -425,17 +443,23 @@ export default function AdminChatPage() {
               বাম পাশ থেকে একটি কনভারসেশন সিলেক্ট করুন
             </div>
           ) : loadingDetail && !detail ? (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">লোড হচ্ছে...</div>
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+              লোড হচ্ছে...
+            </div>
           ) : detail ? (
             <>
               <div className="px-3 sm:px-4 py-3 border-b bg-gray-50 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <h2 className="font-bold text-sm sm:text-base text-gray-800 truncate">
-                    {detail.visitorName || detail.visitorPhone || `ভিজিটর #${detail.id}`}
+                    {detail.visitorName ||
+                      detail.visitorPhone ||
+                      `ভিজিটর #${detail.id}`}
                   </h2>
                   <p className="text-[11px] text-gray-400 truncate">
                     {detail.visitorPhone ? `📞 ${detail.visitorPhone} · ` : ""}
-                    {detail.assignedTo?.name ? `অ্যাসাইন: ${detail.assignedTo.name}` : "অ্যাসাইন হয়নি"}
+                    {detail.assignedTo?.name
+                      ? `অ্যাসাইন: ${detail.assignedTo.name}`
+                      : "অ্যাসাইন হয়নি"}
                   </p>
                 </div>
                 <button
@@ -452,43 +476,58 @@ export default function AdminChatPage() {
 
               <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-gray-50">
                 {detail.messages.map((msg) => {
-                  const isStaff = msg.senderType === "ADMIN" || msg.senderType === "AGENT"
-                  const isCustomer = msg.senderType === "CUSTOMER"
+                  const isStaff =
+                    msg.senderType === "ADMIN" || msg.senderType === "AGENT";
+                  const isCustomer = msg.senderType === "CUSTOMER";
                   return (
-                    <div key={msg.id} className={`flex ${isStaff ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={msg.id}
+                      className={`flex ${isStaff ? "justify-end" : "justify-start"}`}
+                    >
                       <div
                         className={`max-w-[85%] px-3 py-2 rounded-2xl text-[12.5px] leading-relaxed shadow-sm ${
                           isStaff
                             ? "bg-[#055a36] text-white rounded-br-none"
                             : isCustomer
-                            ? "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
-                            : "bg-amber-50 text-amber-900 border border-amber-100 rounded-bl-none text-[11px]"
+                              ? "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                              : "bg-amber-50 text-amber-900 border border-amber-100 rounded-bl-none text-[11px]"
                         }`}
                       >
                         {!isStaff && msg.senderType !== "CUSTOMER" && (
-                          <span className="block text-[10px] font-semibold mb-0.5 opacity-70">সিস্টেম</span>
+                          <span className="block text-[10px] font-semibold mb-0.5 opacity-70">
+                            সিস্টেম
+                          </span>
                         )}
                         {isStaff && (
                           <span className="block text-[10px] font-semibold mb-0.5 text-emerald-100">
                             {msg.senderType === "AGENT" ? "এজেন্ট" : "অ্যাডমিন"}
                           </span>
                         )}
-                        <span className="whitespace-pre-wrap break-words">{msg.text}</span>
-                        <span className={`block text-[9px] mt-1 ${isStaff ? "text-emerald-100/80" : "text-gray-400"}`}>
+                        <span className="whitespace-pre-wrap break-words">
+                          {msg.text}
+                        </span>
+                        <span
+                          className={`block text-[9px] mt-1 ${isStaff ? "text-emerald-100/80" : "text-gray-400"}`}
+                        >
                           {formatTime(msg.createdAt)}
                         </span>
                       </div>
                     </div>
-                  )
+                  );
                 })}
                 <div ref={messagesEndRef} />
               </div>
 
               {error && (
-                <p className="px-3 py-1 text-xs text-red-600 bg-red-50 border-t border-red-100">{error}</p>
+                <p className="px-3 py-1 text-xs text-red-600 bg-red-50 border-t border-red-100">
+                  {error}
+                </p>
               )}
 
-              <form onSubmit={handleReply} className="p-2 sm:p-3 border-t bg-white flex gap-2">
+              <form
+                onSubmit={handleReply}
+                className="p-2 sm:p-3 border-t bg-white flex gap-2"
+              >
                 <input
                   type="text"
                   value={replyText}
@@ -499,7 +538,9 @@ export default function AdminChatPage() {
                 />
                 <button
                   type="submit"
-                  disabled={!replyText.trim() || sending || detail.status === "CLOSED"}
+                  disabled={
+                    !replyText.trim() || sending || detail.status === "CLOSED"
+                  }
                   className="bg-[#055a36] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#034026] disabled:opacity-50 transition"
                 >
                   {sending ? "..." : "পাঠান"}
@@ -510,5 +551,5 @@ export default function AdminChatPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

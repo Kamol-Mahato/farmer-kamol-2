@@ -1,15 +1,15 @@
-import { prisma } from "@/lib/prisma"
-import { notFound } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import ProductCard from "@/app/en/components/ProductCard"
-import ProductActions from "./ProductActions"
-import { safeJsonLd } from "@/lib/jsonLd"
-import { cache } from "react"
-import ReviewForm from "@/app/components/ReviewForm"
-import { getSavePercent } from "@/lib/pricing"
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import ProductCard from "@/app/en/components/ProductCard";
+import ProductActions from "./ProductActions";
+import { safeJsonLd } from "@/lib/jsonLd";
+import { cache } from "react";
+import ReviewForm from "@/app/components/ReviewForm";
+import { getSavePercent } from "@/lib/pricing";
 
-export const revalidate = 86400
+export const revalidate = 86400;
 
 const getProduct = cache((slug: string) =>
   prisma.product.findUnique({
@@ -23,16 +23,20 @@ const getProduct = cache((slug: string) =>
         orderBy: { createdAt: "desc" },
       },
     },
-  })
-)
+  }),
+);
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const product = await getProduct(slug)
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await getProduct(slug);
   if (!product) {
-    return { title: "Product Not Found - Farmer Kamol" }
+    return { title: "Product Not Found - Farmer Kamol" };
   }
-  const displayName = product.nameEn || product.name
+  const displayName = product.nameEn || product.name;
   return {
     title: `${displayName} - Farmer Kamol`,
     description:
@@ -46,14 +50,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         en: `/en/shop/${slug}`,
       },
     },
-  }
+  };
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const product = await getProduct(slug)
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await getProduct(slug);
   if (!product || !product.isActive) {
-    notFound()
+    notFound();
   }
   const relatedProducts = product.categoryId
     ? await prisma.product.findMany({
@@ -65,18 +73,19 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         include: { images: true, category: true },
         take: 4,
       })
-    : []
-  const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg"
-  const isOutOfStock = product.stockQty <= 0
-  const displayName = product.nameEn || product.name
-  const displayDescription = product.descriptionEn || product.description
-  const displayCategory = product.category?.nameEn || product.category?.name
+    : [];
+  const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg";
+  const isOutOfStock = product.stockQty <= 0;
+  const displayName = product.nameEn || product.name;
+  const displayDescription = product.descriptionEn || product.description;
+  const displayCategory = product.category?.nameEn || product.category?.name;
   const avgRating =
     product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-      : 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : 0;
 
- // ✅ Product Schema (structured data for SEO + AI search)
+  // ✅ Product Schema (structured data for SEO + AI search)
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -96,7 +105,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       offers: {
         "@type": "Offer",
         priceCurrency: "BDT",
-        price: getSavePercent(product.pricePerUnit, product.discountPrice) !== null ? product.discountPrice : product.pricePerUnit,
+        price:
+          getSavePercent(product.pricePerUnit, product.discountPrice) !== null
+            ? product.discountPrice
+            : product.pricePerUnit,
         availability: isOutOfStock
           ? "https://schema.org/OutOfStock"
           : "https://schema.org/InStock",
@@ -104,7 +116,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         hasMerchantReturnPolicy: {
           "@type": "MerchantReturnPolicy",
           applicableCountry: "BD",
-          returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+          returnPolicyCategory:
+            "https://schema.org/MerchantReturnFiniteReturnWindow",
           merchantReturnDays: 7,
           returnMethod: "https://schema.org/ReturnByMail",
           returnFees: "https://schema.org/FreeReturn",
@@ -129,17 +142,32 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       ratingValue: product.reviews.length > 0 ? avgRating.toFixed(1) : "5.0",
       reviewCount: product.reviews.length > 0 ? product.reviews.length : 1,
     },
-  }
+  };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.farmerkamol.com/en" },
-      { "@type": "ListItem", position: 2, name: "Shop", item: "https://www.farmerkamol.com/en/shop" },
-      { "@type": "ListItem", position: 3, name: displayName, item: `https://www.farmerkamol.com/en/shop/${product.slug}` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.farmerkamol.com/en",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Shop",
+        item: "https://www.farmerkamol.com/en/shop",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: displayName,
+        item: `https://www.farmerkamol.com/en/shop/${product.slug}`,
+      },
     ],
-  }
+  };
 
   return (
     <>
@@ -153,9 +181,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <nav className="text-sm text-gray-500 mb-4">
-          <Link href="/en" className="hover:text-green-700">Home</Link>
+          <Link href="/en" className="hover:text-green-700">
+            Home
+          </Link>
           <span className="mx-1.5">/</span>
-          <Link href="/en/shop" className="hover:text-green-700">Shop</Link>
+          <Link href="/en/shop" className="hover:text-green-700">
+            Shop
+          </Link>
           <span className="mx-1.5">/</span>
           <span className="text-gray-700 font-medium">{displayName}</span>
         </nav>
@@ -201,31 +233,61 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 {displayCategory}
               </span>
             )}
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-2 mb-3">{displayName}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-2 mb-3">
+              {displayName}
+            </h1>
             {avgRating > 0 && (
               <div className="flex items-center gap-1 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className={star <= Math.round(avgRating) ? "text-yellow-500" : "text-gray-300"}>
+                  <span
+                    key={star}
+                    className={
+                      star <= Math.round(avgRating)
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }
+                  >
                     ★
                   </span>
                 ))}
-                <span className="text-sm text-gray-500 ml-1">({product.reviews.length} reviews)</span>
+                <span className="text-sm text-gray-500 ml-1">
+                  ({product.reviews.length} reviews)
+                </span>
               </div>
             )}
             <div className="mb-4">
               {product.priceType === "NEGOTIABLE" ? (
-                <p className="text-lg font-bold text-green-700">💬 Contact us for price</p>
+                <p className="text-lg font-bold text-green-700">
+                  💬 Contact us for price
+                </p>
               ) : (
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="text-3xl font-extrabold text-black">
-                    ৳ {getSavePercent(product.pricePerUnit, product.discountPrice) !== null ? product.discountPrice : product.pricePerUnit}
+                    ৳{" "}
+                    {getSavePercent(
+                      product.pricePerUnit,
+                      product.discountPrice,
+                    ) !== null
+                      ? product.discountPrice
+                      : product.pricePerUnit}
                   </span>
-                  <span className="text-sm text-gray-400">/ {product.unit}</span>
-                  {getSavePercent(product.pricePerUnit, product.discountPrice) !== null && (
+                  <span className="text-sm text-gray-400">
+                    / {product.unit}
+                  </span>
+                  {getSavePercent(
+                    product.pricePerUnit,
+                    product.discountPrice,
+                  ) !== null && (
                     <>
-                      <span className="text-lg text-gray-400 line-through">৳ {product.pricePerUnit}</span>
+                      <span className="text-lg text-gray-400 line-through">
+                        ৳ {product.pricePerUnit}
+                      </span>
                       <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        {getSavePercent(product.pricePerUnit, product.discountPrice)}% Save
+                        {getSavePercent(
+                          product.pricePerUnit,
+                          product.discountPrice,
+                        )}
+                        % Save
                       </span>
                     </>
                   )}
@@ -233,14 +295,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
             {displayDescription && (
-              <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">{displayDescription}</p>
+              <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">
+                {displayDescription}
+              </p>
             )}
             <ProductActions
               product={{
                 id: product.id,
                 name: product.name,
                 nameEn: product.nameEn,
-                pricePerUnit: getSavePercent(product.pricePerUnit, product.discountPrice) !== null ? (product.discountPrice as number) : product.pricePerUnit,
+                pricePerUnit:
+                  getSavePercent(
+                    product.pricePerUnit,
+                    product.discountPrice,
+                  ) !== null
+                    ? (product.discountPrice as number)
+                    : product.pricePerUnit,
                 unit: product.unit,
                 stockQty: product.stockQty,
                 priceType: product.priceType,
@@ -251,23 +321,41 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
         {/* Reviews */}
         <div className="mb-12">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Customer Reviews</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Customer Reviews
+          </h2>
           <ReviewForm productId={product.id} />
           {product.reviews.length > 0 && (
             <div className="space-y-4">
               {product.reviews.map((review) => (
-                <div key={review.id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                <div
+                  key={review.id}
+                  className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm"
+                >
                   <div className="flex items-center justify-between mb-1">
-                    <p className="font-bold text-gray-800 text-sm">{review.user.name}</p>
+                    <p className="font-bold text-gray-800 text-sm">
+                      {review.user.name}
+                    </p>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className={star <= review.rating ? "text-yellow-500" : "text-gray-300"}>
+                        <span
+                          key={star}
+                          className={
+                            star <= review.rating
+                              ? "text-yellow-500"
+                              : "text-gray-300"
+                          }
+                        >
                           ★
                         </span>
                       ))}
                     </div>
                   </div>
-                  {review.comment && <p className="text-gray-600 text-sm mt-1">{review.comment}</p>}
+                  {review.comment && (
+                    <p className="text-gray-600 text-sm mt-1">
+                      {review.comment}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -276,7 +364,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Related Products</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Related Products
+            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
@@ -286,5 +376,5 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         )}
       </div>
     </>
-  )
+  );
 }

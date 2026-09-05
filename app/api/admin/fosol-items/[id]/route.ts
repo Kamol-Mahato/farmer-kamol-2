@@ -1,25 +1,25 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { verifyAdminOnly } from "@/lib/adminAuth"
-import { sanitizeHtml } from "@/lib/sanitize"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyAdminOnly } from "@/lib/adminAuth";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const admin = await verifyAdminOnly()
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
-  const { id } = await params
-  const itemId = Number(id)
+  const { id } = await params;
+  const itemId = Number(id);
   if (!itemId || isNaN(itemId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
   try {
-    const body = await req.json()
+    const body = await req.json();
     const item = await prisma.fosolItem.update({
       where: { id: itemId },
       data: {
@@ -47,37 +47,37 @@ export async function PUT(
         seoDescription: body.seoDescription ?? null,
       },
       include: { category: true },
-    })
-    return NextResponse.json(item)
+    });
+    return NextResponse.json(item);
   } catch (e: any) {
-    console.error(e)
+    console.error(e);
     if (e?.code === "P2002") {
-      return NextResponse.json({ error: "Slug আগেই ব্যবহৃত" }, { status: 409 })
+      return NextResponse.json({ error: "Slug আগেই ব্যবহৃত" }, { status: 409 });
     }
-    return NextResponse.json({ error: "আপডেট ব্যর্থ" }, { status: 500 })
+    return NextResponse.json({ error: "আপডেট ব্যর্থ" }, { status: 500 });
   }
 }
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const admin = await verifyAdminOnly()
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
-  const { id } = await params
-  const itemId = Number(id)
+  const { id } = await params;
+  const itemId = Number(id);
   if (!itemId || isNaN(itemId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
   try {
-    await prisma.fosolItem.delete({ where: { id: itemId } })
-    return NextResponse.json({ success: true })
+    await prisma.fosolItem.delete({ where: { id: itemId } });
+    return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: "মুছা যায়নি" }, { status: 500 })
+    console.error(e);
+    return NextResponse.json({ error: "মুছা যায়নি" }, { status: 500 });
   }
 }

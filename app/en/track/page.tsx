@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState } from "react";
+import Link from "next/link";
 
 const STATUS_EN: Record<string, string> = {
   PENDING: "Pending",
@@ -15,7 +15,7 @@ const STATUS_EN: Record<string, string> = {
   REFUNDED: "Refunded",
   LOST: "Lost",
   DAMAGED: "Damaged",
-}
+};
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -29,50 +29,54 @@ const STATUS_COLOR: Record<string, string> = {
   REFUNDED: "bg-gray-50 text-gray-700 border-gray-200",
   LOST: "bg-red-50 text-red-700 border-red-200",
   DAMAGED: "bg-red-50 text-red-700 border-red-200",
-}
+};
 
 interface TrackResult {
-  orderId: string
-  orderStatus: string
-  courierProvider: string | null
-  courierStatus: string | null
-  createdAt: string
+  orderId: string;
+  orderStatus: string;
+  courierProvider: string | null;
+  courierStatus: string | null;
+  createdAt: string;
 }
 
 export default function TrackPageEn() {
-  const [orderId, setOrderId] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [result, setResult] = useState<TrackResult | null>(null)
+  const [orderId, setOrderId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<TrackResult | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    const trimmed = orderId.trim()
+    e.preventDefault();
+    const trimmed = orderId.trim();
     if (!trimmed) {
-      setError("Please enter Order ID")
-      return
+      setError("Please enter Order ID");
+      return;
     }
-    setLoading(true)
-    setError("")
-    setResult(null)
+    setLoading(true);
+    setError("");
+    setResult(null);
     try {
-      const res = await fetch(`/api/orders/track?orderId=${encodeURIComponent(trimmed)}`)
-      const data = await res.json()
+      const res = await fetch(
+        `/api/orders/track?orderId=${encodeURIComponent(trimmed)}`,
+      );
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong")
-        return
+        setError(data.error || "Something went wrong");
+        return;
       }
-      setResult(data)
+      setResult(data);
     } catch {
-      setError("Could not connect to server")
+      setError("Could not connect to server");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
     <div className="max-w-lg mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-green-800 text-center mb-2">Track Your Order</h1>
+      <h1 className="text-2xl font-bold text-green-800 text-center mb-2">
+        Track Your Order
+      </h1>
       <p className="text-sm text-gray-500 text-center mb-8">
         Login to see full history, or search by Order ID for status only.
       </p>
@@ -83,12 +87,18 @@ export default function TrackPageEn() {
           className="bg-green-700 text-white rounded-2xl p-5 text-center font-bold hover:bg-green-600 transition shadow-sm"
         >
           🔐 Login to View My Orders
-          <p className="text-green-100 text-xs font-normal mt-1">Full history & details</p>
+          <p className="text-green-100 text-xs font-normal mt-1">
+            Full history & details
+          </p>
         </Link>
 
         <div className="bg-white border border-green-200 rounded-2xl p-5 shadow-sm">
-          <p className="font-bold text-green-800 text-center mb-1">📦 Search by Order ID</p>
-          <p className="text-xs text-gray-500 text-center mb-4">No login needed — status only</p>
+          <p className="font-bold text-green-800 text-center mb-1">
+            📦 Search by Order ID
+          </p>
+          <p className="text-xs text-gray-500 text-center mb-4">
+            No login needed — status only
+          </p>
 
           <form onSubmit={handleSearch} className="space-y-3">
             <input
@@ -108,14 +118,18 @@ export default function TrackPageEn() {
           </form>
 
           {error && (
-            <p className="text-red-500 text-sm text-center mt-3 font-medium">{error}</p>
+            <p className="text-red-500 text-sm text-center mt-3 font-medium">
+              {error}
+            </p>
           )}
 
           {result && (
             <div className="mt-5 bg-green-50 border border-green-100 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Order ID</span>
-                <span className="font-bold text-gray-900 tracking-wider">{result.orderId}</span>
+                <span className="font-bold text-gray-900 tracking-wider">
+                  {result.orderId}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Date</span>
@@ -127,7 +141,8 @@ export default function TrackPageEn() {
                 <span className="text-xs text-gray-500">Status</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                    STATUS_COLOR[result.orderStatus] || "bg-gray-50 text-gray-700 border-gray-200"
+                    STATUS_COLOR[result.orderStatus] ||
+                    "bg-gray-50 text-gray-700 border-gray-200"
                   }`}
                 >
                   {STATUS_EN[result.orderStatus] || result.orderStatus}
@@ -138,7 +153,9 @@ export default function TrackPageEn() {
                 <span className="text-sm font-medium text-gray-700">
                   {result.courierProvider || result.courierStatus
                     ? `${result.courierProvider || ""}${
-                        result.courierProvider && result.courierStatus ? " • " : ""
+                        result.courierProvider && result.courierStatus
+                          ? " • "
+                          : ""
                       }${result.courierStatus || ""}`
                     : "—"}
                 </span>
@@ -148,5 +165,5 @@ export default function TrackPageEn() {
         </div>
       </div>
     </div>
-  )
+  );
 }

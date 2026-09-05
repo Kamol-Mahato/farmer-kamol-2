@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "পেন্ডিং (Pending)",
@@ -13,28 +13,45 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "রিফান্ড (Refunded)",
   LOST: "হারিয়ে গেছে (Lost)",
   DAMAGED: "নষ্ট (Damaged)",
-}
+};
 
 // Admin override করতে পারে বলে বর্তমান বাদে বাকি সব status দেখানো হবে
-const ALL_STATUSES = ["PENDING", "CONFIRMED", "DELIVERY_ONGOING", "DELIVERED", "RETURNED", "CANCELLED", "REFUNDED", "LOST", "DAMAGED"]
+const ALL_STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "DELIVERY_ONGOING",
+  "DELIVERED",
+  "RETURNED",
+  "CANCELLED",
+  "REFUNDED",
+  "LOST",
+  "DAMAGED",
+];
 
 interface OrderStatusUpdateProps {
-  orderId: number
-  currentStatus: string
-  finalCodAmount: number
-  collectedAmount: number | null
+  orderId: number;
+  currentStatus: string;
+  finalCodAmount: number;
+  collectedAmount: number | null;
 }
 
-export default function OrderStatusUpdate({ orderId, currentStatus, finalCodAmount, collectedAmount }: OrderStatusUpdateProps) {
-  const router = useRouter()
-  const [status, setStatus] = useState(currentStatus)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ text: "", isError: false })
-  const [pendingDeliveredAmount, setPendingDeliveredAmount] = useState<string | null>(null)
+export default function OrderStatusUpdate({
+  orderId,
+  currentStatus,
+  finalCodAmount,
+  collectedAmount,
+}: OrderStatusUpdateProps) {
+  const router = useRouter();
+  const [status, setStatus] = useState(currentStatus);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", isError: false });
+  const [pendingDeliveredAmount, setPendingDeliveredAmount] = useState<
+    string | null
+  >(null);
 
   async function submitStatus(newStatus: string, amount?: string) {
-    setLoading(true)
-    setMessage({ text: "", isError: false })
+    setLoading(true);
+    setMessage({ text: "", isError: false });
     try {
       const res = await fetch("/api/admin/orders", {
         method: "POST",
@@ -44,35 +61,42 @@ export default function OrderStatusUpdate({ orderId, currentStatus, finalCodAmou
           status: newStatus,
           ...(amount !== undefined ? { collectedAmount: Number(amount) } : {}),
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setMessage({ text: data.error || "স্ট্যাটাস পরিবর্তন করা যায়নি", isError: true })
-        return
+        setMessage({
+          text: data.error || "স্ট্যাটাস পরিবর্তন করা যায়নি",
+          isError: true,
+        });
+        return;
       }
-      setStatus(newStatus)
-      setMessage({ text: "✅ স্ট্যাটাস সফলভাবে আপডেট হয়েছে!", isError: false })
-      router.refresh()
+      setStatus(newStatus);
+      setMessage({
+        text: "✅ স্ট্যাটাস সফলভাবে আপডেট হয়েছে!",
+        isError: false,
+      });
+      router.refresh();
     } catch {
-      setMessage({ text: "সার্ভার সমস্যা, আবার চেষ্টা করুন", isError: true })
+      setMessage({ text: "সার্ভার সমস্যা, আবার চেষ্টা করুন", isError: true });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const newStatus = e.target.value
-    if (!newStatus || newStatus === status) return
+    const newStatus = e.target.value;
+    if (!newStatus || newStatus === status) return;
 
     if (newStatus === "DELIVERED") {
       // ✅ Delivered মার্ক করার আগে Collected Amount চাওয়া হবে
-      setPendingDeliveredAmount(String(finalCodAmount))
-      return
+      setPendingDeliveredAmount(String(finalCodAmount));
+      return;
     }
-    submitStatus(newStatus)
+    submitStatus(newStatus);
   }
 
-  const due = collectedAmount !== null ? collectedAmount - finalCodAmount : null
+  const due =
+    collectedAmount !== null ? collectedAmount - finalCodAmount : null;
 
   return (
     <div className="space-y-4">
@@ -85,11 +109,17 @@ export default function OrderStatusUpdate({ orderId, currentStatus, finalCodAmou
         >
           <option value={status}>{STATUS_LABELS[status]}</option>
           {ALL_STATUSES.filter((s) => s !== status).map((s) => (
-            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+            <option key={s} value={s}>
+              {STATUS_LABELS[s]}
+            </option>
           ))}
         </select>
 
-        {loading && <span className="text-sm text-gray-500 animate-pulse font-medium">আপডেট হচ্ছে...</span>}
+        {loading && (
+          <span className="text-sm text-gray-500 animate-pulse font-medium">
+            আপডেট হচ্ছে...
+          </span>
+        )}
       </div>
 
       {/* 💰 Collected Amount ইনপুট বক্স — শুধু Delivered সিলেক্ট করলে দেখাবে */}
@@ -107,12 +137,15 @@ export default function OrderStatusUpdate({ orderId, currentStatus, finalCodAmou
             />
             <button
               onClick={() => {
-                if (pendingDeliveredAmount === "" || isNaN(Number(pendingDeliveredAmount))) {
-                  alert("সঠিক টাকার পরিমাণ দিন")
-                  return
+                if (
+                  pendingDeliveredAmount === "" ||
+                  isNaN(Number(pendingDeliveredAmount))
+                ) {
+                  alert("সঠিক টাকার পরিমাণ দিন");
+                  return;
                 }
-                submitStatus("DELIVERED", pendingDeliveredAmount)
-                setPendingDeliveredAmount(null)
+                submitStatus("DELIVERED", pendingDeliveredAmount);
+                setPendingDeliveredAmount(null);
               }}
               className="bg-black text-white px-4 py-2 rounded-lg font-bold text-sm"
             >
@@ -130,16 +163,24 @@ export default function OrderStatusUpdate({ orderId, currentStatus, finalCodAmou
 
       {/* Due/Discrepancy দেখানো */}
       {due !== null && (
-        <p className={`text-sm font-bold ${due === 0 ? "text-gray-600" : due > 0 ? "text-green-700" : "text-red-600"}`}>
-          {due === 0 ? "হিসাব ঠিক আছে" : due > 0 ? `বাড়তি সংগ্রহ: +৳${due}` : `ঘাটতি: ৳${Math.abs(due)}`}
+        <p
+          className={`text-sm font-bold ${due === 0 ? "text-gray-600" : due > 0 ? "text-green-700" : "text-red-600"}`}
+        >
+          {due === 0
+            ? "হিসাব ঠিক আছে"
+            : due > 0
+              ? `বাড়তি সংগ্রহ: +৳${due}`
+              : `ঘাটতি: ৳${Math.abs(due)}`}
         </p>
       )}
 
       {message.text && (
-        <p className={`text-sm font-medium ${message.isError ? "text-red-500" : "text-green-600"}`}>
+        <p
+          className={`text-sm font-medium ${message.isError ? "text-red-500" : "text-green-600"}`}
+        >
           {message.text}
         </p>
       )}
     </div>
-  )
+  );
 }

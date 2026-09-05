@@ -1,108 +1,126 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
 type Category = {
-  id: number
-  name: string
-  nameEn: string | null
-  slug: string
-  displayOrder: number
-  isVisible: boolean
-  _count?: { products: number }
-}
+  id: number;
+  name: string;
+  nameEn: string | null;
+  slug: string;
+  displayOrder: number;
+  isVisible: boolean;
+  _count?: { products: number };
+};
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState({ name: "", nameEn: "", slug: "", displayOrder: "0" })
-  const [error, setError] = useState("")
-  const [saving, setSaving] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    nameEn: "",
+    slug: "",
+    displayOrder: "0",
+  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function fetchCategories() {
-    const res = await fetch("/api/admin/categories")
-    const data = await res.json()
-    if (Array.isArray(data)) setCategories(data)
-    setLoading(false)
+    const res = await fetch("/api/admin/categories");
+    const data = await res.json();
+    if (Array.isArray(data)) setCategories(data);
+    setLoading(false);
   }
 
-  useEffect(() => { fetchCategories() }, [])
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   function generateSlug(name: string) {
     return name
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, "")
+      .replace(/[^\w-]/g, "");
   }
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const name = e.target.value
-    setForm(prev => ({ ...prev, name, slug: editingId ? prev.slug : generateSlug(name) }))
+    const name = e.target.value;
+    setForm((prev) => ({
+      ...prev,
+      name,
+      slug: editingId ? prev.slug : generateSlug(name),
+    }));
   }
 
   function resetForm() {
-    setForm({ name: "", nameEn: "", slug: "", displayOrder: "0" })
-    setEditingId(null)
-    setError("")
+    setForm({ name: "", nameEn: "", slug: "", displayOrder: "0" });
+    setEditingId(null);
+    setError("");
   }
 
   function handleEdit(cat: Category) {
-    setEditingId(cat.id)
+    setEditingId(cat.id);
     setForm({
       name: cat.name,
       nameEn: cat.nameEn || "",
       slug: cat.slug,
       displayOrder: String(cat.displayOrder),
-    })
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function handleSubmit() {
     if (!form.name || !form.slug) {
-      setError("নাম ও Slug আবশ্যক")
-      return
+      setError("নাম ও Slug আবশ্যক");
+      return;
     }
-    setSaving(true)
-    setError("")
+    setSaving(true);
+    setError("");
     try {
-      const url = editingId ? `/api/admin/categories/${editingId}` : "/api/admin/categories"
-      const method = editingId ? "PUT" : "POST"
+      const url = editingId
+        ? `/api/admin/categories/${editingId}`
+        : "/api/admin/categories";
+      const method = editingId ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "সমস্যা হয়েছে")
-        return
+        setError(data.error || "সমস্যা হয়েছে");
+        return;
       }
-      resetForm()
-      fetchCategories()
+      resetForm();
+      fetchCategories();
     } catch {
-      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
+      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("এই ক্যাটাগরি মুছে ফেলতে চান?")) return
-    const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
-    const data = await res.json()
+    if (!confirm("এই ক্যাটাগরি মুছে ফেলতে চান?")) return;
+    const res = await fetch(`/api/admin/categories/${id}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
     if (!res.ok) {
-      alert(data.error || "মুছা যায়নি")
-      return
+      alert(data.error || "মুছা যায়নি");
+      return;
     }
-    fetchCategories()
+    fetchCategories();
   }
 
-  if (loading) return <div className="text-center py-20 text-gray-500">লোড হচ্ছে...</div>
+  if (loading)
+    return <div className="text-center py-20 text-gray-500">লোড হচ্ছে...</div>;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-green-800 mb-8">ক্যাটাগরি ম্যানেজমেন্ট</h1>
+      <h1 className="text-3xl font-bold text-green-800 mb-8">
+        ক্যাটাগরি ম্যানেজমেন্ট
+      </h1>
 
       {/* ফর্ম */}
       <div className="bg-white rounded-xl shadow p-6 mb-8">
@@ -111,7 +129,9 @@ export default function AdminCategoriesPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">নাম (বাংলা) *</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              নাম (বাংলা) *
+            </label>
             <input
               type="text"
               value={form.name}
@@ -121,31 +141,43 @@ export default function AdminCategoriesPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Name (English)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Name (English)
+            </label>
             <input
               type="text"
               value={form.nameEn}
-              onChange={(e) => setForm(prev => ({ ...prev, nameEn: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, nameEn: e.target.value }))
+              }
               placeholder="e.g. Natural Honey"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Slug (URL) *</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Slug (URL) *
+            </label>
             <input
               type="text"
               value={form.slug}
-              onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, slug: e.target.value }))
+              }
               placeholder="natural-honey"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 bg-gray-50"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">ক্রম (Display Order)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ক্রম (Display Order)
+            </label>
             <input
               type="number"
               value={form.displayOrder}
-              onChange={(e) => setForm(prev => ({ ...prev, displayOrder: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, displayOrder: e.target.value }))
+              }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>
@@ -159,7 +191,11 @@ export default function AdminCategoriesPage() {
             disabled={saving}
             className="bg-green-700 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-600 transition disabled:opacity-50"
           >
-            {saving ? "সংরক্ষণ হচ্ছে..." : editingId ? "আপডেট করুন" : "যোগ করুন"}
+            {saving
+              ? "সংরক্ষণ হচ্ছে..."
+              : editingId
+                ? "আপডেট করুন"
+                : "যোগ করুন"}
           </button>
           {editingId && (
             <button
@@ -179,21 +215,35 @@ export default function AdminCategoriesPage() {
           <p className="text-gray-400">কোনো ক্যাটাগরি নেই।</p>
         ) : (
           <div className="flex flex-col gap-3">
-            {categories.map(cat => (
-              <div key={cat.id} className="flex justify-between items-center border border-gray-100 rounded-lg px-4 py-3">
+            {categories.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex justify-between items-center border border-gray-100 rounded-lg px-4 py-3"
+              >
                 <div>
                   <p className="font-bold text-green-800">
-                    {cat.name} {cat.nameEn && <span className="text-gray-400 font-normal">/ {cat.nameEn}</span>}
+                    {cat.name}{" "}
+                    {cat.nameEn && (
+                      <span className="text-gray-400 font-normal">
+                        / {cat.nameEn}
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-gray-400">
                     /{cat.slug} · {cat._count?.products ?? 0}টা প্রোডাক্ট
                   </p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => handleEdit(cat)} className="text-green-600 hover:text-green-800 text-sm font-bold transition">
+                  <button
+                    onClick={() => handleEdit(cat)}
+                    className="text-green-600 hover:text-green-800 text-sm font-bold transition"
+                  >
                     এডিট
                   </button>
-                  <button onClick={() => handleDelete(cat.id)} className="text-red-400 hover:text-red-600 text-sm transition">
+                  <button
+                    onClick={() => handleDelete(cat.id)}
+                    className="text-red-400 hover:text-red-600 text-sm transition"
+                  >
                     মুছুন
                   </button>
                 </div>
@@ -203,5 +253,5 @@ export default function AdminCategoriesPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

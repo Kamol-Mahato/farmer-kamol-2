@@ -1,109 +1,152 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { districts, upazilas, upazilasEn } from "@/lib/bd-locations"
-import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch"
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch";
 
 interface Product {
-  id: number
-  name: string
-  pricePerUnit: number
-  unit: string
-  stockQty: number
+  id: number;
+  name: string;
+  pricePerUnit: number;
+  unit: string;
+  stockQty: number;
 }
 
 interface Props {
-  orderId: number
-  backHref: string
+  orderId: number;
+  backHref: string;
   initialData: {
-    name: string
-    phone: string
-    address: string
-    districtId: number | null
-    district: string | null
-    upazila: string | null
-    customerNote: string | null
-    deliveryCharge: number
-    items: { productId: number; quantity: number; price: number }[]
-  }
-  products: Product[]
+    name: string;
+    phone: string;
+    address: string;
+    districtId: number | null;
+    district: string | null;
+    upazila: string | null;
+    customerNote: string | null;
+    deliveryCharge: number;
+    items: { productId: number; quantity: number; price: number }[];
+  };
+  products: Product[];
 }
 
-export default function EditOrderForm({ orderId, backHref, initialData, products }: Props) {
-  const router = useRouter()
-  const [name, setName] = useState(initialData.name)
-  const [phone, setPhone] = useState(initialData.phone)
-  const [address, setAddress] = useState(initialData.address)
-  const [districtId, setDistrictId] = useState<number | null>(initialData.districtId)
-  const [district, setDistrict] = useState(initialData.district || "")
-  const [upazila, setUpazila] = useState(initialData.upazila || "")
-  const [customerNote, setCustomerNote] = useState(initialData.customerNote || "")
-  const [shipping, setShipping] = useState(String(initialData.deliveryCharge))
+export default function EditOrderForm({
+  orderId,
+  backHref,
+  initialData,
+  products,
+}: Props) {
+  const router = useRouter();
+  const [name, setName] = useState(initialData.name);
+  const [phone, setPhone] = useState(initialData.phone);
+  const [address, setAddress] = useState(initialData.address);
+  const [districtId, setDistrictId] = useState<number | null>(
+    initialData.districtId,
+  );
+  const [district, setDistrict] = useState(initialData.district || "");
+  const [upazila, setUpazila] = useState(initialData.upazila || "");
+  const [customerNote, setCustomerNote] = useState(
+    initialData.customerNote || "",
+  );
+  const [shipping, setShipping] = useState(String(initialData.deliveryCharge));
   const [items, setItems] = useState(
     initialData.items.length > 0
       ? initialData.items
-      : [{ productId: products[0]?.id || 0, quantity: 1, price: products[0]?.pricePerUnit || 0 }]
-  )
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+      : [
+          {
+            productId: products[0]?.id || 0,
+            quantity: 1,
+            price: products[0]?.pricePerUnit || 0,
+          },
+        ],
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const upazilaOptions = districtId ? upazilas[districtId] || [] : []
+  const upazilaOptions = districtId ? upazilas[districtId] || [] : [];
 
   // ✅ প্রোডাক্ট বা quantity বদলালে দাম শপ-প্রাইস দিয়ে রিফ্রেশ হবে (ডিফল্ট), কিন্তু এরপর হাতে বদলানো যাবে
   function updateProduct(index: number, productId: number) {
-    const p = products.find((pr) => pr.id === productId)
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, productId, price: (p?.pricePerUnit || 0) * it.quantity } : it)))
+    const p = products.find((pr) => pr.id === productId);
+    setItems((prev) =>
+      prev.map((it, i) =>
+        i === index
+          ? { ...it, productId, price: (p?.pricePerUnit || 0) * it.quantity }
+          : it,
+      ),
+    );
   }
   function updateQuantity(index: number, quantity: number) {
-    setItems((prev) => prev.map((it, i) => {
-      if (i !== index) return it
-      const p = products.find((pr) => pr.id === it.productId)
-      return { ...it, quantity, price: (p?.pricePerUnit || 0) * quantity }
-    }))
+    setItems((prev) =>
+      prev.map((it, i) => {
+        if (i !== index) return it;
+        const p = products.find((pr) => pr.id === it.productId);
+        return { ...it, quantity, price: (p?.pricePerUnit || 0) * quantity };
+      }),
+    );
   }
   function updatePrice(index: number, price: number) {
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, price } : it)))
+    setItems((prev) =>
+      prev.map((it, i) => (i === index ? { ...it, price } : it)),
+    );
   }
   function addItem() {
-    const p = products[0]
-    setItems((prev) => [...prev, { productId: p?.id || 0, quantity: 1, price: p?.pricePerUnit || 0 }])
+    const p = products[0];
+    setItems((prev) => [
+      ...prev,
+      { productId: p?.id || 0, quantity: 1, price: p?.pricePerUnit || 0 },
+    ]);
   }
   function removeItem(index: number) {
-    setItems((prev) => prev.filter((_, i) => i !== index))
+    setItems((prev) => prev.filter((_, i) => i !== index));
   }
 
-  const totalProductPrice = items.reduce((sum, it) => sum + it.price, 0)
-  const shippingNum = parseFloat(shipping) || 0
-  const grandTotal = totalProductPrice + shippingNum
+  const totalProductPrice = items.reduce((sum, it) => sum + it.price, 0);
+  const shippingNum = parseFloat(shipping) || 0;
+  const grandTotal = totalProductPrice + shippingNum;
 
   async function handleSubmit() {
-    setError("")
-    if (!name.trim() || !phone.trim() || !address.trim() || items.length === 0) {
-      setError("সব তথ্য সঠিকভাবে দিন")
-      return
+    setError("");
+    if (
+      !name.trim() ||
+      !phone.trim() ||
+      !address.trim() ||
+      items.length === 0
+    ) {
+      setError("সব তথ্য সঠিকভাবে দিন");
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/orders/${orderId}/edit`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name, phone, address, districtId, district, upazila, customerNote,
+          name,
+          phone,
+          address,
+          districtId,
+          district,
+          upazila,
+          customerNote,
           shipping: shippingNum,
-          items: items.map((it) => ({ productId: it.productId, quantity: it.quantity, price: it.price })),
+          items: items.map((it) => ({
+            productId: it.productId,
+            quantity: it.quantity,
+            price: it.price,
+          })),
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "আপডেট করা যায়নি")
-        return
+        setError(data.error || "আপডেট করা যায়নি");
+        return;
       }
-      router.push(backHref)
-      router.refresh()
+      router.push(backHref);
+      router.refresh();
     } catch {
-      setError("সার্ভার সমস্যা হয়েছে")
+      setError("সার্ভার সমস্যা হয়েছে");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -113,30 +156,51 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
 
       <div className="bg-white border border-black rounded-xl p-6 space-y-4">
         <h2 className="font-bold text-gray-800">কাস্টমার তথ্য</h2>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="নাম" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" />
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="ফোন" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" />
-        <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ঠিকানা" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="নাম"
+          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm"
+        />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="ফোন"
+          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm"
+        />
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="ঠিকানা"
+          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm"
+        />
 
         <div className="grid grid-cols-2 gap-3">
           <DistrictSearch
             districts={districts}
             value={district}
             onSelect={(d) => {
-              setDistrictId(d.id)
-              setDistrict(d.name)
-              setUpazila("")
+              setDistrictId(d.id);
+              setDistrict(d.name);
+              setUpazila("");
             }}
           />
           <UpazilaSearch
             upazilas={upazilaOptions}
-            upazilasEn={districtId ? (upazilasEn[districtId] || []) : []}
+            upazilasEn={districtId ? upazilasEn[districtId] || [] : []}
             value={upazila}
             onSelect={(u) => setUpazila(u)}
             disabled={!districtId}
           />
         </div>
 
-        <textarea value={customerNote} onChange={(e) => setCustomerNote(e.target.value)} placeholder="কাস্টমার নোট" className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm" rows={2} />
+        <textarea
+          value={customerNote}
+          onChange={(e) => setCustomerNote(e.target.value)}
+          placeholder="কাস্টমার নোট"
+          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm"
+          rows={2}
+        />
       </div>
 
       <div className="bg-white border border-black rounded-xl p-6 space-y-3">
@@ -149,13 +213,17 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
               className="flex-1 min-w-[140px] border border-gray-400 rounded-lg px-2 py-2 text-sm"
             >
               {products.map((p) => (
-                <option key={p.id} value={p.id}>{p.name} — ৳{p.pricePerUnit}/{p.unit}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name} — ৳{p.pricePerUnit}/{p.unit}
+                </option>
               ))}
             </select>
             <input
               type="number"
               value={item.quantity}
-              onChange={(e) => updateQuantity(i, parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                updateQuantity(i, parseFloat(e.target.value) || 0)
+              }
               placeholder="পরিমাণ"
               className="w-20 border border-gray-400 rounded-lg px-2 py-2 text-sm"
             />
@@ -164,20 +232,36 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
               <input
                 type="number"
                 value={item.price}
-                onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  updatePrice(i, parseFloat(e.target.value) || 0)
+                }
                 placeholder="দাম (কাস্টম)"
                 className="w-24 border border-blue-400 rounded-lg px-2 py-2 text-sm font-bold"
               />
             </div>
-            <button onClick={() => removeItem(i)} className="text-red-600 font-bold px-2">✕</button>
+            <button
+              onClick={() => removeItem(i)}
+              className="text-red-600 font-bold px-2"
+            >
+              ✕
+            </button>
           </div>
         ))}
-        <button onClick={addItem} className="text-sm font-bold underline text-black">+ আইটেম যোগ করুন</button>
-        <p className="text-xs text-gray-400">দামের ঘরে শপ-প্রাইস ডিফল্ট বসানো থাকবে, চাইলে বদলে নিতে পারবেন</p>
+        <button
+          onClick={addItem}
+          className="text-sm font-bold underline text-black"
+        >
+          + আইটেম যোগ করুন
+        </button>
+        <p className="text-xs text-gray-400">
+          দামের ঘরে শপ-প্রাইস ডিফল্ট বসানো থাকবে, চাইলে বদলে নিতে পারবেন
+        </p>
       </div>
 
       <div className="bg-white border border-black rounded-xl p-6 space-y-3">
-        <h2 className="font-bold text-gray-800">শিপিং / ডেলিভারি চার্জ (কাস্টম)</h2>
+        <h2 className="font-bold text-gray-800">
+          শিপিং / ডেলিভারি চার্জ (কাস্টম)
+        </h2>
         <div className="flex items-center gap-2">
           <span className="text-gray-600">৳</span>
           <input
@@ -197,11 +281,20 @@ export default function EditOrderForm({ orderId, backHref, initialData, products
       {error && <p className="text-red-600 font-medium text-sm">{error}</p>}
 
       <div className="flex gap-3">
-        <button onClick={handleSubmit} disabled={loading} className="bg-black text-white px-6 py-2.5 rounded-lg font-bold text-sm disabled:opacity-50">
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="bg-black text-white px-6 py-2.5 rounded-lg font-bold text-sm disabled:opacity-50"
+        >
           {loading ? "সেভ হচ্ছে..." : "সেভ করুন"}
         </button>
-        <a href={backHref} className="border border-gray-400 px-6 py-2.5 rounded-lg font-bold text-sm">বাতিল</a>
+        <a
+          href={backHref}
+          className="border border-gray-400 px-6 py-2.5 rounded-lg font-bold text-sm"
+        >
+          বাতিল
+        </a>
       </div>
     </div>
-  )
+  );
 }

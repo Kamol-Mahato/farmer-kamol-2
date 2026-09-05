@@ -1,19 +1,19 @@
-import Link from "next/link"
+import Link from "next/link";
 
 interface Video {
-  id: number
-  title: string
-  titleEn?: string | null
-  description: string | null
-  descriptionEn?: string | null
-  youtubeUrl: string
-  platform: string
-  thumbnailUrl?: string | null
+  id: number;
+  title: string;
+  titleEn?: string | null;
+  description: string | null;
+  descriptionEn?: string | null;
+  youtubeUrl: string;
+  platform: string;
+  thumbnailUrl?: string | null;
 }
 
 function getYoutubeId(url: string) {
-  const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
-  return match ? match[1] : null
+  const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+  return match ? match[1] : null;
 }
 
 export default function VideoSection({
@@ -21,11 +21,11 @@ export default function VideoSection({
   youtubeChannelUrl = "https://www.youtube.com/@FarmerKamol",
   facebookPageUrl = "https://www.facebook.com/farmerkamol",
 }: {
-  videos: Video[]
-  youtubeChannelUrl?: string
-  facebookPageUrl?: string
+  videos: Video[];
+  youtubeChannelUrl?: string;
+  facebookPageUrl?: string;
 }) {
-  if (videos.length === 0) return null
+  if (videos.length === 0) return null;
 
   return (
     <div className="bg-green-50 py-6 px-4">
@@ -37,9 +37,9 @@ export default function VideoSection({
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
           {videos.map((video) => {
-            const ytId = getYoutubeId(video.youtubeUrl)
-            const displayTitle = video.titleEn || video.title
-            const displayDescription = video.descriptionEn || video.description
+            const ytId = getYoutubeId(video.youtubeUrl);
+            const displayTitle = video.titleEn || video.title;
+            const displayDescription = video.descriptionEn || video.description;
             return (
               <div
                 key={video.id}
@@ -97,13 +97,17 @@ export default function VideoSection({
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-green-800 text-sm line-clamp-2">{displayTitle}</h3>
+                  <h3 className="font-bold text-green-800 text-sm line-clamp-2">
+                    {displayTitle}
+                  </h3>
                   {displayDescription && (
-                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">{displayDescription}</p>
+                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">
+                      {displayDescription}
+                    </p>
                   )}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
         <div className="text-center mt-8">
@@ -116,5 +120,5 @@ export default function VideoSection({
         </div>
       </div>
     </div>
-  )
+  );
 }

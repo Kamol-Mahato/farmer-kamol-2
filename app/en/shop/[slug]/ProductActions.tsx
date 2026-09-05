@@ -1,23 +1,23 @@
-"use client"
-import Link from "next/link"
-import { useState } from "react"
+"use client";
+import Link from "next/link";
+import { useState } from "react";
 
 type Product = {
-  id: number
-  name: string
-  nameEn?: string | null
-  pricePerUnit: number
-  unit: string
-  stockQty: number
-  priceType: "FIXED" | "NEGOTIABLE"
-}
+  id: number;
+  name: string;
+  nameEn?: string | null;
+  pricePerUnit: number;
+  unit: string;
+  stockQty: number;
+  priceType: "FIXED" | "NEGOTIABLE";
+};
 
 // ✅ same toast logic as ProductCard, English version
 function showCartToast(name: string) {
-  const existing = document.getElementById("cart-toast")
-  if (existing) existing.remove()
-  const toast = document.createElement("div")
-  toast.id = "cart-toast"
+  const existing = document.getElementById("cart-toast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.id = "cart-toast";
   toast.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:22px;">🛒</span>
@@ -27,7 +27,7 @@ function showCartToast(name: string) {
       </div>
       <span style="font-size:20px;margin-left:4px;">✅</span>
     </div>
-  `
+  `;
   toast.style.cssText = `
     position: fixed;
     top: 80px;
@@ -44,41 +44,41 @@ function showCartToast(name: string) {
     transform: translateX(120%);
     transition: transform 0.3s cubic-bezier(.22,1,.36,1);
     border: 2px solid #22c55e;
-  `
-  document.body.appendChild(toast)
+  `;
+  document.body.appendChild(toast);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      toast.style.transform = "translateX(0)"
-    })
-  })
+      toast.style.transform = "translateX(0)";
+    });
+  });
   setTimeout(() => {
-    toast.style.transform = "translateX(120%)"
-    setTimeout(() => toast.remove(), 350)
-  }, 2500)
+    toast.style.transform = "translateX(120%)";
+    setTimeout(() => toast.remove(), 350);
+  }, 2500);
 }
 
 function buildWhatsAppLink(productName: string) {
-  const phone = "8801737939688"
-  const message = `I would like to know more about "${productName}"`
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+  const phone = "8801737939688";
+  const message = `I would like to know more about "${productName}"`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
 export default function ProductActions({
   product,
   mainImage,
 }: {
-  product: Product
-  mainImage: string
+  product: Product;
+  mainImage: string;
 }) {
-  const [added, setAdded] = useState(false)
-  const isOutOfStock = product.stockQty <= 0
-  const displayName = product.nameEn || product.name
+  const [added, setAdded] = useState(false);
+  const isOutOfStock = product.stockQty <= 0;
+  const displayName = product.nameEn || product.name;
 
   function handleAddToCart() {
-    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]")
-    const existing = cart.find((i: { id: number }) => i.id === product.id)
+    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]");
+    const existing = cart.find((i: { id: number }) => i.id === product.id);
     if (existing) {
-      existing.quantity += 1
+      existing.quantity += 1;
     } else {
       cart.push({
         id: product.id,
@@ -87,13 +87,13 @@ export default function ProductActions({
         unit: product.unit,
         image: mainImage,
         quantity: 1,
-      })
+      });
     }
-    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart))
-    window.dispatchEvent(new CustomEvent("cartUpdated"))
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
-    showCartToast(displayName)
+    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+    showCartToast(displayName);
   }
 
   if (product.priceType === "NEGOTIABLE") {
@@ -106,7 +106,7 @@ export default function ProductActions({
       >
         💬 Contact via WhatsApp
       </a>
-    )
+    );
   }
 
   return (
@@ -118,8 +118,8 @@ export default function ProductActions({
           isOutOfStock
             ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
             : added
-            ? "border-green-500 bg-green-500 text-white scale-95"
-            : "border-green-600 bg-white text-green-700 hover:bg-green-50"
+              ? "border-green-500 bg-green-500 text-white scale-95"
+              : "border-green-600 bg-white text-green-700 hover:bg-green-50"
         }`}
       >
         {added ? "✓ Added" : "🛒 Add to Cart"}
@@ -135,5 +135,5 @@ export default function ProductActions({
         Order Now
       </Link>
     </div>
-  )
+  );
 }

@@ -1,15 +1,19 @@
-import { prisma } from "@/lib/prisma"
-import { cookies } from "next/headers"
-import { NextResponse } from "next/server"
-import { getBangladeshDayBoundaries, calculateDeliveryCharge, getUnitToKgMultiplier } from "@/lib/orderUtils"
-import { sendTelegramAlert } from "@/lib/telegram"
-import { sendPushToAdmin } from "@/lib/webpush"
-import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter"
-import { signOrderPhoneToken } from "@/lib/orderPhoneToken"
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import {
+  getBangladeshDayBoundaries,
+  calculateDeliveryCharge,
+  getUnitToKgMultiplier,
+} from "@/lib/orderUtils";
+import { sendTelegramAlert } from "@/lib/telegram";
+import { sendPushToAdmin } from "@/lib/webpush";
+import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
+import { signOrderPhoneToken } from "@/lib/orderPhoneToken";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       name,
       phone,
@@ -20,123 +24,156 @@ export async function POST(request: Request) {
       paymentMethod,
       gatewayName,
       trxId,
-    } = body
-        if (!name || !phone || !address || !Array.isArray(items) || items.length === 0) {
+    } = body;
+    if (
+      !name ||
+      !phone ||
+      !address ||
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
       return NextResponse.json(
         { error: "সব তথ্য সঠিকভাবে দিন" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const safeName = String(name).trim()
-    const safeAddress = String(address).trim()
-    const rawNote = customerNote != null ? String(customerNote).trim() : ""
+    const safeName = String(name).trim();
+    const safeAddress = String(address).trim();
+    const rawNote = customerNote != null ? String(customerNote).trim() : "";
 
     if (safeName.length < 2 || safeName.length > 50) {
       return NextResponse.json(
         { error: "নাম ২ থেকে ৫০ অক্ষরের মধ্যে হতে হবে" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
     if (safeAddress.length < 10 || safeAddress.length > 300) {
       return NextResponse.json(
         { error: "ঠিকানা ১০ থেকে ৩০০ অক্ষরের মধ্যে হতে হবে" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
     if (rawNote.length > 500) {
       return NextResponse.json(
         { error: "নোট সর্বোচ্চ ৫০০ অক্ষর হতে পারবে" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
-    if (/[<>]/.test(safeName) || /[<>]/.test(safeAddress) || /[<>]/.test(rawNote)) {
+    if (
+      /[<>]/.test(safeName) ||
+      /[<>]/.test(safeAddress) ||
+      /[<>]/.test(rawNote)
+    ) {
       return NextResponse.json(
         { error: "নাম/ঠিকানা/নোটে < বা > ব্যবহার করা যাবে না" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const finalName = safeName
-    const finalAddress = safeAddress
-    const finalNote = rawNote || null
+    const finalName = safeName;
+    const finalAddress = safeAddress;
+    const finalNote = rawNote || null;
 
     // 🔒 একই ফোন নম্বর থেকে বারবার অর্ডার (spam) ঠেকাতে rate limit
-    const rateCheck = await checkRateLimit(`order:${phone}`)
+    const rateCheck = await checkRateLimit(`order:${phone}`);
     if (!rateCheck.allowed) {
-      const minutes = Math.ceil((rateCheck.remainingMs || 0) / 60000)
+      const minutes = Math.ceil((rateCheck.remainingMs || 0) / 60000);
       return NextResponse.json(
-        { error: `অনেকবার অর্ডার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।` },
-        { status: 429 }
-      )
+        {
+          error: `অনেকবার অর্ডার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+        },
+        { status: 429 },
+      );
     }
-    await recordFailedAttempt(`order:${phone}`)
+    await recordFailedAttempt(`order:${phone}`);
 
-    if (!paymentMethod || (paymentMethod !== "COD" && paymentMethod !== "GATEWAY")) {
-      return NextResponse.json({ error: "পেমেন্ট পদ্ধতি বেছে নিন" }, { status: 400 })
+    if (
+      !paymentMethod ||
+      (paymentMethod !== "COD" && paymentMethod !== "GATEWAY")
+    ) {
+      return NextResponse.json(
+        { error: "পেমেন্ট পদ্ধতি বেছে নিন" },
+        { status: 400 },
+      );
     }
     if (paymentMethod === "GATEWAY") {
       if (!gatewayName || !trxId || !String(trxId).trim()) {
         return NextResponse.json(
           { error: "অনলাইন পেমেন্টের জন্য মাধ্যম ও Transaction ID দিন" },
-          { status: 400 }
-        )
+          { status: 400 },
+        );
       }
       const existingTrx = await prisma.order.findUnique({
         where: { gatewayTxnId: String(trxId).trim() },
-      })
+      });
       if (existingTrx) {
         return NextResponse.json(
-          { error: "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।" },
-          { status: 409 }
-        )
+          {
+            error:
+              "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।",
+          },
+          { status: 409 },
+        );
       }
     }
 
-    const productIds = items.map((i: { productId: number }) => i.productId)
+    const productIds = items.map((i: { productId: number }) => i.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-    })
+    });
 
     if (products.length !== items.length) {
       return NextResponse.json(
         { error: "এক বা একাধিক পণ্য খুঁজে পাওয়া যায়নি" },
-        { status: 404 }
-      )
+        { status: 404 },
+      );
     }
 
     for (const item of items) {
-      const product = products.find(p => p.id === item.productId)
-      const stockDeduction = item.quantity * getUnitToKgMultiplier(product?.unit || "কেজি")
+      const product = products.find((p) => p.id === item.productId);
+      const stockDeduction =
+        item.quantity * getUnitToKgMultiplier(product?.unit || "কেজি");
       if (!product || product.stockQty < stockDeduction) {
         return NextResponse.json(
-          { error: `দুঃখিত, "${product?.name}" এর পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product?.stockQty ?? 0} কেজি` },
-          { status: 400 }
-        )
+          {
+            error: `দুঃখিত, "${product?.name}" এর পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product?.stockQty ?? 0} কেজি`,
+          },
+          { status: 400 },
+        );
       }
     }
 
-    const totalProductPrice = items.reduce((sum: number, item: { productId: number; quantity: number }) => {
-      const product = products.find(p => p.id === item.productId)!
-      return sum + product.pricePerUnit * item.quantity
-    }, 0)
-    const totalQuantity = items.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0)
-    const deliveryCharge = await calculateDeliveryCharge(districtId, totalQuantity)
-    const finalCodAmount = totalProductPrice + deliveryCharge
+    const totalProductPrice = items.reduce(
+      (sum: number, item: { productId: number; quantity: number }) => {
+        const product = products.find((p) => p.id === item.productId)!;
+        return sum + product.pricePerUnit * item.quantity;
+      },
+      0,
+    );
+    const totalQuantity = items.reduce(
+      (sum: number, item: { quantity: number }) => sum + item.quantity,
+      0,
+    );
+    const deliveryCharge = await calculateDeliveryCharge(
+      districtId,
+      totalQuantity,
+    );
+    const finalCodAmount = totalProductPrice + deliveryCharge;
 
     const result = await prisma.$transaction(async (tx) => {
-      let customer = await tx.user.findUnique({ where: { phone } })
+      let customer = await tx.user.findUnique({ where: { phone } });
       if (!customer) {
         customer = await tx.user.create({
           data: { phone, name: finalName, role: "CUSTOMER" },
-        })
+        });
       }
 
-      const { start, end } = getBangladeshDayBoundaries()
+      const { start, end } = getBangladeshDayBoundaries();
       const todayCount = await tx.order.count({
         where: { createdAt: { gte: start, lt: end } },
-      })
-      const dailySeq = todayCount + 1
+      });
+      const dailySeq = todayCount + 1;
 
       const order = await tx.order.create({
         data: {
@@ -151,71 +188,81 @@ export async function POST(request: Request) {
           paymentMethod,
           paymentStatus: "PENDING",
           gatewayName: paymentMethod === "GATEWAY" ? gatewayName : null,
-          gatewayTxnId: paymentMethod === "GATEWAY" ? String(trxId).trim() : null,
+          gatewayTxnId:
+            paymentMethod === "GATEWAY" ? String(trxId).trim() : null,
           dailySeq,
           orderItems: {
-            create: items.map((item: { productId: number; quantity: number }) => {
-              const product = products.find(p => p.id === item.productId)!
-              return {
-                productId: item.productId,
-                quantity: item.quantity,
-                finalPrice: product.pricePerUnit * item.quantity,
-              }
-            }),
+            create: items.map(
+              (item: { productId: number; quantity: number }) => {
+                const product = products.find((p) => p.id === item.productId)!;
+                return {
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  finalPrice: product.pricePerUnit * item.quantity,
+                };
+              },
+            ),
           },
         },
-      })
+      });
 
       for (const item of items) {
-        const product = products.find(p => p.id === item.productId)!
-        const stockDeduction = item.quantity * getUnitToKgMultiplier(product.unit)
+        const product = products.find((p) => p.id === item.productId)!;
+        const stockDeduction =
+          item.quantity * getUnitToKgMultiplier(product.unit);
         await tx.product.update({
           where: { id: item.productId },
           data: { stockQty: { decrement: stockDeduction } },
-        })
+        });
       }
 
-      return order
-    })
+      return order;
+    });
     if (paymentMethod === "GATEWAY") {
       await sendTelegramAlert(
         `🟡 <b>নতুন পেমেন্ট রিসিভড! (কার্ট)</b>\n\n` +
-        `👤 কাস্টমার: ${finalName}\n` +
-        `📞 ফোন: ${phone}\n` +
-        `💳 মাধ্যম: ${gatewayName}\n` +
-        `🔢 TrxID: ${trxId}\n` +
-        `💰 মোট বিল: ৳ ${finalCodAmount}\n\n` +
-        `অর্ডার #${result.id} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`
-      )
+          `👤 কাস্টমার: ${finalName}\n` +
+          `📞 ফোন: ${phone}\n` +
+          `💳 মাধ্যম: ${gatewayName}\n` +
+          `🔢 TrxID: ${trxId}\n` +
+          `💰 মোট বিল: ৳ ${finalCodAmount}\n\n` +
+          `অর্ডার #${result.id} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`,
+      );
     }
     // ✅ Admin-এর ফোনে push notification
     await sendPushToAdmin(
       "🛒 নতুন অর্ডার এসেছে!",
       `${finalName} — ৳ ${finalCodAmount} (COD)`,
       "/admin/orders",
-      { orderId: result.id, name: finalName, amount: finalCodAmount }
-    )
-    const cookieStore2 = await cookies()
+      { orderId: result.id, name: finalName, amount: finalCodAmount },
+    );
+    const cookieStore2 = await cookies();
     cookieStore2.set("order_phone_token", await signOrderPhoneToken(phone), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 30 * 60,
       path: "/",
-    })
+    });
 
-    return NextResponse.json({ success: true, orderId: result.id })
+    return NextResponse.json({ success: true, orderId: result.id });
   } catch (error: any) {
-    if (error?.code === "P2002" && error?.meta?.target?.includes("gatewayTxnId")) {
+    if (
+      error?.code === "P2002" &&
+      error?.meta?.target?.includes("gatewayTxnId")
+    ) {
       return NextResponse.json(
-        { error: "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।" },
-        { status: 409 }
-      )
+        {
+          error:
+            "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।",
+        },
+        { status: 409 },
+      );
     }
-    console.error("CRITICAL CART ORDER API ERROR ->", error)
+    console.error("CRITICAL CART ORDER API ERROR ->", error);
     return NextResponse.json(
       { error: "ডাটাবেস বা সার্ভারে সমস্যা হয়েছে" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }

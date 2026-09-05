@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const isDev = process.env.NODE_ENV !== "production"
+const isDev = process.env.NODE_ENV !== "production";
 
 const cspHeader = `
   default-src 'self';
@@ -18,43 +18,59 @@ const cspHeader = `
   form-action 'self';
   frame-ancestors 'self';
   upgrade-insecure-requests;
-`.replace(/\s{2,}/g, " ").trim()
+`
+  .replace(/\s{2,}/g, " ")
+  .trim();
 
 const nextConfig = {
-  allowedDevOrigins: ['3000-firebase-farmer-kamolgit-1781445602919.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev'],
+  allowedDevOrigins: [
+    "3000-firebase-farmer-kamolgit-1781445602919.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev",
+  ],
   poweredByHeader: false,
   images: {
-    loader: 'custom',
-    loaderFile: './lib/imageLoader.ts', // Render-এর বদলে images.weserv.nl দিয়ে resize/WebP হবে — সার্ভারে কোনো লোড নেই
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.ts", // Render-এর বদলে images.weserv.nl দিয়ে resize/WebP হবে — সার্ভারে কোনো লোড নেই
     minimumCacheTTL: 86400, // ২৪ ঘণ্টা image cache
   },
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          { key: 'Content-Security-Policy', value: cspHeader },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          { key: "Content-Security-Policy", value: cspHeader },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
         ],
       },
       {
         // ✅ পুরনো uploads ও static tool ফাইলগুলো ব্রাউজারে ১ বছর cache থাকবে (Lighthouse: efficient cache lifetimes)
-        source: '/uploads/:path*',
+        source: "/uploads/:path*",
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
         ],
       },
       {
-        source: '/tools/:path*',
+        source: "/tools/:path*",
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
         ],
       },
-    ]
+    ];
   },
 };
 export default nextConfig;

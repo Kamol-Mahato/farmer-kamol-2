@@ -1,8 +1,8 @@
-import { safeJsonLd } from "@/lib/jsonLd"
-import { siteConfig } from "@/lib/siteConfig"
+import { safeJsonLd } from "@/lib/jsonLd";
+import { siteConfig } from "@/lib/siteConfig";
 
 export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
-  const isEn = lang === "en"
+  const isEn = lang === "en";
 
   const schema = {
     "@context": "https://schema.org",
@@ -14,20 +14,24 @@ export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
     priceRange: siteConfig.business.priceRange,
     address: {
       "@type": "PostalAddress",
-      addressLocality: isEn ? siteConfig.address.localityEn : siteConfig.address.locality,
-      addressRegion: isEn ? siteConfig.address.regionEn : siteConfig.address.region,
+      addressLocality: isEn
+        ? siteConfig.address.localityEn
+        : siteConfig.address.locality,
+      addressRegion: isEn
+        ? siteConfig.address.regionEn
+        : siteConfig.address.region,
       addressCountry: siteConfig.address.country,
     },
     description: isEn
       ? "Agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying pure honey, ghee, mustard oil, and Chinese duck chicks directly from the farm."
       : "সিরাজগঞ্জের রায়গঞ্জ থেকে সরাসরি খাঁটি মধু, দেশি ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা সরবরাহকারী কৃষি ব্র্যান্ড।",
-      sameAs: [
-        siteConfig.social.facebook,
-        siteConfig.social.youtube,
-        siteConfig.social.instagram,
-        siteConfig.social.tiktok,
-        `https://wa.me/${siteConfig.contact.whatsapp}`,
-      ],
+    sameAs: [
+      siteConfig.social.facebook,
+      siteConfig.social.youtube,
+      siteConfig.social.instagram,
+      siteConfig.social.tiktok,
+      `https://wa.me/${siteConfig.contact.whatsapp}`,
+    ],
     geo: {
       "@type": "GeoCoordinates",
       latitude: siteConfig.address.latitude,
@@ -49,12 +53,12 @@ export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
     currenciesAccepted: siteConfig.business.currenciesAccepted,
     areaServed: "Bangladesh",
     knowsLanguage: ["bn", "en"],
-  }
+  };
 
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
-  )
+  );
 }

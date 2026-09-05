@@ -1,34 +1,34 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
-import { useRef, useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
-import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
-import { getSavePercent } from "@/lib/pricing"
-import { sendGAEvent } from '@next/third-parties/google'
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { useRef, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getLocaleFromPath, localizeHref } from "@/lib/i18n";
+import { getSavePercent } from "@/lib/pricing";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type Product = {
-  id: number
-  name: string
-  slug: string
-  pricePerUnit: number
-  discountPrice: number | null
-  unit: string
-  stockQty: number
-  priceType: "FIXED" | "NEGOTIABLE"
-  images: { imageUrl: string }[]
-  category: { name: string } | null
-}
+  id: number;
+  name: string;
+  slug: string;
+  pricePerUnit: number;
+  discountPrice: number | null;
+  unit: string;
+  stockQty: number;
+  priceType: "FIXED" | "NEGOTIABLE";
+  images: { imageUrl: string }[];
+  category: { name: string } | null;
+};
 
-type DeliveryChargeMode = "NORMAL" | "FREE" | "HALF"
+type DeliveryChargeMode = "NORMAL" | "FREE" | "HALF";
 
 // ✅ Global Toast — একবার define, সব জায়গায় কাজ করবে
 function showCartToast(name: string) {
-  const existing = document.getElementById("cart-toast")
-  if (existing) existing.remove()
+  const existing = document.getElementById("cart-toast");
+  if (existing) existing.remove();
 
-  const toast = document.createElement("div")
-  toast.id = "cart-toast"
+  const toast = document.createElement("div");
+  toast.id = "cart-toast";
   toast.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:22px;">🛒</span>
@@ -38,7 +38,7 @@ function showCartToast(name: string) {
       </div>
       <span style="font-size:20px;margin-left:4px;">✅</span>
     </div>
-  `
+  `;
   toast.style.cssText = `
     position: fixed;
     top: 80px;
@@ -55,130 +55,155 @@ function showCartToast(name: string) {
     transform: translateX(120%);
     transition: transform 0.3s cubic-bezier(.22,1,.36,1);
     border: 2px solid #22c55e;
-  `
-  document.body.appendChild(toast)
+  `;
+  document.body.appendChild(toast);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      toast.style.transform = "translateX(0)"
-    })
-  })
+      toast.style.transform = "translateX(0)";
+    });
+  });
   setTimeout(() => {
-    toast.style.transform = "translateX(120%)"
-    setTimeout(() => toast.remove(), 350)
-  }, 2500)
+    toast.style.transform = "translateX(120%)";
+    setTimeout(() => toast.remove(), 350);
+  }, 2500);
 }
 
 // 💬 Negotiable পণ্যের জন্য WhatsApp লিংক তৈরি করার ফাংশন
 function buildWhatsAppLink(productName: string) {
-  const phone = "8801737939688"
-  const message = `আমি "${productName}" সম্পর্কে জানতে চাই`
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+  const phone = "8801737939688";
+  const message = `আমি "${productName}" সম্পর্কে জানতে চাই`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-export default function ProductCard({ product, deliveryMode = "NORMAL" }: { product: Product; deliveryMode?: DeliveryChargeMode }) {
-  const pathname = usePathname()
-  const locale = getLocaleFromPath(pathname)
-  const btnRef = useRef<HTMLAnchorElement>(null)
-  const imgWrapRef = useRef<HTMLDivElement>(null)
-  const [bounced, setBounced] = useState(false)
-  const [added, setAdded] = useState(false)
-  const [imgIndex, setImgIndex] = useState(0)
-  const [imgVisible, setImgVisible] = useState(false)
-  const isOutOfStock = product.stockQty <= 0
-  const savePercent = getSavePercent(product.pricePerUnit, product.discountPrice)
-  const images = product.images?.length > 0 ? product.images : [{ imageUrl: "/placeholder.jpg" }]
-  const mainImage = images[imgIndex]?.imageUrl || "/placeholder.jpg"
+export default function ProductCard({
+  product,
+  deliveryMode = "NORMAL",
+}: {
+  product: Product;
+  deliveryMode?: DeliveryChargeMode;
+}) {
+  const pathname = usePathname();
+  const locale = getLocaleFromPath(pathname);
+  const btnRef = useRef<HTMLAnchorElement>(null);
+  const imgWrapRef = useRef<HTMLDivElement>(null);
+  const [bounced, setBounced] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
+  const [imgVisible, setImgVisible] = useState(false);
+  const isOutOfStock = product.stockQty <= 0;
+  const savePercent = getSavePercent(
+    product.pricePerUnit,
+    product.discountPrice,
+  );
+  const images =
+    product.images?.length > 0
+      ? product.images
+      : [{ imageUrl: "/placeholder.jpg" }];
+  const mainImage = images[imgIndex]?.imageUrl || "/placeholder.jpg";
   function prevImg(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setImgIndex((i) => (i === 0 ? images.length - 1 : i - 1))
+    e.preventDefault();
+    e.stopPropagation();
+    setImgIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   }
   function nextImg(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setImgIndex((i) => (i === images.length - 1 ? 0 : i + 1))
+    e.preventDefault();
+    e.stopPropagation();
+    setImgIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !bounced) setBounced(true)
+        if (entry.isIntersecting && !bounced) setBounced(true);
       },
-      { threshold: 0.5 }
-    )
-    if (btnRef.current) observer.observe(btnRef.current)
-    return () => observer.disconnect()
-  }, [bounced])
+      { threshold: 0.5 },
+    );
+    if (btnRef.current) observer.observe(btnRef.current);
+    return () => observer.disconnect();
+  }, [bounced]);
 
   useEffect(() => {
     const imgObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setImgVisible(true)
-          imgObserver.disconnect()
+          setImgVisible(true);
+          imgObserver.disconnect();
         }
       },
-      { threshold: 0.15 }
-    )
-    if (imgWrapRef.current) imgObserver.observe(imgWrapRef.current)
-    return () => imgObserver.disconnect()
-  }, [])
+      { threshold: 0.15 },
+    );
+    if (imgWrapRef.current) imgObserver.observe(imgWrapRef.current);
+    return () => imgObserver.disconnect();
+  }, []);
 
- function handleAddToCart() {
+  function handleAddToCart() {
     // ✅ key: "farmer_kamol_cart" — সব জায়গায় একই
-    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]")
-    const existing = cart.find((i: { id: number }) => i.id === product.id)
+    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]");
+    const existing = cart.find((i: { id: number }) => i.id === product.id);
 
     if (existing) {
-      existing.quantity += 1
+      existing.quantity += 1;
     } else {
       cart.push({
         id: product.id,
         name: product.name,
-        price: savePercent !== null ? (product.discountPrice as number) : product.pricePerUnit,
+        price:
+          savePercent !== null
+            ? (product.discountPrice as number)
+            : product.pricePerUnit,
         unit: product.unit,
         image: mainImage,
         quantity: 1,
-      })
+      });
     }
 
-    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart))
+    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart));
     // ✅ custom event — same tab-এও কাজ করবে
-    window.dispatchEvent(new CustomEvent("cartUpdated"))
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
 
     // 📊 GA4 Add to Cart Tracking
     sendGAEvent({
-      event: 'add_to_cart',
+      event: "add_to_cart",
       value: product.name,
       ecommerce: {
-        items: [{
-          item_id: String(product.id),
-          item_name: product.name,
-          price: savePercent !== null ? product.discountPrice : product.pricePerUnit,
-          quantity: 1
-        }]
-      }
-    })
+        items: [
+          {
+            item_id: String(product.id),
+            item_name: product.name,
+            price:
+              savePercent !== null
+                ? product.discountPrice
+                : product.pricePerUnit,
+            quantity: 1,
+          },
+        ],
+      },
+    });
 
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
 
     // ✅ চোখে পড়ার মতো toast
-    showCartToast(product.name)
+    showCartToast(product.name);
   }
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition">
       <div>
         <Link href={`/shop/${product.slug}`}>
-        <div ref={imgWrapRef} className="relative aspect-square w-full bg-gray-50 overflow-hidden mb-3">
-        <Image
+          <div
+            ref={imgWrapRef}
+            className="relative aspect-square w-full bg-gray-50 overflow-hidden mb-3"
+          >
+            <Image
               src={mainImage}
               alt={`${product.name} - ছবি ${imgIndex + 1}`}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
               className={`object-cover group-hover:scale-135 transition-all duration-700 ease-out ${
-                imgVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                imgVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
               }`}
             />
             {savePercent !== null && !isOutOfStock && (
@@ -195,11 +220,13 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
             )}
             {deliveryMode !== "NORMAL" && (
               <span
-              className={`absolute bottom-1.5 right-1.5 z-10 text-[11px] md:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow ${
+                className={`absolute bottom-1.5 right-1.5 z-10 text-[11px] md:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow ${
                   deliveryMode === "FREE" ? "bg-green-600" : "bg-yellow-500"
                 }`}
               >
-                {deliveryMode === "FREE" ? "🟢 ডেলিভারি চার্জ ফ্রি" : "🟡 ডেলিভারি চার্জ অর্ধেক"}
+                {deliveryMode === "FREE"
+                  ? "🟢 ডেলিভারি চার্জ ফ্রি"
+                  : "🟡 ডেলিভারি চার্জ অর্ধেক"}
               </span>
             )}
             {images.length > 1 && (
@@ -220,7 +247,10 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
                 </button>
                 <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
                   {images.map((_, i) => (
-                    <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === imgIndex ? "bg-white" : "bg-white/50"}`} />
+                    <span
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full ${i === imgIndex ? "bg-white" : "bg-white/50"}`}
+                    />
                   ))}
                 </div>
               </>
@@ -228,32 +258,35 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
           </div>
         </Link>
         <div className="px-2 md:px-4">
-        {product.category && (
-          <span className="text-xs text-green-700 font-semibold bg-green-100 px-2.5 py-1 rounded-full">
-            {product.category.name}
-          </span>
-        )}
-        <Link href={`/shop/${product.slug}`}>
-        <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
-            {product.name}
-          </h2>
-        </Link>
-        <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
-          <span className="text-[10px] md:text-xs bg-green-600 font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
-            প্রতি {product.unit}
-          </span>
-          <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-xs text-black font-bold">মূল্য</span>
-            <span className="text-lg md:text-xl font-extrabold text-black">
-              ৳ {savePercent !== null ? product.discountPrice : product.pricePerUnit}
+          {product.category && (
+            <span className="text-xs text-green-700 font-semibold bg-green-100 px-2.5 py-1 rounded-full">
+              {product.category.name}
             </span>
-            {savePercent !== null && (
-              <span className="text-xs md:text-sm text-gray-400 line-through">
-                ৳ {product.pricePerUnit}
+          )}
+          <Link href={`/shop/${product.slug}`}>
+            <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
+              {product.name}
+            </h2>
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
+            <span className="text-[10px] md:text-xs bg-green-600 font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
+              প্রতি {product.unit}
+            </span>
+            <div className="flex items-baseline gap-1 flex-wrap">
+              <span className="text-xs text-black font-bold">মূল্য</span>
+              <span className="text-lg md:text-xl font-extrabold text-black">
+                ৳{" "}
+                {savePercent !== null
+                  ? product.discountPrice
+                  : product.pricePerUnit}
               </span>
-            )}
+              {savePercent !== null && (
+                <span className="text-xs md:text-sm text-gray-400 line-through">
+                  ৳ {product.pricePerUnit}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
         </div>
       </div>
       <div className="mt-2 pt-2 border-t border-gray-100 px-1 pb-2">
@@ -263,7 +296,12 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
             href={buildWhatsAppLink(product.name)}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => sendGAEvent({ event: 'whatsapp_product_click', value: product.name })}
+            onClick={() =>
+              sendGAEvent({
+                event: "whatsapp_product_click",
+                value: product.name,
+              })
+            }
             className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-500 active:scale-95 transition"
           >
             💬 WhatsApp এ যোগাযোগ করুন
@@ -277,16 +315,25 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
                 isOutOfStock
                   ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                   : added
-                  ? "border-green-500 bg-green-500 text-white scale-95"
-                  : "border-green-600 bg-white text-green-700 hover:bg-green-50"
+                    ? "border-green-500 bg-green-500 text-white scale-95"
+                    : "border-green-600 bg-white text-green-700 hover:bg-green-50"
               }`}
             >
               {added ? "✓ যোগ হয়েছে" : "Add to Cart"}
             </button>
             <Link
               ref={btnRef}
-              href={isOutOfStock ? "#" : localizeHref(`/order?productId=${product.id}`, locale)}
-              onClick={() => sendGAEvent({ event: 'begin_checkout_click', value: product.name })}
+              href={
+                isOutOfStock
+                  ? "#"
+                  : localizeHref(`/order?productId=${product.id}`, locale)
+              }
+              onClick={() =>
+                sendGAEvent({
+                  event: "begin_checkout_click",
+                  value: product.name,
+                })
+              }
               className={`flex-1 py-2 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap flex items-center justify-center text-center transition ${
                 isOutOfStock
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
@@ -301,5 +348,5 @@ export default function ProductCard({ product, deliveryMode = "NORMAL" }: { prod
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { siteConfig } from "@/lib/siteConfig"
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { siteConfig } from "@/lib/siteConfig";
 
 const headerImages = [
   "header-1st-about.jpg",
   "header-2nd-about.jpg",
   "header-3rd-about.jpg",
-]
+];
 
 const pillars = [
   {
@@ -42,7 +42,8 @@ const pillars = [
       "Ducks & poultry: eggs, meat, and extra income",
       "Regular veterinary care and vaccination",
     ],
-    quote: "Livestock isn't just an asset — with proper care, it becomes the foundation of success.",
+    quote:
+      "Livestock isn't just an asset — with proper care, it becomes the foundation of success.",
   },
   {
     id: 3,
@@ -60,17 +61,17 @@ const pillars = [
     ],
     quote: "A dream sown in seed, a golden harvest grown in sweat.",
   },
-]
+];
 
 const stats = [
   { label: "Farm to door", value: "Direct" },
   { label: "Middlemen", value: "0" },
   { label: "Process", value: "Transparent" },
   { label: "Location", value: "Sirajganj" },
-]
+];
 
 export default function AboutPageEn() {
-  const [openId, setOpenId] = useState<number | null>(null)
+  const [openId, setOpenId] = useState<number | null>(null);
 
   return (
     <main className="bg-stone-50 min-h-screen">
@@ -79,7 +80,10 @@ export default function AboutPageEn() {
         <div className="absolute inset-0 opacity-30">
           <div className="grid grid-cols-3 h-full">
             {headerImages.map((img, i) => (
-              <div key={i} className="relative h-full min-h-[220px] sm:min-h-[320px]">
+              <div
+                key={i}
+                className="relative h-full min-h-[220px] sm:min-h-[320px]"
+              >
                 <Image
                   src={`/uploads/${img}`}
                   alt=""
@@ -104,8 +108,8 @@ export default function AboutPageEn() {
             A Story of the Soil
           </h1>
           <p className="text-green-100 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            {siteConfig.brand.sloganEn} — pure natural products from Sarail village, Raiganj,
-            Sirajganj, with no middlemen.
+            {siteConfig.brand.sloganEn} — pure natural products from Sarail
+            village, Raiganj, Sirajganj, with no middlemen.
           </p>
         </div>
       </section>
@@ -118,8 +122,12 @@ export default function AboutPageEn() {
               key={s.label}
               className="bg-white rounded-2xl shadow-md border border-green-100 px-4 py-4 text-center"
             >
-              <div className="text-xl sm:text-2xl font-extrabold text-green-800">{s.value}</div>
-              <div className="text-xs sm:text-sm text-gray-500 mt-1">{s.label}</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-green-800">
+                {s.value}
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>
@@ -142,7 +150,9 @@ export default function AboutPageEn() {
               <h2 className="mt-5 text-white font-bold text-lg">
                 {siteConfig.brand.founderName}
               </h2>
-              <p className="text-yellow-300 text-sm mt-1">Founder · {siteConfig.brand.nameEn}</p>
+              <p className="text-yellow-300 text-sm mt-1">
+                Founder · {siteConfig.brand.nameEn}
+              </p>
               <p className="text-green-200 text-xs mt-3 leading-relaxed">
                 {siteConfig.address.villageEn}, {siteConfig.address.localityEn},{" "}
                 {siteConfig.address.regionEn}
@@ -155,17 +165,22 @@ export default function AboutPageEn() {
               </h3>
               <div className="space-y-4 text-gray-700 leading-relaxed text-[15px] sm:text-base">
                 <p>
-                  I&apos;m Kamol. I graduated in Bengali Literature, but my real identity isn&apos;t on
-                  the pages of a book — it&apos;s in the soil of Sarail village, Raiganj, Sirajganj. I
-                  call myself a{" "}
-                  <span className="font-semibold text-green-800">&quot;person of the soil&quot;</span>{" "}
-                  — even while working in Dhaka, my roots stayed in the village fields and on the farm.
+                  I&apos;m Kamol. I graduated in Bengali Literature, but my real
+                  identity isn&apos;t on the pages of a book — it&apos;s in the
+                  soil of Sarail village, Raiganj, Sirajganj. I call myself a{" "}
+                  <span className="font-semibold text-green-800">
+                    &quot;person of the soil&quot;
+                  </span>{" "}
+                  — even while working in Dhaka, my roots stayed in the village
+                  fields and on the farm.
                 </p>
                 <p>
-                  While working at a courier company in Dhaka, I saw how desperately city people
-                  searched for pure honey or adulteration-free ghee. Yet in our village these gifts of
-                  nature are right at hand. {siteConfig.brand.nameEn} was born to close that gap —
-                  straight from the farm to your door, with no middlemen.
+                  While working at a courier company in Dhaka, I saw how
+                  desperately city people searched for pure honey or
+                  adulteration-free ghee. Yet in our village these gifts of
+                  nature are right at hand. {siteConfig.brand.nameEn} was born
+                  to close that gap — straight from the farm to your door, with
+                  no middlemen.
                 </p>
               </div>
 
@@ -175,9 +190,9 @@ export default function AboutPageEn() {
                     <span className="text-lg">🎯</span> Mission
                   </h4>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    To deliver pure, adulteration-free natural food products, produced through a
-                    transparent process, directly from the farmer&apos;s home to every home in
-                    Bangladesh.
+                    To deliver pure, adulteration-free natural food products,
+                    produced through a transparent process, directly from the
+                    farmer&apos;s home to every home in Bangladesh.
                   </p>
                 </div>
                 <div className="rounded-2xl bg-yellow-50 border border-yellow-100 p-5">
@@ -210,8 +225,8 @@ export default function AboutPageEn() {
 
         <div className="flex flex-col gap-8">
           {pillars.map((p, idx) => {
-            const isOpen = openId === p.id
-            const reverse = idx % 2 === 1
+            const isOpen = openId === p.id;
+            const reverse = idx % 2 === 1;
             return (
               <article
                 key={p.id}
@@ -237,17 +252,23 @@ export default function AboutPageEn() {
                   <h3 className="text-xl font-bold text-green-900 mb-3 hidden md:flex items-center gap-2">
                     <span>{p.emoji}</span> {p.title}
                   </h3>
-                  <p className="text-gray-700 leading-relaxed text-[15px]">{p.preview}</p>
+                  <p className="text-gray-700 leading-relaxed text-[15px]">
+                    {p.preview}
+                  </p>
 
                   <div
                     className={`overflow-hidden transition-all duration-300 ${
-                      isOpen ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                      isOpen
+                        ? "max-h-[500px] opacity-100 mt-4"
+                        : "max-h-0 opacity-0"
                     }`}
                   >
                     <ul className="space-y-2 text-sm text-gray-700">
                       {p.points.map((pt) => (
                         <li key={pt} className="flex gap-2">
-                          <span className="text-green-600 shrink-0 mt-0.5">✓</span>
+                          <span className="text-green-600 shrink-0 mt-0.5">
+                            ✓
+                          </span>
                           <span>{pt}</span>
                         </li>
                       ))}
@@ -266,7 +287,7 @@ export default function AboutPageEn() {
                   </button>
                 </div>
               </article>
-            )
+            );
           })}
         </div>
       </section>
@@ -275,11 +296,15 @@ export default function AboutPageEn() {
       <section className="max-w-5xl mx-auto px-4 py-10">
         <div className="rounded-3xl bg-gradient-to-br from-green-800 via-green-900 to-green-950 text-white p-8 sm:p-10 text-center shadow-lg">
           <div className="text-4xl mb-3">🎬</div>
-          <h2 className="text-xl sm:text-2xl font-bold mb-3">Transparency Builds Trust</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-3">
+            Transparency Builds Trust
+          </h2>
           <p className="text-green-100 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed mb-6">
             We show how every product is made on our YouTube channel{" "}
-            <span className="text-yellow-300 font-semibold">{siteConfig.brand.youtubeHandle}</span> —
-            watch, then buy with confidence.
+            <span className="text-yellow-300 font-semibold">
+              {siteConfig.brand.youtubeHandle}
+            </span>{" "}
+            — watch, then buy with confidence.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -334,5 +359,5 @@ export default function AboutPageEn() {
         </div>
       </section>
     </main>
-  )
+  );
 }

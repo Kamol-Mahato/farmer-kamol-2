@@ -10,7 +10,10 @@ export default function NoticeModal() {
     const twelveHours = 12 * 60 * 60 * 1000;
     if (!lastShown || Date.now() - parseInt(lastShown) > twelveHours) {
       setIsVisible(true);
-      localStorage.setItem("farmer_kamol_notice_last_shown", Date.now().toString());
+      localStorage.setItem(
+        "farmer_kamol_notice_last_shown",
+        Date.now().toString(),
+      );
     }
   }, []);
 
@@ -42,7 +45,8 @@ export default function NoticeModal() {
 
         <h3 className="text-2xl font-bold text-green-800 mb-4">Welcome</h3>
         <p className="text-lg text-gray-700 leading-relaxed">
-          Welcome to "Farmer Kamol" — you'll find all our products right here! Order now, and watch our videos here too. "Thank you"
+          Welcome to "Farmer Kamol" — you'll find all our products right here!
+          Order now, and watch our videos here too. "Thank you"
         </p>
       </div>
     </div>

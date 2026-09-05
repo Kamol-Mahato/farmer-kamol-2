@@ -1,22 +1,22 @@
-import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
-import { verifyAdminOrAgent } from "@/lib/adminAuth"
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { verifyAdminOrAgent } from "@/lib/adminAuth";
 
 export async function GET(request: Request) {
-  const user = await verifyAdminOrAgent()
+  const user = await verifyAdminOrAgent();
   if (!user) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status") // OPEN | CLOSED | ALL
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get("status"); // OPEN | CLOSED | ALL
     const where =
       status === "CLOSED"
         ? { status: "CLOSED" as const }
         : status === "ALL"
-        ? {}
-        : { status: "OPEN" as const }
+          ? {}
+          : { status: "OPEN" as const };
 
     const conversations = await prisma.chatConversation.findMany({
       where,
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         },
       },
       take: 100,
-    })
+    });
 
     const items = conversations.map((c) => ({
       id: c.id,
@@ -61,11 +61,14 @@ export async function GET(request: Request) {
             createdAt: c.messages[0].createdAt,
           }
         : null,
-    }))
+    }));
 
-    return NextResponse.json({ conversations: items })
+    return NextResponse.json({ conversations: items });
   } catch (error) {
-    console.error("ADMIN CHAT LIST ERROR:", error)
-    return NextResponse.json({ error: "চ্যাট তালিকা লোড করতে সমস্যা হয়েছে" }, { status: 500 })
+    console.error("ADMIN CHAT LIST ERROR:", error);
+    return NextResponse.json(
+      { error: "চ্যাট তালিকা লোড করতে সমস্যা হয়েছে" },
+      { status: 500 },
+    );
   }
 }

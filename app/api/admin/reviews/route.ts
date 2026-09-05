@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { verifyAdminOnly } from "@/lib/adminAuth"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyAdminOnly } from "@/lib/adminAuth";
 
 export async function GET() {
-  const admin = await verifyAdminOnly()
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
   try {
@@ -18,10 +18,10 @@ export async function GET() {
         { isApproved: "asc" }, // pending (false) আগে দেখাবে
         { createdAt: "desc" },
       ],
-    })
-    return NextResponse.json(reviews)
+    });
+    return NextResponse.json(reviews);
   } catch (error) {
-    console.error("ADMIN REVIEWS GET ERROR:", error)
-    return NextResponse.json({ error: "লোড করা যায়নি" }, { status: 500 })
+    console.error("ADMIN REVIEWS GET ERROR:", error);
+    return NextResponse.json({ error: "লোড করা যায়নি" }, { status: 500 });
   }
 }

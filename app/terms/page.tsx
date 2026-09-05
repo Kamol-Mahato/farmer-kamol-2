@@ -1,11 +1,10 @@
 import PolicyPage from "@/app/components/PolicyPage";
 import { Metadata } from "next";
-import { siteConfig } from "@/lib/siteConfig"
+import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: `শর্তাবলী | ${siteConfig.brand.name}`,
-  description:
-    `${siteConfig.brand.name} ওয়েবসাইট ব্যবহার, অর্ডার, পেমেন্ট ও ডেলিভারি সংক্রান্ত শর্তাবলী জানুন।`,
+  description: `${siteConfig.brand.name} ওয়েবসাইট ব্যবহার, অর্ডার, পেমেন্ট ও ডেলিভারি সংক্রান্ত শর্তাবলী জানুন।`,
   alternates: {
     canonical: "/terms",
     languages: {
@@ -18,8 +17,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "ভূমিকা ও সম্মতি",
-    content:
-      `www.${siteConfig.domain.host} ওয়েবসাইট ব্যবহার করার মাধ্যমে আপনি নিচের শর্তাবলীতে সম্মত হচ্ছেন। অনুগ্রহ করে অর্ডার করার আগে সম্পূর্ণ শর্তাবলী পড়ে নিন।`,
+    content: `www.${siteConfig.domain.host} ওয়েবসাইট ব্যবহার করার মাধ্যমে আপনি নিচের শর্তাবলীতে সম্মত হচ্ছেন। অনুগ্রহ করে অর্ডার করার আগে সম্পূর্ণ শর্তাবলী পড়ে নিন।`,
   },
   {
     title: "ওয়েবসাইট ব্যবহার",
@@ -48,13 +46,11 @@ const sections = [
   },
   {
     title: "মেধাস্বত্ব",
-    content:
-      `এই ওয়েবসাইটের সকল কন্টেন্ট, লোগো, ছবি ও ভিডিও ${siteConfig.brand.name}-এর সম্পত্তি। অনুমতি ছাড়া কপি বা পুনঃব্যবহার নিষিদ্ধ।`,
+    content: `এই ওয়েবসাইটের সকল কন্টেন্ট, লোগো, ছবি ও ভিডিও ${siteConfig.brand.name}-এর সম্পত্তি। অনুমতি ছাড়া কপি বা পুনঃব্যবহার নিষিদ্ধ।`,
   },
   {
     title: "দায়বদ্ধতার সীমাবদ্ধতা",
-    content:
-      `${siteConfig.brand.name} যথাসাধ্য সঠিক ও মানসম্পন্ন পণ্য সরবরাহ করার চেষ্টা করে। তবে অনিচ্ছাকৃত ভুল বা অনিয়ন্ত্রিত পরিস্থিতির (যেমন প্রাকৃতিক দুর্যোগ, কুরিয়ার বিলম্ব) কারণে সৃষ্ট ক্ষতির জন্য আমরা দায়ী থাকব না।`,
+    content: `${siteConfig.brand.name} যথাসাধ্য সঠিক ও মানসম্পন্ন পণ্য সরবরাহ করার চেষ্টা করে। তবে অনিচ্ছাকৃত ভুল বা অনিয়ন্ত্রিত পরিস্থিতির (যেমন প্রাকৃতিক দুর্যোগ, কুরিয়ার বিলম্ব) কারণে সৃষ্ট ক্ষতির জন্য আমরা দায়ী থাকব না।`,
   },
   {
     title: "শর্তাবলীর পরিবর্তন",
@@ -63,13 +59,11 @@ const sections = [
   },
   {
     title: "প্রযোজ্য আইন",
-    content:
-      "এই শর্তাবলী বাংলাদেশের প্রচলিত আইন দ্বারা পরিচালিত হবে।",
+    content: "এই শর্তাবলী বাংলাদেশের প্রচলিত আইন দ্বারা পরিচালিত হবে।",
   },
   {
     title: "যোগাযোগ",
-    content:
-      `শর্তাবলী সংক্রান্ত কোনো প্রশ্ন থাকলে হোয়াটসঅ্যাপে (${siteConfig.contact.phoneDisplay}) যোগাযোগ করুন। আমাদের খামার: ${siteConfig.address.village}, ${siteConfig.address.locality}, ${siteConfig.address.region}।`,
+    content: `শর্তাবলী সংক্রান্ত কোনো প্রশ্ন থাকলে হোয়াটসঅ্যাপে (${siteConfig.contact.phoneDisplay}) যোগাযোগ করুন। আমাদের খামার: ${siteConfig.address.village}, ${siteConfig.address.locality}, ${siteConfig.address.region}।`,
   },
 ];
 

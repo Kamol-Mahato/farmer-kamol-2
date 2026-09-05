@@ -1,43 +1,55 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
 // 🔎 জেলা টাইপ করে খোঁজার ইনপুট
 // 🐛 ফিক্স: আগে খালি করলে (backspace দিয়ে সব মুছলে) আবার আগের সিলেক্ট করা জেলার নাম ফিরে আসত।
 // এখন input-টা সরাসরি নিজের একটা টেক্সট state দিয়ে চলে, তাই খালি করলে সত্যিকারের খালিই থাকবে।
-export function DistrictSearch({ districts, value, onSelect, inputRef, onEnterNext }: {
-  districts: { id: number; name: string; en_name: string }[]
-  value: string
-  onSelect: (d: { id: number; name: string; en_name: string }) => void
-  inputRef?: React.Ref<HTMLInputElement>
-  onEnterNext?: () => void
+export function DistrictSearch({
+  districts,
+  value,
+  onSelect,
+  inputRef,
+  onEnterNext,
+}: {
+  districts: { id: number; name: string; en_name: string }[];
+  value: string;
+  onSelect: (d: { id: number; name: string; en_name: string }) => void;
+  inputRef?: React.Ref<HTMLInputElement>;
+  onEnterNext?: () => void;
 }) {
-  const [text, setText] = useState(value)
-  const [show, setShow] = useState(false)
+  const [text, setText] = useState(value);
+  const [show, setShow] = useState(false);
 
-  useEffect(() => { setText(value) }, [value])
+  useEffect(() => {
+    setText(value);
+  }, [value]);
 
-  const filtered = districts.filter(d =>
-    d.name.includes(text) ||
-    d.en_name.toLowerCase().includes(text.toLowerCase())
-  )
+  const filtered = districts.filter(
+    (d) =>
+      d.name.includes(text) ||
+      d.en_name.toLowerCase().includes(text.toLowerCase()),
+  );
   return (
     <div className="relative">
       <input
         ref={inputRef}
         type="text"
         value={text}
-        onChange={e => { setText(e.target.value); setShow(true) }}
+        onChange={(e) => {
+          setText(e.target.value);
+          setShow(true);
+        }}
         onFocus={() => setShow(true)}
         onBlur={() => setTimeout(() => setShow(false), 200)}
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === "Enter") {
-            e.preventDefault()
+            e.preventDefault();
             if (show && filtered.length > 0) {
-              setText(filtered[0].name)
-              setShow(false)
-              onSelect(filtered[0])
+              setText(filtered[0].name);
+              setShow(false);
+              onSelect(filtered[0]);
             }
-            onEnterNext?.()
+            onEnterNext?.();
           }
         }}
         placeholder="জেলা লিখুন বা খুঁজুন"
@@ -45,64 +57,83 @@ export function DistrictSearch({ districts, value, onSelect, inputRef, onEnterNe
       />
       {show && filtered.length > 0 && (
         <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(d => (
-            <div key={d.id}
+          {filtered.map((d) => (
+            <div
+              key={d.id}
               className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setText(d.name); setShow(false); onSelect(d) }}
+              onMouseDown={() => {
+                setText(d.name);
+                setShow(false);
+                onSelect(d);
+              }}
             >
-              {d.name} <span className="text-gray-400 text-xs">({d.en_name})</span>
+              {d.name}{" "}
+              <span className="text-gray-400 text-xs">({d.en_name})</span>
             </div>
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // 🔎 উপজেলা টাইপ করে খোঁজার ইনপুট — একই ফিক্স
-export function UpazilaSearch({ upazilas, upazilasEn, value, onSelect, disabled, inputRef, onEnterNext }: {
-  upazilas: string[]
-  upazilasEn?: string[]   // ← নতুন optional
-  value: string
-  onSelect: (u: string) => void
-  disabled?: boolean
-  inputRef?: React.Ref<HTMLInputElement>
-  onEnterNext?: () => void
+export function UpazilaSearch({
+  upazilas,
+  upazilasEn,
+  value,
+  onSelect,
+  disabled,
+  inputRef,
+  onEnterNext,
+}: {
+  upazilas: string[];
+  upazilasEn?: string[]; // ← নতুন optional
+  value: string;
+  onSelect: (u: string) => void;
+  disabled?: boolean;
+  inputRef?: React.Ref<HTMLInputElement>;
+  onEnterNext?: () => void;
 }) {
-  const [text, setText] = useState(value)
-  const [show, setShow] = useState(false)
+  const [text, setText] = useState(value);
+  const [show, setShow] = useState(false);
 
-  useEffect(() => { setText(value) }, [value])
+  useEffect(() => {
+    setText(value);
+  }, [value]);
 
-  const q = text.toLowerCase().trim()
-const filtered = upazilas.filter((u, i) => {
-  // Bangla স্ট্রিংয়ে ইংরেজিও থাকে: "ডেমরা (Demra)"
-  if (u.toLowerCase().includes(q)) return true
-  // Parallel English শুধু যখন দুই লিস্ট সমান লম্বা (ঢাকা ছাড়া সব জেলা)
-  if (upazilasEn && upazilas.length === upazilasEn.length) {
-    const en = (upazilasEn[i] || "").toLowerCase()
-    if (en.includes(q)) return true
-  }
-  return false
-})
+  const q = text.toLowerCase().trim();
+  const filtered = upazilas.filter((u, i) => {
+    // Bangla স্ট্রিংয়ে ইংরেজিও থাকে: "ডেমরা (Demra)"
+    if (u.toLowerCase().includes(q)) return true;
+    // Parallel English শুধু যখন দুই লিস্ট সমান লম্বা (ঢাকা ছাড়া সব জেলা)
+    if (upazilasEn && upazilas.length === upazilasEn.length) {
+      const en = (upazilasEn[i] || "").toLowerCase();
+      if (en.includes(q)) return true;
+    }
+    return false;
+  });
   return (
     <div className="relative">
       <input
         ref={inputRef}
         type="text"
         value={text}
-        onChange={e => { setText(e.target.value); setShow(true) }}
+        onChange={(e) => {
+          setText(e.target.value);
+          setShow(true);
+        }}
         onFocus={() => setShow(true)}
         onBlur={() => setTimeout(() => setShow(false), 200)}
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === "Enter") {
-            e.preventDefault()
+            e.preventDefault();
             if (show && filtered.length > 0) {
-              setText(filtered[0])
-              setShow(false)
-              onSelect(filtered[0])
+              setText(filtered[0]);
+              setShow(false);
+              onSelect(filtered[0]);
             }
-            onEnterNext?.()
+            onEnterNext?.();
           }
         }}
         placeholder={disabled ? "আগে জেলা বেছে নিন" : "উপজেলা লিখুন বা খুঁজুন"}
@@ -111,10 +142,15 @@ const filtered = upazilas.filter((u, i) => {
       />
       {show && filtered.length > 0 && (
         <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map(u => (
-            <div key={u}
+          {filtered.map((u) => (
+            <div
+              key={u}
               className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => { setText(u); setShow(false); onSelect(u) }}
+              onMouseDown={() => {
+                setText(u);
+                setShow(false);
+                onSelect(u);
+              }}
             >
               {u}
             </div>
@@ -122,5 +158,5 @@ const filtered = upazilas.filter((u, i) => {
         </div>
       )}
     </div>
-  )
+  );
 }

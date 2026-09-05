@@ -1,8 +1,8 @@
-"use client"
-import { useAdminSidebar } from "./AdminSidebarContext"
+"use client";
+import { useAdminSidebar } from "./AdminSidebarContext";
 
 export default function AdminSidebarToggleButton() {
-  const { mobileOpen, setMobileOpen } = useAdminSidebar()
+  const { mobileOpen, setMobileOpen } = useAdminSidebar();
   return (
     <button
       onClick={() => setMobileOpen(!mobileOpen)}
@@ -11,5 +11,5 @@ export default function AdminSidebarToggleButton() {
     >
       {mobileOpen ? "✕" : "☰"}
     </button>
-  )
+  );
 }
