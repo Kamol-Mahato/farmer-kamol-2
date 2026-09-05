@@ -1,28 +1,29 @@
-import { prisma } from "@/lib/prisma"
-import { siteConfig } from "@/lib/siteConfig"
-import Link from "next/link"
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import Breadcrumb from "@/app/components/Breadcrumb"
-import { safeJsonLd } from "@/lib/jsonLd"
-import { cache } from "react"
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/siteConfig";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import Breadcrumb from "@/app/components/Breadcrumb";
+import { safeJsonLd } from "@/lib/jsonLd";
+import { cache } from "react";
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 const getCategory = cache(async (slug: string) => {
   return prisma.fosolCategory.findFirst({
     where: { slug, isVisible: true },
-  })
-})
+  });
+});
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string }>
+  params: Promise<{ category: string }>;
 }) {
-  const { category: catSlug } = await params
-  const cat = await getCategory(catSlug)
-  if (!cat) return { title: `ক্যাটাগরি পাওয়া যায়নি | ${siteConfig.brand.name}` }
+  const { category: catSlug } = await params;
+  const cat = await getCategory(catSlug);
+  if (!cat)
+    return { title: `ক্যাটাগরি পাওয়া যায়নি | ${siteConfig.brand.name}` };
 
   return {
     title: `${cat.name} | বাংলার ফসল | ${siteConfig.brand.name}`,
@@ -37,17 +38,17 @@ export async function generateMetadata({
         en: `/en/banglar-fosol/${cat.slug}`,
       },
     },
-  }
+  };
 }
 
 export default async function FosolCategoryPage({
   params,
 }: {
-  params: Promise<{ category: string }>
+  params: Promise<{ category: string }>;
 }) {
-  const { category: catSlug } = await params
-  const cat = await getCategory(catSlug)
-  if (!cat) notFound()
+  const { category: catSlug } = await params;
+  const cat = await getCategory(catSlug);
+  if (!cat) notFound();
 
   const [categories, items] = await Promise.all([
     prisma.fosolCategory.findMany({
@@ -58,14 +59,14 @@ export default async function FosolCategoryPage({
       where: { categoryId: cat.id, isPublished: true },
       orderBy: { updatedAt: "desc" },
     }),
-  ])
+  ]);
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: cat.name,
     numberOfItems: items.length,
-  }
+  };
 
   return (
     <div>
@@ -110,7 +111,9 @@ export default async function FosolCategoryPage({
         </div>
 
         {items.length === 0 ? (
-          <p className="text-gray-400 py-16">এই ক্যাটাগরিতে এখনো কোনো আইটেম নেই।</p>
+          <p className="text-gray-400 py-16">
+            এই ক্যাটাগরিতে এখনো কোনো আইটেম নেই।
+          </p>
         ) : (
           <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 text-left">
             {items.map((item) => (
@@ -138,7 +141,9 @@ export default async function FosolCategoryPage({
                     {item.title}
                   </h2>
                   {item.scientificName && (
-                    <p className="text-xs text-gray-400 italic mt-1">{item.scientificName}</p>
+                    <p className="text-xs text-gray-400 italic mt-1">
+                      {item.scientificName}
+                    </p>
                   )}
                   <p className="text-gray-400 text-xs mt-2">
                     {item.updatedAt.toLocaleDateString("bn-BD")}
@@ -150,5 +155,5 @@ export default async function FosolCategoryPage({
         )}
       </div>
     </div>
-  )
+  );
 }

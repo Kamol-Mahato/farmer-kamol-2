@@ -1,11 +1,11 @@
-import { prisma } from "@/lib/prisma"
-import { siteConfig } from "@/lib/siteConfig"
-import Link from "next/link"
-import Image from "next/image"
-import Breadcrumb from "@/app/components/Breadcrumb"
-import { safeJsonLd } from "@/lib/jsonLd"
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/siteConfig";
+import Link from "next/link";
+import Image from "next/image";
+import Breadcrumb from "@/app/components/Breadcrumb";
+import { safeJsonLd } from "@/lib/jsonLd";
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 export async function generateMetadata() {
   return {
@@ -19,24 +19,24 @@ export async function generateMetadata() {
         "x-default": "/banglar-fosol",
       },
     },
-  }
+  };
 }
 
 export default async function BanglarFosolIndexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>
+  searchParams: Promise<{ category?: string }>;
 }) {
-  const { category: catQuery } = await searchParams
+  const { category: catQuery } = await searchParams;
 
   const categories = await prisma.fosolCategory.findMany({
     where: { isVisible: true },
     orderBy: { displayOrder: "asc" },
-  })
+  });
 
-  const activeSlug = catQuery || "all"
+  const activeSlug = catQuery || "all";
   const activeCategory =
-    activeSlug === "all" ? null : categories.find((c) => c.slug === activeSlug)
+    activeSlug === "all" ? null : categories.find((c) => c.slug === activeSlug);
 
   const items = await prisma.fosolItem.findMany({
     where: {
@@ -45,7 +45,7 @@ export default async function BanglarFosolIndexPage({
     },
     include: { category: true },
     orderBy: { updatedAt: "desc" },
-  })
+  });
 
   const schema = {
     "@context": "https://schema.org",
@@ -53,7 +53,7 @@ export default async function BanglarFosolIndexPage({
     name: "বাংলার ফসল",
     description: "বাংলাদেশের ফসল, ফল, শাকসবজি, গাছ ও ঔষধি গাছ",
     url: `${siteConfig.domain.url}/banglar-fosol`,
-  }
+  };
 
   return (
     <div>
@@ -62,10 +62,7 @@ export default async function BanglarFosolIndexPage({
         dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
       />
       <Breadcrumb
-        items={[
-          { label: "হোম", href: "/" },
-          { label: "বাংলার ফসল" },
-        ]}
+        items={[{ label: "হোম", href: "/" }, { label: "বাংলার ফসল" }]}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-12 pt-8 text-center">
@@ -131,7 +128,9 @@ export default async function BanglarFosolIndexPage({
                     {item.title}
                   </h2>
                   {item.scientificName && (
-                    <p className="text-xs text-gray-400 italic mt-1">{item.scientificName}</p>
+                    <p className="text-xs text-gray-400 italic mt-1">
+                      {item.scientificName}
+                    </p>
                   )}
                   <p className="text-gray-400 text-xs mt-2">
                     {item.updatedAt.toLocaleDateString("bn-BD")}
@@ -143,5 +142,5 @@ export default async function BanglarFosolIndexPage({
         )}
       </div>
     </div>
-  )
+  );
 }

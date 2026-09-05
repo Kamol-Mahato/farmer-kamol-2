@@ -1,15 +1,15 @@
-"use client"
-import { useState, useRef } from "react"
+"use client";
+import { useState, useRef } from "react";
 
 interface Video {
-  id: number
-  title: string
-  description: string | null
-  youtubeUrl: string
-  platform: string
-  thumbnailUrl?: string | null
-  displayOrder: number
-  isActive: boolean
+  id: number;
+  title: string;
+  description: string | null;
+  youtubeUrl: string;
+  platform: string;
+  thumbnailUrl?: string | null;
+  displayOrder: number;
+  isActive: boolean;
 }
 
 export default function VideoGalleryClient({
@@ -17,17 +17,17 @@ export default function VideoGalleryClient({
   youtubeChannelUrl = "https://www.youtube.com/@FarmerKamol",
   facebookPageUrl = "https://www.facebook.com/farmerkamol",
 }: {
-  videos: Video[]
-  youtubeChannelUrl?: string
-  facebookPageUrl?: string
+  videos: Video[];
+  youtubeChannelUrl?: string;
+  facebookPageUrl?: string;
 }) {
-  const [secondaryIndex, setSecondaryIndex] = useState(0)
-  const [unmutedId, setUnmutedId] = useState<number | null>(null)
-  const iframeRefs = useRef<Record<number, HTMLIFrameElement | null>>({})
+  const [secondaryIndex, setSecondaryIndex] = useState(0);
+  const [unmutedId, setUnmutedId] = useState<number | null>(null);
+  const iframeRefs = useRef<Record<number, HTMLIFrameElement | null>>({});
 
   function handleUnmute(id: number) {
-    const iframe = iframeRefs.current[id]
-    const willUnmute = unmutedId !== id
+    const iframe = iframeRefs.current[id];
+    const willUnmute = unmutedId !== id;
     if (iframe?.contentWindow) {
       iframe.contentWindow.postMessage(
         JSON.stringify({
@@ -35,36 +35,40 @@ export default function VideoGalleryClient({
           func: willUnmute ? "unMute" : "mute",
           args: [],
         }),
-        "*"
-      )
+        "*",
+      );
     }
-    setUnmutedId(willUnmute ? id : null)
+    setUnmutedId(willUnmute ? id : null);
   }
 
   function getYoutubeId(url: string) {
-    const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
-    return match ? match[1] : null
+    const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+    return match ? match[1] : null;
   }
 
   function getEmbedUrl(video: Video) {
     if (video.platform === "FACEBOOK") {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(video.youtubeUrl)}&autoplay=true&mute=1`
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(video.youtubeUrl)}&autoplay=true&mute=1`;
     }
-    const id = getYoutubeId(video.youtubeUrl)
-    if (!id) return ""
-    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1`
+    const id = getYoutubeId(video.youtubeUrl);
+    if (!id) return "";
+    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1`;
   }
 
   if (videos.length === 0) {
-    return <div className="text-center py-32 text-gray-400">এখনো কোনো ভিডিও যোগ করা হয়নি</div>
+    return (
+      <div className="text-center py-32 text-gray-400">
+        এখনো কোনো ভিডিও যোগ করা হয়নি
+      </div>
+    );
   }
 
-  const topVideos = videos.slice(0, 3)
-  const restVideos = videos.slice(3)
-  const secondaryVideo = restVideos[secondaryIndex] || null
+  const topVideos = videos.slice(0, 3);
+  const restVideos = videos.slice(3);
+  const secondaryVideo = restVideos[secondaryIndex] || null;
 
   function renderVideoFrame(video: Video) {
-    const isUnmuted = unmutedId === video.id
+    const isUnmuted = unmutedId === video.id;
 
     // Facebook → thumbnail + Follow বাটন ভিডিওর ভিতরে
     if (video.platform === "FACEBOOK") {
@@ -81,7 +85,11 @@ export default function VideoGalleryClient({
             className="absolute inset-0 z-0 block"
           >
             {video.thumbnailUrl ? (
-              <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+              <img
+                src={video.thumbnailUrl}
+                alt={video.title}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full bg-blue-50 flex items-center justify-center text-blue-500 text-sm font-bold">
                 📘 Facebook ভিডিও
@@ -103,7 +111,7 @@ export default function VideoGalleryClient({
             👍 Follow
           </a>
         </div>
-      )
+      );
     }
 
     // YouTube → embed + Subscribe (বাম) + Mute (ডান)
@@ -115,7 +123,7 @@ export default function VideoGalleryClient({
       >
         <iframe
           ref={(el) => {
-            iframeRefs.current[video.id] = el
+            iframeRefs.current[video.id] = el;
           }}
           src={getEmbedUrl(video)}
           title={video.title}
@@ -138,7 +146,7 @@ export default function VideoGalleryClient({
           {isUnmuted ? "🔊 Mute" : "🔇 Unmute"}
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -161,7 +169,9 @@ export default function VideoGalleryClient({
                 rel="noopener noreferrer"
                 className="inline-block mt-1 text-xs text-blue-600 hover:underline"
               >
-                {video.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
+                {video.platform === "FACEBOOK"
+                  ? "Facebook-এ দেখুন"
+                  : "YouTube-এ দেখুন"}
               </a>
             </div>
           </div>
@@ -170,10 +180,14 @@ export default function VideoGalleryClient({
 
       {restVideos.length > 0 && secondaryVideo && (
         <>
-          <h2 className="text-xl font-bold text-green-800 mb-4 text-center">আরও ভিডিও</h2>
+          <h2 className="text-xl font-bold text-green-800 mb-4 text-center">
+            আরও ভিডিও
+          </h2>
           {renderVideoFrame(secondaryVideo)}
           <div className="text-center my-8 max-w-2xl mx-auto">
-            <h3 className="text-lg font-bold text-green-800">{secondaryVideo.title}</h3>
+            <h3 className="text-lg font-bold text-green-800">
+              {secondaryVideo.title}
+            </h3>
             {secondaryVideo.description && (
               <p
                 className="text-gray-600 text-sm mt-2"
@@ -186,19 +200,23 @@ export default function VideoGalleryClient({
               rel="noopener noreferrer"
               className="inline-block mt-2 text-sm text-blue-600 hover:underline"
             >
-              {secondaryVideo.platform === "FACEBOOK" ? "Facebook-এ দেখুন" : "YouTube-এ দেখুন"}
+              {secondaryVideo.platform === "FACEBOOK"
+                ? "Facebook-এ দেখুন"
+                : "YouTube-এ দেখুন"}
             </a>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {restVideos.map((video, index) => {
-              const ytId = getYoutubeId(video.youtubeUrl)
+              const ytId = getYoutubeId(video.youtubeUrl);
               return (
                 <button
                   key={video.id}
                   onClick={() => setSecondaryIndex(index)}
                   className={`rounded-xl overflow-hidden shadow hover:shadow-lg transition group border-2 ${
-                    secondaryIndex === index ? "border-green-600" : "border-transparent"
+                    secondaryIndex === index
+                      ? "border-green-600"
+                      : "border-transparent"
                   }`}
                 >
                   {video.thumbnailUrl ? (
@@ -219,14 +237,16 @@ export default function VideoGalleryClient({
                     </div>
                   )}
                   <div className="p-2 bg-white text-left">
-                    <p className="text-xs font-bold text-green-800 line-clamp-2">{video.title}</p>
+                    <p className="text-xs font-bold text-green-800 line-clamp-2">
+                      {video.title}
+                    </p>
                   </div>
                 </button>
-              )
+              );
             })}
           </div>
         </>
       )}
     </>
-  )
-} 
+  );
+}

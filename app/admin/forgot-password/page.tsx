@@ -1,111 +1,111 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1) // 1: phone, 2: otp, 3: new password
-  const [phone, setPhone] = useState("")
-  const [otp, setOtp] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [step, setStep] = useState(1); // 1: phone, 2: otp, 3: new password
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSendOtp() {
-    if (loading) return
+    if (loading) return;
     if (!phone) {
-      setError("মোবাইল নম্বর দিন")
-      return
+      setError("মোবাইল নম্বর দিন");
+      return;
     }
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/admin/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "সমস্যা হয়েছে")
-        setLoading(false)
-        return
+        setError(data.error || "সমস্যা হয়েছে");
+        setLoading(false);
+        return;
       }
-      setSuccess("OTP পাঠানো হয়েছে")
-      setStep(2)
-      setLoading(false)
+      setSuccess("OTP পাঠানো হয়েছে");
+      setStep(2);
+      setLoading(false);
     } catch (err) {
-      console.error(err)
-      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
-      setLoading(false)
+      console.error(err);
+      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+      setLoading(false);
     }
   }
 
   async function handleVerifyOtp() {
-    if (loading) return
+    if (loading) return;
     if (!otp) {
-      setError("OTP দিন")
-      return
+      setError("OTP দিন");
+      return;
     }
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/admin/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "ভুল OTP")
-        setLoading(false)
-        return
+        setError(data.error || "ভুল OTP");
+        setLoading(false);
+        return;
       }
-      setSuccess("OTP যাচাই হয়েছে")
-      setStep(3)
-      setLoading(false)
+      setSuccess("OTP যাচাই হয়েছে");
+      setStep(3);
+      setLoading(false);
     } catch (err) {
-      console.error(err)
-      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
-      setLoading(false)
+      console.error(err);
+      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+      setLoading(false);
     }
   }
 
   async function handleResetPassword() {
-    if (loading) return
+    if (loading) return;
     if (!newPassword || !confirmPassword) {
-      setError("সব ফিল্ড পূরণ করুন")
-      return
+      setError("সব ফিল্ড পূরণ করুন");
+      return;
     }
     if (newPassword !== confirmPassword) {
-      setError("পাসওয়ার্ড দুটি মিলছে না")
-      return
+      setError("পাসওয়ার্ড দুটি মিলছে না");
+      return;
     }
     if (newPassword.length < 6) {
-      setError("পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে")
-      return
+      setError("পাসওয়ার্ড কমপক্ষে ৬ ক্যারেক্টার হতে হবে");
+      return;
     }
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/admin/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp, newPassword }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে")
-        setLoading(false)
-        return
+        setError(data.error || "পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে");
+        setLoading(false);
+        return;
       }
-      router.push("/admin/login")
+      router.push("/admin/login");
     } catch (err) {
-      console.error(err)
-      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
-      setLoading(false)
+      console.error(err);
+      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+      setLoading(false);
     }
   }
 
@@ -214,5 +214,5 @@ export default function ForgotPasswordPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

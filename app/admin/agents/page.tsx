@@ -1,65 +1,69 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
 interface Agent {
-  id: number
-  name: string
-  phone: string
-  isActive: boolean
-  createdAt: string
-  totalOrders: number
+  id: number;
+  name: string;
+  phone: string;
+  isActive: boolean;
+  createdAt: string;
+  totalOrders: number;
 }
 
 export default function AdminAgentsPage() {
-  const [agents, setAgents] = useState<Agent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState("")
-  const [resettingId, setResettingId] = useState<number | null>(null)
-  const [resetResult, setResetResult] = useState<{ name: string; phone: string; password: string } | null>(null)
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [resettingId, setResettingId] = useState<number | null>(null);
+  const [resetResult, setResetResult] = useState<{
+    name: string;
+    phone: string;
+    password: string;
+  } | null>(null);
 
   function loadAgents() {
     fetch("/api/admin/agents")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setAgents(data)
+        if (Array.isArray(data)) setAgents(data);
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
-    loadAgents()
-  }, [])
+    loadAgents();
+  }, []);
 
   async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
-    setSubmitting(true)
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
     try {
       const res = await fetch("/api/admin/agents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, password }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "এজেন্ট তৈরি হয়নি")
-        return
+        setError(data.error || "এজেন্ট তৈরি হয়নি");
+        return;
       }
-      setName("")
-      setPhone("")
-      setPassword("")
-      setShowForm(false)
-      loadAgents()
+      setName("");
+      setPhone("");
+      setPassword("");
+      setShowForm(false);
+      loadAgents();
     } catch {
-      setError("সার্ভার এরর হয়েছে")
+      setError("সার্ভার এরর হয়েছে");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -68,28 +72,35 @@ export default function AdminAgentsPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: !current }),
-    })
-    loadAgents()
+    });
+    loadAgents();
   }
 
   // 🔑 এজেন্টের জন্য নতুন পাসওয়ার্ড জেনারেট করা
-  async function handleResetPassword(agentId: number, name: string, phone: string) {
-    if (!confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`)) return
-    setResettingId(agentId)
+  async function handleResetPassword(
+    agentId: number,
+    name: string,
+    phone: string,
+  ) {
+    if (
+      !confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`)
+    )
+      return;
+    setResettingId(agentId);
     try {
       const res = await fetch(`/api/admin/agents/${agentId}/reset-password`, {
         method: "POST",
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "পাসওয়ার্ড রিসেট করা যায়নি")
-        return
+        alert(data.error || "পাসওয়ার্ড রিসেট করা যায়নি");
+        return;
       }
-      setResetResult({ name, phone, password: data.newPassword })
+      setResetResult({ name, phone, password: data.newPassword });
     } catch {
-      alert("সার্ভার সমস্যা, আবার চেষ্টা করুন")
+      alert("সার্ভার সমস্যা, আবার চেষ্টা করুন");
     } finally {
-      setResettingId(null)
+      setResettingId(null);
     }
   }
 
@@ -98,12 +109,14 @@ export default function AdminAgentsPage() {
       <div className="text-center py-20 text-gray-500 font-medium">
         এজেন্ট ডেটা লোড হচ্ছে...
       </div>
-    )
+    );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-2">
       <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-green-800">এজেন্ট ম্যানেজমেন্ট</h1>
+        <h1 className="text-3xl font-bold text-green-800">
+          এজেন্ট ম্যানেজমেন্ট
+        </h1>
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className="bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-800 transition shadow-sm"
@@ -118,7 +131,9 @@ export default function AdminAgentsPage() {
           className="bg-white rounded-xl shadow p-6 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end"
         >
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">নাম</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              নাম
+            </label>
             <input
               type="text"
               required
@@ -128,7 +143,9 @@ export default function AdminAgentsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">মোবাইল নম্বর</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              মোবাইল নম্বর
+            </label>
             <input
               type="text"
               required
@@ -139,7 +156,9 @@ export default function AdminAgentsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">পাসওয়ার্ড</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              পাসওয়ার্ড
+            </label>
             <input
               type="text"
               required
@@ -165,7 +184,8 @@ export default function AdminAgentsPage() {
 
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <p className="text-sm text-gray-500">
-          মোট এজেন্ট: <span className="font-bold text-green-800">{agents.length}</span> জন
+          মোট এজেন্ট:{" "}
+          <span className="font-bold text-green-800">{agents.length}</span> জন
         </p>
       </div>
 
@@ -197,8 +217,12 @@ export default function AdminAgentsPage() {
                     !agent.isActive ? "opacity-50" : ""
                   }`}
                 >
-                  <td className="px-6 py-4 text-gray-400 text-xs">{index + 1}</td>
-                  <td className="px-6 py-4 font-medium text-gray-800">{agent.name}</td>
+                  <td className="px-6 py-4 text-gray-400 text-xs">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {agent.name}
+                  </td>
                   <td className="px-6 py-4 text-gray-600">{agent.phone}</td>
                   <td className="px-6 py-4">
                     <span className="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full text-xs">
@@ -232,7 +256,9 @@ export default function AdminAgentsPage() {
                         {agent.isActive ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
                       </button>
                       <button
-                        onClick={() => handleResetPassword(agent.id, agent.name, agent.phone)}
+                        onClick={() =>
+                          handleResetPassword(agent.id, agent.name, agent.phone)
+                        }
                         disabled={resettingId === agent.id}
                         className="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 transition disabled:opacity-50"
                       >
@@ -250,9 +276,12 @@ export default function AdminAgentsPage() {
       {resetResult && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-lg font-bold text-green-800 mb-2">নতুন পাসওয়ার্ড তৈরি হয়েছে</h2>
+            <h2 className="text-lg font-bold text-green-800 mb-2">
+              নতুন পাসওয়ার্ড তৈরি হয়েছে
+            </h2>
             <p className="text-sm text-gray-600 mb-4">
-              {resetResult.name} ({resetResult.phone}) — এই পাসওয়ার্ডটা কপি করে এজেন্টকে WhatsApp/কলে জানিয়ে দিন। এটা আর দেখা যাবে না।
+              {resetResult.name} ({resetResult.phone}) — এই পাসওয়ার্ডটা কপি করে
+              এজেন্টকে WhatsApp/কলে জানিয়ে দিন। এটা আর দেখা যাবে না।
             </p>
             <div className="flex items-center gap-2 mb-4">
               <input
@@ -261,7 +290,9 @@ export default function AdminAgentsPage() {
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 font-mono text-center text-lg font-bold tracking-widest"
               />
               <button
-                onClick={() => navigator.clipboard.writeText(resetResult.password)}
+                onClick={() =>
+                  navigator.clipboard.writeText(resetResult.password)
+                }
                 className="bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-green-600"
               >
                 কপি
@@ -277,5 +308,5 @@ export default function AdminAgentsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

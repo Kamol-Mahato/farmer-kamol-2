@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
-import { verifyAdminOnly } from "@/lib/adminAuth"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { verifyAdminOnly } from "@/lib/adminAuth";
 
 export async function GET() {
-  const currentUser = await verifyAdminOnly()
+  const currentUser = await verifyAdminOnly();
   if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -23,7 +23,7 @@ export async function GET() {
           select: { id: true },
         },
       },
-    })
+    });
     const result = agents.map((a) => ({
       id: a.id,
       name: a.name ?? "নাম নেই",
@@ -31,33 +31,39 @@ export async function GET() {
       isActive: a.isActive,
       createdAt: a.createdAt,
       totalOrders: a.createdOrders.length,
-    }))
-    return NextResponse.json(result)
+    }));
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Agents fetch error:", error)
-    return NextResponse.json({ error: "ডেটা লোড হয়নি" }, { status: 500 })
+    console.error("Agents fetch error:", error);
+    return NextResponse.json({ error: "ডেটা লোড হয়নি" }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-  const currentUser = await verifyAdminOnly()
+  const currentUser = await verifyAdminOnly();
   if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const { name, phone, password } = await req.json()
+    const { name, phone, password } = await req.json();
 
     if (!name || !phone || !password) {
-      return NextResponse.json({ error: "নাম, ফোন ও পাসওয়ার্ড দিতে হবে" }, { status: 400 })
+      return NextResponse.json(
+        { error: "নাম, ফোন ও পাসওয়ার্ড দিতে হবে" },
+        { status: 400 },
+      );
     }
 
-    const existing = await prisma.user.findUnique({ where: { phone } })
+    const existing = await prisma.user.findUnique({ where: { phone } });
     if (existing) {
-      return NextResponse.json({ error: "এই ফোন নম্বর দিয়ে অ্যাকাউন্ট আগেই আছে" }, { status: 400 })
+      return NextResponse.json(
+        { error: "এই ফোন নম্বর দিয়ে অ্যাকাউন্ট আগেই আছে" },
+        { status: 400 },
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const agent = await prisma.user.create({
       data: {
@@ -66,11 +72,11 @@ export async function POST(req: Request) {
         password: hashedPassword,
         role: "AGENT",
       },
-    })
+    });
 
-    return NextResponse.json({ success: true, id: agent.id })
+    return NextResponse.json({ success: true, id: agent.id });
   } catch (error) {
-    console.error("Agent create error:", error)
-    return NextResponse.json({ error: "এজেন্ট তৈরি হয়নি" }, { status: 500 })
+    console.error("Agent create error:", error);
+    return NextResponse.json({ error: "এজেন্ট তৈরি হয়নি" }, { status: 500 });
   }
 }

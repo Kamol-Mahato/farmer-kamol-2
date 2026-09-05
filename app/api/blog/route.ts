@@ -1,24 +1,24 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { verifyAdminOnly } from "@/lib/adminAuth"
-import { sanitizeHtml } from "@/lib/sanitize"
-import { sendPushToCustomers } from "@/lib/webpush"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { verifyAdminOnly } from "@/lib/adminAuth";
+import { sanitizeHtml } from "@/lib/sanitize";
+import { sendPushToCustomers } from "@/lib/webpush";
 
 export async function GET() {
   const blogs = await prisma.blog.findMany({
-    orderBy: { createdAt: "desc" }
-  })
-  return NextResponse.json(blogs)
+    orderBy: { createdAt: "desc" },
+  });
+  return NextResponse.json(blogs);
 }
 
 export async function POST(req: Request) {
-  const admin = await verifyAdminOnly()
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
-  const body = await req.json()
+  const body = await req.json();
   const blog = await prisma.blog.create({
     data: {
       title: body.title,
@@ -31,24 +31,27 @@ export async function POST(req: Request) {
       image: body.image || null,
       category: body.category,
       isPublished: body.isPublished,
-      homeOrder: body.homeOrder === "" || body.homeOrder === null || body.homeOrder === undefined
-        ? null
-        : Number(body.homeOrder),
-    }
-  })
+      homeOrder:
+        body.homeOrder === "" ||
+        body.homeOrder === null ||
+        body.homeOrder === undefined
+          ? null
+          : Number(body.homeOrder),
+    },
+  });
 
   // ✅ ব্লগ Published থাকলেই customer-দের জানানো হবে (Draft হলে না)
   if (blog.isPublished) {
     sendPushToCustomers(
       "নতুন ব্লগ পোস্ট! 📝",
       blog.title,
-      `/blog/${blog.slug}`
-    ).catch((err) => console.error("Push notify error:", err))
+      `/blog/${blog.slug}`,
+    ).catch((err) => console.error("Push notify error:", err));
   }
 
-  revalidatePath("/")
-  revalidatePath("/en")
-  revalidatePath("/blog")
-  revalidatePath("/en/blog")
-  return NextResponse.json(blog)
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/blog");
+  revalidatePath("/en/blog");
+  return NextResponse.json(blog);
 }

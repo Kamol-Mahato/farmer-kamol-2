@@ -10,7 +10,10 @@ export default function NoticeModal() {
     const twelveHours = 12 * 60 * 60 * 1000;
     if (!lastShown || Date.now() - parseInt(lastShown) > twelveHours) {
       setIsVisible(true);
-      localStorage.setItem("farmer_kamol_notice_last_shown", Date.now().toString());
+      localStorage.setItem(
+        "farmer_kamol_notice_last_shown",
+        Date.now().toString(),
+      );
     }
   }, []);
   useEffect(() => {
@@ -25,7 +28,7 @@ export default function NoticeModal() {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 p-4">
       {/* মাউস বা টাচ করলে পজ হবে */}
-      <div 
+      <div
         className="bg-white p-8 rounded-2xl shadow-2xl relative max-w-lg w-full text-center border-4 border-green-700"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
@@ -38,10 +41,12 @@ export default function NoticeModal() {
         >
           ✕
         </button>
-        
+
         <h3 className="text-2xl font-bold text-green-800 mb-4">স্বাগতম </h3>
         <p className="text-lg text-gray-700 leading-relaxed">
-        " Farmer Kamol " ওয়েব সাইটে আপনাকে স্বাগতম , আমাদের সকল পণ্য গুলো পেয়ে যাবেন এখানেই !এখনই অর্ডার করুন!একই সাথে আমাদের কৃষি বিষয়ক ভিডিও গুলোও দেখতে পারবেন এখানেই। "ধন্যবাদ "
+          " Farmer Kamol " ওয়েব সাইটে আপনাকে স্বাগতম , আমাদের সকল পণ্য গুলো
+          পেয়ে যাবেন এখানেই !এখনই অর্ডার করুন!একই সাথে আমাদের কৃষি বিষয়ক ভিডিও
+          গুলোও দেখতে পারবেন এখানেই। "ধন্যবাদ "
         </p>
       </div>
     </div>

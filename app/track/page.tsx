@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState } from "react";
+import Link from "next/link";
 
 const STATUS_BN: Record<string, string> = {
   PENDING: "পেন্ডিং",
@@ -15,7 +15,7 @@ const STATUS_BN: Record<string, string> = {
   REFUNDED: "রিফান্ডেড",
   LOST: "হারিয়ে গেছে",
   DAMAGED: "ক্ষতিগ্রস্ত",
-}
+};
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -29,52 +29,61 @@ const STATUS_COLOR: Record<string, string> = {
   REFUNDED: "bg-gray-50 text-gray-700 border-gray-200",
   LOST: "bg-red-50 text-red-700 border-red-200",
   DAMAGED: "bg-red-50 text-red-700 border-red-200",
-}
+};
 
 interface TrackResult {
-  orderId: string
-  orderStatus: string
-  courierProvider: string | null
-  courierStatus: string | null
-  createdAt: string
+  orderId: string;
+  orderStatus: string;
+  courierProvider: string | null;
+  courierStatus: string | null;
+  createdAt: string;
 }
 
 export default function TrackPage() {
-  const [orderId, setOrderId] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [result, setResult] = useState<TrackResult | null>(null)
+  const [orderId, setOrderId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<TrackResult | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    const trimmed = orderId.trim()
+    e.preventDefault();
+    const trimmed = orderId.trim();
     if (!trimmed) {
-      setError("অর্ডার ID দিন")
-      return
+      setError("অর্ডার ID দিন");
+      return;
     }
-    setLoading(true)
-    setError("")
-    setResult(null)
+    setLoading(true);
+    setError("");
+    setResult(null);
     try {
-      const res = await fetch(`/api/orders/track?orderId=${encodeURIComponent(trimmed)}`)
-      const data = await res.json()
+      const res = await fetch(
+        `/api/orders/track?orderId=${encodeURIComponent(trimmed)}`,
+      );
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error === "Order not found" ? "অর্ডার পাওয়া যায়নি" : data.error || "সমস্যা হয়েছে")
-        return
+        setError(
+          data.error === "Order not found"
+            ? "অর্ডার পাওয়া যায়নি"
+            : data.error || "সমস্যা হয়েছে",
+        );
+        return;
       }
-      setResult(data)
+      setResult(data);
     } catch {
-      setError("সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না")
+      setError("সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
     <div className="max-w-lg mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-green-800 text-center mb-2">অর্ডার ট্র্যাক করুন</h1>
+      <h1 className="text-2xl font-bold text-green-800 text-center mb-2">
+        অর্ডার ট্র্যাক করুন
+      </h1>
       <p className="text-sm text-gray-500 text-center mb-8">
-        লগইন করে পুরো হিস্ট্রি দেখুন, অথবা অর্ডার ID দিয়ে শুধু স্ট্যাটাস চেক করুন।
+        লগইন করে পুরো হিস্ট্রি দেখুন, অথবা অর্ডার ID দিয়ে শুধু স্ট্যাটাস চেক
+        করুন।
       </p>
 
       {/* দুইটা অপশন */}
@@ -84,12 +93,18 @@ export default function TrackPage() {
           className="bg-green-700 text-white rounded-2xl p-5 text-center font-bold hover:bg-green-600 transition shadow-sm"
         >
           🔐 লগইন করে আমার অর্ডার দেখুন
-          <p className="text-green-100 text-xs font-normal mt-1">পূর্ণ হিস্ট্রি ও ডিটেইলস</p>
+          <p className="text-green-100 text-xs font-normal mt-1">
+            পূর্ণ হিস্ট্রি ও ডিটেইলস
+          </p>
         </Link>
 
         <div className="bg-white border border-green-200 rounded-2xl p-5 shadow-sm">
-          <p className="font-bold text-green-800 text-center mb-1">📦 অর্ডার ID দিয়ে সার্চ করুন</p>
-          <p className="text-xs text-gray-500 text-center mb-4">লগইন ছাড়াই শুধু স্ট্যাটাস দেখা যাবে</p>
+          <p className="font-bold text-green-800 text-center mb-1">
+            📦 অর্ডার ID দিয়ে সার্চ করুন
+          </p>
+          <p className="text-xs text-gray-500 text-center mb-4">
+            লগইন ছাড়াই শুধু স্ট্যাটাস দেখা যাবে
+          </p>
 
           <form onSubmit={handleSearch} className="space-y-3">
             <input
@@ -109,14 +124,18 @@ export default function TrackPage() {
           </form>
 
           {error && (
-            <p className="text-red-500 text-sm text-center mt-3 font-medium">{error}</p>
+            <p className="text-red-500 text-sm text-center mt-3 font-medium">
+              {error}
+            </p>
           )}
 
           {result && (
             <div className="mt-5 bg-green-50 border border-green-100 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">অর্ডার ID</span>
-                <span className="font-bold text-gray-900 tracking-wider">{result.orderId}</span>
+                <span className="font-bold text-gray-900 tracking-wider">
+                  {result.orderId}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">তারিখ</span>
@@ -128,7 +147,8 @@ export default function TrackPage() {
                 <span className="text-xs text-gray-500">স্ট্যাটাস</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                    STATUS_COLOR[result.orderStatus] || "bg-gray-50 text-gray-700 border-gray-200"
+                    STATUS_COLOR[result.orderStatus] ||
+                    "bg-gray-50 text-gray-700 border-gray-200"
                   }`}
                 >
                   {STATUS_BN[result.orderStatus] || result.orderStatus}
@@ -139,7 +159,9 @@ export default function TrackPage() {
                 <span className="text-sm font-medium text-gray-700">
                   {result.courierProvider || result.courierStatus
                     ? `${result.courierProvider || ""}${
-                        result.courierProvider && result.courierStatus ? " • " : ""
+                        result.courierProvider && result.courierStatus
+                          ? " • "
+                          : ""
                       }${result.courierStatus || ""}`
                     : "—"}
                 </span>
@@ -149,5 +171,5 @@ export default function TrackPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

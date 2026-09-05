@@ -1,125 +1,125 @@
-"use client"
-import Link from "next/link"
-import { ShoppingCart, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import { usePathname } from "next/navigation"
-import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
-const DISMISS_KEY = "farmer_kamol_cart_dismissed_at"
-const RESHOW_AFTER_MS = 30 * 60 * 1000 // ৩০ মিনিট
+"use client";
+import Link from "next/link";
+import { ShoppingCart, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getLocaleFromPath, localizeHref } from "@/lib/i18n";
+const DISMISS_KEY = "farmer_kamol_cart_dismissed_at";
+const RESHOW_AFTER_MS = 30 * 60 * 1000; // ৩০ মিনিট
 export default function FloatingCartButton() {
-  const pathname = usePathname()
-  const locale = getLocaleFromPath(pathname)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const lastScrollY = useRef(0)
-  const current = useRef(0)
-  const target = useRef(0)
-  const rafId = useRef<number | null>(null)
-  const reshowTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [cartCount, setCartCount] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
-  const [dismissed, setDismissed] = useState(false)
+  const pathname = usePathname();
+  const locale = getLocaleFromPath(pathname);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+  const current = useRef(0);
+  const target = useRef(0);
+  const rafId = useRef<number | null>(null);
+  const reshowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
   // ✅ dismiss করার সময় localStorage-এ timestamp সেভ করা
   const handleClose = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDismissed(true)
+    e.preventDefault();
+    e.stopPropagation();
+    setDismissed(true);
     try {
-      localStorage.setItem(DISMISS_KEY, Date.now().toString())
+      localStorage.setItem(DISMISS_KEY, Date.now().toString());
     } catch {}
-  }
+  };
   // ✅ পেজ লোড হওয়ার সময় dismiss-timestamp চেক করা
   const checkDismissState = () => {
     try {
-      const savedAt = localStorage.getItem(DISMISS_KEY)
+      const savedAt = localStorage.getItem(DISMISS_KEY);
       if (!savedAt) {
-        setDismissed(false)
-        return
+        setDismissed(false);
+        return;
       }
-      const elapsed = Date.now() - parseInt(savedAt, 10)
+      const elapsed = Date.now() - parseInt(savedAt, 10);
       if (elapsed < RESHOW_AFTER_MS) {
-        setDismissed(true)
+        setDismissed(true);
         // ✅ বাকি সময় পার হলে নিজে থেকেই আবার দেখাবে (refresh না করলেও)
-        if (reshowTimer.current) clearTimeout(reshowTimer.current)
+        if (reshowTimer.current) clearTimeout(reshowTimer.current);
         reshowTimer.current = setTimeout(() => {
-          setDismissed(false)
-          localStorage.removeItem(DISMISS_KEY)
-        }, RESHOW_AFTER_MS - elapsed)
+          setDismissed(false);
+          localStorage.removeItem(DISMISS_KEY);
+        }, RESHOW_AFTER_MS - elapsed);
       } else {
-        setDismissed(false)
-        localStorage.removeItem(DISMISS_KEY)
+        setDismissed(false);
+        localStorage.removeItem(DISMISS_KEY);
       }
     } catch {
-      setDismissed(false)
+      setDismissed(false);
     }
-  }
+  };
   const checkCart = () => {
     try {
-      const saved = localStorage.getItem("farmer_kamol_cart")
+      const saved = localStorage.getItem("farmer_kamol_cart");
       if (saved) {
-        const items = JSON.parse(saved)
-        const total = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0)
-        setCartCount(total)
+        const items = JSON.parse(saved);
+        const total = items.reduce(
+          (sum: number, item: any) => sum + (item.quantity || 1),
+          0,
+        );
+        setCartCount(total);
         // ✅ item add হলে সাথে সাথেই ফিরে আসবে, dismiss-timer বাতিল
         if (total > 0) {
-          setDismissed(false)
+          setDismissed(false);
           try {
-            localStorage.removeItem(DISMISS_KEY)
+            localStorage.removeItem(DISMISS_KEY);
           } catch {}
-          if (reshowTimer.current) clearTimeout(reshowTimer.current)
+          if (reshowTimer.current) clearTimeout(reshowTimer.current);
         }
       } else {
-        setCartCount(0)
+        setCartCount(0);
       }
     } catch {
-      setCartCount(0)
+      setCartCount(0);
     }
-  }
+  };
   useEffect(() => {
-    checkDismissState()
-    checkCart()
-    window.addEventListener("cartUpdated", checkCart)
-    window.addEventListener("storage", checkCart)
+    checkDismissState();
+    checkCart();
+    window.addEventListener("cartUpdated", checkCart);
+    window.addEventListener("storage", checkCart);
     const pulseInterval = setInterval(() => {
-      setIsVisible((prev) => !prev)
-    }, 4000)
+      setIsVisible((prev) => !prev);
+    }, 4000);
     if (cartCount > 0) {
-      setIsVisible(true)
-      clearInterval(pulseInterval)
+      setIsVisible(true);
+      clearInterval(pulseInterval);
     }
-    lastScrollY.current = window.scrollY
+    lastScrollY.current = window.scrollY;
     function handleScroll() {
-      const scrollY = window.scrollY
-      const delta = scrollY - lastScrollY.current
-      lastScrollY.current = scrollY
-      target.current = Math.max(-18, Math.min(18, -delta * 0.6))
+      const scrollY = window.scrollY;
+      const delta = scrollY - lastScrollY.current;
+      lastScrollY.current = scrollY;
+      target.current = Math.max(-18, Math.min(18, -delta * 0.6));
     }
     function animate() {
-      current.current += (target.current - current.current) * 0.12
-      target.current *= 0.9
+      current.current += (target.current - current.current) * 0.12;
+      target.current *= 0.9;
       if (wrapperRef.current) {
-        wrapperRef.current.style.transform = `translateY(calc(-50% + ${current.current.toFixed(2)}px))`
+        wrapperRef.current.style.transform = `translateY(calc(-50% + ${current.current.toFixed(2)}px))`;
       }
-      rafId.current = requestAnimationFrame(animate)
+      rafId.current = requestAnimationFrame(animate);
     }
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    rafId.current = requestAnimationFrame(animate)
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    rafId.current = requestAnimationFrame(animate);
     return () => {
-      window.removeEventListener("cartUpdated", checkCart)
-      window.removeEventListener("storage", checkCart)
-      window.removeEventListener("scroll", handleScroll)
-      clearInterval(pulseInterval)
-      if (rafId.current) cancelAnimationFrame(rafId.current)
-      if (reshowTimer.current) clearTimeout(reshowTimer.current)
-    }
-  }, [])
+      window.removeEventListener("cartUpdated", checkCart);
+      window.removeEventListener("storage", checkCart);
+      window.removeEventListener("scroll", handleScroll);
+      clearInterval(pulseInterval);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      if (reshowTimer.current) clearTimeout(reshowTimer.current);
+    };
+  }, []);
   // ✅ এখন সব পাবলিক পেজে দেখাবে (home-only restriction তোলা হয়েছে)
-  if (cartCount === 0 && dismissed) return null
-  if (cartCount === 0 && !isVisible) return null
+  if (cartCount === 0 && dismissed) return null;
+  if (cartCount === 0 && !isVisible) return null;
   return (
-    <div
-      ref={wrapperRef}
-      className="fixed right-3 sm:right-4 top-1/2 z-[60]"
-    >
+    <div ref={wrapperRef} className="fixed right-3 sm:right-4 top-1/2 z-[60]">
       <div className="relative">
         <Link
           href={localizeHref("/cart", locale)}
@@ -147,5 +147,5 @@ export default function FloatingCartButton() {
         )}
       </div>
     </div>
-  )
+  );
 }

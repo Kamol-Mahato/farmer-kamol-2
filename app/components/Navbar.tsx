@@ -1,23 +1,23 @@
-"use client"
-import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import AnnouncementBar from "./AnnouncementBar"
-import FlagRibbonBackground from "./FlagRibbonBackground"
-import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import NewOrderNotifier from "../admin/components/NewOrderNotifier"
-import { useMobileMenu } from "./MobileMenuContext"
-import { getLocaleFromPath, localizeHref, switchLocalePath } from "@/lib/i18n"
-import { siteConfig } from "@/lib/siteConfig"
-import GlobalSearch from "./GlobalSearch"
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import AnnouncementBar from "./AnnouncementBar";
+import FlagRibbonBackground from "./FlagRibbonBackground";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import NewOrderNotifier from "../admin/components/NewOrderNotifier";
+import { useMobileMenu } from "./MobileMenuContext";
+import { getLocaleFromPath, localizeHref, switchLocalePath } from "@/lib/i18n";
+import { siteConfig } from "@/lib/siteConfig";
+import GlobalSearch from "./GlobalSearch";
 
 type Menu = {
-  id: number
-  title: string
-  titleEn?: string | null
-  url: string
-  subMenus: Menu[]
-}
+  id: number;
+  title: string;
+  titleEn?: string | null;
+  url: string;
+  subMenus: Menu[];
+};
 
 const uiDict = {
   bn: {
@@ -38,32 +38,37 @@ const uiDict = {
     langSwitch: "বাংলা",
     tagline: "From Our Farm To Your Door",
   },
-}
+};
 
 export default function Navbar() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const locale = getLocaleFromPath(pathname)
-  const t = uiDict[locale]
-  const href = (path: string) => localizeHref(path, locale)
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const locale = getLocaleFromPath(pathname);
+  const t = uiDict[locale];
+  const href = (path: string) => localizeHref(path, locale);
 
-  const [user, setUser] = useState<{ name: string; role: string; avatarUrl?: string | null } | null>(null)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [menus, setMenus] = useState<Menu[]>([])
-  const [openMenu, setOpenMenu] = useState<number | null>(null)
-  const [openSubMenu, setOpenSubMenu] = useState<number | null>(null)
-  const { mobileOpen, openSidebar, closeSidebar, closeSidebarForNav } = useMobileMenu()
-  const [cartCount, setCartCount] = useState<number>(0)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [authMenuOpen, setAuthMenuOpen] = useState(false)
+  const [user, setUser] = useState<{
+    name: string;
+    role: string;
+    avatarUrl?: string | null;
+  } | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [openSubMenu, setOpenSubMenu] = useState<number | null>(null);
+  const { mobileOpen, openSidebar, closeSidebar, closeSidebarForNav } =
+    useMobileMenu();
+  const [cartCount, setCartCount] = useState<number>(0);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [authMenuOpen, setAuthMenuOpen] = useState(false);
 
-  const authRef = useRef<HTMLDivElement>(null)
-  const userRef = useRef<HTMLDivElement>(null)
+  const authRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
   function translateTitle(menu: Menu): string {
-    if (locale === "bn") return menu.title
-    return menu.titleEn || menu.title
+    if (locale === "bn") return menu.title;
+    return menu.titleEn || menu.title;
   }
 
   function localizeMenus(items: Menu[]): Menu[] {
@@ -71,107 +76,135 @@ export default function Navbar() {
       ...m,
       url: localizeHref(m.url, locale),
       subMenus: m.subMenus ? localizeMenus(m.subMenus) : [],
-    }))
+    }));
   }
 
   const checkUser = () => {
-    const storedUser = localStorage.getItem("user")
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const parsed = JSON.parse(storedUser)
-      setUser(parsed)
-      if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl)
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+      if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl);
     } else {
-      setUser(null)
-      setAvatarUrl(null)
+      setUser(null);
+      setAvatarUrl(null);
     }
-  }
+  };
   const checkCart = () => {
-    const savedCart = localStorage.getItem("farmer_kamol_cart")
+    const savedCart = localStorage.getItem("farmer_kamol_cart");
     if (savedCart) {
       try {
-        const cartItems = JSON.parse(savedCart)
-        const total = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0)
-        setCartCount(total)
+        const cartItems = JSON.parse(savedCart);
+        const total = cartItems.reduce(
+          (sum: number, item: any) => sum + (item.quantity || 1),
+          0,
+        );
+        setCartCount(total);
       } catch {
-        setCartCount(0)
+        setCartCount(0);
       }
     } else {
-      setCartCount(0)
+      setCartCount(0);
     }
-  }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (authRef.current && !authRef.current.contains(event.target as Node)) {
-        setAuthMenuOpen(false)
+        setAuthMenuOpen(false);
       }
       if (userRef.current && !userRef.current.contains(event.target as Node)) {
-        setUserMenuOpen(false)
+        setUserMenuOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
-    checkUser()
-    checkCart()
-    window.addEventListener("storage", checkUser)
-    window.addEventListener("storage", checkCart)
-    window.addEventListener("cartUpdated", checkCart)
-    window.addEventListener("avatarUpdated", checkUser)
+    checkUser();
+    checkCart();
+    window.addEventListener("storage", checkUser);
+    window.addEventListener("storage", checkCart);
+    window.addEventListener("cartUpdated", checkCart);
+    window.addEventListener("avatarUpdated", checkUser);
     fetch("/api/navigation")
-      .then(res => res.json())
-      .then(data => setMenus(localizeMenus(data)))
+      .then((res) => res.json())
+      .then((data) => setMenus(localizeMenus(data)));
 
     // লগইন থাকলে সার্ভার থেকে latest avatar আনো
-    const stored = localStorage.getItem("user")
+    const stored = localStorage.getItem("user");
     if (stored) {
       fetch("/api/profile/avatar")
         .then((r) => r.json())
         .then((data) => {
           if (data?.avatarUrl) {
-            setAvatarUrl(data.avatarUrl)
+            setAvatarUrl(data.avatarUrl);
             try {
-              const u = JSON.parse(localStorage.getItem("user") || "{}")
-              u.avatarUrl = data.avatarUrl
-              localStorage.setItem("user", JSON.stringify(u))
+              const u = JSON.parse(localStorage.getItem("user") || "{}");
+              u.avatarUrl = data.avatarUrl;
+              localStorage.setItem("user", JSON.stringify(u));
             } catch {}
           }
         })
-        .catch(() => {})
+        .catch(() => {});
     }
 
     return () => {
-      window.removeEventListener("storage", checkUser)
-      window.removeEventListener("storage", checkCart)
-      window.removeEventListener("cartUpdated", checkCart)
-      window.removeEventListener("avatarUpdated", checkUser)
-    }
-  }, [locale])
+      window.removeEventListener("storage", checkUser);
+      window.removeEventListener("storage", checkCart);
+      window.removeEventListener("cartUpdated", checkCart);
+      window.removeEventListener("avatarUpdated", checkUser);
+    };
+  }, [locale]);
 
   function handleLogout() {
-    localStorage.removeItem("user")
-    setUser(null)
-    setUserMenuOpen(false)
-    router.push(href("/login"))
+    localStorage.removeItem("user");
+    setUser(null);
+    setUserMenuOpen(false);
+    router.push(href("/login"));
   }
   return (
     <>
       <AnnouncementBar />
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-[70] lg:hidden" onClick={() => closeSidebar()} />
+        <div
+          className="fixed inset-0 bg-black/50 z-[70] lg:hidden"
+          onClick={() => closeSidebar()}
+        />
       )}
-      <div className={`fixed top-0 left-0 h-auto max-h-[85vh] overflow-y-auto w-56 bg-green-800 rounded-br-2xl z-[80] transform transition-transform duration-300 lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div
+        className={`fixed top-0 left-0 h-auto max-h-[85vh] overflow-y-auto w-56 bg-green-800 rounded-br-2xl z-[80] transform transition-transform duration-300 lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
         <div className="flex items-center justify-between p-3 border-b border-green-700">
-          <Link href={href("/")} className="flex items-center gap-2" onClick={() => closeSidebarForNav()}>
-            <Image src={siteConfig.domain.logo} alt={siteConfig.brand.name} width={44} height={44} priority className="w-11 h-11 rounded-full object-cover border-2 border-white-400 shrink-0" />
+          <Link
+            href={href("/")}
+            className="flex items-center gap-2"
+            onClick={() => closeSidebarForNav()}
+          >
+            <Image
+              src={siteConfig.domain.logo}
+              alt={siteConfig.brand.name}
+              width={44}
+              height={44}
+              priority
+              className="w-11 h-11 rounded-full object-cover border-2 border-white-400 shrink-0"
+            />
             <div className="flex flex-col leading-tight">
-              <span className="text-white font-bold text-sm whitespace-nowrap">Farmer Kamol</span>
-              <span className="text-yellow-200 text-[10px] font-bold whitespace-nowrap">{t.tagline}</span>
+              <span className="text-white font-bold text-sm whitespace-nowrap">
+                Farmer Kamol
+              </span>
+              <span className="text-yellow-200 text-[10px] font-bold whitespace-nowrap">
+                {t.tagline}
+              </span>
             </div>
           </Link>
-          <button onClick={() => closeSidebar()} className="text-white text-2xl shrink-0">✕</button>
+          <button
+            onClick={() => closeSidebar()}
+            className="text-white text-2xl shrink-0"
+          >
+            ✕
+          </button>
         </div>
         <div className="p-3 flex flex-col gap-3">
           <Link
@@ -182,7 +215,7 @@ export default function Navbar() {
             {locale === "bn" ? "হোম" : "Home"}
           </Link>
 
-          {menus.map(menu => (
+          {menus.map((menu) => (
             <div key={menu.id}>
               <Link
                 href={menu.url}
@@ -193,8 +226,10 @@ export default function Navbar() {
               </Link>
               {menu.subMenus.length > 0 && (
                 <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
-                  {menu.subMenus.map(sub => (
-                    <Link key={sub.id} href={sub.url}
+                  {menu.subMenus.map((sub) => (
+                    <Link
+                      key={sub.id}
+                      href={sub.url}
                       className="block px-3 py-1.5 text-white font-bold text-sm hover:text-yellow-400 transition"
                       onClick={() => closeSidebarForNav()}
                     >
@@ -212,43 +247,70 @@ export default function Navbar() {
         <FlagRibbonBackground className="opacity-60" />
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center h-8 md:h-9">
           <div className="flex items-center gap-2">
-            <button className="lg:hidden text-white text-lg" onClick={openSidebar}>☰</button>
+            <button
+              className="lg:hidden text-white text-lg"
+              onClick={openSidebar}
+            >
+              ☰
+            </button>
             <Link href={href("/")} className="flex items-center gap-1.5">
-              <Image src={siteConfig.domain.logo} alt={siteConfig.brand.name} width={28} height={28} priority className="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover border border-white/40" />
+              <Image
+                src={siteConfig.domain.logo}
+                alt={siteConfig.brand.name}
+                width={28}
+                height={28}
+                priority
+                className="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover border border-white/40"
+              />
               <div className="flex flex-col leading-none">
-                <span className="text-[11px] md:text-xs font-bold text-white whitespace-nowrap drop-shadow-lg">{siteConfig.brand.name}</span>
-                <span className="text-yellow-200 text-[8px] font-medium whitespace-nowrap">{t.tagline}</span>
+                <span className="text-[11px] md:text-xs font-bold text-white whitespace-nowrap drop-shadow-lg">
+                  {siteConfig.brand.name}
+                </span>
+                <span className="text-yellow-200 text-[8px] font-medium whitespace-nowrap">
+                  {t.tagline}
+                </span>
               </div>
             </Link>
           </div>
 
           <div className="hidden lg:flex items-center gap-1 text-xs font-medium">
-            {menus.map(menu => (
-              <div key={menu.id} className="relative"
+            {menus.map((menu) => (
+              <div
+                key={menu.id}
+                className="relative"
                 onMouseEnter={() => setOpenMenu(menu.id)}
-                onMouseLeave={() => { setOpenMenu(null); setOpenSubMenu(null) }}
+                onMouseLeave={() => {
+                  setOpenMenu(null);
+                  setOpenSubMenu(null);
+                }}
               >
-                <Link href={menu.url}
+                <Link
+                  href={menu.url}
                   className="px-2.5 py-1 hover:text-yellow-400 transition font-medium rounded-full hover:bg-green-700 text-xs"
                 >
                   {translateTitle(menu)} {menu.subMenus.length > 0 && "▾"}
                 </Link>
                 {menu.subMenus.length > 0 && openMenu === menu.id && (
                   <div className="absolute top-full left-0 bg-green-800 rounded-lg shadow-lg min-w-[180px] py-1.5 z-50">
-                    {menu.subMenus.map(sub => (
-                      <div key={sub.id} className="relative"
+                    {menu.subMenus.map((sub) => (
+                      <div
+                        key={sub.id}
+                        className="relative"
                         onMouseEnter={() => setOpenSubMenu(sub.id)}
                         onMouseLeave={() => setOpenSubMenu(null)}
                       >
-                        <Link href={sub.url}
+                        <Link
+                          href={sub.url}
                           className="block px-3.5 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
                         >
                           {translateTitle(sub)} {sub.subMenus.length > 0 && "▸"}
                         </Link>
                         {sub.subMenus.length > 0 && openSubMenu === sub.id && (
                           <div className="absolute left-full top-0 bg-green-800 rounded-lg shadow-lg min-w-[160px] py-1.5 z-50">
-                            {sub.subMenus.map(child => (
-                              <Link key={child.id} href={child.url}
+                            {sub.subMenus.map((child) => (
+                              <Link
+                                key={child.id}
+                                href={child.url}
                                 className="block px-3.5 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
                               >
                                 {translateTitle(child)}
@@ -266,7 +328,11 @@ export default function Navbar() {
 
           <div className="flex items-center gap-1.5 shrink-0">
             <Link
-              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", searchParams.toString())}
+              href={switchLocalePath(
+                pathname,
+                locale === "bn" ? "en" : "bn",
+                searchParams.toString(),
+              )}
               className="flex lg:hidden items-center justify-center px-2 py-0.5 text-[11px] font-semibold text-white border border-white/20 rounded bg-white/10 backdrop-blur-sm active:scale-95 hover:bg-white/20 transition shrink-0"
               aria-label="Language Switch"
               title={t.langSwitch}
@@ -275,15 +341,23 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", searchParams.toString())}
+              href={switchLocalePath(
+                pathname,
+                locale === "bn" ? "en" : "bn",
+                searchParams.toString(),
+              )}
               className="hidden lg:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-6 text-[11px] font-bold shrink-0 transition hover:border-yellow-400 group ml-2"
               aria-label="ভাষা পরিবর্তন"
               title={t.langSwitch}
             >
-              <span className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === 'bn' ? 'bg-yellow-400 text-green-900' : 'text-green-300 group-hover:text-white'}`}>
+              <span
+                className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === "bn" ? "bg-yellow-400 text-green-900" : "text-green-300 group-hover:text-white"}`}
+              >
                 BN
               </span>
-              <span className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === 'en' ? 'bg-yellow-400 text-green-900' : 'text-green-300 group-hover:text-white'}`}>
+              <span
+                className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === "en" ? "bg-yellow-400 text-green-900" : "text-green-300 group-hover:text-white"}`}
+              >
                 EN
               </span>
             </Link>
@@ -292,7 +366,7 @@ export default function Navbar() {
               <NewOrderNotifier />
             )}
 
-<div className="hidden lg:flex items-center">
+            <div className="hidden lg:flex items-center">
               <GlobalSearch variant="navbar" />
             </div>
 
@@ -305,21 +379,44 @@ export default function Navbar() {
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                    <img
+                      src={avatarUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2.5"
+                      stroke="currentColor"
+                      className="w-3.5 h-3.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                      />
                     </svg>
                   )}
                 </button>
-                <div className={`absolute right-0 top-full ${userMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[160px] py-1.5 z-50`}>
-                  <Link href={user.role === "ADMIN" ? href("/admin/products") : href("/customer/dashboard")}
+                <div
+                  className={`absolute right-0 top-full ${userMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[160px] py-1.5 z-50`}
+                >
+                  <Link
+                    href={
+                      user.role === "ADMIN"
+                        ? href("/admin/products")
+                        : href("/customer/dashboard")
+                    }
                     onClick={() => setUserMenuOpen(false)}
                     className="block px-3 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
                   >
                     {t.myAccount}
                   </Link>
-                  <button onClick={handleLogout}
+                  <button
+                    onClick={handleLogout}
                     className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-green-700 transition"
                   >
                     {t.logout}
@@ -333,18 +430,34 @@ export default function Navbar() {
                   aria-label="লগইন মেনু"
                   className="text-white hover:text-yellow-400 transition p-1 rounded-full flex items-center justify-center"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.5"
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
                   </svg>
                 </button>
-                <div className={`absolute right-0 top-full ${authMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[170px] py-1.5 z-50`}>
-                  <Link href={href("/login")}
+                <div
+                  className={`absolute right-0 top-full ${authMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[170px] py-1.5 z-50`}
+                >
+                  <Link
+                    href={href("/login")}
                     onClick={() => setAuthMenuOpen(false)}
                     className="block px-3 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
                   >
                     🔑 {t.login}
                   </Link>
-                  <Link href={href("/register")} aria-label="register"
+                  <Link
+                    href={href("/register")}
+                    aria-label="register"
                     onClick={() => setAuthMenuOpen(false)}
                     className="block px-3 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
                   >
@@ -354,10 +467,25 @@ export default function Navbar() {
               </div>
             )}
 
-            <Link href={href("/cart")} aria-label="কার্ট দেখুন" className="text-white hover:text-yellow-400 transition p-1 rounded-full flex items-center justify-center">
+            <Link
+              href={href("/cart")}
+              aria-label="কার্ট দেখুন"
+              className="text-white hover:text-yellow-400 transition p-1 rounded-full flex items-center justify-center"
+            >
               <div className="relative flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                  />
                 </svg>
                 {cartCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-extrabold min-w-[15px] h-3.5 px-0.5 rounded-full flex items-center justify-center border border-green-900">
@@ -370,5 +498,5 @@ export default function Navbar() {
         </div>
       </nav>
     </>
-  )
+  );
 }

@@ -1,21 +1,21 @@
-import type { Metadata } from "next"
-import { Suspense } from "react"
-import { Hind_Siliguri } from "next/font/google"
-import ConditionalLayout from "./components/ConditionalLayout"
-import OrganizationSchema from "./components/OrganizationSchema"
-import EnterKeyNav from "./components/EnterKeyNav"
-import TopLoadingBar from "./components/TopLoadingBar"
-import "./globals.css"
-import { headers } from "next/headers"
-import { GoogleAnalytics } from '@next/third-parties/google'
-import { siteConfig } from "@/lib/siteConfig"
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Hind_Siliguri } from "next/font/google";
+import ConditionalLayout from "./components/ConditionalLayout";
+import OrganizationSchema from "./components/OrganizationSchema";
+import EnterKeyNav from "./components/EnterKeyNav";
+import TopLoadingBar from "./components/TopLoadingBar";
+import "./globals.css";
+import { headers } from "next/headers";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { siteConfig } from "@/lib/siteConfig";
 
 const hindSiliguri = Hind_Siliguri({
   weight: ["400", "600", "700"],
   subsets: ["bengali"],
   variable: "--font-hind-siliguri",
   display: "swap",
-})
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.domain.url),
@@ -48,33 +48,39 @@ export const metadata: Metadata = {
     description: siteConfig.seo.description,
     images: [siteConfig.domain.ogImage],
   },
-}
+};
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const headersList = await headers()
-  const pathname = headersList.get("x-pathname") || ""
-  const lang = pathname.startsWith("/en") ? "en" : "bn"
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const lang = pathname.startsWith("/en") ? "en" : "bn";
 
   return (
     <html lang={lang}>
       <head>
         <link rel="preconnect" href="https://images.weserv.nl" />
-        <link rel="preconnect" href="https://pvixtqqcegfbxkhxogww.supabase.co" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://pvixtqqcegfbxkhxogww.supabase.co"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body className={`${hindSiliguri.variable} ${hindSiliguri.className} antialiased bg-gray-50 flex flex-col min-h-screen`}>
-      <OrganizationSchema lang={lang} />
+      <body
+        className={`${hindSiliguri.variable} ${hindSiliguri.className} antialiased bg-gray-50 flex flex-col min-h-screen`}
+      >
+        <OrganizationSchema lang={lang} />
         <Suspense fallback={null}>
           <TopLoadingBar />
         </Suspense>
-       <EnterKeyNav />
+        <EnterKeyNav />
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* গুগল অ্যানালিটিক্স কম্পোনেন্ট */}
         <GoogleAnalytics gaId="G-7Z6956LM2H" />
       </body>
     </html>
-  )
+  );
 }

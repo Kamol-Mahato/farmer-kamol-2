@@ -1,1 +1,1 @@
-export { default } from "../../admin/chat/page"
+export { default } from "../../admin/chat/page";

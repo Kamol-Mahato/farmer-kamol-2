@@ -1,76 +1,77 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { connectChatSocket } from "@/lib/chatSocket"
-import { useStaffChat } from "./StaffChatProvider"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { connectChatSocket } from "@/lib/chatSocket";
+import { useStaffChat } from "./StaffChatProvider";
 
 type LastMessage = {
-  id: number
-  text: string
-  senderType: string
-  senderName?: string | null
-  createdAt: string
-} | null
+  id: number;
+  text: string;
+  senderType: string;
+  senderName?: string | null;
+  createdAt: string;
+} | null;
 
 type ConversationItem = {
-  id: number
-  visitorId: string
-  visitorName: string | null
-  visitorPhone: string | null
-  status: "OPEN" | "CLOSED"
-  lastMessageAt: string
-  unreadCount: number
-  lastMessage: LastMessage
-  assignedTo?: { id: number; name: string | null } | null
-}
+  id: number;
+  visitorId: string;
+  visitorName: string | null;
+  visitorPhone: string | null;
+  status: "OPEN" | "CLOSED";
+  lastMessageAt: string;
+  unreadCount: number;
+  lastMessage: LastMessage;
+  assignedTo?: { id: number; name: string | null } | null;
+};
 
 type ChatMessage = {
-  id: number
-  senderType: "SYSTEM" | "CUSTOMER" | "ADMIN" | "AGENT"
-  senderId: number | null
-  senderName?: string | null
-  text: string
-  isRead: boolean
-  createdAt: string
-}
+  id: number;
+  senderType: "SYSTEM" | "CUSTOMER" | "ADMIN" | "AGENT";
+  senderId: number | null;
+  senderName?: string | null;
+  text: string;
+  isRead: boolean;
+  createdAt: string;
+};
 
 type ConversationDetail = {
-  id: number
-  visitorName: string | null
-  visitorPhone: string | null
-  status: "OPEN" | "CLOSED"
-  messages: ChatMessage[]
-  assignedTo?: { id: number; name: string | null } | null
-  assignedToId?: number | null
-}
+  id: number;
+  visitorName: string | null;
+  visitorPhone: string | null;
+  status: "OPEN" | "CLOSED";
+  messages: ChatMessage[];
+  assignedTo?: { id: number; name: string | null } | null;
+  assignedToId?: number | null;
+};
 
-type AgentOption = { id: number; name: string }
+type AgentOption = { id: number; name: string };
 
-let sharedAudioCtx: AudioContext | null = null
+let sharedAudioCtx: AudioContext | null = null;
 
 function getAudioCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined") return null;
   try {
     const Ctx =
       window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    if (!sharedAudioCtx) sharedAudioCtx = new Ctx()
-    return sharedAudioCtx
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+    return sharedAudioCtx;
   } catch {
-    return null
+    return null;
   }
 }
 
 export async function unlockChatAudio() {
-  const ctx = getAudioCtx()
-  if (!ctx) return
+  const ctx = getAudioCtx();
+  if (!ctx) return;
   try {
-    if (ctx.state === "suspended") await ctx.resume()
-    const buffer = ctx.createBuffer(1, 1, 22050)
-    const src = ctx.createBufferSource()
-    src.buffer = buffer
-    src.connect(ctx.destination)
-    src.start(0)
+    if (ctx.state === "suspended") await ctx.resume();
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ctx.destination);
+    src.start(0);
   } catch {
     /* ignore */
   }
@@ -79,30 +80,30 @@ export async function unlockChatAudio() {
 function playNotifySound() {
   const run = async () => {
     try {
-      const ctx = getAudioCtx()
-      if (!ctx) return
-      if (ctx.state === "suspended") await ctx.resume()
-      const now = ctx.currentTime
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      if (ctx.state === "suspended") await ctx.resume();
+      const now = ctx.currentTime;
       const beep = (freq: number, start: number, dur: number) => {
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = "sine"
-        osc.frequency.setValueAtTime(freq, now + start)
-        gain.gain.setValueAtTime(0.0001, now + start)
-        gain.gain.exponentialRampToValueAtTime(0.22, now + start + 0.02)
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur)
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.start(now + start)
-        osc.stop(now + start + dur + 0.02)
-      }
-      beep(880, 0, 0.18)
-      beep(1174.7, 0.16, 0.22)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + start);
+        gain.gain.setValueAtTime(0.0001, now + start);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + start);
+        osc.stop(now + start + dur + 0.02);
+      };
+      beep(880, 0, 0.18);
+      beep(1174.7, 0.16, 0.22);
     } catch {
       /* blocked */
     }
-  }
-  void run()
+  };
+  void run();
 }
 
 function formatTime(iso: string) {
@@ -112,152 +113,162 @@ function formatTime(iso: string) {
       minute: "2-digit",
       day: "numeric",
       month: "short",
-    })
+    });
   } catch {
-    return ""
+    return "";
   }
 }
 
 function preview(text: string, max = 48) {
-  const t = text.replace(/\s+/g, " ").trim()
-  return t.length > max ? t.slice(0, max) + "…" : t
+  const t = text.replace(/\s+/g, " ").trim();
+  return t.length > max ? t.slice(0, max) + "…" : t;
 }
 
 function staffLabel(msg: { senderType: string; senderName?: string | null }) {
-  if (msg.senderName) return msg.senderName
-  return msg.senderType === "AGENT" ? "এজেন্ট" : "অ্যাডমিন"
+  if (msg.senderName) return msg.senderName;
+  return msg.senderType === "AGENT" ? "এজেন্ট" : "অ্যাডমিন";
 }
 
 export default function StaffChatWidget() {
-  const { open, setOpen, toggle, unreadTotal, setUnreadTotal } = useStaffChat()
-  const [conversations, setConversations] = useState<ConversationItem[]>([])
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const selectedIdRef = useRef<number | null>(null)
-  const [detail, setDetail] = useState<ConversationDetail | null>(null)
-  const [replyText, setReplyText] = useState("")
-  const [sending, setSending] = useState(false)
-  const [live, setLive] = useState(false)
-  const [loadingList, setLoadingList] = useState(false)
-  const [lockError, setLockError] = useState<string | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [agents, setAgents] = useState<AgentOption[]>([])
-  const [assignId, setAssignId] = useState<string>("")
-  const [assigning, setAssigning] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const wsRef = useRef<WebSocket | null>(null)
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const openRef = useRef(open)
+  const { open, setOpen, toggle, unreadTotal, setUnreadTotal } = useStaffChat();
+  const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const selectedIdRef = useRef<number | null>(null);
+  const [detail, setDetail] = useState<ConversationDetail | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [live, setLive] = useState(false);
+  const [loadingList, setLoadingList] = useState(false);
+  const [lockError, setLockError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [agents, setAgents] = useState<AgentOption[]>([]);
+  const [assignId, setAssignId] = useState<string>("");
+  const [assigning, setAssigning] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openRef = useRef(open);
 
   useEffect(() => {
-    openRef.current = open
-  }, [open])
+    openRef.current = open;
+  }, [open]);
 
   useEffect(() => {
-    selectedIdRef.current = selectedId
-  }, [selectedId])
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
 
   useEffect(() => {
     const unlock = () => {
-      void unlockChatAudio()
-    }
-    window.addEventListener("pointerdown", unlock, { once: true, capture: true })
-    window.addEventListener("keydown", unlock, { once: true, capture: true })
-    window.addEventListener("touchstart", unlock, { once: true, capture: true })
+      void unlockChatAudio();
+    };
+    window.addEventListener("pointerdown", unlock, {
+      once: true,
+      capture: true,
+    });
+    window.addEventListener("keydown", unlock, { once: true, capture: true });
+    window.addEventListener("touchstart", unlock, {
+      once: true,
+      capture: true,
+    });
     return () => {
-      window.removeEventListener("pointerdown", unlock, true)
-      window.removeEventListener("keydown", unlock, true)
-      window.removeEventListener("touchstart", unlock, true)
-    }
-  }, [])
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+      window.removeEventListener("touchstart", unlock, true);
+    };
+  }, []);
 
   // অ্যাডমিন হলে এজেন্ট লিস্ট লোড
   useEffect(() => {
     void (async () => {
       try {
-        const res = await fetch("/api/admin/agents")
+        const res = await fetch("/api/admin/agents");
         if (!res.ok) {
-          setIsAdmin(false)
-          return
+          setIsAdmin(false);
+          return;
         }
-        const data = await res.json()
+        const data = await res.json();
         const list = (Array.isArray(data) ? data : []).filter(
-          (a: { isActive?: boolean }) => a.isActive !== false
-        ) as { id: number; name: string }[]
-        setAgents(list.map((a) => ({ id: a.id, name: a.name || `এজেন্ট #${a.id}` })))
-        setIsAdmin(true)
+          (a: { isActive?: boolean }) => a.isActive !== false,
+        ) as { id: number; name: string }[];
+        setAgents(
+          list.map((a) => ({ id: a.id, name: a.name || `এজেন্ট #${a.id}` })),
+        );
+        setIsAdmin(true);
       } catch {
-        setIsAdmin(false)
+        setIsAdmin(false);
       }
-    })()
-  }, [])
+    })();
+  }, []);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const fetchList = useCallback(async () => {
-    setLoadingList(true)
+    setLoadingList(true);
     try {
-      const res = await fetch("/api/admin/chat?status=OPEN")
-      const data = await res.json()
+      const res = await fetch("/api/admin/chat?status=OPEN");
+      const data = await res.json();
       if (res.ok) {
-        const list = (data.conversations || []) as ConversationItem[]
-        setConversations(list)
-        const total = list.reduce((s, c) => s + (c.unreadCount || 0), 0)
-        setUnreadTotal(total)
+        const list = (data.conversations || []) as ConversationItem[];
+        setConversations(list);
+        const total = list.reduce((s, c) => s + (c.unreadCount || 0), 0);
+        setUnreadTotal(total);
       }
     } catch {
       /* ignore */
     } finally {
-      setLoadingList(false)
+      setLoadingList(false);
     }
-  }, [setUnreadTotal])
+  }, [setUnreadTotal]);
 
   const fetchDetail = useCallback(
     async (id: number) => {
-      setLockError(null)
+      setLockError(null);
       try {
-        const res = await fetch(`/api/admin/chat/${id}`)
-        const data = await res.json()
+        const res = await fetch(`/api/admin/chat/${id}`);
+        const data = await res.json();
         if (res.status === 409) {
-          setDetail(null)
-          setSelectedId(null)
-          setLockError(data.error || "এই চ্যাট অন্য এজেন্টের আন্ডারে আছে")
-          void fetchList()
-          return
+          setDetail(null);
+          setSelectedId(null);
+          setLockError(data.error || "এই চ্যাট অন্য এজেন্টের আন্ডারে আছে");
+          void fetchList();
+          return;
         }
         if (res.ok) {
-          setDetail(data.conversation)
-          if (data.me?.isAdmin) setIsAdmin(true)
-          const aid = data.conversation?.assignedToId ?? data.conversation?.assignedTo?.id
-          setAssignId(aid ? String(aid) : "")
+          setDetail(data.conversation);
+          if (data.me?.isAdmin) setIsAdmin(true);
+          const aid =
+            data.conversation?.assignedToId ??
+            data.conversation?.assignedTo?.id;
+          setAssignId(aid ? String(aid) : "");
           setConversations((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c))
-          )
+            prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
+          );
         }
       } catch {
         /* ignore */
       }
     },
-    [fetchList]
-  )
+    [fetchList],
+  );
 
   useEffect(() => {
-    void fetchList()
-  }, [fetchList])
+    void fetchList();
+  }, [fetchList]);
 
   useEffect(() => {
-    const total = conversations.reduce((s, c) => s + (c.unreadCount || 0), 0)
-    setUnreadTotal(total)
-  }, [conversations, setUnreadTotal])
+    const total = conversations.reduce((s, c) => s + (c.unreadCount || 0), 0);
+    setUnreadTotal(total);
+  }, [conversations, setUnreadTotal]);
 
   useEffect(() => {
-    let closedByUs = false
+    let closedByUs = false;
 
     const connect = () => {
       if (wsRef.current) {
         try {
-          wsRef.current.close()
+          wsRef.current.close();
         } catch {
           /* ignore */
         }
@@ -266,108 +277,112 @@ export default function StaffChatWidget() {
       const ws = connectChatSocket({
         onConnected: () => setLive(true),
         onMessage: (data) => {
-          const msg = data as ChatMessage & { conversationId: number }
-          const isCustomer = msg.senderType === "CUSTOMER"
+          const msg = data as ChatMessage & { conversationId: number };
+          const isCustomer = msg.senderType === "CUSTOMER";
           const viewing =
-            openRef.current && selectedIdRef.current === msg.conversationId
+            openRef.current && selectedIdRef.current === msg.conversationId;
 
           if (viewing) {
             setDetail((prev) => {
-              if (!prev || prev.id !== msg.conversationId) return prev
-              if (prev.messages.some((m) => m.id === msg.id)) return prev
+              if (!prev || prev.id !== msg.conversationId) return prev;
+              if (prev.messages.some((m) => m.id === msg.id)) return prev;
               const withoutTemp = prev.messages.filter(
                 (m) =>
-                  !(m.id > 1e12 && m.text === msg.text && (m.senderType === "ADMIN" || m.senderType === "AGENT"))
-              )
-              return { ...prev, messages: [...withoutTemp, msg] }
-            })
+                  !(
+                    m.id > 1e12 &&
+                    m.text === msg.text &&
+                    (m.senderType === "ADMIN" || m.senderType === "AGENT")
+                  ),
+              );
+              return { ...prev, messages: [...withoutTemp, msg] };
+            });
           }
 
           setConversations((prev) => {
-            const idx = prev.findIndex((c) => c.id === msg.conversationId)
+            const idx = prev.findIndex((c) => c.id === msg.conversationId);
             const lastMessage = {
               id: msg.id,
               text: msg.text,
               senderType: msg.senderType,
               senderName: msg.senderName,
               createdAt: msg.createdAt,
-            }
+            };
 
             if (idx === -1) {
               if (isCustomer) {
-                playNotifySound()
-                void fetchList()
+                playNotifySound();
+                void fetchList();
               }
-              return prev
+              return prev;
             }
 
-            const next = [...prev]
-            const item = { ...next[idx] }
-            item.lastMessage = lastMessage
-            item.lastMessageAt = msg.createdAt
-            item.status = "OPEN"
+            const next = [...prev];
+            const item = { ...next[idx] };
+            item.lastMessage = lastMessage;
+            item.lastMessageAt = msg.createdAt;
+            item.status = "OPEN";
             if (isCustomer && !viewing) {
-              item.unreadCount = (item.unreadCount || 0) + 1
-              playNotifySound()
+              item.unreadCount = (item.unreadCount || 0) + 1;
+              playNotifySound();
             }
-            next.splice(idx, 1)
-            next.unshift(item)
-            return next
-          })
+            next.splice(idx, 1);
+            next.unshift(item);
+            return next;
+          });
         },
         onConversation: () => {
-          void fetchList()
+          void fetchList();
         },
         onError: () => setLive(false),
         onClose: () => {
-          setLive(false)
+          setLive(false);
           if (!closedByUs) {
-            reconnectTimer.current = setTimeout(connect, 2500)
+            reconnectTimer.current = setTimeout(connect, 2500);
           }
         },
-      })
-      wsRef.current = ws
-    }
+      });
+      wsRef.current = ws;
+    };
 
-    connect()
+    connect();
     return () => {
-      closedByUs = true
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
-      wsRef.current?.close()
-      wsRef.current = null
-    }
-  }, [fetchList])
+      closedByUs = true;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      wsRef.current?.close();
+      wsRef.current = null;
+    };
+  }, [fetchList]);
 
   useEffect(() => {
-    if (detail?.messages) scrollToBottom()
-  }, [detail?.messages?.length])
+    if (detail?.messages) scrollToBottom();
+  }, [detail?.messages?.length]);
 
   async function openConversation(id: number) {
-    void unlockChatAudio()
-    setLockError(null)
-    setSelectedId(id)
-    setReplyText("")
-    await fetchDetail(id)
+    void unlockChatAudio();
+    setLockError(null);
+    setSelectedId(id);
+    setReplyText("");
+    await fetchDetail(id);
   }
 
   function handleToggle() {
-    void unlockChatAudio()
-    toggle()
+    void unlockChatAudio();
+    toggle();
   }
 
   async function handleAssign() {
-    if (!selectedId || !assignId || assigning) return
-    setAssigning(true)
+    if (!selectedId || !assignId || assigning) return;
+    setAssigning(true);
     try {
       const res = await fetch(`/api/admin/chat/${selectedId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assignedToId: Number(assignId) }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "অ্যাসাইন করা যায়নি")
-        return
+        alert(data.error || "অ্যাসাইন করা যায়নি");
+        return;
       }
       setDetail((prev) =>
         prev
@@ -376,23 +391,23 @@ export default function StaffChatWidget() {
               assignedTo: data.conversation.assignedTo,
               assignedToId: data.conversation.assignedToId,
             }
-          : prev
-      )
-      void fetchList()
-      alert(`✅ অ্যাসাইন হয়েছে: ${data.conversation.assignedTo?.name || ""}`)
+          : prev,
+      );
+      void fetchList();
+      alert(`✅ অ্যাসাইন হয়েছে: ${data.conversation.assignedTo?.name || ""}`);
     } catch {
-      alert("অ্যাসাইন করতে সমস্যা হয়েছে")
+      alert("অ্যাসাইন করতে সমস্যা হয়েছে");
     } finally {
-      setAssigning(false)
+      setAssigning(false);
     }
   }
 
   async function handleReply(e: React.FormEvent) {
-    e.preventDefault()
-    if (!selectedId || !replyText.trim() || sending) return
-    const text = replyText.trim()
-    setReplyText("")
-    setSending(true)
+    e.preventDefault();
+    if (!selectedId || !replyText.trim() || sending) return;
+    const text = replyText.trim();
+    setReplyText("");
+    setSending(true);
 
     const temp: ChatMessage = {
       id: Date.now(),
@@ -402,32 +417,32 @@ export default function StaffChatWidget() {
       text,
       isRead: true,
       createdAt: new Date().toISOString(),
-    }
+    };
     setDetail((prev) =>
-      prev ? { ...prev, messages: [...prev.messages, temp] } : prev
-    )
+      prev ? { ...prev, messages: [...prev.messages, temp] } : prev,
+    );
 
     try {
       const res = await fetch(`/api/admin/chat/${selectedId}/reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
-      })
-      const data = await res.json().catch(() => ({}))
+      });
+      const data = await res.json().catch(() => ({}));
       if (res.status === 409) {
-        alert(data.error || "এই চ্যাট অন্য এজেন্টের আন্ডারে আছে")
-        setSelectedId(null)
-        setDetail(null)
-        void fetchList()
-        return
+        alert(data.error || "এই চ্যাট অন্য এজেন্টের আন্ডারে আছে");
+        setSelectedId(null);
+        setDetail(null);
+        void fetchList();
+        return;
       }
       if (!res.ok) {
-        await fetchDetail(selectedId)
+        await fetchDetail(selectedId);
       }
     } catch {
       /* ignore */
     } finally {
-      setSending(false)
+      setSending(false);
     }
   }
 
@@ -437,17 +452,25 @@ export default function StaffChatWidget() {
         <div className="bg-white w-[min(100vw-2rem,380px)] h-[min(70vh,520px)] rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden mb-3">
           <div className="bg-[#055a36] text-white px-3 py-2.5 flex items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-2 min-w-0">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${live ? "bg-green-400 animate-pulse" : "bg-yellow-300"}`} />
+              <div
+                className={`w-2 h-2 rounded-full shrink-0 ${live ? "bg-green-400 animate-pulse" : "bg-yellow-300"}`}
+              />
               <div className="min-w-0">
                 <h3 className="font-bold text-sm truncate">
                   {selectedId && detail
-                    ? detail.visitorName || detail.visitorPhone || `ভিজিটর #${detail.id}`
+                    ? detail.visitorName ||
+                      detail.visitorPhone ||
+                      `ভিজিটর #${detail.id}`
                     : "লাইভ চ্যাট"}
                 </h3>
                 <p className="text-[10px] text-emerald-100">
                   {live ? "WebSocket · লাইভ" : "সংযোগ..."}
-                  {detail?.assignedTo?.name ? ` · ${detail.assignedTo.name}` : ""}
-                  {unreadTotal > 0 && !selectedId ? ` · ${unreadTotal} নতুন` : ""}
+                  {detail?.assignedTo?.name
+                    ? ` · ${detail.assignedTo.name}`
+                    : ""}
+                  {unreadTotal > 0 && !selectedId
+                    ? ` · ${unreadTotal} নতুন`
+                    : ""}
                 </p>
               </div>
             </div>
@@ -456,9 +479,9 @@ export default function StaffChatWidget() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedId(null)
-                    setDetail(null)
-                    setLockError(null)
+                    setSelectedId(null);
+                    setDetail(null);
+                    setLockError(null);
                   }}
                   className="text-white/90 hover:bg-white/10 rounded-lg px-2 py-1 text-xs"
                 >
@@ -471,8 +494,18 @@ export default function StaffChatWidget() {
                 className="text-white/90 hover:bg-white/10 rounded-lg p-1.5"
                 aria-label="বন্ধ"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -487,9 +520,13 @@ export default function StaffChatWidget() {
           {!selectedId ? (
             <div className="flex-1 overflow-y-auto bg-gray-50">
               {loadingList && conversations.length === 0 ? (
-                <p className="text-center text-gray-400 text-sm py-10">লোড হচ্ছে...</p>
+                <p className="text-center text-gray-400 text-sm py-10">
+                  লোড হচ্ছে...
+                </p>
               ) : conversations.length === 0 ? (
-                <p className="text-center text-gray-400 text-sm py-10">কোনো খোলা চ্যাট নেই</p>
+                <p className="text-center text-gray-400 text-sm py-10">
+                  কোনো খোলা চ্যাট নেই
+                </p>
               ) : (
                 conversations.map((c) => (
                   <button
@@ -519,7 +556,9 @@ export default function StaffChatWidget() {
                           👤 {c.assignedTo.name}
                         </p>
                       ) : (
-                        <p className="text-[10px] text-amber-600 mt-0.5">নতুন · আনঅ্যাসাইনড</p>
+                        <p className="text-[10px] text-amber-600 mt-0.5">
+                          নতুন · আনঅ্যাসাইনড
+                        </p>
                       )}
                     </div>
                     <span className="text-[10px] text-gray-400 shrink-0">
@@ -533,7 +572,9 @@ export default function StaffChatWidget() {
             <>
               {isAdmin && (
                 <div className="px-2 py-1.5 border-b bg-emerald-50 flex items-center gap-1.5 shrink-0">
-                  <span className="text-[10px] text-gray-600 shrink-0">অ্যাসাইন:</span>
+                  <span className="text-[10px] text-gray-600 shrink-0">
+                    অ্যাসাইন:
+                  </span>
                   <select
                     value={assignId}
                     onChange={(e) => setAssignId(e.target.value)}
@@ -559,16 +600,20 @@ export default function StaffChatWidget() {
 
               <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
                 {detail?.messages.map((msg) => {
-                  const isStaff = msg.senderType === "ADMIN" || msg.senderType === "AGENT"
+                  const isStaff =
+                    msg.senderType === "ADMIN" || msg.senderType === "AGENT";
                   return (
-                    <div key={msg.id} className={`flex ${isStaff ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={msg.id}
+                      className={`flex ${isStaff ? "justify-end" : "justify-start"}`}
+                    >
                       <div
                         className={`max-w-[85%] px-2.5 py-1.5 rounded-2xl text-[12px] leading-relaxed shadow-sm ${
                           isStaff
                             ? "bg-[#055a36] text-white rounded-br-none"
                             : msg.senderType === "CUSTOMER"
-                            ? "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
-                            : "bg-amber-50 text-amber-900 border border-amber-100 rounded-bl-none text-[11px]"
+                              ? "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                              : "bg-amber-50 text-amber-900 border border-amber-100 rounded-bl-none text-[11px]"
                         }`}
                       >
                         {isStaff && (
@@ -576,7 +621,9 @@ export default function StaffChatWidget() {
                             {staffLabel(msg)}
                           </span>
                         )}
-                        <span className="whitespace-pre-wrap break-words">{msg.text}</span>
+                        <span className="whitespace-pre-wrap break-words">
+                          {msg.text}
+                        </span>
                         <span
                           className={`block text-[9px] mt-0.5 ${
                             isStaff ? "text-emerald-100/70" : "text-gray-400"
@@ -586,12 +633,15 @@ export default function StaffChatWidget() {
                         </span>
                       </div>
                     </div>
-                  )
+                  );
                 })}
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={handleReply} className="p-2 border-t bg-white flex gap-2 shrink-0">
+              <form
+                onSubmit={handleReply}
+                className="p-2 border-t bg-white flex gap-2 shrink-0"
+              >
                 <input
                   type="text"
                   value={replyText}
@@ -602,7 +652,9 @@ export default function StaffChatWidget() {
                 />
                 <button
                   type="submit"
-                  disabled={!replyText.trim() || sending || detail?.status === "CLOSED"}
+                  disabled={
+                    !replyText.trim() || sending || detail?.status === "CLOSED"
+                  }
                   className="bg-[#055a36] text-white px-3 py-1.5 rounded-xl text-xs font-bold disabled:opacity-50"
                 >
                   পাঠান
@@ -621,8 +673,18 @@ export default function StaffChatWidget() {
           aria-label="লাইভ চ্যাট"
         >
           {open ? (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -641,5 +703,5 @@ export default function StaffChatWidget() {
         </button>
       </div>
     </div>
-  )
+  );
 }

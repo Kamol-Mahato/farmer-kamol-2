@@ -1,11 +1,11 @@
-import { prisma } from "@/lib/prisma"
-import { siteConfig } from "@/lib/siteConfig"
-import Link from "next/link"
-import Image from "next/image"
-import Breadcrumb from "@/app/components/Breadcrumb"
-import { safeJsonLd } from "@/lib/jsonLd"
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/siteConfig";
+import Link from "next/link";
+import Image from "next/image";
+import Breadcrumb from "@/app/components/Breadcrumb";
+import { safeJsonLd } from "@/lib/jsonLd";
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 export async function generateMetadata() {
   return {
@@ -19,24 +19,24 @@ export async function generateMetadata() {
         "x-default": "/banglar-fosol",
       },
     },
-  }
+  };
 }
 
 export default async function BanglarFosolIndexEn({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>
+  searchParams: Promise<{ category?: string }>;
 }) {
-  const { category: catQuery } = await searchParams
+  const { category: catQuery } = await searchParams;
 
   const categories = await prisma.fosolCategory.findMany({
     where: { isVisible: true },
     orderBy: { displayOrder: "asc" },
-  })
+  });
 
-  const activeSlug = catQuery || "all"
+  const activeSlug = catQuery || "all";
   const activeCategory =
-    activeSlug === "all" ? null : categories.find((c) => c.slug === activeSlug)
+    activeSlug === "all" ? null : categories.find((c) => c.slug === activeSlug);
 
   const items = await prisma.fosolItem.findMany({
     where: {
@@ -45,7 +45,7 @@ export default async function BanglarFosolIndexEn({
     },
     include: { category: true },
     orderBy: { updatedAt: "desc" },
-  })
+  });
 
   const schema = {
     "@context": "https://schema.org",
@@ -53,7 +53,7 @@ export default async function BanglarFosolIndexEn({
     name: "Banglar Fosol",
     url: `${siteConfig.domain.url}/en/banglar-fosol`,
     inLanguage: "en",
-  }
+  };
 
   return (
     <div>
@@ -62,16 +62,16 @@ export default async function BanglarFosolIndexEn({
         dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
       />
       <Breadcrumb
-        items={[
-          { label: "Home", href: "/en" },
-          { label: "Banglar Fosol" },
-        ]}
+        items={[{ label: "Home", href: "/en" }, { label: "Banglar Fosol" }]}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-12 pt-8 text-center">
-        <h1 className="text-2xl font-bold text-green-800 mb-2">Banglar Fosol</h1>
+        <h1 className="text-2xl font-bold text-green-800 mb-2">
+          Banglar Fosol
+        </h1>
         <p className="text-gray-500 mb-8">
-          Crops, fruits, vegetables, trees and medicinal plants of Bangladesh — in one place
+          Crops, fruits, vegetables, trees and medicinal plants of Bangladesh —
+          in one place
         </p>
 
         <div className="flex gap-2 flex-wrap justify-center mb-10">
@@ -129,7 +129,9 @@ export default async function BanglarFosolIndexEn({
                     {item.titleEn || item.title}
                   </h2>
                   {item.scientificName && (
-                    <p className="text-xs text-gray-400 italic mt-1">{item.scientificName}</p>
+                    <p className="text-xs text-gray-400 italic mt-1">
+                      {item.scientificName}
+                    </p>
                   )}
                   <p className="text-gray-400 text-xs mt-2">
                     {item.updatedAt.toLocaleDateString("en-GB")}
@@ -141,5 +143,5 @@ export default async function BanglarFosolIndexEn({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const q = (req.nextUrl.searchParams.get("q") || "").trim()
-  const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") || 8), 20)
+  const q = (req.nextUrl.searchParams.get("q") || "").trim();
+  const limit = Math.min(
+    Number(req.nextUrl.searchParams.get("limit") || 8),
+    20,
+  );
 
   if (q.length < 1) {
-    return NextResponse.json({ results: [] })
+    return NextResponse.json({ results: [] });
   }
 
-  const term = q
+  const term = q;
 
   const [products, blogs, videos, galleries] = await Promise.all([
     prisma.product.findMany({
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
       take: limit,
       orderBy: { displayOrder: "asc" },
     }),
-  ])
+  ]);
 
   const results = [
     ...products.map((p) => ({
@@ -117,7 +120,7 @@ export async function GET(req: NextRequest) {
       url: `/media/image`,
       urlEn: `/en/media/image`,
     })),
-  ].slice(0, limit)
+  ].slice(0, limit);
 
-  return NextResponse.json({ results })
+  return NextResponse.json({ results });
 }

@@ -1,75 +1,78 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
 type Eligibility = {
-  eligible: boolean
-  reason?: "NOT_LOGGED_IN" | "ALREADY_REVIEWED"
-}
+  eligible: boolean;
+  reason?: "NOT_LOGGED_IN" | "ALREADY_REVIEWED";
+};
 
 export default function ReviewForm({ productId }: { productId: number }) {
-  const [status, setStatus] = useState<Eligibility | null>(null)
-  const [rating, setRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
-  const [comment, setComment] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState("")
+  const [status, setStatus] = useState<Eligibility | null>(null);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch(`/api/reviews?productId=${productId}`)
       .then((res) => res.json())
       .then((data) => setStatus(data))
-      .catch(() => setStatus({ eligible: false }))
-  }, [productId])
+      .catch(() => setStatus({ eligible: false }));
+  }, [productId]);
 
   async function handleSubmit() {
     if (rating === 0) {
-      setError("Please select a rating")
-      return
+      setError("Please select a rating");
+      return;
     }
-    setSubmitting(true)
-    setError("")
+    setSubmitting(true);
+    setError("");
     try {
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, rating, comment }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong")
-        return
+        setError(data.error || "Something went wrong");
+        return;
       }
-      setSubmitted(true)
+      setSubmitted(true);
     } catch {
-      setError("Something went wrong, please try again")
+      setError("Something went wrong, please try again");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
-  if (!status) return null
-  if (!status.eligible && status.reason !== "ALREADY_REVIEWED") return null
+  if (!status) return null;
+  if (!status.eligible && status.reason !== "ALREADY_REVIEWED") return null;
 
   if (status.reason === "ALREADY_REVIEWED") {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-sm text-green-800 font-medium">
         ✅ You have already reviewed this product. Thank you!
       </div>
-    )
+    );
   }
 
   if (submitted) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-sm text-green-800 font-medium">
-        ✅ Your review has been submitted! It will appear here after verification.
+        ✅ Your review has been submitted! It will appear here after
+        verification.
       </div>
-    )
+    );
   }
 
   return (
     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-      <p className="font-bold text-gray-800 text-sm mb-2">Share your experience — leave a review</p>
+      <p className="font-bold text-gray-800 text-sm mb-2">
+        Share your experience — leave a review
+      </p>
       <div className="flex gap-1 mb-3">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -81,7 +84,15 @@ export default function ReviewForm({ productId }: { productId: number }) {
             className="text-2xl leading-none"
             aria-label={`${star} star`}
           >
-            <span className={star <= (hoverRating || rating) ? "text-yellow-500" : "text-gray-300"}>★</span>
+            <span
+              className={
+                star <= (hoverRating || rating)
+                  ? "text-yellow-500"
+                  : "text-gray-300"
+              }
+            >
+              ★
+            </span>
           </button>
         ))}
       </div>
@@ -102,5 +113,5 @@ export default function ReviewForm({ productId }: { productId: number }) {
         {submitting ? "Submitting..." : "Submit Review"}
       </button>
     </div>
-  )
+  );
 }

@@ -1,169 +1,183 @@
-"use client"
+"use client";
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback } from "react";
 
 interface Props {
-  currentUrl?: string | null
-  onUploaded?: (url: string) => void
-  size?: number // preview size in px
+  currentUrl?: string | null;
+  onUploaded?: (url: string) => void;
+  size?: number; // preview size in px
 }
 
-const OUTPUT_SIZE = 300 // 300x300 px
-const MAX_KB = 200
+const OUTPUT_SIZE = 300; // 300x300 px
+const MAX_KB = 200;
 
-export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 }: Props) {
-  const [preview, setPreview] = useState<string | null>(currentUrl || null)
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState("")
-  const [cropSrc, setCropSrc] = useState<string | null>(null)
-  const [zoom, setZoom] = useState(1)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imgRef = useRef<HTMLImageElement | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export default function ProfileAvatarUpload({
+  currentUrl,
+  onUploaded,
+  size = 96,
+}: Props) {
+  const [preview, setPreview] = useState<string | null>(currentUrl || null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const openPicker = () => fileInputRef.current?.click()
+  const openPicker = () => fileInputRef.current?.click();
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setError("শুধু ছবি সিলেক্ট করুন")
-      return
+      setError("শুধু ছবি সিলেক্ট করুন");
+      return;
     }
-    setError("")
-    const reader = new FileReader()
+    setError("");
+    const reader = new FileReader();
     reader.onload = () => {
-      setCropSrc(reader.result as string)
-      setZoom(1)
-    }
-    reader.readAsDataURL(file)
-    e.target.value = ""
+      setCropSrc(reader.result as string);
+      setZoom(1);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   }
 
   const drawCrop = useCallback(() => {
-    const canvas = canvasRef.current
-    const img = imgRef.current
-    if (!canvas || !img || !img.complete) return
+    const canvas = canvasRef.current;
+    const img = imgRef.current;
+    if (!canvas || !img || !img.complete) return;
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    canvas.width = OUTPUT_SIZE
-    canvas.height = OUTPUT_SIZE
+    canvas.width = OUTPUT_SIZE;
+    canvas.height = OUTPUT_SIZE;
 
-    const minSide = Math.min(img.naturalWidth, img.naturalHeight)
-    const sx = (img.naturalWidth - minSide) / 2
-    const sy = (img.naturalHeight - minSide) / 2
+    const minSide = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx = (img.naturalWidth - minSide) / 2;
+    const sy = (img.naturalHeight - minSide) / 2;
 
     // zoom: larger zoom = tighter crop from center
-    const cropSize = minSide / zoom
-    const cx = sx + (minSide - cropSize) / 2
-    const cy = sy + (minSide - cropSize) / 2
+    const cropSize = minSide / zoom;
+    const cx = sx + (minSide - cropSize) / 2;
+    const cy = sy + (minSide - cropSize) / 2;
 
-    ctx.clearRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE)
-    ctx.save()
-    ctx.beginPath()
-    ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2)
-    ctx.closePath()
-    ctx.clip()
-    ctx.drawImage(img, cx, cy, cropSize, cropSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE)
-    ctx.restore()
-  }, [zoom])
+    ctx.clearRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(
+      img,
+      cx,
+      cy,
+      cropSize,
+      cropSize,
+      0,
+      0,
+      OUTPUT_SIZE,
+      OUTPUT_SIZE,
+    );
+    ctx.restore();
+  }, [zoom]);
 
   function onImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    imgRef.current = e.currentTarget
-    drawCrop()
+    imgRef.current = e.currentTarget;
+    drawCrop();
   }
 
   // redraw when zoom changes
   useState(() => {
     // no-op placeholder — zoom effect via onChange below
-  })
+  });
 
   async function compressAndUpload() {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    drawCrop()
+    drawCrop();
 
-    setUploading(true)
-    setError("")
+    setUploading(true);
+    setError("");
 
     try {
-      let quality = 0.9
-      let blob: Blob | null = null
+      let quality = 0.9;
+      let blob: Blob | null = null;
 
       // quality কমিয়ে ≤ 200KB না হওয়া পর্যন্ত
       while (quality >= 0.4) {
         blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
-        )
-        if (blob && blob.size <= MAX_KB * 1024) break
-        quality -= 0.1
+          canvas.toBlob((b) => resolve(b), "image/jpeg", quality),
+        );
+        if (blob && blob.size <= MAX_KB * 1024) break;
+        quality -= 0.1;
       }
 
       if (!blob) {
-        setError("ছবি প্রসেস করা যায়নি")
-        setUploading(false)
-        return
+        setError("ছবি প্রসেস করা যায়নি");
+        setUploading(false);
+        return;
       }
 
       // এখনো বড় হলে scale কমাও
       if (blob.size > MAX_KB * 1024) {
-        const scale = Math.sqrt((MAX_KB * 1024) / blob.size)
-        const smallCanvas = document.createElement("canvas")
-        const s = Math.max(100, Math.floor(OUTPUT_SIZE * scale))
-        smallCanvas.width = s
-        smallCanvas.height = s
-        const sctx = smallCanvas.getContext("2d")!
-        sctx.beginPath()
-        sctx.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2)
-        sctx.closePath()
-        sctx.clip()
-        sctx.drawImage(canvas, 0, 0, s, s)
+        const scale = Math.sqrt((MAX_KB * 1024) / blob.size);
+        const smallCanvas = document.createElement("canvas");
+        const s = Math.max(100, Math.floor(OUTPUT_SIZE * scale));
+        smallCanvas.width = s;
+        smallCanvas.height = s;
+        const sctx = smallCanvas.getContext("2d")!;
+        sctx.beginPath();
+        sctx.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2);
+        sctx.closePath();
+        sctx.clip();
+        sctx.drawImage(canvas, 0, 0, s, s);
         blob = await new Promise<Blob | null>((resolve) =>
-          smallCanvas.toBlob((b) => resolve(b), "image/jpeg", 0.8)
-        )
+          smallCanvas.toBlob((b) => resolve(b), "image/jpeg", 0.8),
+        );
       }
 
       if (!blob || blob.size > MAX_KB * 1024) {
-        setError("ছবি ২০০ কেবি-র নিচে আনা যায়নি, অন্য ছবি চেষ্টা করুন")
-        setUploading(false)
-        return
+        setError("ছবি ২০০ কেবি-র নিচে আনা যায়নি, অন্য ছবি চেষ্টা করুন");
+        setUploading(false);
+        return;
       }
 
-      const formData = new FormData()
-      formData.append("file", blob, "avatar.jpg")
+      const formData = new FormData();
+      formData.append("file", blob, "avatar.jpg");
 
       const res = await fetch("/api/profile/avatar", {
         method: "POST",
         body: formData,
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "আপলোড ব্যর্থ")
-        setUploading(false)
-        return
+        setError(data.error || "আপলোড ব্যর্থ");
+        setUploading(false);
+        return;
       }
 
-      setPreview(data.avatarUrl)
-      setCropSrc(null)
+      setPreview(data.avatarUrl);
+      setCropSrc(null);
       // localStorage + ন্যাভবার রিফ্রেশ
       try {
-        const stored = localStorage.getItem("user")
+        const stored = localStorage.getItem("user");
         if (stored) {
-          const u = JSON.parse(stored)
-          u.avatarUrl = data.avatarUrl
-          localStorage.setItem("user", JSON.stringify(u))
+          const u = JSON.parse(stored);
+          u.avatarUrl = data.avatarUrl;
+          localStorage.setItem("user", JSON.stringify(u));
         }
       } catch {}
-      window.dispatchEvent(new Event("avatarUpdated"))
-      window.dispatchEvent(new Event("storage"))
-      onUploaded?.(data.avatarUrl)
+      window.dispatchEvent(new Event("avatarUpdated"));
+      window.dispatchEvent(new Event("storage"));
+      onUploaded?.(data.avatarUrl);
     } catch {
-      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন")
+      setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
   }
 
@@ -179,11 +193,26 @@ export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
+          <img
+            src={preview}
+            alt="Avatar"
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-green-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-1/2 h-1/2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-1/2 h-1/2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+              />
             </svg>
           </div>
         )}
@@ -206,9 +235,14 @@ export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 
       {cropSrc && (
         <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4">
-            <p className="font-bold text-green-800 text-center text-sm">রাউন্ড ক্রপ করুন</p>
+            <p className="font-bold text-green-800 text-center text-sm">
+              রাউন্ড ক্রপ করুন
+            </p>
 
-            <div className="relative mx-auto" style={{ width: 220, height: 220 }}>
+            <div
+              className="relative mx-auto"
+              style={{ width: 220, height: 220 }}
+            >
               {/* hidden full image for measuring */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -234,8 +268,8 @@ export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 
                 step={0.05}
                 value={zoom}
                 onChange={(e) => {
-                  setZoom(parseFloat(e.target.value))
-                  setTimeout(drawCrop, 0)
+                  setZoom(parseFloat(e.target.value));
+                  setTimeout(drawCrop, 0);
                 }}
                 className="w-full"
               />
@@ -259,10 +293,12 @@ export default function ProfileAvatarUpload({ currentUrl, onUploaded, size = 96 
                 {uploading ? "আপলোড হচ্ছে..." : "সেভ করুন"}
               </button>
             </div>
-            <p className="text-[11px] text-gray-400 text-center">অটো কম্প্রেস · সর্বোচ্চ ২০০ কেবি</p>
+            <p className="text-[11px] text-gray-400 text-center">
+              অটো কম্প্রেস · সর্বোচ্চ ২০০ কেবি
+            </p>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

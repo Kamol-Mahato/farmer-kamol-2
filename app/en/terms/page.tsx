@@ -1,11 +1,10 @@
 import PolicyPage from "@/app/components/PolicyPage";
 import { Metadata } from "next";
-import { siteConfig } from "@/lib/siteConfig"
+import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: `Terms & Conditions | ${siteConfig.brand.nameEn}`,
-  description:
-    `Read the terms and conditions for using the ${siteConfig.brand.nameEn} website, placing orders, payment, and delivery.`,
+  description: `Read the terms and conditions for using the ${siteConfig.brand.nameEn} website, placing orders, payment, and delivery.`,
   alternates: {
     canonical: "/en/terms",
     languages: {
@@ -18,8 +17,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "Introduction & Agreement",
-    content:
-      `By using the website www.${siteConfig.domain.host}, you agree to the terms below. Please read the full terms before placing an order.`,
+    content: `By using the website www.${siteConfig.domain.host}, you agree to the terms below. Please read the full terms before placing an order.`,
   },
   {
     title: "Use of the Website",
@@ -48,13 +46,11 @@ const sections = [
   },
   {
     title: "Intellectual Property",
-    content:
-      `All content, logos, images, and videos on this website are the property of ${siteConfig.brand.nameEn}. Copying or reuse without permission is prohibited.`,
+    content: `All content, logos, images, and videos on this website are the property of ${siteConfig.brand.nameEn}. Copying or reuse without permission is prohibited.`,
   },
   {
     title: "Limitation of Liability",
-    content:
-      `${siteConfig.brand.nameEn} makes every effort to supply accurate, quality products. However, we are not liable for damages arising from unintentional errors or uncontrollable circumstances (such as natural disasters or courier delays).`,
+    content: `${siteConfig.brand.nameEn} makes every effort to supply accurate, quality products. However, we are not liable for damages arising from unintentional errors or uncontrollable circumstances (such as natural disasters or courier delays).`,
   },
   {
     title: "Changes to Terms",
@@ -63,13 +59,11 @@ const sections = [
   },
   {
     title: "Governing Law",
-    content:
-      "These terms are governed by the laws of Bangladesh.",
+    content: "These terms are governed by the laws of Bangladesh.",
   },
   {
     title: "Contact",
-    content:
-      `If you have any questions about these terms, contact us on WhatsApp (${siteConfig.contact.phoneDisplay}). Our farm: ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}.`,
+    content: `If you have any questions about these terms, contact us on WhatsApp (${siteConfig.contact.phoneDisplay}). Our farm: ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}.`,
   },
 ];
 

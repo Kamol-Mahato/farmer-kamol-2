@@ -1,20 +1,21 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
-import EnablePushButton from "./EnablePushButton"
-import AdminLogoutButton from "./AdminLogoutButton"
+"use client";
+import { useState, useRef, useEffect } from "react";
+import EnablePushButton from "./EnablePushButton";
+import AdminLogoutButton from "./AdminLogoutButton";
 
 // ✅ মোবাইলে navbar পরিষ্কার রাখতে push status + logout-কে এই "⋮" মেনুর ভেতরে লুকানো হলো
 export default function AdminMoreMenu() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="relative md:hidden" ref={ref}>
@@ -32,5 +33,5 @@ export default function AdminMoreMenu() {
         </div>
       )}
     </div>
-  )
+  );
 }

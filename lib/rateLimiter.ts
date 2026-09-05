@@ -1,84 +1,89 @@
-import { Redis } from "@upstash/redis"
-import { sendTelegramAlert } from "@/lib/telegram"
+import { Redis } from "@upstash/redis";
+import { sendTelegramAlert } from "@/lib/telegram";
 
 // 🔒 Upstash Redis — build-time এ env variable না থাকলেও যেন crash না করে, তাই lazy init
-let redis: Redis | null = null
+let redis: Redis | null = null;
 function getRedis() {
   if (!redis) {
     redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL ?? "",
       token: process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
-    })
+    });
   }
-  return redis
+  return redis;
 }
 
-const MAX_ATTEMPTS = 5
-const LOCK_DURATION_SECONDS = 15 * 60 // ১৫ মিনিট
+const MAX_ATTEMPTS = 5;
+const LOCK_DURATION_SECONDS = 15 * 60; // ১৫ মিনিট
 
-type Attempt = { count: number; lockedUntil: number | null }
+type Attempt = { count: number; lockedUntil: number | null };
 
-export async function checkRateLimit(identifier: string): Promise<{ allowed: boolean; remainingMs?: number }> {
+export async function checkRateLimit(
+  identifier: string,
+): Promise<{ allowed: boolean; remainingMs?: number }> {
   try {
-    const record = await getRedis().get<Attempt>(`ratelimit:${identifier}`)
-    if (!record) return { allowed: true }
+    const record = await getRedis().get<Attempt>(`ratelimit:${identifier}`);
+    if (!record) return { allowed: true };
 
     if (record.lockedUntil && record.lockedUntil > Date.now()) {
-      return { allowed: false, remainingMs: record.lockedUntil - Date.now() }
+      return { allowed: false, remainingMs: record.lockedUntil - Date.now() };
     }
 
-    return { allowed: true }
+    return { allowed: true };
   } catch (error) {
     // Redis-এ সাময়িক সমস্যা হলেও যেন লগইন বন্ধ না হয়ে যায় (fail-open)
-    console.error("Rate limiter check error:", error)
+    console.error("Rate limiter check error:", error);
     await sendTelegramAlert(
-      `⚠️ <b>Rate limiter সমস্যা</b>\nRedis-এ পৌঁছানো যাচ্ছে না, brute-force protection সাময়িকভাবে বন্ধ আছে (fail-open)।\nIdentifier: ${identifier}`
-    )
-    return { allowed: true }
+      `⚠️ <b>Rate limiter সমস্যা</b>\nRedis-এ পৌঁছানো যাচ্ছে না, brute-force protection সাময়িকভাবে বন্ধ আছে (fail-open)।\nIdentifier: ${identifier}`,
+    );
+    return { allowed: true };
   }
 }
 
 export async function recordFailedAttempt(identifier: string) {
   try {
-    const key = `ratelimit:${identifier}`
-    const record = (await getRedis().get<Attempt>(key)) || { count: 0, lockedUntil: null }
-    record.count += 1
+    const key = `ratelimit:${identifier}`;
+    const record = (await getRedis().get<Attempt>(key)) || {
+      count: 0,
+      lockedUntil: null,
+    };
+    record.count += 1;
 
     if (record.count >= MAX_ATTEMPTS) {
-      record.lockedUntil = Date.now() + LOCK_DURATION_SECONDS * 1000
+      record.lockedUntil = Date.now() + LOCK_DURATION_SECONDS * 1000;
     }
 
-    await getRedis().set(key, record, { ex: LOCK_DURATION_SECONDS })
+    await getRedis().set(key, record, { ex: LOCK_DURATION_SECONDS });
   } catch (error) {
-    console.error("Rate limiter record error:", error)
+    console.error("Rate limiter record error:", error);
     await sendTelegramAlert(
-      `⚠️ <b>Rate limiter সমস্যা</b>\nফেইল্ড অ্যাটেম্পট রেকর্ড করা যায়নি (Redis error)।\nIdentifier: ${identifier}`
-    )
+      `⚠️ <b>Rate limiter সমস্যা</b>\nফেইল্ড অ্যাটেম্পট রেকর্ড করা যায়নি (Redis error)।\nIdentifier: ${identifier}`,
+    );
   }
 }
 
 export async function checkAndIncrementRate(
   identifier: string,
   limit: number,
-  windowSeconds: number
+  windowSeconds: number,
 ): Promise<{ allowed: boolean }> {
   try {
-    const key = `rl:${identifier}`
-    const count = await getRedis().incr(key)
+    const key = `rl:${identifier}`;
+    const count = await getRedis().incr(key);
     if (count === 1) {
-      await getRedis().expire(key, windowSeconds)
+      await getRedis().expire(key, windowSeconds);
     }
-    return { allowed: count <= limit }
+    return { allowed: count <= limit };
   } catch (error) {
-    console.error("Chat rate limiter error:", error)
-    return { allowed: true }
+    console.error("Chat rate limiter error:", error);
+    return { allowed: true };
   }
 }
 
 export async function clearAttempts(identifier: string) {
   try {
-    await getRedis().del(`ratelimit:${identifier}`)
+    await getRedis().del(`ratelimit:${identifier}`);
   } catch (error) {
-    console.error("Rate limiter clear error:", error)
+    console.error("Rate limiter clear error:", error);
   }
 }

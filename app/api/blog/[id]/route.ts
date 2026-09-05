@@ -1,38 +1,47 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { verifyAdminOnly } from "@/lib/adminAuth"
-import { sanitizeHtml } from "@/lib/sanitize"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { verifyAdminOnly } from "@/lib/adminAuth";
+import { sanitizeHtml } from "@/lib/sanitize";
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const admin = await verifyAdminOnly()
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
-  const { id } = await params
-  await prisma.blog.delete({ where: { id: parseInt(id) } })
-  revalidatePath("/")
-  revalidatePath("/en")
-  revalidatePath("/blog")
-  revalidatePath("/en/blog")
-  return NextResponse.json({ success: true })
+  const { id } = await params;
+  await prisma.blog.delete({ where: { id: parseInt(id) } });
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/blog");
+  revalidatePath("/en/blog");
+  return NextResponse.json({ success: true });
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const blog = await prisma.blog.findUnique({ where: { id: parseInt(id) } })
-  return NextResponse.json(blog)
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const blog = await prisma.blog.findUnique({ where: { id: parseInt(id) } });
+  return NextResponse.json(blog);
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const admin = await verifyAdminOnly()
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await verifyAdminOnly();
   if (!admin) {
-    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 })
+    return NextResponse.json({ error: "অনুমতি নেই" }, { status: 401 });
   }
 
-  const { id } = await params
-  const body = await req.json()
+  const { id } = await params;
+  const body = await req.json();
   const updated = await prisma.blog.update({
     where: { id: parseInt(id) },
     data: {
@@ -46,16 +55,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       image: body.image,
       category: body.category,
       isPublished: body.isPublished,
-      homeOrder: body.homeOrder === "" || body.homeOrder === null || body.homeOrder === undefined
-        ? null
-        : Number(body.homeOrder),
+      homeOrder:
+        body.homeOrder === "" ||
+        body.homeOrder === null ||
+        body.homeOrder === undefined
+          ? null
+          : Number(body.homeOrder),
     },
-  })
-  revalidatePath("/")
-  revalidatePath("/en")
-  revalidatePath("/blog")
-  revalidatePath("/en/blog")
-  if (updated.slug) revalidatePath(`/blog/${updated.slug}`)
-  if (updated.slugEn) revalidatePath(`/en/blog/${updated.slugEn}`)
-  return NextResponse.json(updated)
+  });
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/blog");
+  revalidatePath("/en/blog");
+  if (updated.slug) revalidatePath(`/blog/${updated.slug}`);
+  if (updated.slugEn) revalidatePath(`/en/blog/${updated.slugEn}`);
+  return NextResponse.json(updated);
 }

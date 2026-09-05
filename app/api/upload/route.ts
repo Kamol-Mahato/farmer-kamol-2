@@ -1,53 +1,53 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-import { verifyAdminOrAgent } from "@/lib/adminAuth"
-import sharp from "sharp"
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { verifyAdminOrAgent } from "@/lib/adminAuth";
+import sharp from "sharp";
 
 // 🔒 build-time এ env variable না থাকলেও crash না করার জন্য lazy init
-let supabase: ReturnType<typeof createClient> | null = null
+let supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
   if (!supabase) {
     supabase = createClient(
       process.env.SUPABASE_URL ?? "",
-      process.env.SUPABASE_SERVICE_ROLE_KEY ?? ""
-    )
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    );
   }
-  return supabase
+  return supabase;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 
 export async function POST(request: Request) {
-  const currentUser = await verifyAdminOrAgent()
+  const currentUser = await verifyAdminOrAgent();
   if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const formData = await request.formData()
-    const file = formData.get("file") as File | null
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
     if (!file) {
       return NextResponse.json(
         { error: "কোনো ফাইল পাওয়া যায়নি" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // ✅ ফাইল টাইপ ভ্যালিডেশন — শুধু ছবি আপলোড করা যাবে
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // ✅ ফাইল সাইজ ভ্যালিডেশন — সর্বোচ্চ 5MB
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: "ফাইলের সাইজ ৫ এমবি-র বেশি হতে পারবে না" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // 🔒 এক্সটেনশন client-এর দেওয়া filename থেকে না নিয়ে, উপরে যাচাই করা আসল MIME type থেকে বসানো হচ্ছে
@@ -56,11 +56,11 @@ export async function POST(request: Request) {
       "image/jpg": "jpg",
       "image/png": "png",
       "image/webp": "webp",
-    }
-    const ext = MIME_TO_EXT[file.type] || "jpg"
+    };
+    const ext = MIME_TO_EXT[file.type] || "jpg";
 
     // ✅ SEO-friendly নাম জেনারেট করা
-    const rawName = formData.get("name") as string | null
+    const rawName = formData.get("name") as string | null;
     let slug = rawName
       ? rawName
           .toLowerCase()
@@ -69,61 +69,64 @@ export async function POST(request: Request) {
           .replace(/\s+/g, "-")
           .replace(/-+/g, "-")
           .replace(/^-|-$/g, "")
-      : ""
+      : "";
 
     if (!slug) {
-      slug = "farmer-kamol-product"
+      slug = "farmer-kamol-product";
     }
 
-    const uniqueSuffix = Date.now().toString().slice(-6)
-    const filename = `${slug}-${uniqueSuffix}.${ext}`
+    const uniqueSuffix = Date.now().toString().slice(-6);
+    const filename = `${slug}-${uniqueSuffix}.${ext}`;
 
     // ✅ ছবি resize + compress করা (আপলোডের সময় একবারই হয়, কাস্টমারের রিকোয়েস্টে কোনো এক্সট্রা RAM/লোড লাগে না)
-    const rawBuffer = Buffer.from(await file.arrayBuffer())
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
 
-    let uploadBuffer: Buffer = rawBuffer
+    let uploadBuffer: Buffer = rawBuffer;
     try {
       let pipeline = sharp(rawBuffer).resize({
         width: 1200,
         withoutEnlargement: true,
-      })
+      });
 
       if (file.type === "image/png") {
-        pipeline = pipeline.png({ quality: 80, compressionLevel: 9 })
+        pipeline = pipeline.png({ quality: 80, compressionLevel: 9 });
       } else if (file.type === "image/webp") {
-        pipeline = pipeline.webp({ quality: 80 })
+        pipeline = pipeline.webp({ quality: 80 });
       } else {
-        pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true })
+        pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true });
       }
 
-      uploadBuffer = await pipeline.toBuffer()
+      uploadBuffer = await pipeline.toBuffer();
     } catch (err) {
-      console.error("Sharp resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:", err)
+      console.error(
+        "Sharp resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:",
+        err,
+      );
     }
 
     // ✅ Supabase Storage-এ আপলোড করা (filesystem-এর বদলে)
-    const { error: uploadError } = await getSupabase().storage
-      .from(process.env.SUPABASE_BUCKET!)
-      .upload(filename, uploadBuffer, { contentType: file.type })
+    const { error: uploadError } = await getSupabase()
+      .storage.from(process.env.SUPABASE_BUCKET!)
+      .upload(filename, uploadBuffer, { contentType: file.type });
 
     if (uploadError) {
-      console.error("Supabase upload error:", uploadError)
+      console.error("Supabase upload error:", uploadError);
       return NextResponse.json(
         { error: "ফাইল আপলোড করতে সমস্যা হয়েছে, আবার চেষ্টা করুন" },
-        { status: 500 }
-      )
+        { status: 500 },
+      );
     }
 
-    const { data } = getSupabase().storage
-      .from(process.env.SUPABASE_BUCKET!)
-      .getPublicUrl(filename)
+    const { data } = getSupabase()
+      .storage.from(process.env.SUPABASE_BUCKET!)
+      .getPublicUrl(filename);
 
-    return NextResponse.json({ imageUrl: data.publicUrl })
+    return NextResponse.json({ imageUrl: data.publicUrl });
   } catch (error) {
-    console.error("Upload API Error:", error)
+    console.error("Upload API Error:", error);
     return NextResponse.json(
       { error: "ফাইল আপলোড করতে সমস্যা হয়েছে, আবার চেষ্টা করুন" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }

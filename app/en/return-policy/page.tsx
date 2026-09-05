@@ -1,11 +1,10 @@
 import PolicyPage from "@/app/components/PolicyPage";
 import { Metadata } from "next";
-import { siteConfig } from "@/lib/siteConfig"
+import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: `Return Policy | ${siteConfig.brand.nameEn}`,
-  description:
-    `Learn about ${siteConfig.brand.nameEn}'s return, exchange, and refund policy for honey, ghee, mustard oil, and duck chicks.`,
+  description: `Learn about ${siteConfig.brand.nameEn}'s return, exchange, and refund policy for honey, ghee, mustard oil, and duck chicks.`,
   alternates: {
     canonical: "/en/return-policy",
     languages: {
@@ -33,8 +32,7 @@ const sections = [
   },
   {
     title: "Return Process",
-    content:
-      `Send a description of the issue along with photos/video to our WhatsApp (${siteConfig.contact.phoneDisplay}). Our team will review it and contact you within 24 hours. If the issue is confirmed, we will arrange a replacement or refund.`,
+    content: `Send a description of the issue along with photos/video to our WhatsApp (${siteConfig.contact.phoneDisplay}). Our team will review it and contact you within 24 hours. If the issue is confirmed, we will arrange a replacement or refund.`,
   },
   {
     title: "Refund Method",
@@ -53,8 +51,7 @@ const sections = [
   },
   {
     title: "Contact",
-    content:
-      `If you have any questions about returns, contact us on WhatsApp (${siteConfig.contact.phoneDisplay}). Our farm: ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}.`,
+    content: `If you have any questions about returns, contact us on WhatsApp (${siteConfig.contact.phoneDisplay}). Our farm: ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}.`,
   },
 ];
 

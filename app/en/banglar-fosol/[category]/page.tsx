@@ -1,33 +1,37 @@
-import { prisma } from "@/lib/prisma"
-import { siteConfig } from "@/lib/siteConfig"
-import Link from "next/link"
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import Breadcrumb from "@/app/components/Breadcrumb"
-import { safeJsonLd } from "@/lib/jsonLd"
-import { cache } from "react"
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/siteConfig";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import Breadcrumb from "@/app/components/Breadcrumb";
+import { safeJsonLd } from "@/lib/jsonLd";
+import { cache } from "react";
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 const getCategory = cache(async (slug: string) => {
   return prisma.fosolCategory.findFirst({
     where: { slug, isVisible: true },
-  })
-})
+  });
+});
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string }>
+  params: Promise<{ category: string }>;
 }) {
-  const { category: catSlug } = await params
-  const cat = await getCategory(catSlug)
-  if (!cat) return { title: `Category not found | ${siteConfig.brand.nameEn}` }
+  const { category: catSlug } = await params;
+  const cat = await getCategory(catSlug);
+  if (!cat) return { title: `Category not found | ${siteConfig.brand.nameEn}` };
 
-  const title = cat.nameEn || cat.name
+  const title = cat.nameEn || cat.name;
   return {
     title: `${title} | Banglar Fosol | ${siteConfig.brand.nameEn}`,
-    description: (cat.descriptionEn || cat.description || `${title} of Bangladesh`).slice(0, 160),
+    description: (
+      cat.descriptionEn ||
+      cat.description ||
+      `${title} of Bangladesh`
+    ).slice(0, 160),
     alternates: {
       canonical: `/en/banglar-fosol/${cat.slug}`,
       languages: {
@@ -35,17 +39,17 @@ export async function generateMetadata({
         en: `/en/banglar-fosol/${cat.slug}`,
       },
     },
-  }
+  };
 }
 
 export default async function FosolCategoryEnPage({
   params,
 }: {
-  params: Promise<{ category: string }>
+  params: Promise<{ category: string }>;
 }) {
-  const { category: catSlug } = await params
-  const cat = await getCategory(catSlug)
-  if (!cat) notFound()
+  const { category: catSlug } = await params;
+  const cat = await getCategory(catSlug);
+  if (!cat) notFound();
 
   const [categories, items] = await Promise.all([
     prisma.fosolCategory.findMany({
@@ -56,9 +60,9 @@ export default async function FosolCategoryEnPage({
       where: { categoryId: cat.id, isPublished: true },
       orderBy: { updatedAt: "desc" },
     }),
-  ])
+  ]);
 
-  const catName = cat.nameEn || cat.name
+  const catName = cat.nameEn || cat.name;
 
   const schema = {
     "@context": "https://schema.org",
@@ -66,7 +70,7 @@ export default async function FosolCategoryEnPage({
     name: catName,
     numberOfItems: items.length,
     inLanguage: "en",
-  }
+  };
 
   return (
     <div>
@@ -85,7 +89,9 @@ export default async function FosolCategoryEnPage({
       <div className="max-w-6xl mx-auto px-4 py-12 pt-8 text-center">
         <h1 className="text-2xl font-bold text-green-800 mb-2">{catName}</h1>
         <p className="text-gray-500 mb-8">
-          {cat.descriptionEn || cat.description || `Learn about ${catName} in Bangladesh`}
+          {cat.descriptionEn ||
+            cat.description ||
+            `Learn about ${catName} in Bangladesh`}
         </p>
 
         <div className="flex gap-2 flex-wrap justify-center mb-10">
@@ -139,7 +145,9 @@ export default async function FosolCategoryEnPage({
                     {item.titleEn || item.title}
                   </h2>
                   {item.scientificName && (
-                    <p className="text-xs text-gray-400 italic mt-1">{item.scientificName}</p>
+                    <p className="text-xs text-gray-400 italic mt-1">
+                      {item.scientificName}
+                    </p>
                   )}
                   <p className="text-gray-400 text-xs mt-2">
                     {item.updatedAt.toLocaleDateString("en-GB")}
@@ -151,5 +159,5 @@ export default async function FosolCategoryEnPage({
         )}
       </div>
     </div>
-  )
+  );
 }

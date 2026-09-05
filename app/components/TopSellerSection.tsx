@@ -1,31 +1,31 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
-import { useState, useEffect, useRef } from "react"
-import { usePathname } from "next/navigation"
-import { getLocaleFromPath, localizeHref } from "@/lib/i18n"
-import { getSavePercent } from "@/lib/pricing"
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { getLocaleFromPath, localizeHref } from "@/lib/i18n";
+import { getSavePercent } from "@/lib/pricing";
 
 type Product = {
-  id: number
-  name: string
-  slug: string
-  pricePerUnit: number
-  discountPrice: number | null
-  unit: string
-  stockQty: number
-  priceType: "FIXED" | "NEGOTIABLE"
-  images: { imageUrl: string }[]
-  category: { name: string } | null
-}
+  id: number;
+  name: string;
+  slug: string;
+  pricePerUnit: number;
+  discountPrice: number | null;
+  unit: string;
+  stockQty: number;
+  priceType: "FIXED" | "NEGOTIABLE";
+  images: { imageUrl: string }[];
+  category: { name: string } | null;
+};
 
 // ✅ ProductCard-এর মতোই cart toast
 function showCartToast(name: string) {
-  const existing = document.getElementById("cart-toast")
-  if (existing) existing.remove()
+  const existing = document.getElementById("cart-toast");
+  if (existing) existing.remove();
 
-  const toast = document.createElement("div")
-  toast.id = "cart-toast"
+  const toast = document.createElement("div");
+  toast.id = "cart-toast";
   toast.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:22px;">🛒</span>
@@ -35,7 +35,7 @@ function showCartToast(name: string) {
       </div>
       <span style="font-size:20px;margin-left:4px;">✅</span>
     </div>
-  `
+  `;
   toast.style.cssText = `
     position: fixed;
     top: 80px;
@@ -52,62 +52,77 @@ function showCartToast(name: string) {
     transform: translateX(120%);
     transition: transform 0.3s cubic-bezier(.22,1,.36,1);
     border: 2px solid #22c55e;
-  `
-  document.body.appendChild(toast)
+  `;
+  document.body.appendChild(toast);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      toast.style.transform = "translateX(0)"
-    })
-  })
+      toast.style.transform = "translateX(0)";
+    });
+  });
   setTimeout(() => {
-    toast.style.transform = "translateX(120%)"
-    setTimeout(() => toast.remove(), 350)
-  }, 2500)
+    toast.style.transform = "translateX(120%)";
+    setTimeout(() => toast.remove(), 350);
+  }, 2500);
 }
 
 function buildWhatsAppLink(productName: string) {
-  const phone = "8801737939688"
-  const message = `আমি "${productName}" সম্পর্কে জানতে চাই`
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+  const phone = "8801737939688";
+  const message = `আমি "${productName}" সম্পর্কে জানতে চাই`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-function TopSellerCard({ product, priority = false }: { product: Product; priority?: boolean }) {
-  const pathname = usePathname()
-  const locale = getLocaleFromPath(pathname)
-  const [added, setAdded] = useState(false)
-  const isOutOfStock = product.stockQty <= 0
-  const savePercent = getSavePercent(product.pricePerUnit, product.discountPrice)
-  const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg"
+function TopSellerCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
+  const pathname = usePathname();
+  const locale = getLocaleFromPath(pathname);
+  const [added, setAdded] = useState(false);
+  const isOutOfStock = product.stockQty <= 0;
+  const savePercent = getSavePercent(
+    product.pricePerUnit,
+    product.discountPrice,
+  );
+  const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg";
 
   function handleAddToCart() {
-    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]")
-    const existing = cart.find((i: { id: number }) => i.id === product.id)
+    const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]");
+    const existing = cart.find((i: { id: number }) => i.id === product.id);
 
     if (existing) {
-      existing.quantity += 1
+      existing.quantity += 1;
     } else {
       cart.push({
         id: product.id,
         name: product.name,
-        price: savePercent !== null ? (product.discountPrice as number) : product.pricePerUnit,
+        price:
+          savePercent !== null
+            ? (product.discountPrice as number)
+            : product.pricePerUnit,
         unit: product.unit,
         image: mainImage,
         quantity: 1,
-      })
+      });
     }
 
-    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart))
-    window.dispatchEvent(new CustomEvent("cartUpdated"))
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
-    showCartToast(product.name)
+    localStorage.setItem("farmer_kamol_cart", JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+    showCartToast(product.name);
   }
 
   return (
     <div className="flex bg-white border-2 border-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition group">
       {/* বাম পাশে ছবি — বড় করা হলো, hover-এ zoom হবে */}
-      <Link href={`/shop/${product.slug}`} className="relative w-2/3 shrink-0 bg-gray-50 overflow-hidden">
-      <div className="relative aspect-[16/9] w-full h-full overflow-hidden">
+      <Link
+        href={`/shop/${product.slug}`}
+        className="relative w-2/3 shrink-0 bg-gray-50 overflow-hidden"
+      >
+        <div className="relative aspect-[16/9] w-full h-full overflow-hidden">
           <Image
             src={mainImage}
             alt={product.name}
@@ -145,16 +160,21 @@ function TopSellerCard({ product, priority = false }: { product: Product; priori
             </h3>
           </Link>
           <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-xs text-black font-bold">মূল্য</span>
+            <span className="text-xs text-black font-bold">মূল্য</span>
             <span className="text-sm md:text-xl font-extrabold text-black">
-              ৳ {savePercent !== null ? product.discountPrice : product.pricePerUnit}
+              ৳{" "}
+              {savePercent !== null
+                ? product.discountPrice
+                : product.pricePerUnit}
             </span>
             {savePercent !== null && (
               <span className="text-[9px] md:text-xs text-gray-400 line-through">
                 ৳ {product.pricePerUnit}
               </span>
             )}
-            <span className="text-[9px] md:text-xs text-gray-400">/ {product.unit}</span>
+            <span className="text-[9px] md:text-xs text-gray-400">
+              / {product.unit}
+            </span>
           </div>
         </div>
 
@@ -177,14 +197,18 @@ function TopSellerCard({ product, priority = false }: { product: Product; priori
                   isOutOfStock
                     ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                     : added
-                    ? "border-green-500 bg-green-500 text-white scale-95"
-                    : "border-green-600 bg-white text-green-700 hover:bg-green-50"
+                      ? "border-green-500 bg-green-500 text-white scale-95"
+                      : "border-green-600 bg-white text-green-700 hover:bg-green-50"
                 }`}
               >
                 {added ? "✓ যোগ হয়েছে" : "🛒 Add to Cart"}
               </button>
               <Link
-                href={isOutOfStock ? "#" : localizeHref(`/order?productId=${product.id}`, locale)}
+                href={
+                  isOutOfStock
+                    ? "#"
+                    : localizeHref(`/order?productId=${product.id}`, locale)
+                }
                 className={`w-full py-2 rounded-xl font-bold text-[10px] md:text-sm flex items-center justify-center text-center transition ${
                   isOutOfStock
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
@@ -198,42 +222,46 @@ function TopSellerCard({ product, priority = false }: { product: Product; priori
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default function TopSellerSection({ products }: { products: Product[] }) {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [mobileIndex, setMobileIndex] = useState(0)
+export default function TopSellerSection({
+  products,
+}: {
+  products: Product[];
+}) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [mobileIndex, setMobileIndex] = useState(0);
 
   useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
+    const el = sectionRef.current;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true)
-          observer.disconnect()
+          setIsVisible(true);
+          observer.disconnect();
         }
       },
-      { threshold: 0.15 }
-    )
+      { threshold: 0.15 },
+    );
 
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // ✅ মোবাইলে Hero Slider-এর মতো অটো-স্লাইড, প্রতি ৪ সেকেন্ডে
   useEffect(() => {
-    if (!products || products.length <= 1) return
+    if (!products || products.length <= 1) return;
     const timer = setInterval(() => {
-      setMobileIndex((i) => (i === products.length - 1 ? 0 : i + 1))
-    }, 4000)
-    return () => clearInterval(timer)
-  }, [products])
+      setMobileIndex((i) => (i === products.length - 1 ? 0 : i + 1));
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [products]);
 
-  if (!products || products.length === 0) return null
+  if (!products || products.length === 0) return null;
 
   return (
     <div
@@ -245,14 +273,18 @@ export default function TopSellerSection({ products }: { products: Product[] }) 
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-5">
           <h2 className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2 rounded-full hover:bg-green-700 hover:text-white transition cursor-default">
-          Farmer Kamol এর জনপ্রিয় পণ্য
+            Farmer Kamol এর জনপ্রিয় পণ্য
           </h2>
         </div>
 
         {/* ✅ PC — আগের মতোই পাশাপাশি গ্রিড */}
         <div className="hidden md:grid md:grid-cols-2 gap-6">
           {products.map((product, i) => (
-            <TopSellerCard key={product.id} product={product} priority={i === 0} />
+            <TopSellerCard
+              key={product.id}
+              product={product}
+              priority={i === 0}
+            />
           ))}
         </div>
 
@@ -274,7 +306,9 @@ export default function TopSellerSection({ products }: { products: Product[] }) 
                 <span
                   key={i}
                   className={`h-1.5 rounded-full transition-all ${
-                    i === mobileIndex ? "w-5 bg-green-700" : "w-1.5 bg-green-300"
+                    i === mobileIndex
+                      ? "w-5 bg-green-700"
+                      : "w-1.5 bg-green-300"
                   }`}
                 />
               ))}
@@ -283,5 +317,5 @@ export default function TopSellerSection({ products }: { products: Product[] }) 
         </div>
       </div>
     </div>
-  )
+  );
 }

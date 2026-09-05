@@ -1,5 +1,5 @@
-"use client"
-import { useId } from "react"
+"use client";
+import { useId } from "react";
 
 // একটা একক পতাকা — সঠিক অনুপাতে (স্ট্রেচ হয় না), হালকা waving ইফেক্টসহ
 // seed ও delay দিয়ে একাধিক পতাকা পাশাপাশি বসালে প্রতিটা আলাদা ছন্দে দুলবে (রোবটিক না লেগে স্বাভাবিক লাগবে)
@@ -8,12 +8,12 @@ export default function BangladeshFlagWave({
   seed = 4,
   delay = 0,
 }: {
-  className?: string
-  seed?: number
-  delay?: number
+  className?: string;
+  seed?: number;
+  delay?: number;
 }) {
-  const rawId = useId().replace(/:/g, "")
-  const filterId = `bd-flag-wave-${rawId}`
+  const rawId = useId().replace(/:/g, "");
+  const filterId = `bd-flag-wave-${rawId}`;
 
   return (
     <svg
@@ -24,7 +24,13 @@ export default function BangladeshFlagWave({
     >
       <defs>
         <filter id={filterId}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.08" numOctaves="2" seed={seed} result="turb">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.02 0.08"
+            numOctaves="2"
+            seed={seed}
+            result="turb"
+          >
             <animate
               attributeName="baseFrequency"
               dur="5s"
@@ -33,7 +39,13 @@ export default function BangladeshFlagWave({
               repeatCount="indefinite"
             />
           </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="turb" scale="6" xChannelSelector="R" yChannelSelector="G" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="turb"
+            scale="6"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
         </filter>
       </defs>
       <g filter={`url(#${filterId})`}>
@@ -41,5 +53,5 @@ export default function BangladeshFlagWave({
         <ellipse cx="45" cy="30" rx="18" ry="18" fill="#f42a41" />
       </g>
     </svg>
-  )
+  );
 }

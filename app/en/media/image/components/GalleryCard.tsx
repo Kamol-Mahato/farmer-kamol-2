@@ -1,38 +1,38 @@
-"use client"
-import { useState } from "react"
-import Image from "next/image"
+"use client";
+import { useState } from "react";
+import Image from "next/image";
 
 type GalleryImage = {
-  id: number
-  imageUrl: string
-}
+  id: number;
+  imageUrl: string;
+};
 type GalleryItem = {
-  id: number
-  title: string
-  titleEn: string | null
-  slug: string
-  slugEn: string | null
-  description: string | null
-  descriptionEn: string | null
-  images: GalleryImage[]
-}
+  id: number;
+  title: string;
+  titleEn: string | null;
+  slug: string;
+  slugEn: string | null;
+  description: string | null;
+  descriptionEn: string | null;
+  images: GalleryImage[];
+};
 
 export default function GalleryCard({ item }: { item: GalleryItem }) {
-  const [index, setIndex] = useState(0)
-  const [expanded, setExpanded] = useState(false)
+  const [index, setIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
-  const displayTitle = item.titleEn || item.title
-  const displayDescription = item.descriptionEn || item.description
+  const displayTitle = item.titleEn || item.title;
+  const displayDescription = item.descriptionEn || item.description;
 
   function prev(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setIndex((i) => (i === 0 ? item.images.length - 1 : i - 1))
+    e.preventDefault();
+    e.stopPropagation();
+    setIndex((i) => (i === 0 ? item.images.length - 1 : i - 1));
   }
   function next(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    setIndex((i) => (i === item.images.length - 1 ? 0 : i + 1))
+    e.preventDefault();
+    e.stopPropagation();
+    setIndex((i) => (i === item.images.length - 1 ? 0 : i + 1));
   }
 
   return (
@@ -73,7 +73,9 @@ export default function GalleryCard({ item }: { item: GalleryItem }) {
         )}
       </div>
       <div className="p-3">
-        <p className="font-bold text-gray-800 text-sm md:text-base">{displayTitle}</p>
+        <p className="font-bold text-gray-800 text-sm md:text-base">
+          {displayTitle}
+        </p>
         {displayDescription && (
           <>
             <p
@@ -82,9 +84,9 @@ export default function GalleryCard({ item }: { item: GalleryItem }) {
             />
             <button
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setExpanded((v) => !v)
+                e.preventDefault();
+                e.stopPropagation();
+                setExpanded((v) => !v);
               }}
               className="text-green-700 text-xs font-bold mt-1"
             >
@@ -94,5 +96,5 @@ export default function GalleryCard({ item }: { item: GalleryItem }) {
         )}
       </div>
     </div>
-  )
+  );
 }

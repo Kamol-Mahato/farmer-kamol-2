@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import { siteConfig } from "@/lib/siteConfig"
+import type { Metadata } from "next";
+import { siteConfig } from "@/lib/siteConfig";
 
-const pageTitle = `About Us - Integrated Farming, Livestock & Crop Cultivation | ${siteConfig.brand.nameEn}`
-const pageDescription = `Learn about ${siteConfig.brand.nameEn}'s story, mission, and vision — pure honey, ghee, and mustard oil through integrated farming in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, delivered straight from the farm to your door.`
-const pageUrl = `${siteConfig.domain.url}/en/about`
-const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`
+const pageTitle = `About Us - Integrated Farming, Livestock & Crop Cultivation | ${siteConfig.brand.nameEn}`;
+const pageDescription = `Learn about ${siteConfig.brand.nameEn}'s story, mission, and vision — pure honey, ghee, and mustard oil through integrated farming in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, delivered straight from the farm to your door.`;
+const pageUrl = `${siteConfig.domain.url}/en/about`;
+const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`;
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-}
+};
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -154,9 +154,13 @@ const jsonLd = {
       ],
     },
   ],
-}
+};
 
-export default function AboutLayoutEn({ children }: { children: React.ReactNode }) {
+export default function AboutLayoutEn({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <script
@@ -165,5 +169,5 @@ export default function AboutLayoutEn({ children }: { children: React.ReactNode 
       />
       {children}
     </>
-  )
+  );
 }

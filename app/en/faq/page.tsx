@@ -1,12 +1,11 @@
 import PolicyPage from "@/app/components/PolicyPage";
 import { Metadata } from "next";
-import { safeJsonLd } from "@/lib/jsonLd"
-import { siteConfig } from "@/lib/siteConfig"
+import { safeJsonLd } from "@/lib/jsonLd";
+import { siteConfig } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: `FAQ | ${siteConfig.brand.nameEn}`,
-  description:
-    `Common questions about ${siteConfig.brand.nameEn}'s products, orders, delivery, and returns. Learn about our pure honey, ghee, mustard oil, and duck chicks from ${siteConfig.address.regionEn}.`,
+  description: `Common questions about ${siteConfig.brand.nameEn}'s products, orders, delivery, and returns. Learn about our pure honey, ghee, mustard oil, and duck chicks from ${siteConfig.address.regionEn}.`,
   alternates: {
     canonical: "/en/faq",
     languages: {
@@ -194,7 +193,7 @@ export default function FaqPageEn() {
           "@type": "Answer",
           text: item.a,
         },
-      }))
+      })),
     ),
   };
 
@@ -205,38 +204,38 @@ export default function FaqPageEn() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
       <PolicyPage title="Frequently Asked Questions">
-  <div className="space-y-4">
-    {faqGroups.map((group) => (
-      <details
-        key={group.category}
-        className="border border-gray-200 rounded-lg bg-white shadow-sm"
-      >
-        <summary className="cursor-pointer px-5 py-4 font-semibold text-lg text-green-700">
-          {group.category}
-        </summary>
+        <div className="space-y-4">
+          {faqGroups.map((group) => (
+            <details
+              key={group.category}
+              className="border border-gray-200 rounded-lg bg-white shadow-sm"
+            >
+              <summary className="cursor-pointer px-5 py-4 font-semibold text-lg text-green-700">
+                {group.category}
+              </summary>
 
-        <div className="px-5 pb-5">
-          <div className="space-y-3">
-            {group.items.map((item) => (
-              <details
-                key={item.q}
-                className="border-b border-gray-100 pb-3"
-              >
-                <summary className="cursor-pointer font-medium text-gray-900 py-2">
-                  {item.q}
-                </summary>
+              <div className="px-5 pb-5">
+                <div className="space-y-3">
+                  {group.items.map((item) => (
+                    <details
+                      key={item.q}
+                      className="border-b border-gray-100 pb-3"
+                    >
+                      <summary className="cursor-pointer font-medium text-gray-900 py-2">
+                        {item.q}
+                      </summary>
 
-                <p className="text-gray-600 mt-2 leading-relaxed">
-                  {item.a}
-                </p>
-              </details>
-            ))}
-          </div>
+                      <p className="text-gray-600 mt-2 leading-relaxed">
+                        {item.a}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
         </div>
-      </details>
-    ))}
-  </div>
-</PolicyPage>
+      </PolicyPage>
     </>
   );
 }

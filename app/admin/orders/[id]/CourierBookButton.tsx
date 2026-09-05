@@ -1,6 +1,6 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CourierBookButton({
   orderId,
@@ -8,31 +8,33 @@ export default function CourierBookButton({
   trackingId,
   onSuccess,
 }: {
-  orderId: number
-  alreadyBooked: boolean
-  trackingId: string | null
-  onSuccess?: () => void
+  orderId: number;
+  alreadyBooked: boolean;
+  trackingId: string | null;
+  onSuccess?: () => void;
 }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleBook() {
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/courier`, { method: "POST" })
-      const data = await res.json()
+      const res = await fetch(`/api/admin/orders/${orderId}/courier`, {
+        method: "POST",
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "বুকিং ব্যর্থ হয়েছে")
-        return
+        setError(data.error || "বুকিং ব্যর্থ হয়েছে");
+        return;
       }
-      router.refresh()
-      onSuccess?.()
+      router.refresh();
+      onSuccess?.();
     } catch {
-      setError("বুকিং ব্যর্থ হয়েছে")
+      setError("বুকিং ব্যর্থ হয়েছে");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -40,9 +42,11 @@ export default function CourierBookButton({
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
         <p className="text-green-700 font-bold">✅ Pathao-তে বুক করা হয়েছে</p>
-        <p className="text-gray-500 text-xs mt-1">Consignment ID: {trackingId}</p>
+        <p className="text-gray-500 text-xs mt-1">
+          Consignment ID: {trackingId}
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -56,5 +60,5 @@ export default function CourierBookButton({
       </button>
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
     </div>
-  )
+  );
 }

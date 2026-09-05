@@ -1,22 +1,21 @@
-import Link from "next/link"
-import HeroSlider from "./components/HeroSlider"
-import { prisma } from "@/lib/prisma"
-import ProductCard from "./components/ProductCard"
-import BlogSection from "./components/BlogSection"
-import TestimonialSection from "./components/TestimonialSection"
-import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections"
-import type { Metadata } from "next"
-import NoticeModal from "./components/NoticeModal" // এটি যোগ করুন
-import VideoSection from "./components/VideoSection"
-import TopSellerSection from "./components/TopSellerSection"
-import { siteConfig } from "@/lib/siteConfig"
+import Link from "next/link";
+import HeroSlider from "./components/HeroSlider";
+import { prisma } from "@/lib/prisma";
+import ProductCard from "./components/ProductCard";
+import BlogSection from "./components/BlogSection";
+import TestimonialSection from "./components/TestimonialSection";
+import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
+import type { Metadata } from "next";
+import NoticeModal from "./components/NoticeModal"; // এটি যোগ করুন
+import VideoSection from "./components/VideoSection";
+import TopSellerSection from "./components/TopSellerSection";
+import { siteConfig } from "@/lib/siteConfig";
 
-export const revalidate = 86400 // ২৪ ঘণ্টা safety-net; Admin Save করলেই সাথে সাথে revalidatePath() দিয়ে আগে আপডেট হয়ে যাবে
+export const revalidate = 86400; // ২৪ ঘণ্টা safety-net; Admin Save করলেই সাথে সাথে revalidatePath() দিয়ে আগে আপডেট হয়ে যাবে
 
 export const metadata: Metadata = {
   title: `${siteConfig.brand.name} - ${siteConfig.brand.slogan}`,
-  description:
-    `${siteConfig.address.region}ের ${siteConfig.address.locality} থেকে সরাসরি খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা — কোনো মধ্যস্থতাকারী ছাড়া, খামার থেকে আপনার দরজায়।`,
+  description: `${siteConfig.address.region}ের ${siteConfig.address.locality} থেকে সরাসরি খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা — কোনো মধ্যস্থতাকারী ছাড়া, খামার থেকে আপনার দরজায়।`,
   alternates: {
     canonical: "/",
     languages: {
@@ -24,7 +23,7 @@ export const metadata: Metadata = {
       en: "/en",
     },
   },
-}
+};
 
 export default async function HomePage() {
   const [
@@ -80,9 +79,10 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
-  ])
+  ]);
 
-  const deliveryMode = (systemSettings?.deliveryChargeMode ?? "NORMAL") as "NORMAL" | "FREE" | "HALF"
+  const deliveryMode = (systemSettings?.deliveryChargeMode ?? "NORMAL") as
+    "NORMAL" | "FREE" | "HALF";
 
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)]">
@@ -108,12 +108,19 @@ export default async function HomePage() {
             </h2>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-2">
-          {products.map((product) => (
-              <ProductCard key={product.id} product={product} deliveryMode={deliveryMode} />
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                deliveryMode={deliveryMode}
+              />
             ))}
           </div>
           <div className="text-center mt-4">
-            <Link href="/shop" className="border-2 border-green-700 text-green-700 px-4 py-1 rounded-full font-bold hover:bg-green-700 hover:text-white text-xl transition">
+            <Link
+              href="/shop"
+              className="border-2 border-green-700 text-green-700 px-4 py-1 rounded-full font-bold hover:bg-green-700 hover:text-white text-xl transition"
+            >
               সব পণ্য দেখুন →
             </Link>
           </div>
@@ -123,15 +130,19 @@ export default async function HomePage() {
       {/* Blog Section */}
       <BlogSection blogs={blogs} />
 
-            {/* Video Section */}
+      {/* Video Section */}
       <VideoSection
         videos={videos}
-        youtubeChannelUrl={systemSettings?.youtubeChannelUrl || siteConfig.social.youtube}
-        facebookPageUrl={systemSettings?.facebookPageUrl || siteConfig.social.facebook}
+        youtubeChannelUrl={
+          systemSettings?.youtubeChannelUrl || siteConfig.social.youtube
+        }
+        facebookPageUrl={
+          systemSettings?.facebookPageUrl || siteConfig.social.facebook
+        }
       />
 
       {/* Reviews — Footer-এর ঠিক আগে */}
       <TestimonialSection reviews={reviews} />
     </div>
-  )
+  );
 }

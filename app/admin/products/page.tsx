@@ -1,11 +1,11 @@
-import Link from "next/link"
-import { prisma } from "@/lib/prisma"
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
     include: { category: true, images: true },
     orderBy: { createdAt: "desc" },
-  })
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-2 py-4">
@@ -22,7 +22,10 @@ export default async function AdminProductsPage() {
       {products.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl shadow">
           <p className="text-gray-400 text-lg">কোনো পণ্য নেই</p>
-          <Link href="/admin/products/new" className="text-green-600 mt-2 inline-block hover:underline">
+          <Link
+            href="/admin/products/new"
+            className="text-green-600 mt-2 inline-block hover:underline"
+          >
             প্রথম পণ্য যোগ করুন →
           </Link>
         </div>
@@ -31,7 +34,9 @@ export default async function AdminProductsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-6 py-4 text-gray-600">পণ্যের নাম</th>
+                <th className="text-left px-6 py-4 text-gray-600">
+                  পণ্যের নাম
+                </th>
                 <th className="text-left px-6 py-4 text-gray-600">দাম</th>
                 <th className="text-left px-6 py-4 text-gray-600">স্টক</th>
                 <th className="text-left px-6 py-4 text-gray-600">স্ট্যাটাস</th>
@@ -46,23 +51,34 @@ export default async function AdminProductsPage() {
                     <p className="text-sm text-gray-400">{product.slug}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="font-bold text-green-700">৳ {product.pricePerUnit}</p>
+                    <p className="font-bold text-green-700">
+                      ৳ {product.pricePerUnit}
+                    </p>
                     {product.discountPrice && (
-                      <p className="text-sm text-black font-bold">সেল: ৳ {product.discountPrice}</p>
+                      <p className="text-sm text-black font-bold">
+                        সেল: ৳ {product.discountPrice}
+                      </p>
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <p className={`font-medium ${product.stockQty <= 0 ? "text-red-500" : "text-green-600"}`}>
+                    <p
+                      className={`font-medium ${product.stockQty <= 0 ? "text-red-500" : "text-green-600"}`}
+                    >
                       {product.stockQty} {product.unit}
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${product.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${product.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                    >
                       {product.isActive ? "সক্রিয়" : "নিষ্ক্রিয়"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <Link href={`/admin/products/${product.id}/edit`} className="text-blue-600 hover:underline mr-4">
+                    <Link
+                      href={`/admin/products/${product.id}/edit`}
+                      className="text-blue-600 hover:underline mr-4"
+                    >
                       সম্পাদনা
                     </Link>
                   </td>
@@ -73,5 +89,5 @@ export default async function AdminProductsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

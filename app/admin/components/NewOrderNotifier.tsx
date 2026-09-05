@@ -1,75 +1,83 @@
-"use client"
-import { useEffect, useRef, useState, useCallback } from "react"
-import Link from "next/link"
+"use client";
+import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 
 interface NewOrderAlert {
-  id: number
-  name: string
-  amount: number
-  time: string
+  id: number;
+  name: string;
+  amount: number;
+  time: string;
 }
 
 export default function NewOrderNotifier() {
-  const lastSeenId = useRef<number | null>(null)
-  const isFirstCheck = useRef(true)
-  const [toasts, setToasts] = useState<NewOrderAlert[]>([])
-  const [history, setHistory] = useState<NewOrderAlert[]>([])
-  const [unseenCount, setUnseenCount] = useState(0)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const lastSeenId = useRef<number | null>(null);
+  const isFirstCheck = useRef(true);
+  const [toasts, setToasts] = useState<NewOrderAlert[]>([]);
+  const [history, setHistory] = useState<NewOrderAlert[]>([]);
+  const [unseenCount, setUnseenCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // 🔔 Web Audio API দিয়ে নিজেই একটা ding শব্দ বানানো হচ্ছে
   const playDing = useCallback(() => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const oscillator = ctx.createOscillator()
-      const gain = ctx.createGain()
-      oscillator.type = "sine"
-      oscillator.frequency.setValueAtTime(880, ctx.currentTime)
-      gain.gain.setValueAtTime(0.3, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6)
-      oscillator.connect(gain)
-      gain.connect(ctx.destination)
-      oscillator.start()
-      oscillator.stop(ctx.currentTime + 0.6)
+      const ctx = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.6);
     } catch {
       // সাউন্ড সাপোর্ট না করলে নিরবে এড়িয়ে যাবে
     }
-  }, [])
+  }, []);
 
   // ✅ একই অর্ডার (id) দুইবার (push + polling দুই জায়গা থেকে) না দেখানোর জন্য dedup সহ shared ফাংশন
-  const addAlert = useCallback((alert: NewOrderAlert) => {
-    let isDuplicate = false
-    setHistory(prev => {
-      if (prev.some(h => h.id === alert.id)) {
-        isDuplicate = true
-        return prev
-      }
-      return [alert, ...prev].slice(0, 30)
-    })
-    if (isDuplicate) return
+  const addAlert = useCallback(
+    (alert: NewOrderAlert) => {
+      let isDuplicate = false;
+      setHistory((prev) => {
+        if (prev.some((h) => h.id === alert.id)) {
+          isDuplicate = true;
+          return prev;
+        }
+        return [alert, ...prev].slice(0, 30);
+      });
+      if (isDuplicate) return;
 
-    setToasts(prev => [...prev, alert])
-    setUnseenCount(prev => prev + 1)
-    playDing()
+      setToasts((prev) => [...prev, alert]);
+      setUnseenCount((prev) => prev + 1);
+      playDing();
 
-    // ৬ সেকেন্ড পরে toast নিজেই মিলিয়ে যাবে
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== alert.id))
-    }, 6000)
-  }, [playDing])
+      // ৬ সেকেন্ড পরে toast নিজেই মিলিয়ে যাবে
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== alert.id));
+      }, 6000);
+    },
+    [playDing],
+  );
 
   const checkNewOrders = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/notifications?afterId=${lastSeenId.current ?? 0}`, { cache: "no-store" })
-      const data = await res.json()
-      if (!Array.isArray(data) || data.length === 0) return
+      const res = await fetch(
+        `/api/admin/notifications?afterId=${lastSeenId.current ?? 0}`,
+        { cache: "no-store" },
+      );
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return;
 
-      lastSeenId.current = data[data.length - 1].id
+      lastSeenId.current = data[data.length - 1].id;
 
       // ✅ প্রথমবার শুধু baseline সেট হবে, পুরনো অর্ডারের জন্য alert দেখাবে না
       if (isFirstCheck.current) {
-        isFirstCheck.current = false
-        return
+        isFirstCheck.current = false;
+        return;
       }
 
       data.forEach((o: any) => {
@@ -77,81 +85,88 @@ export default function NewOrderNotifier() {
           id: o.id,
           name: o.customer?.name || "কাস্টমার",
           amount: o.finalCodAmount,
-          time: new Date().toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" }),
-        })
-      })
+          time: new Date().toLocaleTimeString("bn-BD", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        });
+      });
     } catch (error) {
-      console.error("নতুন অর্ডার চেক ব্যর্থ হয়েছে", error)
+      console.error("নতুন অর্ডার চেক ব্যর্থ হয়েছে", error);
     }
-  }, [addAlert])
+  }, [addAlert]);
 
   useEffect(() => {
-    checkNewOrders()
+    checkNewOrders();
 
-    let interval: ReturnType<typeof setInterval> | null = null
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     // ✅ শুধু ট্যাব active/visible থাকলে polling চলবে, ব্যাকগ্রাউন্ডে পড়ে থাকলে বন্ধ — DB চাপ কমাতে
     function startPolling() {
-      if (interval) return
-      interval = setInterval(checkNewOrders, 30000)
+      if (interval) return;
+      interval = setInterval(checkNewOrders, 30000);
     }
 
     function stopPolling() {
       if (interval) {
-        clearInterval(interval)
-        interval = null
+        clearInterval(interval);
+        interval = null;
       }
     }
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        checkNewOrders()
-        startPolling()
+        checkNewOrders();
+        startPolling();
       } else {
-        stopPolling()
+        stopPolling();
       }
     }
 
-    if (document.visibilityState === "visible") startPolling()
-    document.addEventListener("visibilitychange", handleVisibilityChange)
+    if (document.visibilityState === "visible") startPolling();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      stopPolling()
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-    }
-  }, [checkNewOrders])
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [checkNewOrders]);
 
   // ✅ Service Worker push event থেকে সরাসরি real-time আপডেট
   useEffect(() => {
-    if (!("serviceWorker" in navigator)) return
+    if (!("serviceWorker" in navigator)) return;
 
     function handleMessage(event: MessageEvent) {
-      const data = event.data
-      if (data?.type !== "NEW_ORDER" || !data.orderId) return
+      const data = event.data;
+      if (data?.type !== "NEW_ORDER" || !data.orderId) return;
 
       addAlert({
         id: data.orderId,
         name: data.name || "কাস্টমার",
         amount: data.amount || 0,
-        time: new Date().toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" }),
-      })
+        time: new Date().toLocaleTimeString("bn-BD", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      });
 
       if (lastSeenId.current === null || data.orderId > lastSeenId.current) {
-        lastSeenId.current = data.orderId
+        lastSeenId.current = data.orderId;
       }
     }
 
-    navigator.serviceWorker.addEventListener("message", handleMessage)
-    return () => navigator.serviceWorker.removeEventListener("message", handleMessage)
-  }, [addAlert])
+    navigator.serviceWorker.addEventListener("message", handleMessage);
+    return () =>
+      navigator.serviceWorker.removeEventListener("message", handleMessage);
+  }, [addAlert]);
 
   function dismissToast(id: number) {
-    setToasts(prev => prev.filter(t => t.id !== id))
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }
 
   function toggleDropdown() {
-    setDropdownOpen(prev => !prev)
-    if (!dropdownOpen) setUnseenCount(0)
+    setDropdownOpen((prev) => !prev);
+    if (!dropdownOpen) setUnseenCount(0);
   }
 
   return (
@@ -177,16 +192,20 @@ export default function NewOrderNotifier() {
               সাম্প্রতিক অর্ডার
             </p>
             {history.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-gray-400">কোনো নতুন অর্ডার নাই</p>
+              <p className="px-4 py-6 text-center text-sm text-gray-400">
+                কোনো নতুন অর্ডার নাই
+              </p>
             ) : (
-              history.map(item => (
+              history.map((item) => (
                 <Link
                   key={item.id}
                   href={`/admin/orders/${item.id}`}
                   className="block px-4 py-3 hover:bg-green-50 transition border-b border-gray-50"
                   onClick={() => setDropdownOpen(false)}
                 >
-                  <p className="text-sm font-bold text-gray-800">{item.name} - ৳{item.amount}</p>
+                  <p className="text-sm font-bold text-gray-800">
+                    {item.name} - ৳{item.amount}
+                  </p>
                   <p className="text-xs text-gray-400">{item.time}</p>
                 </Link>
               ))
@@ -197,7 +216,7 @@ export default function NewOrderNotifier() {
 
       {/* ✅ instant toast popup */}
       <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <Link
             key={toast.id}
             href={`/admin/orders/${toast.id}`}
@@ -208,9 +227,9 @@ export default function NewOrderNotifier() {
             </span>
             <button
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                dismissToast(toast.id)
+                e.preventDefault();
+                e.stopPropagation();
+                dismissToast(toast.id);
               }}
               className="text-white/80 hover:text-white text-xs font-bold ml-2"
             >
@@ -220,5 +239,5 @@ export default function NewOrderNotifier() {
         ))}
       </div>
     </>
-  )
+  );
 }

@@ -1,5 +1,9 @@
 // Navbar-এর ব্যাকগ্রাউন্ডে নতুন তৈরি bd-flag-v3.png (ঘন, ধারালো, সিমলেস) — repeat-x করে
-export default function FlagRibbonBackground({ className = "" }: { className?: string }) {
+export default function FlagRibbonBackground({
+  className = "",
+}: {
+  className?: string;
+}) {
   return (
     <div
       className={`absolute inset-0 pointer-events-none ${className}`}
@@ -10,5 +14,5 @@ export default function FlagRibbonBackground({ className = "" }: { className?: s
         backgroundPosition: "left center",
       }}
     />
-  )
+  );
 }
