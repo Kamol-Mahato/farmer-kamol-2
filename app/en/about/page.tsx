@@ -167,27 +167,59 @@ const ecosystem = [
   {
     id: 1,
     title: "Integrated Farming & Crop Cultivation",
-    desc: "Rice, seasonal vegetables, and livestock-feed grass — grown together on the same land through natural methods. This is also where the raw material for our pure mustard oil comes from.",
+    shortDesc:
+      "Rice, seasonal vegetables, and livestock-feed grass — grown together on the same land through natural methods. This is also where the raw material for our pure mustard oil comes from.",
+    fullDesc: `Rice, seasonal vegetables, and livestock-feed grass — grown together on the same land through natural methods. This is also where the raw material for our pure mustard oil comes from.
+
+On our farm we use no artificial chemical fertilizers or toxic pesticides. By growing rice, mustard, vegetables and grass together, we maintain the natural nutrient balance of the soil. Crop residues become animal feed, and animal waste returns to the soil as organic fertilizer.
+
+Because of this complete natural cycle, our mustard oil, vegetables and other crops retain their true taste and maximum nutritional value. Against the chemical-laden products of the market, we offer completely toxin-free and pure agricultural products.`,
     image: "/uploads/about-1st-sub.jpg",
     side: "right" as const,
   },
   {
     id: 2,
     title: "Livestock & Poultry Rearing",
-    desc: "Native cattle, goats, and Chinese ducks give us milk, eggs, meat, and organic waste — the very source of our adulteration-free desi ghee.",
+    shortDesc:
+      "Native cattle, goats, and Chinese ducks give us milk, eggs, meat, and organic waste — the very source of our adulteration-free desi ghee.",
+    fullDesc: `Native cattle, goats, and Chinese ducks give us milk, eggs, meat, and organic waste — the very source of our adulteration-free desi ghee.
+
+Our cattle, goats and ducks grow on natural grass and crop residues. No hormones or artificial feed additives are used. That is why the ghee made from their milk and the eggs they produce remain completely pure and nutritious.
+
+The organic waste from the animals returns directly to the soil as fertilizer, further enriching the next crop cycle. This closed loop is one of the core strengths of our integrated farming system.`,
     image: "/uploads/about-2nd-sub.jpg",
     side: "left" as const,
   },
   {
     id: 3,
     title: "Soil & Waste Recycling",
-    desc: "Organic waste from livestock returns to the soil as natural fertilizer, restoring its fertility — and a new crop cycle begins, completely free of chemicals.",
+    shortDesc:
+      "Organic waste from livestock returns to the soil as natural fertilizer, restoring its fertility — and a new crop cycle begins, completely free of chemicals.",
+    fullDesc: `Organic waste from livestock returns to the soil as natural fertilizer, restoring its fertility — and a new crop cycle begins, completely free of chemicals.
+
+On our farm there is no need for synthetic fertilizers. Cow dung and poultry waste compost naturally and nourish the soil. As a result, the soil’s life force is preserved and the quality of the crops improves significantly.
+
+Through this waste recycling we not only protect the environment but also produce completely chemical-free crops. The unbroken relationship between soil, animals and crops is the foundation of our integrated farming.`,
     image: "/uploads/about-1st-sub.jpg",
     side: "right" as const,
   },
 ];
 
 export default function AboutPageEn() {
+  // See More state for "Why Integrated Farming?"
+  const [showMore, setShowMore] = useState(false);
+
+  // Separate expand/collapse for each ecosystem card
+  const [expandedSections, setExpandedSections] = useState<
+    Record<number, boolean>
+  >({});
+  const toggleSection = (id: number) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
     <main className="bg-white text-gray-800">
       {/* ===== 1. HEADER — 3 images (no name/background hero) ===== */}
@@ -198,7 +230,8 @@ export default function AboutPageEn() {
               About Us
             </p>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 leading-snug">
-              From the Soil of Sirajganj to Your Kitchen — The {siteConfig.brand.nameEn} Journey
+              From the Soil of Sirajganj to Your Kitchen — The{" "}
+              {siteConfig.brand.nameEn} Journey
             </h1>
           </Reveal>
           <Reveal delay={100}>
@@ -369,11 +402,54 @@ export default function AboutPageEn() {
           <h2 className="text-2xl font-bold text-green-900 mb-2">
             Why Integrated Farming?
           </h2>
-          <p className="text-gray-600 max-w-xl text-[15px] leading-relaxed">
-            Crops, livestock, poultry, and soil — all interwoven into one
-            complete natural cycle, the very source of every pure
-            agricultural product we offer.
-          </p>
+          <div className="max-w-xl">
+            <p className="text-gray-600 text-[15px] leading-relaxed whitespace-pre-line">
+              Crops, livestock, poultry, and soil — all interwoven into one
+              complete natural cycle, the very source of every pure
+              agricultural product we offer.
+              {"\n\n"}
+              When the market is flooded with chemicals, integrated farming
+              gives us the assurance of completely toxin-free food. On our
+              farm, livestock manure enriches the soil, and every crop grows
+              in that living soil without any poisonous pesticides. The
+              natural fertility of the soil combined with our hard work
+              creates every pure product of {siteConfig.brand.nameEn} — ensuring
+              the good health of you and your family.
+              {showMore && (
+                <>
+                  {"\n\n"}
+                  In integrated farming we use no artificial chemical
+                  fertilizers. The waste from our ducks, chickens and cattle
+                  directly improves soil fertility as organic manure. In turn,
+                  the crop residues grown on that soil become animal feed.
+                  Because of this complete natural cycle, every crop retains
+                  its true taste and maximum nutritional value.
+                  {"\n\n"}
+                  Most food in today&apos;s market is covered in a layer of
+                  pesticides and chemicals. But in our integrated system we do
+                  not spray any chemical poison to control pests; instead we
+                  use natural methods of pest management. As a result, soil,
+                  water and the environment stay protected, while 100%
+                  toxin-free and safe food reaches your family&apos;s table.
+                  {"\n\n"}
+                  Growing multiple crops together on the same land keeps the
+                  soil&apos;s life force alive. Unlike monoculture fields, the
+                  soil on our farm never becomes exhausted or depleted of
+                  nutrients. From this living soil we collect the pure
+                  mustard oil, pure ghee, honey and everyday nutritious
+                  agricultural products you love.
+                </>
+              )}
+            </p>
+
+            {/* See More / See Less Button */}
+            <button
+              onClick={() => setShowMore(!showMore)}
+              className="mt-3 text-sm font-bold text-green-700 hover:text-green-900 transition underline focus:outline-none"
+            >
+              {showMore ? "See Less" : "See More"}
+            </button>
+          </div>
         </Reveal>
 
         <div className="flex flex-col gap-14 sm:gap-16">
@@ -401,9 +477,17 @@ export default function AboutPageEn() {
                     <h3 className="text-xl font-bold text-green-900 mt-1 mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-gray-600 text-[15px] leading-relaxed">
-                      {item.desc}
+                    <p className="text-gray-600 text-[15px] leading-relaxed whitespace-pre-line">
+                      {expandedSections[item.id]
+                        ? item.fullDesc
+                        : item.shortDesc}
                     </p>
+                    <button
+                      onClick={() => toggleSection(item.id)}
+                      className="mt-3 text-sm font-bold text-green-700 hover:text-green-900 transition underline focus:outline-none"
+                    >
+                      {expandedSections[item.id] ? "See Less" : "See More"}
+                    </button>
                   </div>
                 </div>
               </Reveal>
