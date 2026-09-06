@@ -407,8 +407,11 @@ model FosolItem {
   image          String?
   scientificName String?
   season         String?
+  seasonEn       String?
   region         String?
+  regionEn       String?
   uses           String?
+  usesEn         String?
   categoryId     Int
   isPublished    Boolean       @default(false)
   isFeatured     Boolean       @default(false)

@@ -32,8 +32,11 @@ const emptyForm = {
   image: "",
   scientificName: "",
   season: "",
+  seasonEn: "",
   region: "",
+  regionEn: "",
   uses: "",
+  usesEn: "",
   categoryId: "",
   isPublished: false,
   isFeatured: false,
@@ -145,8 +148,11 @@ export default function AdminBanglarFosolPage() {
       image: item.image || "",
       scientificName: item.scientificName || "",
       season: item.season || "",
+      seasonEn: item.seasonEn || "",
       region: item.region || "",
+      regionEn: item.regionEn || "",
       uses: item.uses || "",
+      usesEn: item.usesEn || "",
       categoryId: String(item.categoryId),
       isPublished: !!item.isPublished,
       isFeatured: !!item.isFeatured,
@@ -338,10 +344,36 @@ export default function AdminBanglarFosolPage() {
               className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
             />
           </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              value={form.seasonEn}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, seasonEn: e.target.value }))
+              }
+              placeholder="Season (English)"
+              className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
+            />
+            <input
+              value={form.regionEn}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, regionEn: e.target.value }))
+              }
+              placeholder="Region (English)"
+              className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
+            />
+          </div>
           <input
             value={form.uses}
             onChange={(e) => setForm((p) => ({ ...p, uses: e.target.value }))}
             placeholder="ব্যবহার (খাদ্য / ঔষধ / অন্যান্য)"
+            className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
+          />
+          <input
+            value={form.usesEn}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, usesEn: e.target.value }))
+            }
+            placeholder="Uses (English)"
             className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
           />
 
