@@ -1,4 +1,4 @@
-import PolicyPage from "@/app/components/PolicyPage";
+import FaqAccordion from "@/app/components/FaqAccordion";
 import { Metadata } from "next";
 import { safeJsonLd } from "@/lib/jsonLd";
 import { siteConfig } from "@/lib/siteConfig";
@@ -206,39 +206,17 @@ export default function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
-      <PolicyPage title="প্রশ্ন ও উত্তর">
-        <div className="space-y-4">
-          {faqGroups.map((group) => (
-            <details
-              key={group.category}
-              className="border border-gray-200 rounded-lg bg-white shadow-sm"
-            >
-              <summary className="cursor-pointer px-5 py-4 font-semibold text-lg text-green-700">
-                {group.category}
-              </summary>
-
-              <div className="px-5 pb-5">
-                <div className="space-y-3">
-                  {group.items.map((item) => (
-                    <details
-                      key={item.q}
-                      className="border-b border-gray-100 pb-3"
-                    >
-                      <summary className="cursor-pointer font-medium text-gray-900 py-2">
-                        {item.q}
-                      </summary>
-
-                      <p className="text-gray-600 mt-2 leading-relaxed">
-                        {item.a}
-                      </p>
-                    </details>
-                  ))}
-                </div>
-              </div>
-            </details>
-          ))}
+      <main className="max-w-3xl mx-auto px-4 py-12">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-green-800 mb-2">
+            প্রশ্ন ও উত্তর
+          </h1>
+          <p className="text-gray-500">
+            পণ্য, অর্ডার, ডেলিভারি ও রিটার্ন সম্পর্কিত সাধারণ প্রশ্নের উত্তর
+          </p>
         </div>
-      </PolicyPage>
+        <FaqAccordion groups={faqGroups} locale="bn" />
+      </main>
     </>
   );
 }
