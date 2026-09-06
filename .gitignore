@@ -44,3 +44,7 @@ next-env.d.ts
 # firebase / windows leftover files
 firebase-debug.log
 nul
+# Database dumps - never commit
+*.sql
+*.sql.gz
+neon_*.sql
