@@ -50,6 +50,12 @@
 ## Blog (English)
 - [Farming Blog](https://www.farmerkamol.com/en/blog) — regular articles on livestock rearing, poultry farming, crop cultivation, farm life stories, and healthy lifestyle.
 
+## বাংলার ফসল
+- [বাংলার ফসল](https://www.farmerkamol.com/banglar-fosol) — বাংলাদেশের ফসল, ফল, শাকসবজি, গাছ ও ঔষধি গাছ নিয়ে একটি তথ্যভিত্তিক সংকলন, প্রতিটি আইটেমের বৈজ্ঞানিক নাম, মৌসুম, অঞ্চল ও ব্যবহারসহ।
+
+## Banglar Fosol (English)
+- [Banglar Fosol](https://www.farmerkamol.com/en/banglar-fosol) — An informational collection covering Bangladesh's crops, fruits, vegetables, trees, and medicinal plants, each with scientific name, season, region, and uses.
+
 ## মিডিয়া
 - [ভিডিও গ্যালারি](https://www.farmerkamol.com/media/video)
 - [ছবি গ্যালারি](https://www.farmerkamol.com/media/image)
