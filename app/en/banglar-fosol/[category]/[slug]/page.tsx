@@ -138,19 +138,19 @@ export default async function FosolItemEnPage({
         )}
 
         <div className="flex flex-wrap gap-2 mb-6 text-xs">
-          {item.season && (
+          {(item.seasonEn || item.season) && (
             <span className="bg-yellow-50 text-yellow-800 border border-yellow-100 px-2 py-1 rounded-full">
-              Season: {item.season}
+              Season: {item.seasonEn || item.season}
             </span>
           )}
-          {item.region && (
+          {(item.regionEn || item.region) && (
             <span className="bg-blue-50 text-blue-800 border border-blue-100 px-2 py-1 rounded-full">
-              Region: {item.region}
+              Region: {item.regionEn || item.region}
             </span>
           )}
-          {item.uses && (
+          {(item.usesEn || item.uses) && (
             <span className="bg-purple-50 text-purple-800 border border-purple-100 px-2 py-1 rounded-full">
-              Uses: {item.uses}
+              Uses: {item.usesEn || item.uses}
             </span>
           )}
         </div>
