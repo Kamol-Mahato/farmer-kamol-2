@@ -8,6 +8,7 @@ import ReviewForm from "@/app/components/ReviewForm";
 import { safeJsonLd } from "@/lib/jsonLd";
 import { cache } from "react";
 import { getSavePercent } from "@/lib/pricing";
+import { siteConfig } from "@/lib/siteConfig";
 
 export const revalidate = 86400;
 
@@ -107,7 +108,7 @@ export default async function ProductDetailPage({
         availability: isOutOfStock
           ? "https://schema.org/OutOfStock"
           : "https://schema.org/InStock",
-        url: `https://www.farmerkamol.com/shop/${product.slug}`,
+        url: `${siteConfig.domain.url}/shop/${product.slug}`,
         hasMerchantReturnPolicy: {
           "@type": "MerchantReturnPolicy",
           applicableCountry: "BD",
@@ -131,12 +132,14 @@ export default async function ProductDetailPage({
         },
       },
     }),
-    // ⭐️ aggregateRating: রিভিউ না থাকলেও ৫/৫ ফলব্যাক পাঠাবে গুগলের ওয়ার্নিং বন্ধ রাখতে
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.reviews.length > 0 ? avgRating.toFixed(1) : "5.0",
-      reviewCount: product.reviews.length > 0 ? product.reviews.length : 1,
-    },
+    // রিভিউ থাকলেই aggregateRating পাঠানো — fake rating নয়
+    ...(product.reviews.length > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: avgRating.toFixed(1),
+        reviewCount: product.reviews.length,
+      },
+    }),
   };
 
   const breadcrumbSchema = {
@@ -147,19 +150,19 @@ export default async function ProductDetailPage({
         "@type": "ListItem",
         position: 1,
         name: "হোম",
-        item: "https://www.farmerkamol.com",
+        item: siteConfig.domain.url,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "শপ",
-        item: "https://www.farmerkamol.com/shop",
+        item: `${siteConfig.domain.url}/shop`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: product.name,
-        item: `https://www.farmerkamol.com/shop/${product.slug}`,
+        item: `${siteConfig.domain.url}/shop/${product.slug}`,
       },
     ],
   };
