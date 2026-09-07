@@ -13,7 +13,7 @@ function getRedis() {
   return redis;
 }
 
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 10;
 const LOCK_DURATION_SECONDS = 15 * 60; // ১৫ মিনিট
 
 type Attempt = { count: number; lockedUntil: number | null };
