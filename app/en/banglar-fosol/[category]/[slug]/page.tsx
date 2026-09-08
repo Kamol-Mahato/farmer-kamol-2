@@ -165,7 +165,7 @@ export default async function FosolItemEnPage({
             <h2 className="text-lg font-bold text-green-900 mb-4">
               More in this category
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {related.map((r) => (
                 <Link
                   key={r.id}
