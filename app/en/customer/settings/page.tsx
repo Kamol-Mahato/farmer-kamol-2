@@ -2,7 +2,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { districts, upazilas } from "@/lib/bd-locations";
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
+
+/** English upazila list — BN/EN mismatch হলে Bangla থেকে (English) অংশ বের করে */
+function getEnglishUpazilas(districtId: number): string[] {
+  const bn = upazilas[districtId] || [];
+  const en = upazilasEn[districtId] || [];
+  if (bn.length === en.length && en.length > 0) return en;
+  return bn.map((u) => {
+    const m = u.match(/\(([^)]+)\)\s*$/);
+    return m ? m[1].trim() : u;
+  });
+}
 
 function DistrictSearch({
   districts,
@@ -260,7 +271,7 @@ export default function CustomerSettingsPageEn() {
               onSelect={(d) =>
                 setForm((f) => ({
                   ...f,
-                  district: d.name,
+                  district: d.en_name,
                   districtId: d.id,
                   upazila: "",
                 }))
@@ -273,7 +284,9 @@ export default function CustomerSettingsPageEn() {
             </label>
             <UpazilaSearch
               key={form.districtId ?? "none"}
-              upazilas={form.districtId ? upazilas[form.districtId] || [] : []}
+              upazilas={
+                form.districtId ? getEnglishUpazilas(form.districtId) : []
+              }
               value={form.upazila}
               disabled={!form.districtId}
               onSelect={(u) => setForm((f) => ({ ...f, upazila: u }))}

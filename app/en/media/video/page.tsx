@@ -40,7 +40,7 @@ export default async function MediaVideoPage() {
           Our Videos
         </h1>
         <p className="text-gray-500 text-center mb-8">
-          {siteConfig.brand.name} YouTube চ্যানেল থেকে
+          From {siteConfig.brand.name}'s YouTube channel
         </p>
         <VideoGalleryClient
           videos={videos}

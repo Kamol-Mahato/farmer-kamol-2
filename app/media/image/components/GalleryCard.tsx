@@ -27,7 +27,7 @@ export default function GalleryCard({ item }: { item: GalleryItem }) {
   }
   return (
     <div className="bg-white rounded-xl shadow group overflow-hidden">
-      <div className="relative w-full aspect-square">
+      <div className="relative w-full aspect-square overflow-hidden">
         <Image
           src={item.images[index].imageUrl}
           alt={`${item.title} - ছবি ${index + 1}`}

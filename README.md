@@ -1,46 +1,101 @@
 # Farmer Kamol
 
-Sirajganj, Bangladesh-এর organic farm products (মধু, ঘি, সরিষার তেল, হাঁসের বাচ্চা) বিক্রির জন্য agro-commerce প্ল্যাটফর্ম।
+Official website of **Farmer Kamol (কৃষক কমল)** — focused on integrated agriculture, farming knowledge, agricultural products, and online services.
+
+🌐 **Website:** https://farmerkamol.com
 
 ## Tech Stack
 
-- **Framework:** Next.js (App Router)
-- **Database:** Neon PostgreSQL + Prisma ORM
-- **Storage:** Supabase Storage
-- **Auth:** JWT (jose) + bcrypt
-- **Hosting:** Railway
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* Prisma ORM
+* PostgreSQL (Supabase)
+* Authentication & Authorization
+* Supabase Storage
+* Render (Production Hosting)
 
-## Local Development
+## Main Features
 
-```bash
-npm install
-npm run dev
-```
+* 🛒 Product & Shop
+* 📝 Agricultural Blog
+* 🎥 Farming Videos / Media
+* 👤 Customer Authentication
+* 📦 Order Management
+* 👨‍💼 Admin & Agent Panel
+* 🧾 Invoice & Order Management
+* 📍 Bangladesh District & Upazila Support
+* 🔐 Role-based Access Control
+* 🔎 SEO & Structured Data
+* 🤖 AI/Search Engine Friendly Content Structure
 
-http://localhost:3000 এ ব্রাউজারে দেখা যাবে।
+## Project Structure
+
+The project uses the **Next.js App Router** architecture with a `src/` based application structure.
+
+Major areas include:
+
+* Customer-facing website
+* Admin Panel
+* API Routes
+* Authentication
+* Products & Orders
+* Blog & Media
+* Database / Prisma
+* SEO & Metadata
 
 ## Environment Variables
 
-Deploy বা local development-এর জন্য `.env` ফাইলে এই variable গুলো লাগবে:
+Create a `.env` / `.env.local` file for local development.
 
-| Variable                    | বিবরণ                                    |
-| --------------------------- | ---------------------------------------- |
-| `DATABASE_URL`              | Neon PostgreSQL connection string        |
-| `SESSION_SECRET`            | JWT session সাইন করার জন্য secret key    |
-| `SUPABASE_URL`              | Supabase project URL                     |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (image upload) |
-| `SUPABASE_BUCKET`           | Image storage bucket name                |
-| `TELEGRAM_BOT_TOKEN`        | Order notification bot token             |
-| `TELEGRAM_CHAT_ID`          | Order notification পাঠানোর chat ID       |
+Required environment variable **names** should be kept private in their actual values.
 
-## Build
+```env
+DATABASE_URL=
+DIRECT_URL=
 
-```bash
-npm run build
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-(`prisma generate` build script-এর মধ্যেই অন্তর্ভুক্ত আছে।)
+> Never commit `.env`, `.env.local`, API keys, passwords, tokens, or other secrets to GitHub.
 
-## Deploy
+## Local Development
 
-Railway-তে deploy করা হয়। GitHub repo connect করে উপরের env variable গুলো Railway dashboard-এ set করতে হবে।
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+## Production
+
+* **Hosting:** Render
+* **Database:** Supabase PostgreSQL
+* **Storage:** Supabase
+* **Production Domain:** https://farmerkamol.com
+
+## Security
+
+Production secrets and credentials must be stored in the hosting provider's environment variables and must never be committed to the repository.
+
+## License
+
+This project is maintained for the Farmer Kamol website and related services.
