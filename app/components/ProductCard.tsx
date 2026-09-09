@@ -269,7 +269,7 @@ export default function ProductCard({
             </h2>
           </Link>
           <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
-            <span className="text-[10px] md:text-xs bg-green-600 font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
+            <span className="text-xs md:text-sm bg-green-800 font-bold text-white font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
               প্রতি {product.unit}
             </span>
             <div className="flex items-baseline gap-1 flex-wrap">

@@ -163,7 +163,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="w-7 h-7 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-11 h-11 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -282,15 +282,15 @@ export default function Footer() {
           <div className="lg:col-span-3 grid grid-cols-3 gap-2 sm:gap-4 items-start">
             {/* পণ্য বিভাগ */}
             <div>
-              <h4 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+              <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
                 {t.productsHeading}
-              </h4>
+              </h3>
               <div className="flex flex-col gap-1.5 text-xs text-black">
                 {t.products.map((p) => (
                   <Link
                     key={p}
                     href={href("/shop")}
-                    className="hover:text-green-700 transition leading-tight"
+                    className="relative hover:text-green-700 transition leading-tight before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
                   >
                     {p}
                   </Link>
@@ -300,9 +300,9 @@ export default function Footer() {
 
             {/* কাস্টমার সেবা */}
             <div>
-              <h4 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+              <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
                 {t.serviceHeading}
-              </h4>
+              </h3>
               <div className="flex flex-col gap-1.5 text-xs text-black">
                 <Link
                   href={href("/customer/dashboard")}
@@ -333,9 +333,9 @@ export default function Footer() {
 
             {/* পেমেন্ট মেথড */}
             <div>
-              <h4 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+              <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
                 {t.paymentHeading}
-              </h4>
+              </h3>
               <div className="flex flex-col gap-1.5">
                 {paymentIcons.map((p, i) => (
                   <div
@@ -360,15 +360,15 @@ export default function Footer() {
           {/* ৩. আমাদের খামার সেকশন (মোবাইলে নিচে, পিসিতে ৫ম কলাম হিসেবে) */}
           {/* ========================================== */}
           <div className="mt-5 pt-4 border-t border-green-100 lg:mt-0 lg:pt-0 lg:border-t-0 lg:col-span-1">
-            <h4 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+            <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
               {t.farmHeading}
-            </h4>
+            </h3>
             <div className="flex flex-col gap-1.5 text-xs text-black">
               <a
                 href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-green-700 transition leading-snug"
+                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
               >
                 🏡 {t.location}
               </a>
@@ -396,7 +396,7 @@ export default function Footer() {
               </a>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
-                className="hover:text-green-700 transition break-all leading-snug"
+                className="relative hover:text-green-700 transition break-all leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
               >
                 ✉️ {siteConfig.contact.email}
               </a>
@@ -412,7 +412,7 @@ export default function Footer() {
           <div className="flex gap-3">
             <Link
               href={href("/privacy-policy")}
-              className="hover:text-yellow-400 transition"
+              className="relative hover:text-yellow-400 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
             >
               {t.privacyPolicy}
             </Link>
