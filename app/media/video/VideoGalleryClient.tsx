@@ -105,7 +105,7 @@ export default function VideoGalleryClient({
             href={facebookPageUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-3 left-3 z-20 inline-flex items-center gap-1 bg-[#1877F2] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg hover:bg-[#166FE5] transition"
+            className="absolute bottom-3 left-3 z-20 inline-flex min-h-11 items-center gap-1 bg-[#1877F2] text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg hover:bg-[#166FE5] transition"
             onClick={(e) => e.stopPropagation()}
           >
             👍 Follow

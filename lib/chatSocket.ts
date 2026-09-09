@@ -17,6 +17,12 @@ export type ChatSocketHandlers = {
 export function connectChatSocket(handlers: ChatSocketHandlers): WebSocket {
   const ws = new WebSocket(getChatWsUrl());
 
+ws.addEventListener("error", () => {
+  // WebSocket unavailable হলে existing polling/fallback চালু থাকবে।
+  // Browser-এর native WebSocket error এখানে intentionally suppress করা যায় না,
+  // তাই connection failure হলে reconnect loop নিয়ন্ত্রিত রাখা হবে।
+});
+
   ws.onopen = () => {
     // server sends { type: 'connected', data }
   };

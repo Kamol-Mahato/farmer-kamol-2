@@ -9,7 +9,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl https://*.google-analytics.com https://*.googletagmanager.com;
   font-src 'self' data:;
-  connect-src 'self' https://pvixtqqcegfbxkhxogww.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://doubleclick.net ${isDev ? "ws://localhost:* ws:" : ""};
+  connect-src 'self' ws: wss: https://pvixtqqcegfbxkhxogww.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://doubleclick.net ${isDev ? "ws://localhost:*" : ""};
   frame-src 'self' https://youtube.com https://youtube.com;
   media-src 'self' blob:;
   worker-src 'self' blob:;

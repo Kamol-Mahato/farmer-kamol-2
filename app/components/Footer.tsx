@@ -197,7 +197,7 @@ export default function Footer() {
               <a
                 href={`tel:${siteConfig.contact.phone}`}
                 aria-label="Call"
-                className="w-7 h-7 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-11 h-11 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="w-7 h-7 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-11 h-11 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +234,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-7 h-7 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-11 h-11 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
