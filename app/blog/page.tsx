@@ -77,7 +77,7 @@ export default async function BlogPage({
 
         {/* Blog List */}
         {blogs.length === 0 ? (
-          <p className="text-gray-400">কোনো blog নেই।</p>
+          <p className="text-gray-500">কোনো blog নেই।</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {blogs.map((blog) => (
@@ -104,7 +104,7 @@ export default async function BlogPage({
                   <h2 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition">
                     {blog.title}
                   </h2>
-                  <p className="text-gray-400 text-xs mt-2">
+                  <p className="text-gray-500 text-xs mt-2">
                     {blog.createdAt.toLocaleDateString("bn-BD")}
                   </p>
                 </div>

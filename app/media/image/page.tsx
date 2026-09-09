@@ -26,7 +26,7 @@ export default async function GalleryPage() {
         </h1>
       </div>
       {items.length === 0 ? (
-        <p className="text-center text-gray-400 py-20">
+        <p className="text-center text-gray-500 py-20">
           এখনো কোনো গ্যালারি ছবি যোগ করা হয়নি।
         </p>
       ) : (

@@ -261,7 +261,7 @@ export default function GlobalSearch({ variant, onClose, autoFocus }: Props) {
                   onClick={() => pickHistory(h)}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-green-50 rounded-lg flex items-center gap-2"
                 >
-                  <span className="text-gray-400">⏱</span>
+                  <span className="text-gray-500">⏱</span>
                   <span className="truncate">{h}</span>
                 </button>
               ))}

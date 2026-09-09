@@ -271,7 +271,7 @@ export default async function ProductDetailPage({
                       ? product.discountPrice
                       : product.pricePerUnit}
                   </span>
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-gray-500">
                     / {product.unit}
                   </span>
                   {getSavePercent(
@@ -279,7 +279,7 @@ export default async function ProductDetailPage({
                     product.discountPrice,
                   ) !== null && (
                     <>
-                      <span className="text-lg text-gray-400 line-through">
+                      <span className="text-lg text-gray-500 line-through">
                         ৳ {product.pricePerUnit}
                       </span>
                       <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">

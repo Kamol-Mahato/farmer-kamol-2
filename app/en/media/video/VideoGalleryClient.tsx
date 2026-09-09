@@ -59,7 +59,7 @@ export default function VideoGalleryClient({
 
   if (videos.length === 0) {
     return (
-      <div className="text-center py-32 text-gray-400">No videos added yet</div>
+      <div className="text-center py-32 text-gray-500">No videos added yet</div>
     );
   }
 

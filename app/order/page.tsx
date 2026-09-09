@@ -203,7 +203,7 @@ function OrderForm() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
           >
             {showPassword ? (
               <svg
@@ -246,7 +246,7 @@ function OrderForm() {
           <button
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
           >
             {showConfirm ? (
               <svg
@@ -441,7 +441,7 @@ function OrderForm() {
           <PasswordSetSection phone={form.phone} />
           <button
             onClick={() => router.push("/shop")}
-            className="text-gray-400 text-sm hover:text-green-700 transition underline mt-4 block w-full"
+            className="text-gray-500 text-sm hover:text-green-700 transition underline mt-4 block w-full"
           >
             এখন শপে যান
           </button>
@@ -476,7 +476,7 @@ function OrderForm() {
             <p className="font-bold text-gray-800 text-sm">{product?.name}</p>
             <p className="text-black font-bold text-base">
               ৳ {product?.pricePerUnit}{" "}
-              <span className="text-gray-400 text-xs font-normal">
+              <span className="text-gray-500 text-xs font-normal">
                 / {product?.unit}
               </span>
             </p>
@@ -710,7 +710,7 @@ function OrderForm() {
                 placeholder="যেমন: 8N7A6XYZ12"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500"
               />
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-500 mt-1">
                 Send Money করার পর SMS এ পাওয়া Transaction ID টি এখানে বসান।
               </p>
             </div>

@@ -386,7 +386,7 @@ export default function CartPage() {
               <p className="font-bold text-gray-800 text-sm">{item.name}</p>
               <p className="text-black font-bold text-sm">
                 ৳ {item.price}{" "}
-                <span className="text-gray-400 text-xs font-normal">
+                <span className="text-gray-500 text-xs font-normal">
                   / {item.unit}
                 </span>
               </p>
@@ -615,7 +615,7 @@ export default function CartPage() {
                 placeholder="e.g. 8N7A6XYZ12"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500"
               />
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-500 mt-1">
                 Enter the Transaction ID you received via SMS after sending
                 money.
               </p>

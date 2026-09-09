@@ -82,7 +82,7 @@ export default async function BlogPageEn({
 
         {/* Blog List */}
         {blogs.length === 0 ? (
-          <p className="text-gray-400">
+          <p className="text-gray-500">
             No blog posts available in English yet.
           </p>
         ) : (
@@ -112,7 +112,7 @@ export default async function BlogPageEn({
                   <h2 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition">
                     {blog.titleEn}
                   </h2>
-                  <p className="text-gray-400 text-xs mt-2">
+                  <p className="text-gray-500 text-xs mt-2">
                     {blog.createdAt.toLocaleDateString("en-US")}
                   </p>
                 </div>

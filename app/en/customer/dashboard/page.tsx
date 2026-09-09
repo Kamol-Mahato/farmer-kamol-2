@@ -111,7 +111,7 @@ export default function CustomerDashboardEn() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="text-center py-12 text-gray-400 font-medium"
+                    className="text-center py-12 text-gray-500 font-medium"
                   >
                     You haven't placed any orders yet.
                   </td>
@@ -160,12 +160,12 @@ export default function CustomerDashboardEn() {
                           🚚 {order.courierSummary.courierStatus}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-400 font-medium">
+                        <span className="text-xs text-gray-500 font-medium">
                           —
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
+                    <td className="px-6 py-4 text-xs text-gray-500">
                       {new Date(order.createdAt).toLocaleDateString("en-US")}
                     </td>
                   </tr>

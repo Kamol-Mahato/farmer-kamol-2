@@ -135,7 +135,7 @@ export default async function BlogDetailPageEn({
         <h1 className="text-3xl font-bold text-green-800 mt-3 mb-2">
           {blog.titleEn}
         </h1>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-gray-500 text-sm mb-6">
           {blog.createdAt.toLocaleDateString("en-US")}
         </p>
         <div

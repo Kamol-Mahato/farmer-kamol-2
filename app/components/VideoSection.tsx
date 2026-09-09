@@ -77,7 +77,7 @@ export default function VideoSection({
                       href={facebookPageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-2 left-2 z-20 inline-flex items-center gap-1 bg-[#1877F2] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg hover:bg-[#166FE5] transition"
+                      className="absolute bottom-2 left-2 z-20 inline-flex items-center gap-1 bg-[#0f5fce] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg hover:bg-[#0c4ea8] transition"
                     >
                       👍 Follow
                     </a>

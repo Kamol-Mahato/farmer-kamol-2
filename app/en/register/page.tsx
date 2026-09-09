@@ -186,7 +186,7 @@ export default function RegisterPageEn() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               Must be at least 6 characters
             </p>
           </div>

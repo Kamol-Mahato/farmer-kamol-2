@@ -51,7 +51,7 @@ function DistrictSearch({
               }}
             >
               {d.name}{" "}
-              <span className="text-gray-400 text-xs">({d.en_name})</span>
+              <span className="text-gray-500 text-xs">({d.en_name})</span>
             </div>
           ))}
         </div>
@@ -231,7 +231,7 @@ export default function CustomerSettingsPage() {
           />
         </div>
 
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           এখানে আপনার নাম ও ঠিকানা সেভ করে রাখলে পরবর্তী অর্ডারে এগুলো নিজে
           থেকেই পূরণ হয়ে যাবে।
         </p>
@@ -244,7 +244,7 @@ export default function CustomerSettingsPage() {
             type="text"
             value={phone}
             disabled
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-400"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-500"
           />
         </div>
 

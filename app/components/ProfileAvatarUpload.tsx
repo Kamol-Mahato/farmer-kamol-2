@@ -293,7 +293,7 @@ export default function ProfileAvatarUpload({
                 {uploading ? "আপলোড হচ্ছে..." : "সেভ করুন"}
               </button>
             </div>
-            <p className="text-[11px] text-gray-400 text-center">
+            <p className="text-[11px] text-gray-500 text-center">
               অটো কম্প্রেস · সর্বোচ্চ ২০০ কেবি
             </p>
           </div>

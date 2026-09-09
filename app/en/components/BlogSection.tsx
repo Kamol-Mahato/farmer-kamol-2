@@ -55,7 +55,7 @@ export default function BlogSection({
                 <h3 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition">
                   {blog.titleEn}
                 </h3>
-                <p className="text-gray-400 text-xs mt-2">
+                <p className="text-gray-500 text-xs mt-2">
                   {new Date(blog.createdAt).toLocaleDateString("en-US")}
                 </p>
               </div>

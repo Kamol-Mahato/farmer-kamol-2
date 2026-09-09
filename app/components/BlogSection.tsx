@@ -44,7 +44,7 @@ export default function BlogSection({ blogs }: { blogs: Blog[] }) {
                 <h3 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition">
                   {blog.title}
                 </h3>
-                <p className="text-gray-400 text-xs mt-2">
+                <p className="text-gray-500 text-xs mt-2">
                   {new Date(blog.createdAt).toLocaleDateString("bn-BD")}
                 </p>
               </div>

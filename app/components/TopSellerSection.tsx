@@ -168,11 +168,11 @@ function TopSellerCard({
                 : product.pricePerUnit}
             </span>
             {savePercent !== null && (
-              <span className="text-[9px] md:text-xs text-gray-400 line-through">
+              <span className="text-[9px] md:text-xs text-gray-500 line-through">
                 ৳ {product.pricePerUnit}
               </span>
             )}
-            <span className="text-[9px] md:text-xs text-gray-400">
+            <span className="text-[9px] md:text-xs text-gray-500">
               / {product.unit}
             </span>
           </div>
@@ -211,7 +211,7 @@ function TopSellerCard({
                 }
                 className={`w-full py-2 rounded-xl font-bold text-[10px] md:text-sm flex items-center justify-center text-center transition ${
                   isOutOfStock
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
+                    ? "bg-gray-100 text-gray-500 cursor-not-allowed pointer-events-none"
                     : "bg-green-700 text-white hover:bg-green-600 active:scale-95"
                 }`}
               >

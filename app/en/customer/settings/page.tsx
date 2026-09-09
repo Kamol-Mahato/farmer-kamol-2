@@ -61,7 +61,7 @@ function DistrictSearch({
               }}
             >
               {d.en_name}{" "}
-              <span className="text-gray-400 text-xs">({d.name})</span>
+              <span className="text-gray-500 text-xs">({d.name})</span>
             </div>
           ))}
         </div>
@@ -230,7 +230,7 @@ export default function CustomerSettingsPageEn() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           Save your name and address here so future orders fill in
           automatically.
         </p>
@@ -243,7 +243,7 @@ export default function CustomerSettingsPageEn() {
             type="text"
             value={phone}
             disabled
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-400"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-500"
           />
         </div>
 

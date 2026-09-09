@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 p-1"
                 tabIndex={-1}
               >
                 {showNewPassword ? (
@@ -154,7 +154,7 @@ export default function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 p-1"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? (
@@ -206,7 +206,7 @@ export default function ResetPasswordPage() {
               {loading ? "সেট হচ্ছে..." : "পাসওয়ার্ড সেট করুন"}
             </button>
 
-            <p className="text-center text-xs text-gray-400 mt-4">
+            <p className="text-center text-xs text-gray-500 mt-4">
               <Link href="/login" className="hover:underline">
                 লগইন পেজে ফিরে যান
               </Link>

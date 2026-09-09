@@ -454,7 +454,7 @@ function OrderForm() {
           <PasswordSetSection phone={form.phone} />
           <button
             onClick={() => router.push("/en/shop")}
-            className="text-gray-400 text-sm hover:text-green-700 transition underline mt-4 block w-full"
+            className="text-gray-500 text-sm hover:text-green-700 transition underline mt-4 block w-full"
           >
             Continue Shopping
           </button>
@@ -489,7 +489,7 @@ function OrderForm() {
             </p>
             <p className="text-black font-bold text-base">
               ৳ {product?.pricePerUnit}{" "}
-              <span className="text-gray-400 text-xs font-normal">
+              <span className="text-gray-500 text-xs font-normal">
                 / {product?.unit ? translateUnit(product.unit) : ""}
               </span>
             </p>
@@ -717,7 +717,7 @@ function OrderForm() {
                 placeholder="e.g. 8N7A6XYZ12"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500"
               />
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-500 mt-1">
                 Enter the Transaction ID you received via SMS after sending
                 money.
               </p>

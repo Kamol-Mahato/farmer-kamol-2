@@ -30,7 +30,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
                     {item.label}
                   </span>
                 )}
-                {!isLast && <span className="text-gray-400 mx-1">{">"}</span>}
+                {!isLast && <span className="text-gray-500 mx-1">{">"}</span>}
               </li>
             );
           })}

@@ -68,7 +68,7 @@ export function DistrictSearch({
               }}
             >
               {d.name}{" "}
-              <span className="text-gray-400 text-xs">({d.en_name})</span>
+              <span className="text-gray-500 text-xs">({d.en_name})</span>
             </div>
           ))}
         </div>

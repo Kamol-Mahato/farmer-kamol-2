@@ -111,7 +111,7 @@ export default async function FosolCategoryPage({
         </div>
 
         {items.length === 0 ? (
-          <p className="text-gray-400 py-16">
+          <p className="text-gray-500 py-16">
             এই ক্যাটাগরিতে এখনো কোনো আইটেম নেই।
           </p>
         ) : (
@@ -141,11 +141,11 @@ export default async function FosolCategoryPage({
                     {item.title}
                   </h2>
                   {item.scientificName && (
-                    <p className="text-xs text-gray-400 italic mt-1">
+                    <p className="text-xs text-gray-500 italic mt-1">
                       {item.scientificName}
                     </p>
                   )}
-                  <p className="text-gray-400 text-xs mt-2">
+                  <p className="text-gray-500 text-xs mt-2">
                     {item.updatedAt.toLocaleDateString("bn-BD")}
                   </p>
                 </div>

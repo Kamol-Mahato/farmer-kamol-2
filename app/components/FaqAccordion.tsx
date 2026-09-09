@@ -52,7 +52,7 @@ export default function FaqAccordion({
       <div className="relative mb-5">
         <Search
           size={18}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
         />
         <input
           value={query}
@@ -92,7 +92,7 @@ export default function FaqAccordion({
       {/* Groups */}
       <div className="space-y-8">
         {filteredGroups.length === 0 && (
-          <p className="text-center text-gray-400 py-10">{t.noResults}</p>
+          <p className="text-center text-gray-500 py-10">{t.noResults}</p>
         )}
 
         {filteredGroups.map((group) => (
@@ -119,7 +119,7 @@ export default function FaqAccordion({
                       </span>
                       <ChevronDown
                         size={18}
-                        className={`shrink-0 text-gray-400 transition-transform duration-300 ${
+                        className={`shrink-0 text-gray-500 transition-transform duration-300 ${
                           isOpen ? "rotate-180 text-green-700" : ""
                         }`}
                       />
