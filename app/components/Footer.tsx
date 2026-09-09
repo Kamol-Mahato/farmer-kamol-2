@@ -181,7 +181,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
-                className="w-7 h-7 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-12 h-12 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -306,25 +306,25 @@ export default function Footer() {
               <div className="flex flex-col gap-1.5 text-xs text-black">
                 <Link
                   href={href("/customer/dashboard")}
-                  className="hover:text-green-700 transition leading-tight"
+                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
                 >
                   {t.trackOrder}
                 </Link>
                 <Link
                   href={href("/return-policy")}
-                  className="hover:text-green-700 transition leading-tight"
+                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
                 >
                   {t.returnPolicy}
                 </Link>
                 <Link
                   href={href("/faq")}
-                  className="hover:text-green-700 transition leading-tight"
+                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
                 >
                   {t.faq}
                 </Link>
                 <Link
                   href={href("/contact")}
-                  className="hover:text-green-700 transition leading-tight"
+                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
                 >
                   {t.contact}
                 </Link>
@@ -340,7 +340,7 @@ export default function Footer() {
                 {paymentIcons.map((p, i) => (
                   <div
                     key={t.paymentMethods[i]}
-                    className="flex items-center gap-1 group cursor-pointer"
+                    className="flex items-center gap-1.5 py-2 -my-1 group cursor-pointer"
                   >
                     <div
                       className={`w-4 h-4 rounded-full ${p.bg} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110`}
@@ -374,7 +374,7 @@ export default function Footer() {
               </a>
               <a
                 href={`tel:${siteConfig.contact.phone}`}
-                className="hover:text-green-700 transition leading-snug"
+                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
               >
                 📞 {siteConfig.contact.phoneDisplay}
               </a>
@@ -382,7 +382,7 @@ export default function Footer() {
                 href={`https://wa.me/${siteConfig.contact.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-green-700 transition leading-snug"
+                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
               >
                 💬 {siteConfig.contact.phoneDisplay}
               </a>
@@ -390,13 +390,13 @@ export default function Footer() {
                 href="https://wa.me/8801521406139"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-green-700 transition leading-snug"
+                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
               >
                 💼 {t.businessContact}: 01521406139
               </a>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
-                className="relative hover:text-green-700 transition break-all leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                className="inline-block py-3 -my-3 hover:text-green-700 transition break-all leading-snug"
               >
                 ✉️ {siteConfig.contact.email}
               </a>
@@ -418,7 +418,7 @@ export default function Footer() {
             </Link>
             <Link
               href={href("/terms")}
-              className="hover:text-yellow-400 transition"
+              className="inline-block py-2 -my-2 hover:text-yellow-400 transition"
             >
               {t.terms}
             </Link>

@@ -216,9 +216,9 @@ export default function HeroSlider({
           </span>
         )}
         <div className="absolute bottom-0 right-0 bg-white/60 backdrop-blur-sm px-1.5 py-0.5 md:px-2 md:py-1 rounded-tl-2xl flex flex-col items-end gap-0.5 md:gap-1 text-right">
-          <h3 className="text-xs md:text-base font-bold text-green-900">
+          <p className="text-xs md:text-base font-bold text-green-900">
             {displayName}
-          </h3>
+          </p>
           <p className="text-black text-[10px] md:text-xs font-semibold">
             {translateUnit(p.unit)}
           </p>
