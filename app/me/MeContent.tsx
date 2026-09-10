@@ -18,9 +18,10 @@ import {
   MapPin,
   GraduationCap,
   Briefcase,
+  X,
 } from "lucide-react";
 
-/* lucide-react ভার্সন 1.x-এ ব্র্যান্ড/সোশ্যাল আইকন (Facebook ইত্যাদি) নেই, তাই নিজস্ব SVG */
+/* lucide-react ভার্সন 1.x-এ ব্র্যান্ড/সোশ্যাল আইকন নেই, তাই নিজস্ব SVG */
 function FacebookIcon({ size = 18 }: { size?: number }) {
   return (
     <svg
@@ -35,7 +36,7 @@ function FacebookIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-/* ---------- fade-up on scroll (no external library) ---------- */
+/* ---------- fade-up on scroll ---------- */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -75,6 +76,81 @@ function Reveal({
       } ${className}`}
     >
       {children}
+    </div>
+  );
+}
+
+/* ---------- scroll অনুযায়ী active section ---------- */
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState(ids[0]);
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(id);
+        },
+        { threshold: 0.4, rootMargin: "-80px 0px -40% 0px" },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  }, [ids]);
+
+  return active;
+}
+
+/* ---------- popup modal (নিচ থেকে উপরে উঠে আসে) ---------- */
+function Modal({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="no-print fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/70 animate-[fadeIn_0.25s_ease]" />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto bg-[#111a33] border border-white/10 rounded-2xl p-6 animate-[popUp_0.35s_ease]"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-white">{title}</h3>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="text-slate-400 hover:text-white transition"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        {children}
+      </div>
     </div>
   );
 }
@@ -148,27 +224,37 @@ const projects = [
   },
 ];
 
-const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#experience", label: "Experience" },
-];
+const SECTION_LABELS: Record<string, string> = {
+  home: "Home",
+  about: "About",
+  skills: "Skills",
+  experience: "Experience",
+};
 
 export default function MeContent() {
   const printCV = () => window.print();
+  const activeSection = useActiveSection(["home", "about", "skills", "experience"]);
+  const [modal, setModal] = useState<"about" | "education" | null>(null);
 
   return (
     <div className="min-h-screen bg-[#0b1224] text-slate-100 selection:bg-indigo-500/30">
       <style>{`
-        .blob-shape {
-          border-radius: 71% 29% 61% 39% / 42% 42% 58% 58%;
-        }
         @keyframes floaty {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-14px); }
         }
-        .float-anim { animation: floaty 5s ease-in-out infinite; }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(24px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes popUp {
+          from { opacity: 0; transform: translateY(48px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
         @media print {
           .no-print { display: none !important; }
@@ -185,6 +271,7 @@ export default function MeContent() {
             width: 110px !important;
             height: 110px !important;
           }
+          .print-full-detail { display: block !important; }
           @page { size: A4; margin: 14mm; }
         }
       `}</style>
@@ -196,13 +283,31 @@ export default function MeContent() {
             <span className="font-mono text-sm text-indigo-300">
               &lt;Kamol Mahato/&gt;
             </span>
-            <nav className="hidden md:flex gap-6 text-sm text-slate-300">
-              {navLinks.map((l) => (
-                <a key={l.href} href={l.href} className="hover:text-white transition">
-                  {l.label}
-                </a>
-              ))}
+            <nav className="hidden md:flex gap-6 text-sm text-slate-300 items-center">
+              <a href="#home" className="hover:text-white transition">
+                Home
+              </a>
+              <button
+                onClick={() => setModal("about")}
+                className="hover:text-white transition"
+              >
+                About
+              </button>
+              <a href="#skills" className="hover:text-white transition">
+                Skills
+              </a>
+              <a href="#experience" className="hover:text-white transition">
+                Experience
+              </a>
             </nav>
+            <div className="hidden md:block relative h-6 w-28 overflow-hidden text-right">
+              <span
+                key={activeSection}
+                className="absolute inset-0 flex items-center justify-end text-sm font-semibold text-white animate-[slideIn_0.5s_ease]"
+              >
+                {SECTION_LABELS[activeSection]}
+              </span>
+            </div>
             <button
               onClick={printCV}
               className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 transition text-white text-sm font-semibold px-4 py-2 rounded-lg"
@@ -262,12 +367,12 @@ export default function MeContent() {
           </Reveal>
 
           <Reveal className="flex justify-center">
-            <div className="relative w-64 h-64 md:w-80 md:h-80 float-anim">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400 via-rose-400 to-indigo-500 blob-shape" />
+            <div className="relative w-64 h-64 md:w-80 md:h-80">
+              <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,theme(colors.amber.400),theme(colors.rose.400),theme(colors.indigo.500),theme(colors.amber.400))] animate-[spin_6s_linear_infinite]" />
               <img
                 src="/uploads/kamol-mahato.png"
                 alt="Kamol Kumar Mahato"
-                className="print-photo absolute inset-[6px] w-[calc(100%-12px)] h-[calc(100%-12px)] object-cover blob-shape"
+                className="print-photo absolute inset-[8px] w-[calc(100%-16px)] h-[calc(100%-16px)] rounded-full object-cover bg-[#0b1224]"
               />
             </div>
           </Reveal>
@@ -290,28 +395,45 @@ export default function MeContent() {
           </Reveal>
         </section>
 
-        {/* ---------- about ---------- */}
+        {/* ---------- about (preview card → popup) ---------- */}
         <section id="about" className="max-w-6xl mx-auto px-5 pb-20">
           <Reveal>
-            <h2 className="text-2xl font-bold mb-4">About</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Highly dependable Fulfillment &amp; Logistics Specialist with
-              6+ years of experience supporting end-to-end fulfillment
-              operations, including order processing, picking, packing,
-              dispatch, and last-mile delivery across urban and regional
-              networks. Expert in inventory flow coordination, order
-              accuracy, route optimization, POD systems, and fulfillment
-              KPIs. Recognized for achieving 98–100% order accuracy and
-              on-time dispatch, reducing operational delays, optimizing
-              labor and fuel utilization, and maintaining strict safety,
-              quality, and compliance standards.
-            </p>
-            <ul className="text-sm text-slate-400 list-disc list-inside space-y-1">
-              <li>Strong motivation &amp; commitment</li>
-              <li>Ability to work independently as well as in a team</li>
-              <li>Commendable communication and presentation skills</li>
-              <li>Fluent communication in both Bengali &amp; English</li>
-            </ul>
+            <button
+              onClick={() => setModal("about")}
+              className="no-print w-full text-left bg-white/5 border border-white/10 hover:border-indigo-400/50 transition rounded-xl p-6"
+            >
+              <h2 className="text-xl font-bold mb-2">About Me</h2>
+              <p className="text-sm text-slate-400 line-clamp-2">
+                Highly dependable Fulfillment &amp; Logistics Specialist with
+                6+ years of experience — click to read the full profile.
+              </p>
+              <span className="inline-block mt-3 text-xs font-semibold text-indigo-300">
+                বিস্তারিত দেখুন →
+              </span>
+            </button>
+
+            {/* প্রিন্টের সময় সম্পূর্ণ লেখা দেখানোর জন্য — স্ক্রিনে লুকানো, প্রিন্টে দৃশ্যমান */}
+            <div className="hidden print-full-detail">
+              <h2 className="text-xl font-bold mb-2">About Me</h2>
+              <p className="text-sm leading-relaxed mb-3">
+                Highly dependable Fulfillment &amp; Logistics Specialist with
+                6+ years of experience supporting end-to-end fulfillment
+                operations, including order processing, picking, packing,
+                dispatch, and last-mile delivery across urban and regional
+                networks. Expert in inventory flow coordination, order
+                accuracy, route optimization, POD systems, and fulfillment
+                KPIs. Recognized for achieving 98–100% order accuracy and
+                on-time dispatch, reducing operational delays, optimizing
+                labor and fuel utilization, and maintaining strict safety,
+                quality, and compliance standards.
+              </p>
+              <ul className="text-sm list-disc list-inside space-y-1">
+                <li>Strong motivation &amp; commitment</li>
+                <li>Ability to work independently as well as in a team</li>
+                <li>Commendable communication and presentation skills</li>
+                <li>Fluent communication in both Bengali &amp; English</li>
+              </ul>
+            </div>
           </Reveal>
         </section>
 
@@ -342,32 +464,48 @@ export default function MeContent() {
           </Reveal>
         </section>
 
-        {/* ---------- education ---------- */}
+        {/* ---------- education (preview card → popup) ---------- */}
         <section id="education" className="max-w-6xl mx-auto px-5 pb-20">
           <Reveal>
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <GraduationCap size={22} className="text-indigo-300" /> Education
-            </h2>
-            <div className="space-y-6 border-l border-white/10 pl-6">
-              {education.map((ed, i) => (
-                <div key={i} className="relative">
-                  <span className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-amber-400" />
-                  <div className="flex justify-between items-baseline flex-wrap gap-1">
-                    <p className="font-semibold text-white">{ed.degree}</p>
-                    <span className="text-xs text-amber-400 font-medium">
-                      {ed.time}
-                    </span>
+            <button
+              onClick={() => setModal("education")}
+              className="no-print w-full text-left bg-white/5 border border-white/10 hover:border-indigo-400/50 transition rounded-xl p-6"
+            >
+              <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                <GraduationCap size={20} className="text-indigo-300" />{" "}
+                Education
+              </h2>
+              <p className="text-sm text-slate-400">
+                Bachelor of Arts (Hons), Bangla — National University ·
+                click for full academic history
+              </p>
+              <span className="inline-block mt-3 text-xs font-semibold text-indigo-300">
+                বিস্তারিত দেখুন →
+              </span>
+            </button>
+
+            <div className="hidden print-full-detail">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <GraduationCap size={20} /> Education
+              </h2>
+              <div className="space-y-4">
+                {education.map((ed, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-baseline flex-wrap gap-1">
+                      <p className="font-semibold">{ed.degree}</p>
+                      <span className="text-xs font-medium">{ed.time}</span>
+                    </div>
+                    <p className="text-sm">{ed.school}</p>
+                    <p className="text-sm">{ed.detail}</p>
                   </div>
-                  <p className="text-sm text-slate-400">{ed.school}</p>
-                  <p className="text-sm text-slate-300">{ed.detail}</p>
-                </div>
-              ))}
+                ))}
+              </div>
+              <p className="text-xs mt-4">
+                Professional Training: Practical SEO (Search Engine
+                Optimization) course — BASIS Institute of Technology &amp;
+                Management (BITM), Oct–Nov 2018.
+              </p>
             </div>
-            <p className="text-xs text-slate-500 mt-6">
-              Professional Training: Practical SEO (Search Engine
-              Optimization) course — BASIS Institute of Technology &amp;
-              Management (BITM), Oct–Nov 2018.
-            </p>
           </Reveal>
         </section>
 
@@ -423,9 +561,60 @@ export default function MeContent() {
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-indigo-500 transition flex items-center justify-center"
           aria-label="Facebook"
         >
-        <FacebookIcon size={18} />
+          <FacebookIcon size={18} />
         </a>
       </div>
+
+      {/* ---------- popups ---------- */}
+      <Modal
+        open={modal === "about"}
+        onClose={() => setModal(null)}
+        title="About Me"
+      >
+        <p className="text-sm leading-relaxed text-slate-300 mb-4">
+          Highly dependable Fulfillment &amp; Logistics Specialist with 6+
+          years of experience supporting end-to-end fulfillment operations,
+          including order processing, picking, packing, dispatch, and
+          last-mile delivery across urban and regional networks. Expert in
+          inventory flow coordination, order accuracy, route optimization,
+          POD systems, and fulfillment KPIs. Recognized for achieving
+          98–100% order accuracy and on-time dispatch, reducing operational
+          delays, optimizing labor and fuel utilization, and maintaining
+          strict safety, quality, and compliance standards.
+        </p>
+        <ul className="text-sm text-slate-400 list-disc list-inside space-y-1">
+          <li>Strong motivation &amp; commitment</li>
+          <li>Ability to work independently as well as in a team</li>
+          <li>Commendable communication and presentation skills</li>
+          <li>Fluent communication in both Bengali &amp; English</li>
+        </ul>
+      </Modal>
+
+      <Modal
+        open={modal === "education"}
+        onClose={() => setModal(null)}
+        title="Education"
+      >
+        <div className="space-y-5">
+          {education.map((ed, i) => (
+            <div key={i}>
+              <div className="flex justify-between items-baseline flex-wrap gap-1">
+                <p className="font-semibold text-white">{ed.degree}</p>
+                <span className="text-xs text-amber-400 font-medium">
+                  {ed.time}
+                </span>
+              </div>
+              <p className="text-sm text-slate-400">{ed.school}</p>
+              <p className="text-sm text-slate-300">{ed.detail}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-slate-500 mt-5">
+          Professional Training: Practical SEO (Search Engine Optimization)
+          course — BASIS Institute of Technology &amp; Management (BITM),
+          Oct–Nov 2018.
+        </p>
+      </Modal>
     </div>
   );
 }
