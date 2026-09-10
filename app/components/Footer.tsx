@@ -343,13 +343,10 @@ export default function Footer() {
                 {t.paymentHeading}
               </h3>
               <div className="flex flex-col gap-1.5">
-                {/* TODO (accessibility/UX decision needed): এই আইটেমগুলোর href/onClick নেই,
-                    কিন্তু cursor-pointer + hover effect আছে যা ক্লিকযোগ্য মনে করায়।
-                    যদি ভবিষ্যতে পেমেন্ট-সংক্রান্ত পেজে লিংক করার ইচ্ছা থাকে, <Link>/<button>-এ
-                    বদলানো উচিত; নাহলে cursor-pointer ও hover ক্লাস সরিয়ে ফেলাই ভালো। */}
                 {paymentIcons.map((p, i) => (
-                  <div
+                  <Link
                     key={t.paymentMethods[i]}
+                    href={href("/faq")}
                     className="flex items-center gap-1.5 py-2 -my-1 group cursor-pointer"
                   >
                     <div
@@ -360,7 +357,7 @@ export default function Footer() {
                     <span className="text-xs text-black group-hover:text-green-700 font-medium leading-tight whitespace-nowrap transition-colors">
                       {t.paymentMethods[i]}
                     </span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -378,7 +375,7 @@ export default function Footer() {
                 href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
               >
                 🏡 {t.location}
               </a>
@@ -386,7 +383,7 @@ export default function Footer() {
                 href={`https://wa.me/${siteConfig.contact.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
               >
                 💬 {siteConfig.contact.phoneDisplay}
               </a>
@@ -394,13 +391,13 @@ export default function Footer() {
                 href="https://wa.me/8801521406139"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
               >
                 💼 {t.businessContact}: 01521406139
               </a>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
-                className="relative hover:text-green-700 transition break-all leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                className="inline-block hover:text-green-700 transition break-all leading-tight py-2 -my-1"
               >
                 ✉️ {siteConfig.contact.email}
               </a>
