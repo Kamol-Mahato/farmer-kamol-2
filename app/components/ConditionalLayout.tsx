@@ -22,7 +22,9 @@ export default function ConditionalLayout({
     window.scrollTo(0, 0);
   }, [pathname]);
   const isPanelRoute =
-    pathname.startsWith("/admin") || pathname.startsWith("/agent");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/agent") ||
+    pathname.startsWith("/me");
 
   if (isPanelRoute) {
     return <main className="flex-grow">{children}</main>;
