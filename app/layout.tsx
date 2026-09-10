@@ -79,7 +79,7 @@ export default async function RootLayout({
         <EnterKeyNav />
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* গুগল অ্যানালিটিক্স কম্পোনেন্ট */}
-        <GoogleAnalytics gaId="G-7Z6956LM2H" />
+        <GoogleAnalytics gaId="G-8ZRHT134HL" />
       </body>
     </html>
   );
