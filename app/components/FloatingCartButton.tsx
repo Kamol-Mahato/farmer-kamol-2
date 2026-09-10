@@ -140,7 +140,7 @@ export default function FloatingCartButton() {
             type="button"
             onClick={handleClose}
             aria-label={locale === "en" ? "Close" : "বন্ধ করুন"}
-            className="absolute -top-1 -left-1 w-4.5 h-4.5 sm:w-6 sm:h-6 bg-gray-700 text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform z-10"
+            className="absolute -top-2.5 -right-2.5 w-6 h-6 sm:w-7 sm:h-7 bg-gray-700 text-white rounded-full flex items-center justify-center shadow-md ring-2 ring-white active:scale-90 transition-transform z-10"
           >
             <X className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" strokeWidth={3} />
           </button>
