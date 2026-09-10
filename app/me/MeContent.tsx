@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Briefcase,
   X,
+  ExternalLink,
 } from "lucide-react";
 
 /* ---------- Custom Facebook Icon ---------- */
@@ -61,72 +62,6 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
       } ${className}`}
     >
       {children}
-    </div>
-  );
-}
-
-/* ---------- Active Section ---------- */
-function useActiveSection(ids: string[]) {
-  const [active, setActive] = useState(ids[0]);
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActive(id);
-        },
-        { threshold: 0.4, rootMargin: "-80px 0px -40% 0px" }
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-    return () => observers.forEach((o) => o.disconnect());
-  }, [ids]);
-  return active;
-}
-
-/* ---------- Modal ---------- */
-function Modal({
-  open,
-  onClose,
-  title,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70" />
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto bg-[#0f172a] border border-white/10 rounded-2xl p-6"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">{title}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition">
-            <X size={20} />
-          </button>
-        </div>
-        {children}
-      </div>
     </div>
   );
 }
@@ -190,10 +125,17 @@ const education = [
   },
 ];
 
+const projects = [
+  {
+    name: "Farmer Kamol — Personal E-commerce Website",
+    detail:
+      "A full-featured e-commerce platform built entirely solo: Next.js, TypeScript, Tailwind CSS, PostgreSQL, Supabase storage, Redis caching, SSLCommerz payment gateway, Pathao courier integration, and real-time live-chat support.",
+    link: "https://farmerkamol.com",
+  },
+];
+
 export default function MeContent() {
   const printCV = () => window.print();
-  const activeSection = useActiveSection(["home", "about", "skills", "experience"]);
-  const [modal, setModal] = useState<"about" | "education" | null>(null);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b0f2a] via-[#12183a] to-[#0d1329] text-slate-100">
@@ -201,12 +143,13 @@ export default function MeContent() {
       <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0b0f2a]/80 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           <span className="font-mono text-sm text-indigo-300">&lt;Kamol Mahato/&gt;</span>
-          
+
           <nav className="hidden md:flex gap-8 text-sm text-slate-300">
             <a href="#home" className="hover:text-white transition">Home</a>
             <a href="#about" className="hover:text-white transition">About</a>
             <a href="#skills" className="hover:text-white transition">Skills</a>
             <a href="#experience" className="hover:text-white transition">Experience</a>
+            <a href="#projects" className="hover:text-white transition">Projects</a>
           </nav>
 
           <button
@@ -282,7 +225,7 @@ export default function MeContent() {
         </Reveal>
       </section>
 
-      {/* About Section - Card Style like Milon */}
+      {/* About Section */}
       <section id="about" className="max-w-6xl mx-auto px-5 pb-20">
         <Reveal>
           <div className="grid md:grid-cols-2 gap-6">
@@ -340,6 +283,35 @@ export default function MeContent() {
               </div>
             ))}
           </div>
+        </Reveal>
+      </section>
+
+      {/* Projects Section - Farmer Kamol */}
+      <section id="projects" className="max-w-6xl mx-auto px-5 pb-20">
+        <Reveal>
+          <h2 className="text-2xl font-bold mb-8">Projects</h2>
+          {projects.map((p, i) => (
+            <div
+              key={i}
+              className="bg-[#111827]/80 border border-white/10 rounded-2xl p-6 hover:border-indigo-500/40 transition"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-white text-lg">{p.name}</p>
+                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">{p.detail}</p>
+                </div>
+              </div>
+              <a
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-4 text-sm text-indigo-300 font-medium hover:text-indigo-200 transition"
+              >
+                {p.link}
+                <ExternalLink size={14} />
+              </a>
+            </div>
+          ))}
         </Reveal>
       </section>
 
