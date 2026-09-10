@@ -163,7 +163,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="w-8 h-8 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -171,6 +171,7 @@ export default function Footer() {
                   height="14"
                   viewBox="0 0 24 24"
                   fill="white"
+                  aria-hidden="true"
                 >
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
@@ -181,7 +182,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
-                className="w-8 h-8 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -189,6 +190,7 @@ export default function Footer() {
                   height="14"
                   viewBox="0 0 24 24"
                   fill="white"
+                  aria-hidden="true"
                 >
                   <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.04 0 12 0 12s0 3.96.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.46 20.5 12 20.5 12 20.5s7.54 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.96 24 12 24 12s0-3.96-.5-5.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
                 </svg>
@@ -197,7 +199,7 @@ export default function Footer() {
               <a
                 href={`tel:${siteConfig.contact.phone}`}
                 aria-label="Call"
-                className="w-8 h-8 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -205,6 +207,7 @@ export default function Footer() {
                   height="14"
                   viewBox="0 0 24 24"
                   fill="white"
+                  aria-hidden="true"
                 >
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
@@ -215,7 +218,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="w-8 h-8 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -223,6 +226,7 @@ export default function Footer() {
                   height="14"
                   viewBox="0 0 24 24"
                   fill="white"
+                  aria-hidden="true"
                 >
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                   <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.118 1.535 5.845L.057 23.428a.5.5 0 0 0 .609.63l5.703-1.476A11.952 11.952 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.523-5.168-1.432l-.361-.214-3.807.985.999-3.715-.235-.374A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
@@ -234,7 +238,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-8 h-8 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -244,6 +248,7 @@ export default function Footer() {
                   fill="none"
                   stroke="white"
                   strokeWidth="2"
+                  aria-hidden="true"
                 >
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
@@ -254,7 +259,7 @@ export default function Footer() {
               <a
                 href={`mailto:${siteConfig.contact.email}`}
                 aria-label="Email Us"
-                className="w-8 h-8 rounded-full bg-emerald-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="relative w-8 h-8 rounded-full bg-emerald-600 hover:opacity-90 flex items-center justify-center shrink-0 transition before:absolute before:-inset-1.5 before:content-['']"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -266,6 +271,7 @@ export default function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  aria-hidden="true"
                 >
                   <path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
@@ -290,7 +296,7 @@ export default function Footer() {
                   <Link
                     key={p}
                     href={href("/shop")}
-                    className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
+                    className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                   >
                     {p}
                   </Link>
@@ -306,25 +312,25 @@ export default function Footer() {
               <div className="flex flex-col gap-1 text-xs text-black">
                 <Link
                   href={href("/customer/dashboard")}
-                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
+                  className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                 >
                   {t.trackOrder}
                 </Link>
                 <Link
                   href={href("/return-policy")}
-                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
+                  className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                 >
                   {t.returnPolicy}
                 </Link>
                 <Link
                   href={href("/faq")}
-                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
+                  className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                 >
                   {t.faq}
                 </Link>
                 <Link
                   href={href("/contact")}
-                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
+                  className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                 >
                   {t.contact}
                 </Link>
@@ -337,6 +343,10 @@ export default function Footer() {
                 {t.paymentHeading}
               </h3>
               <div className="flex flex-col gap-1.5">
+                {/* TODO (accessibility/UX decision needed): এই আইটেমগুলোর href/onClick নেই,
+                    কিন্তু cursor-pointer + hover effect আছে যা ক্লিকযোগ্য মনে করায়।
+                    যদি ভবিষ্যতে পেমেন্ট-সংক্রান্ত পেজে লিংক করার ইচ্ছা থাকে, <Link>/<button>-এ
+                    বদলানো উচিত; নাহলে cursor-pointer ও hover ক্লাস সরিয়ে ফেলাই ভালো। */}
                 {paymentIcons.map((p, i) => (
                   <div
                     key={t.paymentMethods[i]}
@@ -373,16 +383,10 @@ export default function Footer() {
                 🏡 {t.location}
               </a>
               <a
-                href={`tel:${siteConfig.contact.phone}`}
-                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
-              >
-                📞 {siteConfig.contact.phoneDisplay}
-              </a>
-              <a
                 href={`https://wa.me/${siteConfig.contact.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
+                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
               >
                 💬 {siteConfig.contact.phoneDisplay}
               </a>
@@ -390,13 +394,13 @@ export default function Footer() {
                 href="https://wa.me/8801521406139"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block py-3 -my-3 hover:text-green-700 transition leading-snug"
+                className="relative hover:text-green-700 transition leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
               >
                 💼 {t.businessContact}: 01521406139
               </a>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
-                className="inline-block py-3 -my-3 hover:text-green-700 transition break-all leading-snug"
+                className="relative hover:text-green-700 transition break-all leading-snug before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
               >
                 ✉️ {siteConfig.contact.email}
               </a>
@@ -418,13 +422,13 @@ export default function Footer() {
             </Link>
             <Link
               href={href("/terms")}
-              className="inline-block py-2 -my-2 hover:text-yellow-400 transition"
+              className="relative hover:text-yellow-400 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
             >
               {t.terms}
             </Link>
             <Link
               href={href("/return-policy")}
-              className="hover:text-yellow-400 transition"
+              className="relative hover:text-yellow-400 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
             >
               {t.returnPolicy}
             </Link>
