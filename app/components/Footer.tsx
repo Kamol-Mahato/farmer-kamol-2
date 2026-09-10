@@ -157,13 +157,13 @@ export default function Footer() {
             </p>
 
             {/* সোশ্যাল আইকনসমূহ */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full flex-wrap lg:flex-nowrap">
+            <div className="flex items-center gap-1.5 py-1 w-full flex-nowrap overflow-hidden">
               <a
                 href={siteConfig.social.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="w-11 h-11 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-blue-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -181,7 +181,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
-                className="w-12 h-12 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-red-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +197,7 @@ export default function Footer() {
               <a
                 href={`tel:${siteConfig.contact.phone}`}
                 aria-label="Call"
-                className="w-11 h-11 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-gray-800 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="w-11 h-11 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-green-500 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +234,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-11 h-11 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-pink-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +254,7 @@ export default function Footer() {
               <a
                 href={`mailto:${siteConfig.contact.email}`}
                 aria-label="Email Us"
-                className="w-7 h-7 rounded-full bg-emerald-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
+                className="w-8 h-8 rounded-full bg-emerald-600 hover:opacity-90 flex items-center justify-center shrink-0 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -285,12 +285,12 @@ export default function Footer() {
               <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
                 {t.productsHeading}
               </h3>
-              <div className="flex flex-col gap-1.5 text-xs text-black">
+              <div className="flex flex-col gap-1 text-xs text-black">
                 {t.products.map((p) => (
                   <Link
                     key={p}
                     href={href("/shop")}
-                    className="relative hover:text-green-700 transition leading-tight before:absolute before:-inset-y-2.5 before:-inset-x-1 before:content-['']"
+                    className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
                   >
                     {p}
                   </Link>
@@ -303,28 +303,28 @@ export default function Footer() {
               <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
                 {t.serviceHeading}
               </h3>
-              <div className="flex flex-col gap-1.5 text-xs text-black">
+              <div className="flex flex-col gap-1 text-xs text-black">
                 <Link
                   href={href("/customer/dashboard")}
-                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
+                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
                 >
                   {t.trackOrder}
                 </Link>
                 <Link
                   href={href("/return-policy")}
-                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
+                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
                 >
                   {t.returnPolicy}
                 </Link>
                 <Link
                   href={href("/faq")}
-                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
+                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
                 >
                   {t.faq}
                 </Link>
                 <Link
                   href={href("/contact")}
-                  className="inline-block py-3 -my-3 hover:text-green-700 transition leading-tight"
+                  className="flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap"
                 >
                   {t.contact}
                 </Link>
