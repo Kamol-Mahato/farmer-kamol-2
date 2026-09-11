@@ -24,7 +24,8 @@ export default function ConditionalLayout({
   const isPanelRoute =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/agent") ||
-    pathname.startsWith("/me");
+    pathname === "/me" ||
+    pathname.startsWith("/me/");
 
   if (isPanelRoute) {
     return <main className="flex-grow">{children}</main>;
