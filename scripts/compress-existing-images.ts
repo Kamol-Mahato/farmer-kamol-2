@@ -86,7 +86,11 @@ async function main() {
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(file.name, compressed, { contentType, upsert: true });
+      .upload(file.name, compressed, {
+        contentType,
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
     if (uploadError) {
       console.error("  আপলোড ব্যর্থ:", uploadError.message);

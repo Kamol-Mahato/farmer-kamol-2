@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { verifyCustomer } from "@/lib/customerAuth";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
+import sharp from "sharp";
 
 let supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -15,7 +16,7 @@ function getSupabase() {
   return supabase;
 }
 
-const MAX_FILE_SIZE = 200 * 1024; // 200 KB
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // ১০ MB পর্যন্ত raw ফাইল গ্রহণযোগ্য, compress হয়ে যাবে
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 
 async function getCurrentUser() {
@@ -49,26 +50,60 @@ export async function POST(request: Request) {
       );
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: "ছবির সাইজ ২০০ কেবি-র বেশি হতে পারবে না" },
+        { error: "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না" },
         { status: 400 },
       );
     }
 
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
+
+    // ✅ প্রোফাইল ছবি resize + compress (২৫৬x২৫৬ যথেষ্ট, avatar কখনো বড় দেখানো হয় না)
+    let buffer: Buffer = rawBuffer;
+    let outputType: "jpeg" | "png" | "webp" = "jpeg";
+    try {
+      let pipeline = sharp(rawBuffer).resize({
+        width: 256,
+        height: 256,
+        fit: "cover",
+        withoutEnlargement: true,
+      });
+
+      if (file.type === "image/png") {
+        pipeline = pipeline.png({ quality: 80, compressionLevel: 9 });
+        outputType = "png";
+      } else if (file.type === "image/webp") {
+        pipeline = pipeline.webp({ quality: 80 });
+        outputType = "webp";
+      } else {
+        pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true });
+        outputType = "jpeg";
+      }
+
+      buffer = await pipeline.toBuffer();
+    } catch (err) {
+      console.error("Avatar resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:", err);
+    }
+
     const MIME_TO_EXT: Record<string, string> = {
-      "image/jpeg": "jpg",
-      "image/jpg": "jpg",
-      "image/png": "png",
-      "image/webp": "webp",
+      jpeg: "jpg",
+      png: "png",
+      webp: "webp",
     };
-    const ext = MIME_TO_EXT[file.type] || "jpg";
+    const ext = MIME_TO_EXT[outputType];
     const filename = `avatars/avatar-${user.id}-${Date.now()}.${ext}`;
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const contentType =
+      outputType === "jpeg" ? "image/jpeg" : `image/${outputType}`;
+
     const { error: uploadError } = await getSupabase()
       .storage.from(process.env.SUPABASE_BUCKET!)
-      .upload(filename, buffer, { contentType: file.type, upsert: true });
+      .upload(filename, buffer, {
+        contentType,
+        upsert: true,
+        cacheControl: "31536000",
+      });
 
     if (uploadError) {
       console.error("Avatar upload error:", uploadError);

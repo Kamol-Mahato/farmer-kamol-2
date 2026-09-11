@@ -107,7 +107,10 @@ export async function POST(request: Request) {
     // ✅ Supabase Storage-এ আপলোড করা (filesystem-এর বদলে)
     const { error: uploadError } = await getSupabase()
       .storage.from(process.env.SUPABASE_BUCKET!)
-      .upload(filename, uploadBuffer, { contentType: file.type });
+      .upload(filename, uploadBuffer, {
+        contentType: file.type,
+        cacheControl: "31536000",
+      });
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
