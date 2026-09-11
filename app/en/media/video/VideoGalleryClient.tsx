@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 interface Video {
   id: number;
@@ -24,37 +24,11 @@ export default function VideoGalleryClient({
   facebookPageUrl?: string;
 }) {
   const [secondaryIndex, setSecondaryIndex] = useState(0);
-  const [unmutedId, setUnmutedId] = useState<number | null>(null);
-  const iframeRefs = useRef<Record<number, HTMLIFrameElement | null>>({});
-
-  function handleUnmute(id: number) {
-    const iframe = iframeRefs.current[id];
-    const willUnmute = unmutedId !== id;
-    if (iframe?.contentWindow) {
-      iframe.contentWindow.postMessage(
-        JSON.stringify({
-          event: "command",
-          func: willUnmute ? "unMute" : "mute",
-          args: [],
-        }),
-        "*",
-      );
-    }
-    setUnmutedId(willUnmute ? id : null);
-  }
+  const [playingId, setPlayingId] = useState<number | null>(null);
 
   function getYoutubeId(url: string) {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
     return match ? match[1] : null;
-  }
-
-  function getEmbedUrl(video: Video) {
-    if (video.platform === "FACEBOOK") {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(video.youtubeUrl)}&autoplay=true&mute=1`;
-    }
-    const id = getYoutubeId(video.youtubeUrl);
-    if (!id) return "";
-    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1`;
   }
 
   if (videos.length === 0) {
@@ -68,10 +42,8 @@ export default function VideoGalleryClient({
   const secondaryVideo = restVideos[secondaryIndex] || null;
 
   function renderVideoFrame(video: Video) {
-    const isUnmuted = unmutedId === video.id;
     const displayTitle = video.titleEn || video.title;
 
-    // Facebook → thumbnail + Follow button on video
     if (video.platform === "FACEBOOK") {
       return (
         <div
@@ -89,6 +61,7 @@ export default function VideoGalleryClient({
               <img
                 src={video.thumbnailUrl}
                 alt={displayTitle}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -115,23 +88,58 @@ export default function VideoGalleryClient({
       );
     }
 
-    // YouTube → embed + Subscribe (left) + Mute (right)
+    const ytId = getYoutubeId(video.youtubeUrl);
+
+    if (!ytId) {
+      return (
+        <div
+          key={video.id}
+          className="relative bg-gray-100 rounded-2xl overflow-hidden shadow-xl flex items-center justify-center text-gray-400 text-sm text-center px-4"
+          style={{ aspectRatio: "16/9" }}
+        >
+          Could not load this video — please check the link
+        </div>
+      );
+    }
+
+    const isPlaying = playingId === video.id;
+    const thumb =
+      video.thumbnailUrl || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+
     return (
       <div
         key={video.id}
         className="relative bg-black rounded-2xl overflow-hidden shadow-xl"
         style={{ aspectRatio: "16/9" }}
       >
-        <iframe
-          ref={(el) => {
-            iframeRefs.current[video.id] = el;
-          }}
-          src={getEmbedUrl(video)}
-          title={displayTitle}
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          className="w-full h-full"
-        />
+        {isPlaying ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+            title={displayTitle}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPlayingId(video.id)}
+            aria-label={`Play: ${displayTitle}`}
+            className="absolute inset-0 w-full h-full group"
+          >
+            <img
+              src={thumb}
+              alt={displayTitle}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/35 transition">
+              <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white text-2xl shadow-lg">
+                ▶
+              </div>
+            </div>
+          </button>
+        )}
         <a
           href={youtubeChannelUrl}
           target="_blank"
@@ -140,12 +148,6 @@ export default function VideoGalleryClient({
         >
           ▶️ Subscribe
         </a>
-        <button
-          onClick={() => handleUnmute(video.id)}
-          className="absolute bottom-3 right-3 z-20 bg-white/90 text-green-900 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:bg-white transition border border-green-700"
-        >
-          {isUnmuted ? "🔊 Mute" : "🔇 Unmute"}
-        </button>
       </div>
     );
   }
@@ -221,7 +223,10 @@ export default function VideoGalleryClient({
               return (
                 <button
                   key={video.id}
-                  onClick={() => setSecondaryIndex(index)}
+                  onClick={() => {
+                    setSecondaryIndex(index);
+                    setPlayingId(null);
+                  }}
                   className={`rounded-xl overflow-hidden shadow hover:shadow-lg transition group border-2 ${
                     secondaryIndex === index
                       ? "border-green-600"
@@ -232,12 +237,14 @@ export default function VideoGalleryClient({
                     <img
                       src={video.thumbnailUrl}
                       alt={displayTitle}
+                      loading="lazy"
                       className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
                     />
                   ) : video.platform === "YOUTUBE" && ytId ? (
                     <img
                       src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
                       alt={displayTitle}
+                      loading="lazy"
                       className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
                     />
                   ) : (

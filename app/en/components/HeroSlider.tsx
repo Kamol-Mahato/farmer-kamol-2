@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { translateUnit } from "@/lib/unitTranslate";
 import { getSavePercent } from "@/lib/pricing";
+import { translateUnit } from "@/lib/unitTranslate";
 
 type Product = {
   id: number;
@@ -19,6 +19,9 @@ type Product = {
 type HeroVideo = {
   id: number;
   youtubeUrl: string;
+  title?: string | null;
+  titleEn?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 interface YTMessage {
@@ -26,11 +29,15 @@ interface YTMessage {
   info?: number;
 }
 
-function toYoutubeEmbedUrl(url: string) {
+function extractYoutubeId(url: string) {
   const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
-  const videoId = match ? match[1] : null;
+  return match ? match[1] : null;
+}
+
+function toYoutubeEmbedUrl(url: string) {
+  const videoId = extractYoutubeId(url);
   if (!videoId) return null;
-  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0`;
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&playsinline=1&enablejsapi=1&rel=0`;
 }
 
 function startListening(iframe: HTMLIFrameElement | null) {
@@ -50,7 +57,10 @@ function startListening(iframe: HTMLIFrameElement | null) {
 }
 
 type MobileQueueItem =
-  { kind: "video"; videoIdx: number } | { kind: "product"; productIdx: number };
+  | { kind: "video"; videoIdx: number }
+  | { kind: "product"; productIdx: number };
+
+const THUMBNAIL_ADVANCE_MS = 3500;
 
 export default function HeroSlider({
   featuredProducts = [],
@@ -62,11 +72,11 @@ export default function HeroSlider({
   const [pcVideoIndex, setPcVideoIndex] = useState(0);
   const [pcProductIndex, setPcProductIndex] = useState(0);
   const pcIframeRef = useRef<HTMLIFrameElement>(null);
-  const [pcMuted, setPcMuted] = useState(true);
+  const [pcPlaying, setPcPlaying] = useState(false);
 
   const [mobileQueueIndex, setMobileQueueIndex] = useState(0);
   const mobileIframeRef = useRef<HTMLIFrameElement>(null);
-  const [mobileMuted, setMobileMuted] = useState(true);
+  const [mobilePlaying, setMobilePlaying] = useState(false);
 
   const hasVideos = heroVideos.length > 0;
 
@@ -96,12 +106,36 @@ export default function HeroSlider({
   }, [featuredProducts.length]);
 
   useEffect(() => {
-    if (!currentMobileItem || currentMobileItem.kind !== "product") return;
+    setPcPlaying(false);
+  }, [pcVideoIndex]);
+
+  useEffect(() => {
+    if (heroVideos.length <= 1 || pcPlaying) return;
     const timer = setTimeout(() => {
-      setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
-    }, 2000);
+      setPcVideoIndex((prev) => (prev + 1) % heroVideos.length);
+    }, THUMBNAIL_ADVANCE_MS);
     return () => clearTimeout(timer);
-  }, [safeMobileIndex, currentMobileItem, mobileTotal]);
+  }, [pcVideoIndex, pcPlaying, heroVideos.length]);
+
+  useEffect(() => {
+    setMobilePlaying(false);
+  }, [safeMobileIndex]);
+
+  useEffect(() => {
+    if (!currentMobileItem) return;
+    if (currentMobileItem.kind === "product") {
+      const timer = setTimeout(() => {
+        setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+    if (currentMobileItem.kind === "video" && !mobilePlaying) {
+      const timer = setTimeout(() => {
+        setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
+      }, THUMBNAIL_ADVANCE_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [safeMobileIndex, currentMobileItem, mobileTotal, mobilePlaying]);
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
@@ -124,43 +158,11 @@ export default function HeroSlider({
     return () => window.removeEventListener("message", handleMessage);
   }, [heroVideos.length, mobileTotal]);
 
-  function togglePcMute() {
-    const iframe = pcIframeRef.current;
-    if (!iframe?.contentWindow) return;
-    const nextMuted = !pcMuted;
-    iframe.contentWindow.postMessage(
-      JSON.stringify({
-        event: "command",
-        func: nextMuted ? "mute" : "unMute",
-        args: [],
-      }),
-      "*",
-    );
-    setPcMuted(nextMuted);
-  }
-
-  function toggleMobileMute() {
-    const iframe = mobileIframeRef.current;
-    if (!iframe?.contentWindow) return;
-    const nextMuted = !mobileMuted;
-    iframe.contentWindow.postMessage(
-      JSON.stringify({
-        event: "command",
-        func: nextMuted ? "mute" : "unMute",
-        args: [],
-      }),
-      "*",
-    );
-    setMobileMuted(nextMuted);
-  }
-
   function pcPrevVideo() {
     setPcVideoIndex((p) => (p - 1 + heroVideos.length) % heroVideos.length);
-    setPcMuted(true);
   }
   function pcNextVideo() {
     setPcVideoIndex((p) => (p + 1) % heroVideos.length);
-    setPcMuted(true);
   }
   function pcPrevProduct() {
     setPcProductIndex(
@@ -173,24 +175,33 @@ export default function HeroSlider({
 
   function mobilePrev() {
     setMobileQueueIndex((p) => (p - 1 + mobileTotal) % mobileTotal);
-    setMobileMuted(true);
   }
   function mobileNext() {
     setMobileQueueIndex((p) => (p + 1) % mobileTotal);
-    setMobileMuted(true);
   }
 
-  const pcEmbedUrl = hasVideos
-    ? toYoutubeEmbedUrl(
-        heroVideos[pcVideoIndex % heroVideos.length]?.youtubeUrl || "",
-      )
+  const currentPcVideo = hasVideos
+    ? heroVideos[pcVideoIndex % heroVideos.length]
     : null;
-  const mobileEmbedUrl =
+  const pcYtId = currentPcVideo ? extractYoutubeId(currentPcVideo.youtubeUrl) : null;
+  const pcEmbedUrl = currentPcVideo ? toYoutubeEmbedUrl(currentPcVideo.youtubeUrl) : null;
+  const pcThumb =
+    currentPcVideo?.thumbnailUrl ||
+    (pcYtId ? `https://img.youtube.com/vi/${pcYtId}/hqdefault.jpg` : null);
+
+  const currentMobileVideo =
     currentMobileItem?.kind === "video" && hasVideos
-      ? toYoutubeEmbedUrl(
-          heroVideos[currentMobileItem.videoIdx]?.youtubeUrl || "",
-        )
+      ? heroVideos[currentMobileItem.videoIdx]
       : null;
+  const mobileYtId = currentMobileVideo
+    ? extractYoutubeId(currentMobileVideo.youtubeUrl)
+    : null;
+  const mobileEmbedUrl = currentMobileVideo
+    ? toYoutubeEmbedUrl(currentMobileVideo.youtubeUrl)
+    : null;
+  const mobileThumb =
+    currentMobileVideo?.thumbnailUrl ||
+    (mobileYtId ? `https://img.youtube.com/vi/${mobileYtId}/hqdefault.jpg` : null);
 
   function renderProductSlide(
     p: Product,
@@ -199,8 +210,8 @@ export default function HeroSlider({
   ) {
     const imageUrl =
       p.images?.[0]?.imageUrl || "/uploads/1781611130414-modhu.jpg";
-    const displayName = p.nameEn || p.name;
     const savePercent = getSavePercent(p.pricePerUnit, p.discountPrice);
+    const displayName = p.nameEn || p.name;
     return (
       <div key={key} className={`absolute inset-0 ${extraClass}`}>
         <Image
@@ -243,6 +254,37 @@ export default function HeroSlider({
     );
   }
 
+  function renderVideoThumbnail(
+    thumb: string | null,
+    title: string,
+    onPlay: () => void,
+  ) {
+    return (
+      <button
+        type="button"
+        onClick={onPlay}
+        aria-label={`Play: ${title}`}
+        className="absolute inset-0 w-full h-full group"
+      >
+        {thumb ? (
+          <img
+            src={thumb}
+            alt={title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-green-800" />
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/40 transition">
+          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white text-2xl shadow-lg">
+            ▶
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
@@ -254,28 +296,28 @@ export default function HeroSlider({
       <div className="hidden md:grid md:grid-cols-2 h-[280px]">
         <div className="relative overflow-hidden">
           {pcEmbedUrl ? (
-            <iframe
-              key={pcVideoIndex}
-              ref={pcIframeRef}
-              src={pcEmbedUrl}
-              className="w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              scrolling="no"
-              onLoad={(e) => startListening(e.currentTarget)}
-            />
+            pcPlaying ? (
+              <iframe
+                key={pcVideoIndex}
+                ref={pcIframeRef}
+                src={pcEmbedUrl}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                scrolling="no"
+                onLoad={(e) => startListening(e.currentTarget)}
+              />
+            ) : (
+              renderVideoThumbnail(
+                pcThumb,
+                currentPcVideo?.titleEn || currentPcVideo?.title || "Video",
+                () => setPcPlaying(true),
+              )
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">No live video available</p>
             </div>
-          )}
-          {pcEmbedUrl && (
-            <button
-              onClick={togglePcMute}
-              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
-            >
-              {pcMuted ? "🔇 Unmute" : "🔊 Mute"}
-            </button>
           )}
           {heroVideos.length > 1 && (
             <>
@@ -301,12 +343,10 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">No featured products</p>
             </div>
           ) : (
-            featuredProducts.map((p, i) =>
-              renderProductSlide(
-                p,
-                p.id,
-                `transition-opacity duration-700 ${pcProductIndex === i ? "opacity-100" : "opacity-0"}`,
-              ),
+            renderProductSlide(
+              featuredProducts[pcProductIndex],
+              featuredProducts[pcProductIndex].id,
+              "opacity-100 animate-fadeIn",
             )
           )}
           {featuredProducts.length > 1 && (
@@ -332,16 +372,26 @@ export default function HeroSlider({
       <div className="md:hidden">
         <div className="relative" style={{ paddingTop: "56.25%" }}>
           {currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
-            <iframe
-              key={`m-${safeMobileIndex}`}
-              ref={mobileIframeRef}
-              src={mobileEmbedUrl}
-              className="absolute inset-0 w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              scrolling="no"
-              onLoad={(e) => startListening(e.currentTarget)}
-            />
+            mobilePlaying ? (
+              <iframe
+                key={`m-${safeMobileIndex}`}
+                ref={mobileIframeRef}
+                src={mobileEmbedUrl}
+                className="absolute inset-0 w-full h-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                scrolling="no"
+                onLoad={(e) => startListening(e.currentTarget)}
+              />
+            ) : (
+              renderVideoThumbnail(
+                mobileThumb,
+                currentMobileVideo?.titleEn ||
+                  currentMobileVideo?.title ||
+                  "Video",
+                () => setMobilePlaying(true),
+              )
+            )
           ) : currentMobileItem?.kind === "product" &&
             featuredProducts[currentMobileItem.productIdx] ? (
             renderProductSlide(
@@ -353,14 +403,6 @@ export default function HeroSlider({
             <div className="absolute inset-0 flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">No content available</p>
             </div>
-          )}
-          {currentMobileItem?.kind === "video" && mobileEmbedUrl && (
-            <button
-              onClick={toggleMobileMute}
-              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
-            >
-              {mobileMuted ? "🔇 Unmute" : "🔊 Mute"}
-            </button>
           )}
           {mobileTotal > 1 && (
             <>

@@ -71,7 +71,7 @@ export default async function HomePage() {
     prisma.youtubeVideo.findMany({
       where: { heroOrder: { not: null } },
       orderBy: { heroOrder: "asc" },
-      select: { id: true, youtubeUrl: true },
+      select: { id: true, youtubeUrl: true, title: true, thumbnailUrl: true },
     }),
     prisma.productReview.findMany({
       where: { isApproved: true },

@@ -17,6 +17,8 @@ type Product = {
 type HeroVideo = {
   id: number;
   youtubeUrl: string;
+  title?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 interface YTMessage {
@@ -24,12 +26,17 @@ interface YTMessage {
   info?: number;
 }
 
-// ✅ যেকোনো ফরম্যাটের YouTube লিংক থেকে সঠিক embed URL বানানো (jsapi enabled — ভিডিও শেষ হওয়া detect করার জন্য)
-function toYoutubeEmbedUrl(url: string) {
+// ✅ YouTube ভিডিও ID বের করা (থাম্বনেইল বানানোর জন্যও ব্যবহার হয়)
+function extractYoutubeId(url: string) {
   const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
-  const videoId = match ? match[1] : null;
+  return match ? match[1] : null;
+}
+
+// ✅ ক্লিক করার পরই এই URL দিয়ে ভিডিও লোড হবে (autoplay এখন user gesture-এর ফলে, তাই mute করার দরকার নেই)
+function toYoutubeEmbedUrl(url: string) {
+  const videoId = extractYoutubeId(url);
   if (!videoId) return null;
-  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0`;
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&playsinline=1&enablejsapi=1&rel=0`;
 }
 
 // ✅ iframe লোড হওয়ার পর YouTube-কে "onStateChange" ইভেন্ট পাঠাতে বলা (postMessage API)
@@ -50,7 +57,11 @@ function startListening(iframe: HTMLIFrameElement | null) {
 }
 
 type MobileQueueItem =
-  { kind: "video"; videoIdx: number } | { kind: "product"; productIdx: number };
+  | { kind: "video"; videoIdx: number }
+  | { kind: "product"; productIdx: number };
+
+// থাম্বনেইল অবস্থায় (play না করা পর্যন্ত) কতক্ষণ পর পর পরের স্লাইডে যাবে
+const THUMBNAIL_ADVANCE_MS = 3500;
 
 export default function HeroSlider({
   featuredProducts = [],
@@ -59,22 +70,17 @@ export default function HeroSlider({
   featuredProducts?: Product[];
   heroVideos?: HeroVideo[];
 }) {
-  // ===== ভিডিও লোড একটু দেরি করে শুরু হবে, যাতে প্রথমে ছবি/টেক্সট দ্রুত দেখা যায় (Speed Index ফিক্স) =====
-  const [videoReady, setVideoReady] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setVideoReady(true), 500);
-    return () => clearTimeout(t);
-  }, []);
   // ===== PC: ভিডিও ও প্রোডাক্ট আলাদা আলাদাভাবে চলবে =====
   const [pcVideoIndex, setPcVideoIndex] = useState(0);
   const [pcProductIndex, setPcProductIndex] = useState(0);
   const pcIframeRef = useRef<HTMLIFrameElement>(null);
-  const [pcMuted, setPcMuted] = useState(true);
+  // ✅ true হলে সেই ভিডিওটা আসলে play (iframe) অবস্থায় আছে; false মানে শুধু থাম্বনেইল দেখাচ্ছে
+  const [pcPlaying, setPcPlaying] = useState(false);
 
   // ===== Mobile: ভিডিও + প্রোডাক্ট মিলিয়ে একটাই queue =====
   const [mobileQueueIndex, setMobileQueueIndex] = useState(0);
   const mobileIframeRef = useRef<HTMLIFrameElement>(null);
-  const [mobileMuted, setMobileMuted] = useState(true);
+  const [mobilePlaying, setMobilePlaying] = useState(false);
 
   const hasVideos = heroVideos.length > 0;
 
@@ -105,16 +111,43 @@ export default function HeroSlider({
     return () => clearInterval(timer);
   }, [featuredProducts.length]);
 
-  // ===== Mobile: প্রোডাক্ট আইটেমে থাকলে ২ সেকেন্ড পর পরের আইটেমে যাওয়া =====
+  // ===== PC: ভিডিও স্লট নতুন index-এ গেলে সবসময় থাম্বনেইল অবস্থা থেকে শুরু হবে =====
   useEffect(() => {
-    if (!currentMobileItem || currentMobileItem.kind !== "product") return;
-    const timer = setTimeout(() => {
-      setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [safeMobileIndex, currentMobileItem, mobileTotal]);
+    setPcPlaying(false);
+  }, [pcVideoIndex]);
 
-  // ===== YouTube "ভিডিও শেষ" ইভেন্ট শোনা (PC ও Mobile দুই জায়গার জন্য) =====
+  // ===== PC: ভিডিও যদি play না করা হয় (শুধু থাম্বনেইল), একটা সময় পর অটো পরেরটায় যাবে =====
+  useEffect(() => {
+    if (heroVideos.length <= 1 || pcPlaying) return;
+    const timer = setTimeout(() => {
+      setPcVideoIndex((prev) => (prev + 1) % heroVideos.length);
+    }, THUMBNAIL_ADVANCE_MS);
+    return () => clearTimeout(timer);
+  }, [pcVideoIndex, pcPlaying, heroVideos.length]);
+
+  // ===== Mobile: নতুন আইটেমে গেলে ভিডিও থাম্বনেইল অবস্থা থেকে শুরু হবে =====
+  useEffect(() => {
+    setMobilePlaying(false);
+  }, [safeMobileIndex]);
+
+  // ===== Mobile: প্রোডাক্টে ২ সেকেন্ড, অথবা "play না করা" ভিডিও থাম্বনেইলে একটা সময় পর পরের আইটেমে যাওয়া =====
+  useEffect(() => {
+    if (!currentMobileItem) return;
+    if (currentMobileItem.kind === "product") {
+      const timer = setTimeout(() => {
+        setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+    if (currentMobileItem.kind === "video" && !mobilePlaying) {
+      const timer = setTimeout(() => {
+        setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
+      }, THUMBNAIL_ADVANCE_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [safeMobileIndex, currentMobileItem, mobileTotal, mobilePlaying]);
+
+  // ===== YouTube "ভিডিও শেষ" ইভেন্ট শোনা (PC ও Mobile দুই জায়গার জন্য) — শুধু play হওয়া ভিডিওর জন্য প্রাসঙ্গিক =====
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
       if (e.origin !== "https://www.youtube.com") return;
@@ -136,43 +169,11 @@ export default function HeroSlider({
     return () => window.removeEventListener("message", handleMessage);
   }, [heroVideos.length, mobileTotal]);
 
-  function togglePcMute() {
-    const iframe = pcIframeRef.current;
-    if (!iframe?.contentWindow) return;
-    const nextMuted = !pcMuted;
-    iframe.contentWindow.postMessage(
-      JSON.stringify({
-        event: "command",
-        func: nextMuted ? "mute" : "unMute",
-        args: [],
-      }),
-      "*",
-    );
-    setPcMuted(nextMuted);
-  }
-
-  function toggleMobileMute() {
-    const iframe = mobileIframeRef.current;
-    if (!iframe?.contentWindow) return;
-    const nextMuted = !mobileMuted;
-    iframe.contentWindow.postMessage(
-      JSON.stringify({
-        event: "command",
-        func: nextMuted ? "mute" : "unMute",
-        args: [],
-      }),
-      "*",
-    );
-    setMobileMuted(nextMuted);
-  }
-
   function pcPrevVideo() {
     setPcVideoIndex((p) => (p - 1 + heroVideos.length) % heroVideos.length);
-    setPcMuted(true);
   }
   function pcNextVideo() {
     setPcVideoIndex((p) => (p + 1) % heroVideos.length);
-    setPcMuted(true);
   }
   function pcPrevProduct() {
     setPcProductIndex(
@@ -185,24 +186,33 @@ export default function HeroSlider({
 
   function mobilePrev() {
     setMobileQueueIndex((p) => (p - 1 + mobileTotal) % mobileTotal);
-    setMobileMuted(true);
   }
   function mobileNext() {
     setMobileQueueIndex((p) => (p + 1) % mobileTotal);
-    setMobileMuted(true);
   }
 
-  const pcEmbedUrl = hasVideos
-    ? toYoutubeEmbedUrl(
-        heroVideos[pcVideoIndex % heroVideos.length]?.youtubeUrl || "",
-      )
+  const currentPcVideo = hasVideos
+    ? heroVideos[pcVideoIndex % heroVideos.length]
     : null;
-  const mobileEmbedUrl =
+  const pcYtId = currentPcVideo ? extractYoutubeId(currentPcVideo.youtubeUrl) : null;
+  const pcEmbedUrl = currentPcVideo ? toYoutubeEmbedUrl(currentPcVideo.youtubeUrl) : null;
+  const pcThumb =
+    currentPcVideo?.thumbnailUrl ||
+    (pcYtId ? `https://img.youtube.com/vi/${pcYtId}/hqdefault.jpg` : null);
+
+  const currentMobileVideo =
     currentMobileItem?.kind === "video" && hasVideos
-      ? toYoutubeEmbedUrl(
-          heroVideos[currentMobileItem.videoIdx]?.youtubeUrl || "",
-        )
+      ? heroVideos[currentMobileItem.videoIdx]
       : null;
+  const mobileYtId = currentMobileVideo
+    ? extractYoutubeId(currentMobileVideo.youtubeUrl)
+    : null;
+  const mobileEmbedUrl = currentMobileVideo
+    ? toYoutubeEmbedUrl(currentMobileVideo.youtubeUrl)
+    : null;
+  const mobileThumb =
+    currentMobileVideo?.thumbnailUrl ||
+    (mobileYtId ? `https://img.youtube.com/vi/${mobileYtId}/hqdefault.jpg` : null);
 
   function renderProductSlide(
     p: Product,
@@ -256,6 +266,38 @@ export default function HeroSlider({
     );
   }
 
+  // ✅ ভিডিও থাম্বনেইল + Play বাটন (ক্লিক করলে play হবে)
+  function renderVideoThumbnail(
+    thumb: string | null,
+    title: string,
+    onPlay: () => void,
+  ) {
+    return (
+      <button
+        type="button"
+        onClick={onPlay}
+        aria-label={`প্লে করুন: ${title}`}
+        className="absolute inset-0 w-full h-full group"
+      >
+        {thumb ? (
+          <img
+            src={thumb}
+            alt={title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-green-800" />
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/40 transition">
+          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white text-2xl shadow-lg">
+            ▶
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
@@ -265,31 +307,31 @@ export default function HeroSlider({
 
       {/* ── PC LAYOUT ── */}
       <div className="hidden md:grid md:grid-cols-2 h-[280px]">
-        {/* বাম — ভিডিও (৩-৪টা ক্রমানুসারে চলবে) */}
+        {/* বাম — ভিডিও (থাম্বনেইল ঘুরবে, ক্লিক করলে play হবে) */}
         <div className="relative overflow-hidden">
-          {pcEmbedUrl && videoReady ? (
-            <iframe
-              key={pcVideoIndex}
-              ref={pcIframeRef}
-              src={pcEmbedUrl}
-              className="w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              scrolling="no"
-              onLoad={(e) => startListening(e.currentTarget)}
-            />
+          {pcEmbedUrl ? (
+            pcPlaying ? (
+              <iframe
+                key={pcVideoIndex}
+                ref={pcIframeRef}
+                src={pcEmbedUrl}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                scrolling="no"
+                onLoad={(e) => startListening(e.currentTarget)}
+              />
+            ) : (
+              renderVideoThumbnail(
+                pcThumb,
+                currentPcVideo?.title || "ভিডিও",
+                () => setPcPlaying(true),
+              )
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">কোনো ভিডিও লাইভ করা নেই</p>
             </div>
-          )}
-          {pcEmbedUrl && videoReady && (
-            <button
-              onClick={togglePcMute}
-              className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
-            >
-              {pcMuted ? "🔇 Unmute" : "🔊 Mute"}
-            </button>
           )}
           {heroVideos.length > 1 && (
             <>
@@ -316,7 +358,6 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">কোনো ফিচার্ড পণ্য নেই</p>
             </div>
           ) : (
-            // ✅ শুধু বর্তমানে visible প্রোডাক্টটাই mount হবে — বাকিগুলো আর ব্যাকগ্রাউন্ডে প্রিলোড হবে না (Lighthouse: image delivery ফিক্স)
             renderProductSlide(
               featuredProducts[pcProductIndex],
               featuredProducts[pcProductIndex].id,
@@ -346,19 +387,25 @@ export default function HeroSlider({
       {/* ── MOBILE LAYOUT — ভিডিও ও প্রোডাক্ট একই queue-তে, ‹ › দিয়ে পুরো queue-তে ঘোরা যাবে ── */}
       <div className="md:hidden">
         <div className="relative" style={{ paddingTop: "56.25%" }}>
-          {currentMobileItem?.kind === "video" &&
-          mobileEmbedUrl &&
-          videoReady ? (
-            <iframe
-              key={`m-${safeMobileIndex}`}
-              ref={mobileIframeRef}
-              src={mobileEmbedUrl}
-              className="absolute inset-0 w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              scrolling="no"
-              onLoad={(e) => startListening(e.currentTarget)}
-            />
+          {currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
+            mobilePlaying ? (
+              <iframe
+                key={`m-${safeMobileIndex}`}
+                ref={mobileIframeRef}
+                src={mobileEmbedUrl}
+                className="absolute inset-0 w-full h-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                scrolling="no"
+                onLoad={(e) => startListening(e.currentTarget)}
+              />
+            ) : (
+              renderVideoThumbnail(
+                mobileThumb,
+                currentMobileVideo?.title || "ভিডিও",
+                () => setMobilePlaying(true),
+              )
+            )
           ) : currentMobileItem?.kind === "product" &&
             featuredProducts[currentMobileItem.productIdx] ? (
             renderProductSlide(
@@ -372,16 +419,6 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">কোনো কনটেন্ট নেই</p>
             </div>
           )}
-          {currentMobileItem?.kind === "video" &&
-            mobileEmbedUrl &&
-            videoReady && (
-              <button
-                onClick={toggleMobileMute}
-                className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-bold transition"
-              >
-                {mobileMuted ? "🔇 Unmute" : "🔊 Mute"}
-              </button>
-            )}
           {mobileTotal > 1 && (
             <>
               <button
