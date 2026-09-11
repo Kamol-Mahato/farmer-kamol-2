@@ -10,7 +10,9 @@ import { WebSocketServer, WebSocket } from "ws";
 import { parse as parseCookie } from "cookie";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = process.env.HOSTNAME || "0.0.0.0";
+const hostname = "0.0.0.0"; // ⚠️ process.env.HOSTNAME ব্যবহার করা যাবে না —
+// Docker/Render কন্টেইনার নিজে থেকেই এই ভ্যারিয়েবলে নিজের internal container ID বসিয়ে দেয়,
+// যার ফলে সার্ভার সব ইন্টারফেসের বদলে ভুল/নির্দিষ্ট hostname-এ বাইন্ড হয়ে যায়।
 const port = parseInt(process.env.PORT || "3000", 10);
 
 const app = next({ dev, hostname, port });
