@@ -57,8 +57,7 @@ function startListening(iframe: HTMLIFrameElement | null) {
 }
 
 type MobileQueueItem =
-  | { kind: "video"; videoIdx: number }
-  | { kind: "product"; productIdx: number };
+  { kind: "video"; videoIdx: number } | { kind: "product"; productIdx: number };
 
 // থাম্বনেইল অবস্থায় (play না করা পর্যন্ত) কতক্ষণ পর পর পরের স্লাইডে যাবে
 const THUMBNAIL_ADVANCE_MS = 3500;
@@ -194,8 +193,12 @@ export default function HeroSlider({
   const currentPcVideo = hasVideos
     ? heroVideos[pcVideoIndex % heroVideos.length]
     : null;
-  const pcYtId = currentPcVideo ? extractYoutubeId(currentPcVideo.youtubeUrl) : null;
-  const pcEmbedUrl = currentPcVideo ? toYoutubeEmbedUrl(currentPcVideo.youtubeUrl) : null;
+  const pcYtId = currentPcVideo
+    ? extractYoutubeId(currentPcVideo.youtubeUrl)
+    : null;
+  const pcEmbedUrl = currentPcVideo
+    ? toYoutubeEmbedUrl(currentPcVideo.youtubeUrl)
+    : null;
   const pcThumb =
     currentPcVideo?.thumbnailUrl ||
     (pcYtId ? `https://img.youtube.com/vi/${pcYtId}/hqdefault.jpg` : null);
@@ -212,7 +215,9 @@ export default function HeroSlider({
     : null;
   const mobileThumb =
     currentMobileVideo?.thumbnailUrl ||
-    (mobileYtId ? `https://img.youtube.com/vi/${mobileYtId}/hqdefault.jpg` : null);
+    (mobileYtId
+      ? `https://img.youtube.com/vi/${mobileYtId}/hqdefault.jpg`
+      : null);
 
   function renderProductSlide(
     p: Product,

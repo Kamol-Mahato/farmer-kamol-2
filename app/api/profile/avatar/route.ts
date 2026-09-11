@@ -83,7 +83,10 @@ export async function POST(request: Request) {
 
       buffer = await pipeline.toBuffer();
     } catch (err) {
-      console.error("Avatar resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:", err);
+      console.error(
+        "Avatar resize error, ফলব্যাক হিসেবে আসল ছবি আপলোড হচ্ছে:",
+        err,
+      );
     }
 
     const MIME_TO_EXT: Record<string, string> = {

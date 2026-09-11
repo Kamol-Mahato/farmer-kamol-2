@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { connectChatSocket } from "@/lib/chatSocket";
 
 interface Message {
@@ -60,6 +61,8 @@ function playVisitorNotify() {
 }
 
 export default function ChatWidget() {
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en") ?? false;
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
@@ -297,7 +300,13 @@ export default function ChatWidget() {
                   Farmer Kamol Support
                 </h3>
                 <p className="text-[9px] sm:text-[10px] text-emerald-100">
-                  {live ? "লাইভ · WebSocket" : "সংযোগ হচ্ছে..."}
+                  {live
+                    ? isEn
+                      ? "Live · WebSocket"
+                      : "লাইভ · WebSocket"
+                    : isEn
+                      ? "Connecting..."
+                      : "সংযোগ হচ্ছে..."}
                 </p>
               </div>
             </div>
@@ -340,7 +349,13 @@ export default function ChatWidget() {
                       msg.senderType === "AGENT") && (
                       <span className="block text-[10px] font-semibold text-green-700 mb-0.5">
                         {msg.senderName ||
-                          (msg.senderType === "AGENT" ? "এজেন্ট" : "সাপোর্ট")}
+                          (msg.senderType === "AGENT"
+                            ? isEn
+                              ? "Agent"
+                              : "এজেন্ট"
+                            : isEn
+                              ? "Support"
+                              : "সাপোর্ট")}
                       </span>
                     )}
                     {renderMessageText(msg.text, isCustomer)}
@@ -359,7 +374,9 @@ export default function ChatWidget() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="আপনার প্রশ্নটি লিখুন..."
+              placeholder={
+                isEn ? "Type your question..." : "আপনার প্রশ্নটি লিখুন..."
+              }
               className="flex-1 border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#055a36] text-gray-800 transition"
             />
             <button
@@ -384,8 +401,12 @@ export default function ChatWidget() {
           <div className="absolute right-14 whitespace-nowrap bg-gray-900 text-white text-[11px] sm:text-xs py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-1.5 animate-bounce transition-all duration-300 border border-gray-700">
             <span>
               {unread > 0
-                ? `💬 নতুন রিপ্লাই এসেছে (${unread})`
-                : "👋 আমরা এখন অনলাইনে আছি, যেকোনো কিছু জিজ্ঞাসা করুন!"}
+                ? isEn
+                  ? `💬 New reply (${unread})`
+                  : `💬 নতুন রিপ্লাই এসেছে (${unread})`
+                : isEn
+                  ? "👋 We're online now, ask us anything!"
+                  : "👋 আমরা এখন অনলাইনে আছি, যেকোনো কিছু জিজ্ঞাসা করুন!"}
             </span>
             <div className="absolute right-[-5px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-gray-900" />
           </div>

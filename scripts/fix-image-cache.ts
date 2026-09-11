@@ -11,11 +11,19 @@ const BUCKET = process.env.SUPABASE_BUCKET!;
 const ONE_YEAR = "31536000";
 
 async function main() {
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY || !BUCKET) {
-    throw new Error("SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_BUCKET .env-এ থাকতে হবে");
+  if (
+    !process.env.SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    !BUCKET
+  ) {
+    throw new Error(
+      "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_BUCKET .env-এ থাকতে হবে",
+    );
   }
 
-  const { data: files, error } = await supabase.storage.from(BUCKET).list("", { limit: 1000 });
+  const { data: files, error } = await supabase.storage
+    .from(BUCKET)
+    .list("", { limit: 1000 });
   if (error) throw error;
 
   console.log(`মোট ফাইল: ${files?.length ?? 0}\n`);
@@ -29,7 +37,9 @@ async function main() {
       .download(file.name);
 
     if (downloadError || !downloaded) {
-      console.error(`❌ ডাউনলোড ব্যর্থ: ${file.name} — ${downloadError?.message}`);
+      console.error(
+        `❌ ডাউনলোড ব্যর্থ: ${file.name} — ${downloadError?.message}`,
+      );
       failed++;
       continue;
     }

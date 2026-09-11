@@ -102,7 +102,7 @@ export default function ProductActions({
         href={buildWhatsAppLink(displayName)}
         target="_blank"
         rel="noopener noreferrer"
-            className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-700 text-white hover:bg-green-600 active:scale-95 transition"
+        className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-700 text-white hover:bg-green-600 active:scale-95 transition"
       >
         💬 Contact via WhatsApp
       </a>

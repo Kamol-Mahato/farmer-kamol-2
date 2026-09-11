@@ -33,7 +33,9 @@ export default function FaqAccordion({
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
     return groups
-      .filter((g) => activeCategory === "__all__" || g.category === activeCategory)
+      .filter(
+        (g) => activeCategory === "__all__" || g.category === activeCategory,
+      )
       .map((g) => ({
         ...g,
         items: g.items.filter(

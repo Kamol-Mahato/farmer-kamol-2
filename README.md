@@ -6,29 +6,29 @@ Official website of **Farmer Kamol (কৃষক কমল)** — focused on int
 
 ## Tech Stack
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
-* Prisma ORM
-* PostgreSQL (Supabase)
-* Authentication & Authorization
-* Supabase Storage
-* Render (Production Hosting)
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL (Supabase)
+- Authentication & Authorization
+- Supabase Storage
+- Render (Production Hosting)
 
 ## Main Features
 
-* 🛒 Product & Shop
-* 📝 Agricultural Blog
-* 🎥 Farming Videos / Media
-* 👤 Customer Authentication
-* 📦 Order Management
-* 👨‍💼 Admin & Agent Panel
-* 🧾 Invoice & Order Management
-* 📍 Bangladesh District & Upazila Support
-* 🔐 Role-based Access Control
-* 🔎 SEO & Structured Data
-* 🤖 AI/Search Engine Friendly Content Structure
+- 🛒 Product & Shop
+- 📝 Agricultural Blog
+- 🎥 Farming Videos / Media
+- 👤 Customer Authentication
+- 📦 Order Management
+- 👨‍💼 Admin & Agent Panel
+- 🧾 Invoice & Order Management
+- 📍 Bangladesh District & Upazila Support
+- 🔐 Role-based Access Control
+- 🔎 SEO & Structured Data
+- 🤖 AI/Search Engine Friendly Content Structure
 
 ## Project Structure
 
@@ -36,14 +36,14 @@ The project uses the **Next.js App Router** architecture with a `src/` based app
 
 Major areas include:
 
-* Customer-facing website
-* Admin Panel
-* API Routes
-* Authentication
-* Products & Orders
-* Blog & Media
-* Database / Prisma
-* SEO & Metadata
+- Customer-facing website
+- Admin Panel
+- API Routes
+- Authentication
+- Products & Orders
+- Blog & Media
+- Database / Prisma
+- SEO & Metadata
 
 ## Environment Variables
 
@@ -87,10 +87,10 @@ http://localhost:3000
 
 ## Production
 
-* **Hosting:** Render
-* **Database:** Supabase PostgreSQL
-* **Storage:** Supabase
-* **Production Domain:** https://farmerkamol.com
+- **Hosting:** Render
+- **Database:** Supabase PostgreSQL
+- **Storage:** Supabase
+- **Production Domain:** https://farmerkamol.com
 
 ## Security
 

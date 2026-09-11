@@ -370,9 +370,7 @@ export default function AdminBanglarFosolPage() {
           />
           <input
             value={form.usesEn}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, usesEn: e.target.value }))
-            }
+            onChange={(e) => setForm((p) => ({ ...p, usesEn: e.target.value }))}
             placeholder="Uses (English)"
             className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500"
           />

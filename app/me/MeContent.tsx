@@ -24,7 +24,13 @@ import {
 /* ---------- Custom Facebook Icon ---------- */
 function FacebookIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z" />
     </svg>
   );
@@ -44,7 +50,7 @@ function useReveal() {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -52,7 +58,13 @@ function useReveal() {
   return { ref, visible };
 }
 
-function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Reveal({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   const { ref, visible } = useReveal();
   return (
     <div
@@ -142,14 +154,26 @@ export default function MeContent() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0b0f2a]/80 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-          <span className="font-mono text-sm text-indigo-300">&lt;Kamol Mahato/&gt;</span>
+          <span className="font-mono text-sm text-indigo-300">
+            &lt;Kamol Mahato/&gt;
+          </span>
 
           <nav className="hidden md:flex gap-8 text-sm text-slate-300">
-            <a href="#home" className="hover:text-white transition">Home</a>
-            <a href="#about" className="hover:text-white transition">About</a>
-            <a href="#skills" className="hover:text-white transition">Skills</a>
-            <a href="#experience" className="hover:text-white transition">Experience</a>
-            <a href="#projects" className="hover:text-white transition">Projects</a>
+            <a href="#home" className="hover:text-white transition">
+              Home
+            </a>
+            <a href="#about" className="hover:text-white transition">
+              About
+            </a>
+            <a href="#skills" className="hover:text-white transition">
+              Skills
+            </a>
+            <a href="#experience" className="hover:text-white transition">
+              Experience
+            </a>
+            <a href="#projects" className="hover:text-white transition">
+              Projects
+            </a>
           </nav>
 
           <button
@@ -171,11 +195,14 @@ export default function MeContent() {
             </h1>
             <p className="text-slate-300 leading-relaxed mb-8 max-w-lg">
               A dependable{" "}
-              <span className="text-amber-400 font-semibold">Fulfillment & Logistics Specialist</span>{" "}
+              <span className="text-amber-400 font-semibold">
+                Fulfillment & Logistics Specialist
+              </span>{" "}
               with 6+ years of experience in{" "}
               <span className="text-indigo-300">Route Optimization</span>,{" "}
               <span className="text-indigo-300">POD Systems</span> and{" "}
-              <span className="text-indigo-300">COD Reconciliation</span>. Recognized for achieving 98–100% order accuracy.
+              <span className="text-indigo-300">COD Reconciliation</span>.
+              Recognized for achieving 98–100% order accuracy.
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -231,7 +258,9 @@ export default function MeContent() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Personal Info Card */}
             <div className="bg-[#111827]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-5">Personal Info</h3>
+              <h3 className="text-lg font-semibold text-white mb-5">
+                Personal Info
+              </h3>
               <div className="space-y-4 text-sm text-slate-300">
                 <div className="flex items-center gap-3">
                   <Phone size={16} className="text-indigo-400" />
@@ -254,9 +283,16 @@ export default function MeContent() {
 
             {/* About Me Card */}
             <div className="bg-[#111827]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">About Me</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                About Me
+              </h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Highly dependable Fulfillment & Logistics Specialist with 6+ years of experience supporting end-to-end fulfillment operations, including order processing, picking, packing, dispatch, and last-mile delivery across urban and regional networks. Expert in inventory flow coordination, order accuracy, route optimization, POD systems, and fulfillment KPIs.
+                Highly dependable Fulfillment & Logistics Specialist with 6+
+                years of experience supporting end-to-end fulfillment
+                operations, including order processing, picking, packing,
+                dispatch, and last-mile delivery across urban and regional
+                networks. Expert in inventory flow coordination, order accuracy,
+                route optimization, POD systems, and fulfillment KPIs.
               </p>
             </div>
           </div>
@@ -275,11 +311,15 @@ export default function MeContent() {
                 <span className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-indigo-400" />
                 <div className="flex justify-between items-baseline flex-wrap gap-1">
                   <p className="font-semibold text-white">{e.role}</p>
-                  <span className="text-xs text-amber-400 font-medium">{e.time}</span>
+                  <span className="text-xs text-amber-400 font-medium">
+                    {e.time}
+                  </span>
                 </div>
                 <p className="text-sm text-slate-400">{e.company}</p>
                 <p className="text-xs text-slate-500">{e.place}</p>
-                {e.detail && <p className="text-sm text-slate-300 mt-1">{e.detail}</p>}
+                {e.detail && (
+                  <p className="text-sm text-slate-300 mt-1">{e.detail}</p>
+                )}
               </div>
             ))}
           </div>
@@ -298,7 +338,9 @@ export default function MeContent() {
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div>
                   <p className="font-semibold text-white text-lg">{p.name}</p>
-                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">{p.detail}</p>
+                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+                    {p.detail}
+                  </p>
                 </div>
               </div>
               <a
@@ -323,10 +365,15 @@ export default function MeContent() {
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             {education.map((ed, i) => (
-              <div key={i} className="bg-[#111827]/80 border border-white/10 rounded-2xl p-6">
+              <div
+                key={i}
+                className="bg-[#111827]/80 border border-white/10 rounded-2xl p-6"
+              >
                 <div className="flex justify-between items-start gap-2 mb-2">
                   <p className="font-semibold text-white">{ed.degree}</p>
-                  <span className="text-xs text-amber-400 font-medium whitespace-nowrap">{ed.time}</span>
+                  <span className="text-xs text-amber-400 font-medium whitespace-nowrap">
+                    {ed.time}
+                  </span>
                 </div>
                 <p className="text-sm text-slate-400">{ed.school}</p>
                 <p className="text-sm text-slate-500 mt-1">{ed.detail}</p>

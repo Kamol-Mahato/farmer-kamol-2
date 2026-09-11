@@ -326,8 +326,8 @@ export default function AboutPageEn() {
               </h3>
               <p className="text-gray-700 leading-relaxed text-[15px] sm:text-base">
                 Born and raised in Sarail village, Raiganj upazila. Though he
-                graduated in Bengali Literature, he felt a deep pull toward
-                the soil, the crops, and rural life since childhood.
+                graduated in Bengali Literature, he felt a deep pull toward the
+                soil, the crops, and rural life since childhood.
               </p>
             </Reveal>
 
@@ -342,12 +342,11 @@ export default function AboutPageEn() {
               </h3>
               <p className="text-gray-700 leading-relaxed text-[15px] sm:text-base mb-3">
                 For a living, he worked at a courier company in Dhaka — but
-                every holiday, he returned to the familiar soil of the
-                village.
+                every holiday, he returned to the familiar soil of the village.
               </p>
               <blockquote className="border-l-4 border-yellow-400 pl-4 italic text-green-900 font-semibold text-base sm:text-lg">
-                &quot;I&apos;m a person of the soil — the city could never
-                hold me.&quot;
+                &quot;I&apos;m a person of the soil — the city could never hold
+                me.&quot;
               </blockquote>
             </Reveal>
 
@@ -362,12 +361,11 @@ export default function AboutPageEn() {
               </h3>
               <p className="text-gray-700 leading-relaxed text-[15px] sm:text-base">
                 While working in Dhaka, he saw how desperately city people
-                searched for a single bottle of pure honey or
-                adulteration-free desi ghee — yet in his own village, these
-                gifts of nature were right at hand. To close that gap, with
-                no middlemen, delivering pure products straight from the farm
-                to people&apos;s doors — that is how {siteConfig.brand.nameEn}{" "}
-                was born.
+                searched for a single bottle of pure honey or adulteration-free
+                desi ghee — yet in his own village, these gifts of nature were
+                right at hand. To close that gap, with no middlemen, delivering
+                pure products straight from the farm to people&apos;s doors —
+                that is how {siteConfig.brand.nameEn} was born.
               </p>
             </Reveal>
 
@@ -405,16 +403,16 @@ export default function AboutPageEn() {
           <div className="max-w-xl">
             <p className="text-gray-600 text-[15px] leading-relaxed whitespace-pre-line">
               Crops, livestock, poultry, and soil — all interwoven into one
-              complete natural cycle, the very source of every pure
-              agricultural product we offer.
+              complete natural cycle, the very source of every pure agricultural
+              product we offer.
               {"\n\n"}
               When the market is flooded with chemicals, integrated farming
-              gives us the assurance of completely toxin-free food. On our
-              farm, livestock manure enriches the soil, and every crop grows
-              in that living soil without any poisonous pesticides. The
-              natural fertility of the soil combined with our hard work
-              creates every pure product of {siteConfig.brand.nameEn} — ensuring
-              the good health of you and your family.
+              gives us the assurance of completely toxin-free food. On our farm,
+              livestock manure enriches the soil, and every crop grows in that
+              living soil without any poisonous pesticides. The natural
+              fertility of the soil combined with our hard work creates every
+              pure product of {siteConfig.brand.nameEn} — ensuring the good
+              health of you and your family.
               {showMore && (
                 <>
                   {"\n\n"}
@@ -422,22 +420,22 @@ export default function AboutPageEn() {
                   fertilizers. The waste from our ducks, chickens and cattle
                   directly improves soil fertility as organic manure. In turn,
                   the crop residues grown on that soil become animal feed.
-                  Because of this complete natural cycle, every crop retains
-                  its true taste and maximum nutritional value.
+                  Because of this complete natural cycle, every crop retains its
+                  true taste and maximum nutritional value.
                   {"\n\n"}
                   Most food in today&apos;s market is covered in a layer of
                   pesticides and chemicals. But in our integrated system we do
-                  not spray any chemical poison to control pests; instead we
-                  use natural methods of pest management. As a result, soil,
-                  water and the environment stay protected, while 100%
-                  toxin-free and safe food reaches your family&apos;s table.
+                  not spray any chemical poison to control pests; instead we use
+                  natural methods of pest management. As a result, soil, water
+                  and the environment stay protected, while 100% toxin-free and
+                  safe food reaches your family&apos;s table.
                   {"\n\n"}
                   Growing multiple crops together on the same land keeps the
                   soil&apos;s life force alive. Unlike monoculture fields, the
                   soil on our farm never becomes exhausted or depleted of
-                  nutrients. From this living soil we collect the pure
-                  mustard oil, pure ghee, honey and everyday nutritious
-                  agricultural products you love.
+                  nutrients. From this living soil we collect the pure mustard
+                  oil, pure ghee, honey and everyday nutritious agricultural
+                  products you love.
                 </>
               )}
             </p>
@@ -523,9 +521,9 @@ export default function AboutPageEn() {
               </h3>
               <p className="text-gray-700 leading-relaxed text-[15px]">
                 Delivering pure honey, desi ghee, and mustard oil — produced
-                through integrated farming in Sarail village, Raiganj,
-                Sirajganj — directly to the consumer&apos;s door at a fair
-                price, with no middlemen. That is our core goal.
+                through integrated farming in Sarail village, Raiganj, Sirajganj
+                — directly to the consumer&apos;s door at a fair price, with no
+                middlemen. That is our core goal.
               </p>
             </Reveal>
             <Reveal
@@ -539,8 +537,8 @@ export default function AboutPageEn() {
               <p className="text-gray-700 leading-relaxed text-[15px]">
                 To establish {siteConfig.brand.nameEn} as Bangladesh&apos;s
                 trusted brand for honesty and genuine integrated farming — not
-                just a sales platform, but a bridge of trust between farmer
-                and consumer.
+                just a sales platform, but a bridge of trust between farmer and
+                consumer.
               </p>
             </Reveal>
           </div>
@@ -565,9 +563,9 @@ export default function AboutPageEn() {
           <p className="text-gray-700 text-[15px] leading-relaxed">
             {siteConfig.brand.nameEn} will become a familiar, trusted name
             across Bangladesh — not just a brand selling products, but an
-            example of honesty and a real farming life. One day, returning
-            fully to the family land, to show integrated farming on an even
-            bigger scale.
+            example of honesty and a real farming life. One day, returning fully
+            to the family land, to show integrated farming on an even bigger
+            scale.
           </p>
         </Reveal>
       </section>
