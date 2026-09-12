@@ -21,6 +21,7 @@ type Settings = {
   enableCoupons: boolean;
   enableWishlist: boolean;
   enablePaymentGateway: boolean;
+  enableInvestmentProgram: boolean;
 };
 
 // ✅ একটা টগল সুইচ — ক্লিক করলেই সাথে সাথে সেভ হয়ে যাবে (notification on/off-এর মতো)
@@ -196,6 +197,14 @@ export default function AdminSystemSettingsPage() {
           checked={settings.enableWishlist}
           onChange={(v) => updateField("enableWishlist", v)}
           disabled={savingField === "enableWishlist"}
+          comingSoon
+        />
+        <ToggleRow
+          label="বিনিয়োগ প্রোগ্রাম"
+          description="হোমপেজে 'বিনিয়োগ করুন' সেকশন দেখাবে কিনা — কাজ চলাকালীন বন্ধ রাখুন"
+          checked={settings.enableInvestmentProgram}
+          onChange={(v) => updateField("enableInvestmentProgram", v)}
+          disabled={savingField === "enableInvestmentProgram"}
           comingSoon
         />
       </div>

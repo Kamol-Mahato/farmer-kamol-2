@@ -36,6 +36,7 @@ model SystemControlCenter {
   normalOutsideExtraPerUnit Int     @default(30)
   facebookPageUrl           String  @default("https://www.facebook.com/farmerkamol")
   youtubeChannelUrl         String  @default("https://www.youtube.com/@FarmerKamol")
+  enableInvestmentProgram   Boolean @default(false)
 }
 
 model User {
@@ -64,6 +65,7 @@ model User {
   customerOrders           Order[]             @relation("CustomerToOrder")
   reviews                  ProductReview[]
   walletTransactions       WalletTransaction[]
+  investorProfile          InvestorProfile?
 }
 
 model Category {
@@ -467,6 +469,76 @@ model ChatMessage {
   conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
+model InvestorProfile {
+  id                 Int       @id @default(autoincrement())
+  userId             Int       @unique
+  user               User      @relation(fields: [userId], references: [id])
+  email              String?   @unique
+  emailVerified      Boolean   @default(false)
+  fatherName         String?
+  address            String?
+  nidNumber          String?
+  nidImageUrl        String?
+  photoImageUrl      String?
+  signatureImageUrl  String?
+  paymentNumber      String?
+  termsAcceptedAt    DateTime?
+  profileCompletedAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  investments        Investment[]
+}
+
+model Project {
+  id               Int          @id @default(autoincrement())
+  name             String
+  description      String?
+  startDate        DateTime?
+  isAcceptingFunds Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  investments      Investment[]
+}
+
+model Investment {
+  id                Int              @id @default(autoincrement())
+  investorProfileId Int
+  investorProfile   InvestorProfile  @relation(fields: [investorProfileId], references: [id])
+  projectId         Int
+  project           Project          @relation(fields: [projectId], references: [id])
+  amount            Float
+  status            InvestmentStatus @default(PENDING)
+  startDate         DateTime?
+  termMonths        Int?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  transactions      Transaction[]
+  agreement         Agreement?
+}
+
+model Transaction {
+  id           Int               @id @default(autoincrement())
+  investmentId Int
+  investment   Investment        @relation(fields: [investmentId], references: [id])
+  type         TransactionType
+  amount       Float
+  slipImageUrl String?
+  status       TransactionStatus @default(PENDING)
+  note         String?
+  createdAt    DateTime          @default(now())
+  confirmedAt  DateTime?
+}
+
+model Agreement {
+  id             Int        @id @default(autoincrement())
+  investmentId   Int        @unique
+  investment     Investment @relation(fields: [investmentId], references: [id])
+  agreementNo    String     @unique
+  profitSharePct Float?
+  documentUrl    String?
+  generatedAt    DateTime   @default(now())
+}
+
 model playing_with_neon {
   id    Int    @id @default(autoincrement())
   name  String
@@ -531,6 +603,24 @@ enum WalletTxnType {
 enum ChatStatus {
   OPEN
   CLOSED
+}
+
+enum InvestmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
 }
 
 enum ChatSenderType {

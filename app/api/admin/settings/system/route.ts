@@ -54,6 +54,7 @@ export async function PUT(request: Request) {
       "enableCoupons",
       "enableWishlist",
       "enablePaymentGateway",
+      "enableInvestmentProgram",
     ];
 
     const updateData: Record<string, unknown> = {};
