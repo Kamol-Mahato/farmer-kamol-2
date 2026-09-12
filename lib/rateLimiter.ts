@@ -3,7 +3,7 @@ import { sendTelegramAlert } from "@/lib/telegram";
 
 // 🔒 Upstash Redis — build-time এ env variable না থাকলেও যেন crash না করে, তাই lazy init
 let redis: Redis | null = null;
-function getRedis() {
+export function getRedis() {
   if (!redis) {
     redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL ?? "",
