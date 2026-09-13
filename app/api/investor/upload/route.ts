@@ -118,7 +118,12 @@ export async function POST(request: Request) {
 
     await prisma.investorProfile.update({
       where: { userId: customerId },
-      data: { [config.field]: url },
+      data: {
+        [config.field]: url,
+        ...(existing.verificationStatus === "REJECTED"
+          ? { verificationStatus: "PENDING", rejectionReason: null }
+          : {}),
+      },
     });
 
     return NextResponse.json({ success: true, url, field: config.field });

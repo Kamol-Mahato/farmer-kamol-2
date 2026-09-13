@@ -74,6 +74,10 @@ export async function PATCH(request: Request) {
   if (isProfileComplete(merged) && !existing.profileCompletedAt) {
     data.profileCompletedAt = new Date();
   }
+  if (existing.verificationStatus === "REJECTED") {
+    data.verificationStatus = "PENDING";
+    data.rejectionReason = null;
+  }
 
   const profile = await prisma.investorProfile.update({
     where: { userId: customerId },

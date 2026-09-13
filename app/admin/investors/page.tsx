@@ -15,6 +15,8 @@ interface InvestorProfile {
   paymentNumber: string | null;
   termsAcceptedAt: string | null;
   profileCompletedAt: string | null;
+  verificationStatus: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason: string | null;
   createdAt: string;
 }
 
@@ -22,6 +24,36 @@ export default function AdminInvestorsPage() {
   const [profiles, setProfiles] = useState<InvestorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewing, setViewing] = useState<InvestorProfile | null>(null);
+  const [deciding, setDeciding] = useState(false);
+
+  async function decide(status: "APPROVED" | "REJECTED") {
+    if (!viewing) return;
+    let reason = "";
+    if (status === "REJECTED") {
+      reason = prompt("বাতিলের কারণ লিখুন (ঐচ্ছিক):") || "";
+    }
+    setDeciding(true);
+    try {
+      const res = await fetch(`/api/admin/investors/${viewing.id}/verify`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "সমস্যা হয়েছে");
+        return;
+      }
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === viewing.id ? { ...p, ...data.profile } : p)),
+      );
+      setViewing((v) => (v ? { ...v, ...data.profile } : v));
+    } catch {
+      alert("সার্ভার সমস্যা, আবার চেষ্টা করুন");
+    } finally {
+      setDeciding(false);
+    }
+  }
 
   useEffect(() => {
     fetch("/api/admin/investors")
@@ -83,13 +115,21 @@ export default function AdminInvestorsPage() {
                     {p.email || "—"}
                   </td>
                   <td className="px-6 py-4">
-                    {p.profileCompletedAt ? (
+                    {p.verificationStatus === "APPROVED" ? (
                       <span className="bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
-                        সম্পূর্ণ
+                        ✅ অনুমোদিত
+                      </span>
+                    ) : p.verificationStatus === "REJECTED" ? (
+                      <span className="bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
+                        ❌ বাতিল
+                      </span>
+                    ) : p.profileCompletedAt ? (
+                      <span className="bg-yellow-100 text-yellow-800 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
+                        🔎 রিভিউ বাকি
                       </span>
                     ) : p.emailVerified ? (
-                      <span className="bg-yellow-100 text-yellow-800 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
-                        অসম্পূর্ণ
+                      <span className="bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
+                        প্রোফাইল অসম্পূর্ণ
                       </span>
                     ) : (
                       <span className="bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
@@ -175,6 +215,22 @@ export default function AdminInvestorsPage() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2">
+              {viewing.verificationStatus === "APPROVED" ? (
+                <span className="bg-green-100 text-green-700 font-bold px-2.5 py-1 rounded-full text-xs">
+                  ✅ অনুমোদিত
+                </span>
+              ) : viewing.verificationStatus === "REJECTED" ? (
+                <span className="bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-full text-xs">
+                  ❌ বাতিল{viewing.rejectionReason ? `: ${viewing.rejectionReason}` : ""}
+                </span>
+              ) : (
+                <span className="bg-yellow-100 text-yellow-800 font-bold px-2.5 py-1 rounded-full text-xs">
+                  🔎 রিভিউ বাকি
+                </span>
+              )}
+            </div>
+
             <div className="grid grid-cols-3 gap-3 pt-2">
               {[
                 ["এনআইডি", viewing.nidImageUrl],
@@ -199,6 +255,23 @@ export default function AdminInvestorsPage() {
                   )}
                 </div>
               ))}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => decide("APPROVED")}
+                disabled={deciding || viewing.verificationStatus === "APPROVED"}
+                className="flex-1 bg-green-700 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-green-600 disabled:opacity-50"
+              >
+                ✅ অনুমোদন করুন
+              </button>
+              <button
+                onClick={() => decide("REJECTED")}
+                disabled={deciding || viewing.verificationStatus === "REJECTED"}
+                className="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-xl font-bold text-sm hover:bg-red-100 disabled:opacity-50"
+              >
+                ❌ বাতিল করুন
+              </button>
             </div>
 
             <button

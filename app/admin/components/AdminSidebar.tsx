@@ -30,6 +30,11 @@ const navItems = [
     href: "/admin/investors",
     agentVisible: false,
   },
+  {
+    label: "বিনিয়োগ প্রজেক্ট",
+    href: "/admin/projects",
+    agentVisible: false,
+  },
   { label: "এজেন্ট ম্যানেজমেন্ট", href: "/admin/agents", agentVisible: false },
   { label: "ব্লগ ম্যানেজমেন্ট", href: "/admin/blog", agentVisible: false },
   { label: "বাংলার ফসল", href: "/admin/banglar-fosol", agentVisible: false },

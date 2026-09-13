@@ -16,6 +16,8 @@ interface InvestorProfile {
   paymentNumber: string | null;
   termsAcceptedAt: string | null;
   profileCompletedAt: string | null;
+  verificationStatus: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason: string | null;
 }
 
 function DocUpload({
@@ -271,14 +273,49 @@ export default function InvestorPage() {
       </div>
 
       {profileComplete && (
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-6">
-          <p className="text-green-800 font-bold text-sm">
-            ✅ আপনার প্রোফাইল সম্পূর্ণ হয়েছে
-          </p>
-          <p className="text-gray-600 text-sm mt-1">
-            শীঘ্রই এখান থেকেই সরাসরি বিনিয়োগ করা যাবে — সেই অংশটি এখনো তৈরি
-            হচ্ছে।
-          </p>
+        <div
+          className={`border rounded-2xl p-5 mb-6 ${
+            profile?.verificationStatus === "APPROVED"
+              ? "bg-green-50 border-green-200"
+              : profile?.verificationStatus === "REJECTED"
+                ? "bg-red-50 border-red-200"
+                : "bg-yellow-50 border-yellow-200"
+          }`}
+        >
+          {profile?.verificationStatus === "APPROVED" ? (
+            <>
+              <p className="text-green-800 font-bold text-sm">
+                ✅ আপনার প্রোফাইল অনুমোদিত হয়েছে
+              </p>
+              <p className="text-gray-600 text-sm mt-1">
+                শীঘ্রই এখান থেকেই সরাসরি বিনিয়োগ করা যাবে — সেই অংশটি এখনো তৈরি
+                হচ্ছে।
+              </p>
+            </>
+          ) : profile?.verificationStatus === "REJECTED" ? (
+            <>
+              <p className="text-red-700 font-bold text-sm">
+                ❌ আপনার প্রোফাইল বাতিল হয়েছে
+              </p>
+              {profile.rejectionReason && (
+                <p className="text-gray-600 text-sm mt-1">
+                  কারণ: {profile.rejectionReason}
+                </p>
+              )}
+              <p className="text-gray-600 text-sm mt-1">
+                নিচের তথ্য/ছবি ঠিক করে আবার সেভ করুন।
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-yellow-800 font-bold text-sm">
+                🔎 আপনার প্রোফাইল রিভিউ হচ্ছে
+              </p>
+              <p className="text-gray-600 text-sm mt-1">
+                আমরা যাচাই করে শীঘ্রই জানাব।
+              </p>
+            </>
+          )}
         </div>
       )}
 
