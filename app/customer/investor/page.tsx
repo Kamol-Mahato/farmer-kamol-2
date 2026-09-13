@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import InvestmentsSection from "./InvestmentsSection";
 
 interface InvestorProfile {
   email: string | null;
@@ -489,6 +490,8 @@ export default function InvestorPage() {
           </button>
         </form>
       )}
+
+      {profile?.verificationStatus === "APPROVED" && <InvestmentsSection />}
     </div>
   );
 }
