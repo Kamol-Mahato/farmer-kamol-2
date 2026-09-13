@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface Project {
   id: number;
@@ -296,6 +297,15 @@ export default function InvestmentsSection() {
                       <> · চুক্তি নং: {inv.agreement.agreementNo}</>
                     )}
                   </p>
+                  {inv.agreement && (
+                    <Link
+                      href={`/agreement/${inv.id}`}
+                      target="_blank"
+                      className="text-green-700 text-xs font-bold hover:underline mt-1 inline-block"
+                    >
+                      📄 চুক্তিপত্র দেখুন
+                    </Link>
+                  )}
                 </div>
                 <span className="bg-gray-100 text-gray-700 font-bold px-2.5 py-1 rounded-full text-xs whitespace-nowrap">
                   {investmentStatusLabel[inv.status]}
