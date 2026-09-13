@@ -470,23 +470,32 @@ model ChatMessage {
 }
 
 model InvestorProfile {
-  id                 Int       @id @default(autoincrement())
-  userId             Int       @unique
-  user               User      @relation(fields: [userId], references: [id])
-  email              String?   @unique
-  emailVerified      Boolean   @default(false)
-  fatherName         String?
-  address            String?
-  nidNumber          String?
-  nidImageUrl        String?
-  photoImageUrl      String?
-  signatureImageUrl  String?
-  paymentNumber      String?
-  termsAcceptedAt    DateTime?
-  profileCompletedAt DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  investments        Investment[]
+  id                   Int                        @id @default(autoincrement())
+  userId               Int                        @unique
+  user                 User                       @relation(fields: [userId], references: [id])
+  email                String?                    @unique
+  emailVerified        Boolean                    @default(false)
+  fatherName           String?
+  address              String?
+  nidNumber            String?
+  nidImageUrl          String?
+  photoImageUrl        String?
+  signatureImageUrl    String?
+  paymentNumber        String?
+  termsAcceptedAt      DateTime?
+  profileCompletedAt   DateTime?
+  verificationStatus   InvestorVerificationStatus @default(PENDING)
+  verifiedAt           DateTime?
+  rejectionReason      String?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  investments          Investment[]
+}
+
+enum InvestorVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Project {

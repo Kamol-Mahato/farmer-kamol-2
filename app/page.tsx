@@ -8,6 +8,7 @@ import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
 import type { Metadata } from "next";
 import NoticeModal from "./components/NoticeModal"; // এটি যোগ করুন
 import VideoSection from "./components/VideoSection";
+import InvestSection from "./components/InvestSection";
 import TopSellerSection from "./components/TopSellerSection";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -140,6 +141,9 @@ export default async function HomePage() {
           systemSettings?.facebookPageUrl || siteConfig.social.facebook
         }
       />
+
+      {/* Investment CTA — admin panel থেকে on/off */}
+      {systemSettings?.enableInvestmentProgram && <InvestSection />}
 
       {/* Reviews — Footer-এর ঠিক আগে */}
       <TestimonialSection reviews={reviews} />

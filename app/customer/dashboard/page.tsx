@@ -32,6 +32,14 @@ export default function CustomerDashboard() {
   );
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showInvestor, setShowInvestor] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings/investment-flag")
+      .then((res) => res.json())
+      .then((data) => setShowInvestor(Boolean(data.enabled)))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     // লোকাল স্টোরেজ থেকে লগইন করা ইউজারের ডাটা চেক করা
@@ -90,6 +98,14 @@ export default function CustomerDashboard() {
             className="bg-white text-green-800 border border-green-200 px-5 py-2.5 rounded-xl font-bold text-sm text-center hover:bg-green-50 transition"
           >
             ⚙️ আমার তথ্য
+          </Link>
+          <Link
+            href="/customer/investor"
+            className={`bg-white text-green-800 border border-green-200 px-5 py-2.5 rounded-xl font-bold text-sm text-center hover:bg-green-50 transition ${
+              showInvestor ? "" : "hidden"
+            }`}
+          >
+            🌱 বিনিয়োগকারী
           </Link>
           <Link
             href="/shop"

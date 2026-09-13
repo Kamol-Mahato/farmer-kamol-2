@@ -25,6 +25,11 @@ const navItems = [
     agentHref: "/agent/customers",
     agentVisible: true,
   },
+  {
+    label: "বিনিয়োগকারী প্রোফাইল",
+    href: "/admin/investors",
+    agentVisible: false,
+  },
   { label: "এজেন্ট ম্যানেজমেন্ট", href: "/admin/agents", agentVisible: false },
   { label: "ব্লগ ম্যানেজমেন্ট", href: "/admin/blog", agentVisible: false },
   { label: "বাংলার ফসল", href: "/admin/banglar-fosol", agentVisible: false },
