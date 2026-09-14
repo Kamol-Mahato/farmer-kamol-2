@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import { ExpandableText, StepAccordion } from "./InvestAccordion";
+import InvestCalculator from "./InvestCalculator";
 
 export const revalidate = 86400;
 
@@ -93,6 +94,15 @@ export default function InvestPage() {
           )}
         </div>
       </section>
+
+      {/* =========================================================
+    LIVE CALCULATOR
+========================================================== */}
+<section className="py-12 md:py-14 px-4">
+  <div className="max-w-3xl mx-auto">
+    <InvestCalculator />
+  </div>
+</section>
 
       {/* =========================================================
           CURRENT PROJECT
@@ -219,140 +229,152 @@ export default function InvestPage() {
       </section>
 
       {/* =========================================================
-          PROFIT MODEL
-      ========================================================== */}
-      <section id="profit-model" className="py-12 md:py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-3">
-            <SectionHeading>📊 লাভ কীভাবে ভাগ হবে</SectionHeading>
+    PROFIT MODEL
+========================================================== */}
+<section id="profit-model" className="py-12 md:py-16 px-4">
+  <div className="max-w-4xl mx-auto">
+    <div className="text-center mb-3">
+      <SectionHeading>📊 লাভ কীভাবে ভাগ হবে</SectionHeading>
+    </div>
+
+    <p className="text-center text-xs md:text-sm text-gray-500 max-w-2xl mx-auto mb-10">
+      নিচের হিসাবটি শুধুমাত্র বোঝানোর জন্য একটি উদাহরণ। এটি কোনো নিশ্চিত
+      লাভের পূর্বাভাস নয়।
+    </p>
+
+    {/* ===== নিট লাভ হিসাব ===== */}
+    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+      <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+        <h3 className="font-bold text-gray-800 text-base md:text-lg">
+          নিট লাভ কীভাবে বের হয়?
+        </h3>
+      </div>
+
+      <div className="p-6 md:p-8">
+        <div className="space-y-4">
+          {/* Sales */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold">
+                K
+              </div>
+              <span className="text-gray-700 font-medium">মোট বিক্রয়</span>
+            </div>
+            <span className="text-lg font-bold text-green-800">
+              ৳{exampleSales.toLocaleString("bn-BD")}
+            </span>
           </div>
 
-          <p className="text-center text-xs md:text-sm text-gray-500 max-w-2xl mx-auto mb-9">
-            নিচের হিসাবটি শুধুমাত্র বোঝানোর জন্য একটি উদাহরণ। এটি কোনো
-            নিশ্চিত লাভের পূর্বাভাস নয়।
-          </p>
-
-          {/* K - Y calculation */}
-          <div className="grid md:grid-cols-3 gap-4 mb-7">
-            <div className="rounded-2xl border border-green-100 bg-green-50 p-5 text-center">
-              <p className="text-sm text-gray-600 mb-1">
-                মোট বিক্রয় — K
-              </p>
-              <p className="text-2xl font-bold text-green-800">
-                ৳{exampleSales.toLocaleString("bn-BD")}
-              </p>
+          {/* Expense */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm font-bold">
+                Y
+              </div>
+              <span className="text-gray-700 font-medium">মোট খরচ</span>
             </div>
-
-            <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-center">
-              <p className="text-sm text-gray-600 mb-1">
-                মোট খরচ — Y
-              </p>
-              <p className="text-2xl font-bold text-red-700">
-                ৳{exampleExpense.toLocaleString("bn-BD")}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 text-center">
-              <p className="text-sm text-gray-600 mb-1">
-                নিট লাভ — K − Y
-              </p>
-              <p className="text-2xl font-bold text-blue-800">
-                ৳{exampleProfit.toLocaleString("bn-BD")}
-              </p>
-            </div>
+            <span className="text-lg font-bold text-red-600">
+              − ৳{exampleExpense.toLocaleString("bn-BD")}
+            </span>
           </div>
 
-          {/* 65 / 35 */}
-          <div className="bg-white border border-gray-200 rounded-3xl shadow-sm p-6 md:p-8">
-            <div className="grid md:grid-cols-2 gap-5">
-              {/* Farmer */}
-              <div className="rounded-2xl bg-green-50 border border-green-100 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Farmer Kamol</p>
-                    <h3 className="text-xl font-bold text-green-900">
-                      ৬৫% লাভ
-                    </h3>
-                  </div>
+          {/* Divider */}
+          <div className="border-t border-dashed border-gray-200 my-2"></div>
 
-                  <div className="text-3xl font-black text-green-700">
-                    65%
-                  </div>
-                </div>
-
-                <div className="h-4 bg-white rounded-full overflow-hidden mb-4">
-                  <div className="h-full w-[65%] bg-green-600 rounded-full" />
-                </div>
-
-                <p className="text-sm text-gray-600">
-                  উদাহরণে Farmer Kamol-এর অংশ:
-                </p>
-                <p className="text-2xl font-bold text-green-800 mt-1">
-                  ৳{farmerShare.toLocaleString("bn-BD")}
-                </p>
+          {/* Net Profit */}
+          <div className="flex items-center justify-between bg-blue-50 rounded-2xl px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">
+                =
               </div>
-
-              {/* Investors */}
-              <div className="rounded-2xl bg-blue-50 border border-blue-100 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Investor Pool</p>
-                    <h3 className="text-xl font-bold text-blue-900">
-                      ৩৫% লাভ
-                    </h3>
-                  </div>
-
-                  <div className="text-3xl font-black text-blue-700">
-                    35%
-                  </div>
-                </div>
-
-                <div className="h-4 bg-white rounded-full overflow-hidden mb-4">
-                  <div className="h-full w-[35%] bg-blue-600 rounded-full" />
-                </div>
-
-                <p className="text-sm text-gray-600">
-                  উদাহরণে সকল Investor-এর মোট অংশ:
-                </p>
-                <p className="text-2xl font-bold text-blue-800 mt-1">
-                  ৳{investorShare.toLocaleString("bn-BD")}
-                </p>
-              </div>
+              <span className="text-gray-800 font-bold">নিট লাভ (K − Y)</span>
             </div>
-
-            <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-100 p-5">
-              <p className="font-bold text-gray-800 mb-2">
-                Investor Pool কীভাবে ভাগ হবে?
-              </p>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                সকল Investor-এর জন্য নির্ধারিত ৩৫% লাভের pool তাদের প্রত্যেকের
-                প্রকৃত বিনিয়োগের অনুপাত অনুযায়ী ভাগ হবে। অর্থাৎ যে যত বেশি
-                অংশ বিনিয়োগ করবেন, Investor Pool-এ তার অংশও সেই অনুপাতে হবে।
-              </p>
-            </div>
-          </div>
-
-          {/* Bonus */}
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 md:p-6">
-            <div className="flex gap-3">
-              <div className="text-2xl">⭐</div>
-
-              <div>
-                <h3 className="font-bold text-amber-900 mb-1">
-                  অতিরিক্ত Investor Bonus
-                </h3>
-
-                <p className="text-sm text-amber-900/80 leading-relaxed">
-                  কোনো প্রজেক্টে প্রকৃত লাভ প্রত্যাশার তুলনায় অনেক বেশি হলে
-                  Farmer Kamol চাইলে Investor Pool-এর জন্য অতিরিক্ত bonus দিতে
-                  পারবেন। এই bonus ৩৫% base share-এর অতিরিক্ত হবে এবং
-                  Investor-দের প্রাপ্য কমিয়ে দেওয়ার জন্য ব্যবহার করা হবে না।
-                </p>
-              </div>
-            </div>
+            <span className="text-2xl font-black text-blue-800">
+              ৳{exampleProfit.toLocaleString("bn-BD")}
+            </span>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+
+    {/* ===== ৬৫% / ৩৫% ভাগ ===== */}
+    <div className="grid md:grid-cols-2 gap-5 mb-6">
+      {/* Farmer */}
+      <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-xs text-green-700 font-medium mb-1">
+              Farmer Kamol
+            </p>
+            <h3 className="text-2xl font-bold text-green-900">৬৫% লাভ</h3>
+          </div>
+          <div className="text-4xl font-black text-green-700">65%</div>
+        </div>
+
+        <div className="h-3 bg-white rounded-full overflow-hidden mb-5">
+          <div className="h-full w-[65%] bg-green-600 rounded-full" />
+        </div>
+
+        <p className="text-sm text-gray-600 mb-1">উদাহরণে প্রাপ্য:</p>
+        <p className="text-2xl font-bold text-green-800">
+          ৳{farmerShare.toLocaleString("bn-BD")}
+        </p>
+      </div>
+
+      {/* Investors */}
+      <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-xs text-blue-700 font-medium mb-1">
+              Investor Pool
+            </p>
+            <h3 className="text-2xl font-bold text-blue-900">৩৫% লাভ</h3>
+          </div>
+          <div className="text-4xl font-black text-blue-700">35%</div>
+        </div>
+
+        <div className="h-3 bg-white rounded-full overflow-hidden mb-5">
+          <div className="h-full w-[35%] bg-blue-600 rounded-full" />
+        </div>
+
+        <p className="text-sm text-gray-600 mb-1">উদাহরণে প্রাপ্য:</p>
+        <p className="text-2xl font-bold text-blue-800">
+          ৳{investorShare.toLocaleString("bn-BD")}
+        </p>
+      </div>
+    </div>
+
+    {/* ===== Investor Pool ব্যাখ্যা ===== */}
+    <div className="rounded-2xl bg-gray-50 border border-gray-100 p-5 md:p-6 mb-5">
+      <p className="font-bold text-gray-800 mb-2">
+        Investor Pool কীভাবে ভাগ হবে?
+      </p>
+      <p className="text-sm text-gray-600 leading-relaxed">
+        সকল Investor-এর জন্য নির্ধারিত ৩৫% লাভের pool তাদের প্রত্যেকের প্রকৃত
+        বিনিয়োগের অনুপাত অনুযায়ী ভাগ হবে। অর্থাৎ যে যত বেশি অংশ বিনিয়োগ
+        করবেন, Investor Pool-এ তার অংশও সেই অনুপাতে হবে।
+      </p>
+    </div>
+
+    {/* ===== Bonus ===== */}
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 md:p-6">
+      <div className="flex gap-3">
+        <div className="text-2xl">⭐</div>
+        <div>
+          <h3 className="font-bold text-amber-900 mb-1">
+            অতিরিক্ত Investor Bonus
+          </h3>
+          <p className="text-sm text-amber-900/80 leading-relaxed">
+            কোনো প্রজেক্টে প্রকৃত লাভ প্রত্যাশার তুলনায় অনেক বেশি হলে Farmer
+            Kamol চাইলে Investor Pool-এর জন্য অতিরিক্ত bonus দিতে পারবেন। এই
+            bonus ৩৫% base share-এর অতিরিক্ত হবে এবং Investor-দের প্রাপ্য
+            কমিয়ে দেওয়ার জন্য ব্যবহার করা হবে না।
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* =========================================================
           PROJECT ACCOUNTING
