@@ -55,6 +55,11 @@ export async function PUT(request: Request) {
       "enableWishlist",
       "enablePaymentGateway",
       "enableInvestmentProgram",
+      "farmCowCount",
+      "farmDuckCount",
+      "farmGoatCount",
+      "farmLandBigha",
+      "farmLocation",
     ];
 
     const updateData: Record<string, unknown> = {};
@@ -72,6 +77,7 @@ export async function PUT(request: Request) {
     revalidatePath("/en");
     revalidatePath("/media/video");
     revalidatePath("/en/media/video");
+    revalidatePath("/invest");
     return NextResponse.json(settings);
   } catch (error) {
     console.error("SYSTEM SETTINGS PUT ERROR:", error);

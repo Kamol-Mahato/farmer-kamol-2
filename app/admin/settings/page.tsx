@@ -22,6 +22,11 @@ type Settings = {
   enableWishlist: boolean;
   enablePaymentGateway: boolean;
   enableInvestmentProgram: boolean;
+  farmCowCount: number | null;
+  farmDuckCount: number | null;
+  farmGoatCount: number | null;
+  farmLandBigha: number | null;
+  farmLocation: string | null;
 };
 
 // ✅ একটা টগল সুইচ — ক্লিক করলেই সাথে সাথে সেভ হয়ে যাবে (notification on/off-এর মতো)
@@ -382,6 +387,122 @@ export default function AdminSystemSettingsPage() {
           টেক্সট/নাম্বার ফিল্ড থেকে বাইরে ক্লিক করলেই (blur) স্বয়ংক্রিয়ভাবে
           সেভ হয়ে যাবে
         </p>
+      </div>
+
+      {/* গ্রুপ ৪ — /invest পেজের "খামারের বর্তমান অবস্থা" */}
+      <div className="bg-white rounded-xl shadow p-6 mt-6">
+        <h2 className="text-lg font-bold text-green-700 mb-1">
+          খামারের বর্তমান অবস্থা
+        </h2>
+        <p className="text-xs text-gray-400 mb-4">
+          এই সংখ্যাগুলো /invest পেজে সরাসরি দেখানো হবে — নিয়মিত আপডেট করুন
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              গরু
+            </label>
+            <input
+              type="number"
+              value={settings.farmCowCount ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  farmCowCount: e.target.value === "" ? null : Number(e.target.value),
+                })
+              }
+              onBlur={(e) =>
+                updateField(
+                  "farmCowCount",
+                  e.target.value === "" ? 0 : Number(e.target.value),
+                )
+              }
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              চীনা হাঁস
+            </label>
+            <input
+              type="number"
+              value={settings.farmDuckCount ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  farmDuckCount: e.target.value === "" ? null : Number(e.target.value),
+                })
+              }
+              onBlur={(e) =>
+                updateField(
+                  "farmDuckCount",
+                  e.target.value === "" ? 0 : Number(e.target.value),
+                )
+              }
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ছাগল
+            </label>
+            <input
+              type="number"
+              value={settings.farmGoatCount ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  farmGoatCount: e.target.value === "" ? null : Number(e.target.value),
+                })
+              }
+              onBlur={(e) =>
+                updateField(
+                  "farmGoatCount",
+                  e.target.value === "" ? 0 : Number(e.target.value),
+                )
+              }
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              জমি (বিঘা)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              value={settings.farmLandBigha ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  farmLandBigha: e.target.value === "" ? null : Number(e.target.value),
+                })
+              }
+              onBlur={(e) =>
+                updateField(
+                  "farmLandBigha",
+                  e.target.value === "" ? 0 : Number(e.target.value),
+                )
+              }
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              অবস্থান
+            </label>
+            <input
+              type="text"
+              value={settings.farmLocation ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, farmLocation: e.target.value })
+              }
+              onBlur={(e) => updateField("farmLocation", e.target.value)}
+              placeholder="সারাইল, সিরাজগঞ্জ"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

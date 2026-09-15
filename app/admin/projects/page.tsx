@@ -7,6 +7,13 @@ interface Project {
   description: string | null;
   startDate: string | null;
   isAcceptingFunds: boolean;
+  isFeaturedOnInvestPage: boolean;
+  targetAmount: number | null;
+  ownContributionAmount: number | null;
+  fundUsage: string | null;
+  timeline: string | null;
+  risks: string | null;
+  profitShareNote: string | null;
   createdAt: string;
   _count: { investments: number };
 }
@@ -21,6 +28,12 @@ export default function AdminProjectsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
+  const [targetAmount, setTargetAmount] = useState("");
+  const [ownContributionAmount, setOwnContributionAmount] = useState("");
+  const [fundUsage, setFundUsage] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [risks, setRisks] = useState("");
+  const [profitShareNote, setProfitShareNote] = useState("");
 
   function loadProjects() {
     setLoading(true);
@@ -49,7 +62,19 @@ export default function AdminProjectsPage() {
       const res = await fetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, startDate }),
+        body: JSON.stringify({
+          name,
+          description,
+          startDate,
+          targetAmount: targetAmount ? Number(targetAmount) : null,
+          ownContributionAmount: ownContributionAmount
+            ? Number(ownContributionAmount)
+            : null,
+          fundUsage,
+          timeline,
+          risks,
+          profitShareNote,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -59,6 +84,12 @@ export default function AdminProjectsPage() {
       setName("");
       setDescription("");
       setStartDate("");
+      setTargetAmount("");
+      setOwnContributionAmount("");
+      setFundUsage("");
+      setTimeline("");
+      setRisks("");
+      setProfitShareNote("");
       setShowForm(false);
       loadProjects();
     } catch {
@@ -82,6 +113,25 @@ export default function AdminProjectsPage() {
         setProjects((prev) =>
           prev.map((p) => (p.id === project.id ? data.project : p)),
         );
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // ✅ /invest পেজে "বিস্তারিত"সহ কোন প্রজেক্ট দেখাবে সেটা এখান থেকে সেট করুন
+  async function toggleFeatured(project: Project) {
+    try {
+      const res = await fetch(`/api/admin/projects/${project.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isFeaturedOnInvestPage: !project.isFeaturedOnInvestPage,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        loadProjects();
       }
     } catch {
       // ignore
@@ -148,6 +198,77 @@ export default function AdminProjectsPage() {
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
             />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                মোট প্রয়োজন (৳)
+              </label>
+              <input
+                type="number"
+                value={targetAmount}
+                onChange={(e) => setTargetAmount(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                নিজের বিনিয়োগ (৳)
+              </label>
+              <input
+                type="number"
+                value={ownContributionAmount}
+                onChange={(e) => setOwnContributionAmount(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              টাকা কোথায় খরচ হবে
+            </label>
+            <textarea
+              value={fundUsage}
+              onChange={(e) => setFundUsage(e.target.value)}
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              সময়সীমা
+            </label>
+            <input
+              type="text"
+              value={timeline}
+              onChange={(e) => setTimeline(e.target.value)}
+              placeholder="যেমন: আগস্ট–ডিসেম্বর ২০২৭"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              ঝুঁকি
+            </label>
+            <textarea
+              value={risks}
+              onChange={(e) => setRisks(e.target.value)}
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              লাভ/ক্ষতি বণ্টন নোট (ঐচ্ছিক)
+            </label>
+            <textarea
+              value={profitShareNote}
+              onChange={(e) => setProfitShareNote(e.target.value)}
+              rows={2}
+              placeholder="খালি রাখলে ডিফল্ট ৬৫/৩৫ ভাগ দেখাবে"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+          </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"
@@ -209,10 +330,10 @@ export default function AdminProjectsPage() {
                       ? new Date(p.startDate).toLocaleDateString("bn-BD")
                       : "—"}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 space-y-1.5">
                     <button
                       onClick={() => toggleAccepting(p)}
-                      className={`font-bold px-3 py-1.5 rounded-lg text-xs transition ${
+                      className={`block w-full font-bold px-3 py-1.5 rounded-lg text-xs transition ${
                         p.isAcceptingFunds
                           ? "bg-red-50 text-red-600 hover:bg-red-100"
                           : "bg-green-100 text-green-700 hover:bg-green-200"
@@ -221,6 +342,18 @@ export default function AdminProjectsPage() {
                       {p.isAcceptingFunds
                         ? "বিনিয়োগ বন্ধ করুন"
                         : "বিনিয়োগ চালু করুন"}
+                    </button>
+                    <button
+                      onClick={() => toggleFeatured(p)}
+                      className={`block w-full font-bold px-3 py-1.5 rounded-lg text-xs transition ${
+                        p.isFeaturedOnInvestPage
+                          ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                          : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                      }`}
+                    >
+                      {p.isFeaturedOnInvestPage
+                        ? "★ /invest-এ ফিচার্ড"
+                        : "/invest-এ ফিচার করুন"}
                     </button>
                   </td>
                 </tr>

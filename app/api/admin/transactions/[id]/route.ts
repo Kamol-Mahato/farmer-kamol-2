@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminOnly } from "@/lib/adminAuth";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   request: Request,
@@ -50,5 +51,6 @@ export async function PATCH(
     });
   }
 
+  revalidatePath("/invest");
   return NextResponse.json({ success: true, transaction: updated });
 }

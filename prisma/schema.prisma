@@ -11,6 +11,12 @@ model SystemControlCenter {
   enableOtpForGuest         Boolean @default(false)
   defaultLanguage           String  @default("BN")
   heroYoutubeUrl            String  @default("https://www.youtube.com/watch?v=default")
+  // ✅ /invest পেজের "খামারের বর্তমান অবস্থা" সেকশনের জন্য — admin থেকে এডিট হবে
+  farmCowCount              Int?
+  farmDuckCount             Int?
+  farmGoatCount             Int?
+  farmLandBigha             Float?
+  farmLocation              String?
   maskCustomerData          Boolean @default(true)
   disableLiveCourierAPI     Boolean @default(true)
   paperSizeMode             String  @default("POS")
@@ -499,14 +505,22 @@ enum InvestorVerificationStatus {
 }
 
 model Project {
-  id               Int          @id @default(autoincrement())
-  name             String
-  description      String?
-  startDate        DateTime?
-  isAcceptingFunds Boolean      @default(true)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  investments      Investment[]
+  id                     Int          @id @default(autoincrement())
+  name                   String
+  description            String?
+  startDate              DateTime?
+  isAcceptingFunds       Boolean      @default(true)
+  // ✅ /invest পাবলিক পেজে "বিস্তারিত" সহ ফিচার হবে কোন প্রজেক্টটা (একসাথে একটাই)
+  isFeaturedOnInvestPage Boolean      @default(false)
+  targetAmount           Float?
+  ownContributionAmount  Float?
+  fundUsage              String?
+  timeline               String?
+  risks                  String?
+  profitShareNote        String?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  investments            Investment[]
 }
 
 model Investment {
