@@ -33,16 +33,24 @@ function SubNav() {
   ];
   return (
     <div className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
-      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-2 overflow-x-auto text-sm scrollbar-hide">
-        {links.map((l) => (
-          <a
-            key={l.href}
-            href={l.href}
-            className="shrink-0 px-4 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 transition whitespace-nowrap"
-          >
-            {l.label}
-          </a>
-        ))}
+      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+        <div className="flex-1 flex items-center justify-center gap-1 overflow-x-auto text-sm scrollbar-hide">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="shrink-0 px-4 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 transition whitespace-nowrap"
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+        <Link
+          href="/customer/dashboard"
+          className="shrink-0 inline-flex items-center gap-1.5 bg-green-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-green-800 transition whitespace-nowrap"
+        >
+          বিনিয়োগ করুন →
+        </Link>
       </div>
     </div>
   );
@@ -511,7 +519,7 @@ export default async function InvestPage() {
       </section>
 
       {/* Sticky Button (ডান পাশে সবসময় দেখা যাবে) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed top-6 right-6 z-50">
         <Link
           href="/customer/dashboard"
           className="inline-flex items-center gap-2 bg-green-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-green-800 transition"
