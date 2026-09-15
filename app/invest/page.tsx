@@ -518,15 +518,6 @@ export default async function InvestPage() {
         </div>
       </section>
 
-      {/* Sticky Button (ডান পাশে সবসময় দেখা যাবে) */}
-      <div className="fixed top-6 right-6 z-50">
-        <Link
-          href="/customer/dashboard"
-          className="inline-flex items-center gap-2 bg-green-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-green-800 transition"
-        >
-          বিনিয়োগ করুন
-        </Link>
       </div>
-    </div>
   );
 }
