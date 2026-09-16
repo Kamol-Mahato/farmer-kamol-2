@@ -144,23 +144,26 @@ function SubNav() {
   ];
   return (
     <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex-1 flex flex-wrap items-center justify-center gap-1.5 text-sm md:flex-nowrap md:overflow-x-auto md:scrollbar-hide">
+      <div className="max-w-6xl mx-auto px-3 md:px-4 py-2 flex items-center gap-2">
+        {/* লিংক — মোবাইলে এক লাইনে স্ক্রল, র‌্যাপ নয় */}
+        <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto scrollbar-hide text-sm">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="shrink-0 px-4 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+              className="shrink-0 px-3 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
             >
               {l.label}
             </a>
           ))}
         </div>
+
+        {/* CTA — সবসময় ডানে দৃশ্যমান */}
         <Link
           href="/customer/dashboard"
-          className="shrink-0 inline-flex items-center gap-1.5 bg-green-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-green-800 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+          className="shrink-0 inline-flex items-center gap-1 bg-green-700 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
         >
-          বিনিয়োগ করুন →
+          বিনিয়োগ করুন
         </Link>
       </div>
     </div>
@@ -220,7 +223,7 @@ export default async function InvestPage() {
       <section className="relative bg-gradient-to-b from-green-50 to-white pt-10 pb-16 md:pt-14 md:pb-20 px-4">
         <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <Reveal direction="up" delay={80}>
+        <Reveal direction="up" delay={0}>
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-2 bg-white border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-green-500"></span>
