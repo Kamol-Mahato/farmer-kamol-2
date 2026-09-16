@@ -7,10 +7,25 @@ import {
   checkRateLimit,
   recordFailedAttempt,
   clearAttempts,
+  checkIpRateLimit,
+  getClientIp,
 } from "@/lib/rateLimiter";
 
 export async function POST(request: Request) {
   try {
+    // 🔒 IP ভিত্তিক হালকা limit (৬০ / ঘণ্টা) — shared network-এ conflict কম
+    const ip = getClientIp(request);
+    const ipCheck = await checkIpRateLimit(ip, 60, 60 * 60);
+    if (!ipCheck.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const { phone, password } = body;
 
