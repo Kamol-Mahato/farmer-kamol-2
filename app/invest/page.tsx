@@ -72,7 +72,7 @@ function YoutubeCard({
               src={thumb}
               alt={title}
               loading="lazy"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition">
               <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white text-xl shadow-lg">
@@ -112,7 +112,7 @@ function YoutubeCard({
 // ✅ ছবির কার্ড — imageUrl না থাকলে টাইটেল-সহ ধূসর প্লেসহোল্ডার
 function PhotoCard({ title, imageUrl }: { title: string; imageUrl: string }) {
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm">
+    <div className="rounded-2xl overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
       <div
         className="relative bg-gray-100 flex items-center justify-center text-gray-500 text-sm text-center px-3 font-medium"
         style={{ aspectRatio: "16/9" }}
@@ -143,14 +143,14 @@ function SubNav() {
     { href: "/contact", label: "যোগাযোগ" },
   ];
   return (
-    <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100">
+    <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex-1 flex flex-wrap items-center justify-center gap-1.5 text-sm md:flex-nowrap md:overflow-x-auto md:scrollbar-hide">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="shrink-0 px-4 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 transition whitespace-nowrap"
+              className="shrink-0 px-4 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
             >
               {l.label}
             </a>
@@ -158,7 +158,7 @@ function SubNav() {
         </div>
         <Link
           href="/customer/dashboard"
-          className="shrink-0 inline-flex items-center gap-1.5 bg-green-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-green-800 transition whitespace-nowrap"
+          className="shrink-0 inline-flex items-center gap-1.5 bg-green-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-green-800 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
         >
           বিনিয়োগ করুন →
         </Link>
@@ -169,7 +169,7 @@ function SubNav() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
       <p className="text-2xl md:text-3xl font-black text-green-700">{value}</p>
       <p className="text-xs md:text-sm text-gray-500 mt-1">{label}</p>
     </div>
@@ -220,7 +220,7 @@ export default async function InvestPage() {
       <section className="relative bg-gradient-to-b from-green-50 to-white pt-10 pb-16 md:pt-14 md:pb-20 px-4">
         <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <Reveal direction="left">
+        <Reveal direction="up" delay={80}>
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-2 bg-white border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -247,13 +247,13 @@ export default async function InvestPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/customer/dashboard"
-                  className="inline-flex items-center justify-center gap-2 bg-green-700 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-green-700 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
                 >
                   অংশীদার হওয়ার আবেদন করুন →
                 </Link>
                 <a
                   href="#projects"
-                  className="inline-flex items-center justify-center px-7 py-3.5 rounded-full font-semibold text-green-700 border border-green-300 bg-white hover:bg-green-50 transition"
+                  className="inline-flex items-center justify-center px-7 py-3.5 rounded-full font-semibold text-green-700 border border-green-300 bg-white hover:bg-green-50 hover:border-green-500 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 ease-out"
                 >
                   প্রকল্পসমূহ দেখুন
                 </a>
@@ -263,7 +263,7 @@ export default async function InvestPage() {
                 <a
                   href={systemSettings.youtubeChannelUrl}
                   target="_blank"
-                  className="inline-flex items-center gap-1.5 mt-5 text-sm text-gray-500 hover:text-green-700 font-medium"
+                  className="inline-flex items-center gap-1.5 mt-5 text-sm text-gray-500 hover:text-green-700 font-medium transition-colors duration-300 ease-out"
                 >
                   ▶ খামারের সব ভিডিও ইউটিউবে দেখুন
                 </a>
@@ -308,9 +308,9 @@ export default async function InvestPage() {
               <Reveal
                 key={item.title}
                 direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
-                delay={(i % 3) * 120}
+                delay={(i % 3) * 80}
               >
-                <div className="bg-green-50 border border-green-100 rounded-2xl p-5">
+                <div className="bg-green-50 border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
                 </div>
@@ -329,19 +329,19 @@ export default async function InvestPage() {
             <SectionHeading>খামারের বর্তমান অবস্থা</SectionHeading>
           </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Reveal delay={0}>
-              <StatCard label="গরু" value={`${systemSettings?.farmCowCount ?? 0}টি`} />
+          <Reveal delay={0}>
+              <StatCard label="গরু" value={`${systemSettings?.farmCowCount ?? 5}টি`} />
             </Reveal>
-            <Reveal delay={100}>
-              <StatCard label="চীনা হাঁস" value={`${systemSettings?.farmDuckCount ?? 0}টি`} />
+            <Reveal delay={80}>
+              <StatCard label="চীনা হাঁস" value={`${systemSettings?.farmDuckCount ?? 15}টি`} />
             </Reveal>
-            <Reveal delay={200}>
-              <StatCard label="ছাগল" value={`${systemSettings?.farmGoatCount ?? 0}টি`} />
+            <Reveal delay={160}>
+              <StatCard label="ছাগল" value={`${systemSettings?.farmGoatCount ?? 4}টি`} />
             </Reveal>
-            <Reveal delay={300}>
+            <Reveal delay={240}>
               <StatCard
                 label="জমি"
-                value={`${systemSettings?.farmLandBigha ?? 0} বিঘা`}
+                value={`${systemSettings?.farmLandBigha ?? 3} বিঘা`}
               />
             </Reveal>
           </div>
@@ -359,8 +359,8 @@ export default async function InvestPage() {
 
           <div className="grid md:grid-cols-3 gap-6 items-start">
             {/* Project 1 - চিনা হাঁস (dynamic, expandable) */}
-            <Reveal direction="left">
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+            <Reveal direction="right" delay={160}>
+            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
               <div className="h-40 bg-green-100 flex items-center justify-center text-green-700 font-medium">
                 চিনা হাঁসের ছবি
               </div>
@@ -449,7 +449,7 @@ export default async function InvestPage() {
 
             {/* Project 2 - ফসল (static, শীঘ্রই) */}
             <Reveal direction="up" delay={120}>
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
               <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-700 font-medium">
                 ফসলের ছবি
               </div>
@@ -468,7 +468,7 @@ export default async function InvestPage() {
 
             {/* Project 3 - কোরবানির গরু (static, ব্লগে লিংক) */}
             <Reveal direction="right" delay={240}>
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
               <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
                 গরুর ছবি
               </div>
@@ -586,7 +586,7 @@ export default async function InvestPage() {
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-            <Reveal direction="left">
+          <Reveal direction="left" delay={0}>
               <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>

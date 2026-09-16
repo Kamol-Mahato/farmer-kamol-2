@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// ✅ স্ক্রল করে ভিউতে এলে fade+slide করে ভেসে ওঠে — left/right/up তিন দিক থেকে আসতে পারে
+// ✅ স্ক্রল করে ভিউতে এলে একবার fade + ছোট slide — প্রফেশনাল, হালকা মোশন
 export default function Reveal({
   children,
   direction = "up",
@@ -16,10 +16,25 @@ export default function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const onChange = () => setReduceMotion(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    if (reduceMotion) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -27,24 +42,28 @@ export default function Reveal({
           observer.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [reduceMotion]);
 
+  // ছোট দূরত্ব = বেশি প্রফেশনাল (আগের -translate-x-10 / y-8 কমানো)
   const hiddenState =
     direction === "left"
-      ? "opacity-0 -translate-x-10"
+      ? "opacity-0 -translate-x-6"
       : direction === "right"
-        ? "opacity-0 translate-x-10"
-        : "opacity-0 translate-y-8";
+        ? "opacity-0 translate-x-6"
+        : "opacity-0 translate-y-5";
 
   return (
     <div
       ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out ${
+      style={{
+        transitionDelay: reduceMotion ? "0ms" : `${delay}ms`,
+        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+      }}
+      className={`transition-all duration-500 ${
         visible ? "opacity-100 translate-x-0 translate-y-0" : hiddenState
       } ${className}`}
     >
