@@ -3,10 +3,27 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { signSession } from "@/lib/session";
-import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
+import {
+  checkRateLimit,
+  recordFailedAttempt,
+  checkIpRateLimit,
+  getClientIp,
+} from "@/lib/rateLimiter";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const ipCheck = await checkIpRateLimit(ip, 60, 60 * 60);
+    if (!ipCheck.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const { name, phone, password } = body;
 
