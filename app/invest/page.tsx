@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/siteConfig";
 import { prisma } from "@/lib/prisma";
 import InvestCalculator from "./InvestCalculator";
 import { DetailToggle, StepAccordion } from "./InvestAccordion";
+import Reveal from "./Reveal";
 
 export const revalidate = 3600;
 
@@ -21,6 +22,116 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ✅ প্লেসহোল্ডার ডেটা — পরে শুধু youtubeUrl / imageUrl বসিয়ে দিলেই আসল কন্টেন্ট দেখাবে
+const farmVisitVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+  { title: "খামার ভ্রমণ - পর্ব ১", youtubeUrl: "" },
+  { title: "খামার ভ্রমণ - পর্ব ২", youtubeUrl: "" },
+  { title: "খামার ভ্রমণ - পর্ব ৩", youtubeUrl: "" },
+];
+
+const farmVisitPhotos: { title: string; imageUrl: string }[] = [
+  { title: "খামারের ছবি ১", imageUrl: "" },
+  { title: "খামারের ছবি ২", imageUrl: "" },
+  { title: "খামারের ছবি ৩", imageUrl: "" },
+];
+
+const journeyVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+  { title: "অংশীদারের অভিজ্ঞতা ১", youtubeUrl: "" },
+  { title: "অংশীদারের অভিজ্ঞতা ২", youtubeUrl: "" },
+  { title: "অংশীদারের অভিজ্ঞতা ৩", youtubeUrl: "" },
+  { title: "অংশীদারের অভিজ্ঞতা ৪", youtubeUrl: "" },
+];
+
+function getYoutubeId(url: string) {
+  const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+  return match ? match[1] : null;
+}
+
+// ✅ থাম্বনেইল কার্ড — লিংক থাকলে ক্লিকে নতুন ট্যাবে YouTube খুলবে, না থাকলে "শীঘ্রই" প্লেসহোল্ডার
+function YoutubeCard({
+  title,
+  description,
+  youtubeUrl,
+}: {
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+}) {
+  const ytId = youtubeUrl ? getYoutubeId(youtubeUrl) : null;
+  const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+
+  const body = (
+    <>
+      <div
+        className="relative bg-black rounded-2xl overflow-hidden shadow-sm"
+        style={{ aspectRatio: "16/9" }}
+      >
+        {thumb ? (
+          <>
+            <img
+              src={thumb}
+              alt={title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition">
+              <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white text-xl shadow-lg">
+                ▶
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm text-center px-3">
+            ভিডিও শীঘ্রই আসছে
+          </div>
+        )}
+      </div>
+      <div className="px-0.5 pt-2">
+        <h3 className="font-bold text-green-800 text-sm line-clamp-2">{title}</h3>
+        {description && (
+          <p className="text-gray-500 text-xs mt-1 line-clamp-2">{description}</p>
+        )}
+      </div>
+    </>
+  );
+
+  return ytId ? (
+    <a
+      href={youtubeUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block group"
+    >
+      {body}
+    </a>
+  ) : (
+    <div>{body}</div>
+  );
+}
+
+// ✅ ছবির কার্ড — imageUrl না থাকলে টাইটেল-সহ ধূসর প্লেসহোল্ডার
+function PhotoCard({ title, imageUrl }: { title: string; imageUrl: string }) {
+  return (
+    <div className="rounded-2xl overflow-hidden shadow-sm">
+      <div
+        className="relative bg-gray-100 flex items-center justify-center text-gray-500 text-sm text-center px-3 font-medium"
+        style={{ aspectRatio: "16/9" }}
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={title}
+            loading="lazy"
+            className="w-full h-full object-cover absolute inset-0"
+          />
+        ) : (
+          <span>{title}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ✅ deenagro-স্টাইলে ইন-পেজ সাব-নেভিগেশন — ক্লিক করলে সেই সেকশনে স্ক্রল করবে
 function SubNav() {
   const links = [
@@ -32,9 +143,9 @@ function SubNav() {
     { href: "/contact", label: "যোগাযোগ" },
   ];
   return (
-    <div className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
-      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
-        <div className="flex-1 flex items-center justify-center gap-1 overflow-x-auto text-sm scrollbar-hide">
+    <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex-1 flex flex-wrap items-center justify-center gap-1.5 text-sm md:flex-nowrap md:overflow-x-auto md:scrollbar-hide">
           {links.map((l) => (
             <a
               key={l.href}
@@ -108,8 +219,8 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="relative bg-gradient-to-b from-green-50 to-white pt-10 pb-16 md:pt-14 md:pb-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <div>
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <Reveal direction="left">
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-2 bg-white border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -157,9 +268,9 @@ export default async function InvestPage() {
                   ▶ খামারের সব ভিডিও ইউটিউবে দেখুন
                 </a>
               )}
-            </div>
+            </Reveal>
 
-            <div className="relative">
+            <Reveal direction="right" className="relative">
               <div className="rounded-3xl overflow-hidden shadow-xl border border-green-100 aspect-[4/3] bg-green-100 flex items-center justify-center text-green-700 font-medium">
                 খামারের ছবি এখানে বসবে
               </div>
@@ -167,7 +278,7 @@ export default async function InvestPage() {
                 <p className="text-xs text-gray-500">লাভ বণ্টন</p>
                 <p className="text-sm font-bold text-green-700">স্বচ্ছ ও ন্যায্য</p>
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -177,13 +288,13 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="py-14 md:py-16 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>আমার খামারের যাত্রা</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
               Investment দিয়ে শুরু করিনি। নিজের টাকা দিয়ে কাজ শুরু করেছি।
               নিচে সেই সত্য গল্প।
             </p>
-          </div>
+          </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
@@ -193,11 +304,17 @@ export default async function InvestPage() {
               { title: "সমাধান", desc: "ধাপে ধাপে সমস্যা সমাধান করে এগিয়েছি। হিসাব ও রেকর্ড রাখা শুরু করেছি।" },
               { title: "বর্তমান অবস্থা", desc: "ছোট পরিসরে কাজ চলছে। মানুষ দেখছে আমি শুধু কথা বলি না, কাজও করি।" },
               { title: "ভবিষ্যৎ ভিশন", desc: "প্রথমে প্রমাণ, তারপর ছোট pilot, তারপর ধীরে ধীরে বড় করা।" },
-            ].map((item) => (
-              <div key={item.title} className="bg-green-50 border border-green-100 rounded-2xl p-5">
-                <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
-              </div>
+            ].map((item, i) => (
+              <Reveal
+                key={item.title}
+                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
+                delay={(i % 3) * 120}
+              >
+                <div className="bg-green-50 border border-green-100 rounded-2xl p-5">
+                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -208,17 +325,25 @@ export default async function InvestPage() {
       ========================================================== */}
       <section id="farm-status" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>খামারের বর্তমান অবস্থা</SectionHeading>
-          </div>
+          </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="গরু" value={`${systemSettings?.farmCowCount ?? 0}টি`} />
-            <StatCard label="চীনা হাঁস" value={`${systemSettings?.farmDuckCount ?? 0}টি`} />
-            <StatCard label="ছাগল" value={`${systemSettings?.farmGoatCount ?? 0}টি`} />
-            <StatCard
-              label="জমি"
-              value={`${systemSettings?.farmLandBigha ?? 0} বিঘা`}
-            />
+            <Reveal delay={0}>
+              <StatCard label="গরু" value={`${systemSettings?.farmCowCount ?? 0}টি`} />
+            </Reveal>
+            <Reveal delay={100}>
+              <StatCard label="চীনা হাঁস" value={`${systemSettings?.farmDuckCount ?? 0}টি`} />
+            </Reveal>
+            <Reveal delay={200}>
+              <StatCard label="ছাগল" value={`${systemSettings?.farmGoatCount ?? 0}টি`} />
+            </Reveal>
+            <Reveal delay={300}>
+              <StatCard
+                label="জমি"
+                value={`${systemSettings?.farmLandBigha ?? 0} বিঘা`}
+              />
+            </Reveal>
           </div>
         </div>
       </section>
@@ -228,12 +353,13 @@ export default async function InvestPage() {
       ========================================================== */}
       <section id="projects" className="py-14 md:py-16 px-4 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>প্রকল্পসমূহ</SectionHeading>
-          </div>
+          </Reveal>
 
           <div className="grid md:grid-cols-3 gap-6 items-start">
             {/* Project 1 - চিনা হাঁস (dynamic, expandable) */}
+            <Reveal direction="left">
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="h-40 bg-green-100 flex items-center justify-center text-green-700 font-medium">
                 চিনা হাঁসের ছবি
@@ -319,8 +445,10 @@ export default async function InvestPage() {
                 </DetailToggle>
               </div>
             </div>
+            </Reveal>
 
             {/* Project 2 - ফসল (static, শীঘ্রই) */}
+            <Reveal direction="up" delay={120}>
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-700 font-medium">
                 ফসলের ছবি
@@ -336,8 +464,10 @@ export default async function InvestPage() {
                 <span className="text-gray-400 text-sm">শীঘ্রই চালু হবে</span>
               </div>
             </div>
+            </Reveal>
 
             {/* Project 3 - কোরবানির গরু (static, ব্লগে লিংক) */}
+            <Reveal direction="right" delay={240}>
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
                 গরুর ছবি
@@ -351,10 +481,64 @@ export default async function InvestPage() {
                   কোরবানির উদ্দেশ্যে গরু পালানোর স্পন্সরশিপ প্রকল্প। বিস্তারিত জানুন আমাদের ব্লগে।
                 </p>
                 <Link href="/blog" className="text-blue-700 font-semibold text-sm hover:underline">
-                  ব্লগে পড়ুন →
+                ব্লগে পড়ুন →
                 </Link>
               </div>
             </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          আমাদের খামার পরিদর্শন — ভিডিও + ছবি (প্লেসহোল্ডার)
+      ========================================================== */}
+      <section id="farm-visit" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
+        <div className="max-w-6xl mx-auto">
+          <Reveal className="text-center mb-10">
+            <SectionHeading>আমাদের খামার পরিদর্শন</SectionHeading>
+          </Reveal>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {farmVisitVideos.map((v, i) => (
+              <Reveal
+                key={`farm-visit-video-${i}`}
+                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
+                delay={(i % 3) * 120}
+              >
+                <YoutubeCard title={v.title} description={v.description} youtubeUrl={v.youtubeUrl} />
+              </Reveal>
+            ))}
+            {farmVisitPhotos.map((p, i) => (
+              <Reveal
+                key={`farm-visit-photo-${i}`}
+                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
+                delay={(i % 3) * 120}
+              >
+                <PhotoCard title={p.title} imageUrl={p.imageUrl} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          যারা আমাদের সাথে যাত্রা শুরু করেছেন — ভিডিও (প্লেসহোল্ডার)
+      ========================================================== */}
+      <section id="journey-with-us" className="py-14 md:py-16 px-4 scroll-mt-16">
+        <div className="max-w-6xl mx-auto">
+          <Reveal className="text-center mb-10">
+            <SectionHeading>যারা আমাদের সাথে যাত্রা শুরু করেছেন</SectionHeading>
+          </Reveal>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {journeyVideos.map((v, i) => (
+              <Reveal
+                key={`journey-video-${i}`}
+                direction={i % 2 === 0 ? "left" : "right"}
+                delay={(i % 4) * 100}
+              >
+                <YoutubeCard title={v.title} description={v.description} youtubeUrl={v.youtubeUrl} />
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -364,7 +548,9 @@ export default async function InvestPage() {
       ========================================================== */}
       <section id="calculator" className="py-14 md:py-16 px-4 scroll-mt-16">
         <div className="max-w-3xl mx-auto">
-          <InvestCalculator />
+          <Reveal>
+            <InvestCalculator />
+          </Reveal>
         </div>
       </section>
 
@@ -373,14 +559,14 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="py-14 md:py-16 px-4 bg-green-50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>লাভ কীভাবে ভাগ হবে</SectionHeading>
             <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
               কোনো নির্দিষ্ট লাভের প্রতিশ্রুতি নেই। প্রকৃত বিক্রয় ও খরচের হিসাব করে নিট লাভ বের করা হবে।
             </p>
-          </div>
+          </Reveal>
 
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-8 mb-8">
+          <Reveal className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-8 mb-8">
             <div className="space-y-5">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700 font-medium">মোট বিক্রয়</span>
@@ -397,48 +583,52 @@ export default async function InvestPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-            <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="text-xs text-green-700 font-medium">খামারি (Farmer Kamol)</p>
-                  <h3 className="text-2xl font-bold text-green-900">৬৫% লাভ</h3>
+            <Reveal direction="left">
+              <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <p className="text-xs text-green-700 font-medium">খামারি (Farmer Kamol)</p>
+                    <h3 className="text-2xl font-bold text-green-900">৬৫% লাভ</h3>
+                  </div>
+                  <div className="text-4xl font-black text-green-700">65%</div>
                 </div>
-                <div className="text-4xl font-black text-green-700">65%</div>
+                <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
+                  <div className="h-full w-[65%] bg-green-600 rounded-full" />
+                </div>
+                <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
+                <p className="text-2xl font-bold text-green-800">৳{farmerShare.toLocaleString("bn-BD")}</p>
               </div>
-              <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
-                <div className="h-full w-[65%] bg-green-600 rounded-full" />
-              </div>
-              <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
-              <p className="text-2xl font-bold text-green-800">৳{farmerShare.toLocaleString("bn-BD")}</p>
-            </div>
+            </Reveal>
 
-            <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="text-xs text-blue-700 font-medium">সকল বিনিয়োগকারী</p>
-                  <h3 className="text-2xl font-bold text-blue-900">৩৫% লাভ</h3>
+            <Reveal direction="right">
+              <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <p className="text-xs text-blue-700 font-medium">সকল বিনিয়োগকারী</p>
+                    <h3 className="text-2xl font-bold text-blue-900">৩৫% লাভ</h3>
+                  </div>
+                  <div className="text-4xl font-black text-blue-700">35%</div>
                 </div>
-                <div className="text-4xl font-black text-blue-700">35%</div>
+                <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
+                  <div className="h-full w-[35%] bg-blue-600 rounded-full" />
+                </div>
+                <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
+                <p className="text-2xl font-bold text-blue-800">৳{investorShare.toLocaleString("bn-BD")}</p>
               </div>
-              <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
-                <div className="h-full w-[35%] bg-blue-600 rounded-full" />
-              </div>
-              <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
-              <p className="text-2xl font-bold text-blue-800">৳{investorShare.toLocaleString("bn-BD")}</p>
-            </div>
+            </Reveal>
           </div>
 
           {/* ঝুঁকি — calculator/লাভ বণ্টনের কাছাকাছি, বেশি prominent */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 mt-8">
+          <Reveal className="rounded-2xl border border-amber-200 bg-amber-50 p-6 mt-8">
             <h3 className="font-bold text-amber-900 mb-2">⚠️ ঝুঁকির স্পষ্ট কথা</h3>
             <p className="text-sm text-amber-900/90 leading-relaxed">
               কৃষি ও খামার ব্যবসায় ঝুঁকি আছে। রোগবালাই, প্রাকৃতিক দুর্যোগ, বাজার মূল্য কমে যাওয়া ইত্যাদি কারণে লোকসান হতে পারে।
               আমরা কোনোভাবেই পুঁজি ফেরত বা নির্দিষ্ট লাভের গ্যারান্টি দিই না। বিনিয়োগ করার আগে ভালো করে বুঝে নিন।
             </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -447,27 +637,29 @@ export default async function InvestPage() {
       ========================================================== */}
       <section id="how-to" className="py-14 md:py-16 px-4 scroll-mt-16">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>কীভাবে অংশীদার হবেন</SectionHeading>
-          </div>
+          </Reveal>
 
-          <StepAccordion
-            steps={[
-              { step: "১", title: "অ্যাকাউন্ট তৈরি", text: "নাম, ফোন ও ইমেইল দিয়ে সাধারণ অ্যাকাউন্ট খুলুন।" },
-              { step: "২", title: "প্রোফাইল সম্পূর্ণ", text: "NID, ছবি, স্বাক্ষর ও পেমেন্ট তথ্য দিন।" },
-              { step: "৩", title: "প্রকল্প বেছে নিন ও আবেদন করুন", text: "নির্দিষ্ট প্রকল্প বেছে নিয়ে অংশীদার হওয়ার আবেদন করুন, চুক্তিপত্র পড়ে ইলেকট্রনিক সম্মতি দিন।" },
-              { step: "৪", title: "টাকা জমা দিন", text: "বিকাশ/ব্যাংকে টাকা পাঠিয়ে স্লিপ আপলোড করুন। নিশ্চিত হলে আপনি অংশীদার হয়ে যাবেন।" },
-            ]}
-          />
+          <Reveal>
+            <StepAccordion
+              steps={[
+                { step: "১", title: "অ্যাকাউন্ট তৈরি", text: "নাম, ফোন ও ইমেইল দিয়ে সাধারণ অ্যাকাউন্ট খুলুন।" },
+                { step: "২", title: "প্রোফাইল সম্পূর্ণ", text: "NID, ছবি, স্বাক্ষর ও পেমেন্ট তথ্য দিন।" },
+                { step: "৩", title: "প্রকল্প বেছে নিন ও আবেদন করুন", text: "নির্দিষ্ট প্রকল্প বেছে নিয়ে অংশীদার হওয়ার আবেদন করুন, চুক্তিপত্র পড়ে ইলেকট্রনিক সম্মতি দিন।" },
+                { step: "৪", title: "টাকা জমা দিন", text: "বিকাশ/ব্যাংকে টাকা পাঠিয়ে স্লিপ আপলোড করুন। নিশ্চিত হলে আপনি অংশীদার হয়ে যাবেন।" },
+              ]}
+            />
+          </Reveal>
 
-          <div className="text-center mt-10">
+          <Reveal className="text-center mt-10">
             <Link
               href="/customer/dashboard"
               className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
             >
               অংশীদার হওয়ার আবেদন করুন →
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -476,9 +668,9 @@ export default async function InvestPage() {
       ========================================================== */}
       <section id="principles" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
             <SectionHeading>আমাদের নীতিমালা</SectionHeading>
-          </div>
+          </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
@@ -488,11 +680,17 @@ export default async function InvestPage() {
               { title: "নৈতিক ব্যবসা", desc: "কোনো প্রতারণা বা লুকোচুরি নেই। সবকিছু খোলাখুলি।" },
               { title: "ঝুঁকি ভাগাভাগি", desc: "লাভ-লোকসান দুটোই অংশীদারিত্বের ভিত্তিতে ভাগ হয়।" },
               { title: "চুক্তিভিত্তিক", desc: "প্রতিটি বিনিয়োগের জন্য লিখিত চুক্তি থাকে।" },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-2xl border border-gray-200 p-5">
-                <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
-              </div>
+            ].map((item, i) => (
+              <Reveal
+                key={item.title}
+                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
+                delay={(i % 3) * 120}
+              >
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -502,7 +700,7 @@ export default async function InvestPage() {
           FINAL CTA
       ========================================================== */}
       <section className="py-16 px-4 bg-green-700 text-white text-center">
-        <div className="max-w-2xl mx-auto">
+        <Reveal className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
             একসাথে এগিয়ে চলুন
           </h2>
@@ -515,7 +713,7 @@ export default async function InvestPage() {
           >
             অংশীদার হওয়ার আবেদন করুন →
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       </div>
