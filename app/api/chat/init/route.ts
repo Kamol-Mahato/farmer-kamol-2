@@ -6,6 +6,7 @@ import {
   verifyVisitorSession,
   generateVisitorId,
 } from "@/lib/visitorSession";
+import { checkAndIncrementRate, getClientIp } from "@/lib/rateLimiter";
 
 // 🔒 এই রুট কখনো CDN/ব্রাউজারে ক্যাশ হলে দুই ভিজিটর একই visitorId পেতে পারে
 export const dynamic = "force-dynamic";
@@ -28,8 +29,18 @@ function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status, headers: NO_STORE_HEADERS });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // 🔒 spam / mass init আটকাতে IP ভিত্তিক হালকা limit (২০ / মিনিট)
+    const ip = getClientIp(request);
+    const { allowed } = await checkAndIncrementRate(`chat-init:${ip}`, 20, 60);
+    if (!allowed) {
+      return json(
+        { error: "একটু ধীরে চেষ্টা করুন। কিছুক্ষণ পর আবার চেষ্টা করুন।" },
+        429,
+      );
+    }
+
     const cookieStore = await cookies();
     const existingToken = cookieStore.get("visitor_session")?.value;
 
