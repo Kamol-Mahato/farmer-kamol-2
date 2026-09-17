@@ -146,6 +146,7 @@ export default function InvestorPage() {
   const [nomineeRelation, setNomineeRelation] = useState("");
   const [nomineeNid, setNomineeNid] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveMsg, setSaveMsg] = useState("");
@@ -349,6 +350,7 @@ export default function InvestorPage() {
       } else {
         setProfile(data.profile);
         setSaveMsg("সেভ হয়েছে");
+        setEditing(false);
       }
     } catch {
       setSaveError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
@@ -429,6 +431,127 @@ export default function InvestorPage() {
         </div>
       )}
 
+      {/* —— প্রোফাইল হেডার (রাউন্ড ছবি উপরের ডানে) —— */}
+      {emailVerified && profile && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 flex items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 mb-0.5">বিনিয়োগকারী প্রোফাইল</p>
+            <p className="font-bold text-green-800 text-base truncate">
+              {profile.fatherName
+                ? `${profile.fatherName} এর সন্তান`
+                : "প্রোফাইল"}
+            </p>
+            {(profile.district || profile.upazila) && (
+              <p className="text-xs text-gray-500 mt-1">
+                {[profile.upazila, profile.district].filter(Boolean).join(", ")}
+              </p>
+            )}
+            {profileComplete && !editing && (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition"
+              >
+                ✎ এডিট করুন
+              </button>
+            )}
+            {editing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false);
+                  loadProfile();
+                }}
+                className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition"
+              >
+                বাতিল
+              </button>
+            )}
+          </div>
+          {/* উপরের ডানে রাউন্ড পাসপোর্ট ছবি */}
+          <div className="shrink-0">
+            {profile.photoImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.photoImageUrl}
+                alt="পাসপোর্ট"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-green-200 shadow-sm"
+              />
+            ) : (
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-300 text-xs">
+                ছবি
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* —— View মোড: লকড সারাংশ (অ্যাপ্রুভড/কমপ্লিট + এডিট না) —— */}
+      {emailVerified && profileComplete && !editing && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 space-y-4 text-sm">
+          <h2 className="font-bold text-green-800 text-base">প্রোফাইল সারাংশ</h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] text-gray-500">পিতার নাম</p>
+              <p className="font-semibold text-gray-800">{profile?.fatherName || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">মাতার নাম</p>
+              <p className="font-semibold text-gray-800">{profile?.motherName || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">জেলা / উপজেলা</p>
+              <p className="font-semibold text-gray-800">
+                {[profile?.upazila, profile?.district].filter(Boolean).join(", ") || "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">বিস্তারিত ঠিকানা</p>
+              <p className="font-semibold text-gray-800">{profile?.address || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">এনআইডি</p>
+              <p className="font-semibold text-gray-800">{profile?.nidNumber || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">পেমেন্ট নম্বর</p>
+              <p className="font-semibold text-gray-800">{profile?.paymentNumber || "—"}</p>
+            </div>
+          </div>
+
+          <div className="border-t pt-3">
+            <p className="text-[10px] text-gray-500 mb-1">নমিনি</p>
+            <p className="font-semibold text-gray-800">
+              {profile?.nomineeName || "—"}
+              {profile?.nomineeRelation ? ` (${profile.nomineeRelation})` : ""}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {profile?.nomineePhone || ""}
+              {profile?.nomineeNid ? ` · NID: ${profile.nomineeNid}` : ""}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 pt-2">
+            {profile?.nidImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.nidImageUrl} alt="NID" className="w-14 h-14 rounded-lg object-cover border" />
+            )}
+            {profile?.photoImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.photoImageUrl} alt="Photo" className="w-14 h-14 rounded-full object-cover border" />
+            )}
+            {profile?.signatureImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.signatureImageUrl} alt="Sign" className="w-14 h-14 rounded-lg object-cover border" />
+            )}
+            {profile?.nomineeImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.nomineeImageUrl} alt="Nominee" className="w-14 h-14 rounded-full object-cover border" />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ধাপ ১: ইমেইল OTP ভেরিফিকেশন */}
       {!emailVerified && (
         <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
@@ -488,7 +611,7 @@ export default function InvestorPage() {
       )}
 
       {/* ধাপ ২: প্রোফাইল সম্পূর্ণ করুন */}
-      {emailVerified && (
+      {emailVerified && (!profileComplete || editing) && (
         <form
           onSubmit={saveProfile}
           className="bg-white rounded-2xl shadow-sm p-6 space-y-5 mt-6"
@@ -671,7 +794,7 @@ export default function InvestorPage() {
                   type="text"
                   value={nomineeRelation}
                   onChange={(e) => setNomineeRelation(e.target.value)}
-                  placeholder="যেমন: /মা/ বাবা / স্ত্রী / ভাই /বোন / পুত্র / কন্যা "
+                  placeholder="যেমন:স্ত্রী / পুত্র / কন্যা "
                   required
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
                 />
