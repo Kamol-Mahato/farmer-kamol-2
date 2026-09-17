@@ -24,26 +24,28 @@ function DistrictSearch({
   value: string;
   onSelect: (d: { id: number; name: string; en_name: string }) => void;
 }) {
-  const [query, setQuery] = useState("");
+  const [text, setText] = useState(value);
   const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    setText(value);
+  }, [value]);
+
   const filtered = districts.filter(
     (d) =>
-      d.en_name.toLowerCase().includes(query.toLowerCase()) ||
-      d.name.includes(query),
+      d.en_name.toLowerCase().includes(text.toLowerCase()) ||
+      d.name.includes(text),
   );
   return (
     <div className="relative">
       <input
         type="text"
-        value={query || value}
+        value={text}
         onChange={(e) => {
-          setQuery(e.target.value);
+          setText(e.target.value);
           setShow(true);
         }}
-        onFocus={() => {
-          setQuery("");
-          setShow(true);
-        }}
+        onFocus={() => setShow(true)}
         onBlur={() => setTimeout(() => setShow(false), 200)}
         placeholder="Search district"
         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
@@ -55,7 +57,7 @@ function DistrictSearch({
               key={d.id}
               className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
               onMouseDown={() => {
-                setQuery("");
+                setText(d.en_name);
                 setShow(false);
                 onSelect(d);
               }}
@@ -81,22 +83,26 @@ function UpazilaSearch({
   onSelect: (u: string) => void;
   disabled?: boolean;
 }) {
-  const [query, setQuery] = useState("");
+  const [text, setText] = useState(value);
   const [show, setShow] = useState(false);
-  const filtered = upazilas.filter((u) => u.includes(query));
+
+  useEffect(() => {
+    setText(value);
+  }, [value]);
+
+  const filtered = upazilas.filter((u) =>
+    u.toLowerCase().includes(text.toLowerCase()),
+  );
   return (
     <div className="relative">
       <input
         type="text"
-        value={query || value}
+        value={text}
         onChange={(e) => {
-          setQuery(e.target.value);
+          setText(e.target.value);
           setShow(true);
         }}
-        onFocus={() => {
-          setQuery("");
-          setShow(true);
-        }}
+        onFocus={() => setShow(true)}
         onBlur={() => setTimeout(() => setShow(false), 200)}
         placeholder={
           disabled ? "Select district first" : "Search upazila /area"
@@ -111,7 +117,7 @@ function UpazilaSearch({
               key={u}
               className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
               onMouseDown={() => {
-                setQuery("");
+                setText(u);
                 setShow(false);
                 onSelect(u);
               }}
@@ -283,7 +289,6 @@ export default function CustomerSettingsPageEn() {
               Upazila /Area
             </label>
             <UpazilaSearch
-              key={form.districtId ?? "none"}
               upazilas={
                 form.districtId ? getEnglishUpazilas(form.districtId) : []
               }

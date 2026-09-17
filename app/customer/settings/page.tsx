@@ -2,118 +2,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { districts, upazilas } from "@/lib/bd-locations";
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch";
 import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload";
-
-function DistrictSearch({
-  districts,
-  value,
-  onSelect,
-}: {
-  districts: { id: number; name: string; en_name: string }[];
-  value: string;
-  onSelect: (d: { id: number; name: string; en_name: string }) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [show, setShow] = useState(false);
-  const filtered = districts.filter(
-    (d) =>
-      d.name.includes(query) ||
-      d.en_name.toLowerCase().includes(query.toLowerCase()),
-  );
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={query || value}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setShow(true);
-        }}
-        onFocus={() => {
-          setQuery("");
-          setShow(true);
-        }}
-        onBlur={() => setTimeout(() => setShow(false), 200)}
-        placeholder="জেলা লিখুন বা খুঁজুন"
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map((d) => (
-            <div
-              key={d.id}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => {
-                setQuery("");
-                setShow(false);
-                onSelect(d);
-              }}
-            >
-              {d.name}{" "}
-              <span className="text-gray-500 text-xs">({d.en_name})</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function UpazilaSearch({
-  upazilas,
-  value,
-  onSelect,
-  disabled,
-}: {
-  upazilas: string[];
-  value: string;
-  onSelect: (u: string) => void;
-  disabled?: boolean;
-}) {
-  const [query, setQuery] = useState("");
-  const [show, setShow] = useState(false);
-  const filtered = upazilas.filter((u) => u.includes(query));
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={query || value}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setShow(true);
-        }}
-        onFocus={() => {
-          setQuery("");
-          setShow(true);
-        }}
-        onBlur={() => setTimeout(() => setShow(false), 200)}
-        placeholder={
-          disabled ? "আগে জেলা বেছে নিন" : "উপজেলা /এরিয়া লিখুন বা খুঁজুন"
-        }
-        disabled={disabled}
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 disabled:bg-gray-100"
-      />
-      {show && filtered.length > 0 && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
-          {filtered.map((u) => (
-            <div
-              key={u}
-              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer"
-              onMouseDown={() => {
-                setQuery("");
-                setShow(false);
-                onSelect(u);
-              }}
-            >
-              {u}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 interface Profile {
   name: string | null;
@@ -284,8 +175,10 @@ export default function CustomerSettingsPage() {
               উপজেলা /এরিয়া
             </label>
             <UpazilaSearch
-              key={form.districtId ?? "none"}
               upazilas={form.districtId ? upazilas[form.districtId] || [] : []}
+              upazilasEn={
+                form.districtId ? upazilasEn[form.districtId] || [] : []
+              }
               value={form.upazila}
               disabled={!form.districtId}
               onSelect={(u) => setForm((f) => ({ ...f, upazila: u }))}

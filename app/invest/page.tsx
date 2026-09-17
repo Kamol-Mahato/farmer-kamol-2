@@ -273,11 +273,21 @@ export default async function InvestPage() {
               )}
             </Reveal>
 
-            <Reveal direction="right" className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-xl border border-green-100 aspect-[4/3] bg-green-100 flex items-center justify-center text-green-700 font-medium">
-                খামারের ছবি এখানে বসবে
+            <Reveal direction="right" className="relative group">
+              <div className="relative rounded-3xl overflow-hidden shadow-xl border border-green-100 aspect-[4/3] transition-all duration-500 ease-out group-hover:shadow-2xl group-hover:border-green-300">
+                <img
+                  src="/uploads/header-2nd-about.jpg"
+                  alt="কৃষক কমল নিজের খামারে গরুর সাথে"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+                {/* নিচ থেকে গ্র্যাডিয়েন্ট — hover করলে ক্যাপশন স্পষ্ট হয়ে ভেসে ওঠে */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500 ease-out" />
+                <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+                  <p className="text-white font-bold text-sm md:text-base">কমল কুমার মাহাতো</p>
+                  <p className="text-white/80 text-xs md:text-sm">প্রতিষ্ঠাতা, নিজের খামারে</p>
+                </div>
               </div>
-              <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-lg px-4 py-3 border border-green-100">
+              <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-lg px-4 py-3 border border-green-100 transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-xl">
                 <p className="text-xs text-gray-500">লাভ বণ্টন</p>
                 <p className="text-sm font-bold text-green-700">স্বচ্ছ ও ন্যায্য</p>
               </div>
