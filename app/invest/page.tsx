@@ -150,9 +150,9 @@ function SubNav() {
           flex items-center gap-2 md:gap-3
           px-2.5 md:px-4 py-2
           rounded-full
-          bg-green-50/80 backdrop-blur-md
-          border border-green-200/60
-          shadow-[0_4px_24px_rgba(22,101,52,0.08)]
+          bg-white/90 backdrop-blur-md
+          border border-green-300/70
+          shadow-[0_4px_24px_rgba(22,101,52,0.12)]
         "
       >
         {/* লিংক — স্ক্রলযোগ্য, মাঝখানে */}
