@@ -132,7 +132,7 @@ function PhotoCard({ title, imageUrl }: { title: string; imageUrl: string }) {
   );
 }
 
-// ✅ deenagro-স্টাইলে ইন-পেজ সাব-নেভিগেশন — ক্লিক করলে সেই সেকশনে স্ক্রল করবে
+// ✅ Kamol Own Des-স্টাইল — রাউন্ডেড গ্লাস/জল-ঝাপ সাব-নেভ
 function SubNav() {
   const links = [
     { href: "#projects", label: "প্রকল্পসমূহ" },
@@ -143,27 +143,60 @@ function SubNav() {
     { href: "/contact", label: "যোগাযোগ" },
   ];
   return (
-    <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
-      <div className="max-w-6xl mx-auto px-3 md:px-4 py-2.5 flex items-center justify-center relative">
-        {/* লিংক — মাঝখানে, বড় ও বোল্ড */}
-        <div className="flex items-center justify-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide text-sm md:text-base">
+    <div className="sticky top-[76px] z-40 px-3 md:px-4 py-2.5 bg-transparent">
+      <div
+        className="
+          max-w-5xl mx-auto
+          flex items-center gap-2 md:gap-3
+          px-2.5 md:px-4 py-2
+          rounded-full
+          bg-green-50/80 backdrop-blur-md
+          border border-green-200/60
+          shadow-[0_4px_24px_rgba(22,101,52,0.08)]
+        "
+      >
+        {/* লিংক — স্ক্রলযোগ্য, মাঝখানে */}
+        <div className="flex-1 min-w-0 flex items-center justify-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="shrink-0 px-3.5 py-2 rounded-full font-bold text-gray-700 hover:text-green-800 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+              className="
+                shrink-0 px-2.5 md:px-3.5 py-1.5 md:py-2
+                rounded-full
+                text-xs md:text-sm font-semibold
+                text-gray-700
+                hover:text-green-800 hover:bg-white/70
+                active:scale-[0.97]
+                transition-all duration-200 ease-out
+                whitespace-nowrap
+              "
             >
               {l.label}
             </a>
           ))}
         </div>
 
-        {/* CTA — ডানে absolute রাখা হয়েছে যাতে লিংকগুলো ঠিক মাঝে থাকে */}
+        {/* CTA — ডানে, সবসময় দেখা যায় */}
         <Link
           href="/customer/dashboard"
-          className="absolute right-3 md:right-4 shrink-0 inline-flex items-center gap-1 bg-green-600 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+          className="
+            shrink-0 inline-flex items-center gap-1
+            bg-green-700 text-white
+            px-3.5 md:px-5 py-2 md:py-2.5
+            rounded-full
+            font-bold text-xs md:text-sm
+            shadow-md shadow-green-900/15
+            hover:bg-green-800 hover:shadow-lg
+            active:scale-[0.97]
+            transition-all duration-200 ease-out
+            whitespace-nowrap
+          "
         >
           বিনিয়োগ করুন
+          <span className="hidden sm:inline" aria-hidden>
+            →
+          </span>
         </Link>
       </div>
     </div>
