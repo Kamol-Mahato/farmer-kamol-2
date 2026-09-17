@@ -14,6 +14,10 @@ interface Project {
   timeline: string | null;
   risks: string | null;
   profitShareNote: string | null;
+  durationMonths: number | null;
+  investorProfitPct: number | null;
+  totalLots: number | null;
+  lotUnitName: string | null;
   createdAt: string;
   _count: { investments: number };
 }
@@ -34,6 +38,10 @@ export default function AdminProjectsPage() {
   const [timeline, setTimeline] = useState("");
   const [risks, setRisks] = useState("");
   const [profitShareNote, setProfitShareNote] = useState("");
+  const [durationMonths, setDurationMonths] = useState("");
+  const [investorProfitPct, setInvestorProfitPct] = useState("");
+  const [totalLots, setTotalLots] = useState("");
+  const [lotUnitName, setLotUnitName] = useState("");
 
   function loadProjects() {
     setLoading(true);
@@ -74,6 +82,12 @@ export default function AdminProjectsPage() {
           timeline,
           risks,
           profitShareNote,
+          durationMonths: durationMonths ? Number(durationMonths) : null,
+          investorProfitPct: investorProfitPct
+            ? Number(investorProfitPct)
+            : null,
+          totalLots: totalLots ? Number(totalLots) : null,
+          lotUnitName: lotUnitName.trim() || null,
         }),
       });
       const data = await res.json();
@@ -90,6 +104,10 @@ export default function AdminProjectsPage() {
       setTimeline("");
       setRisks("");
       setProfitShareNote("");
+      setDurationMonths("");
+      setInvestorProfitPct("");
+      setTotalLots("");
+      setLotUnitName("");
       setShowForm(false);
       loadProjects();
     } catch {
@@ -261,6 +279,60 @@ export default function AdminProjectsPage() {
             <label className="block text-xs font-semibold text-gray-500 mb-1">
               লাভ/ক্ষতি বণ্টন নোট (ঐচ্ছিক)
             </label>
+
+            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                মেয়াদ (মাস)
+              </label>
+              <input
+                type="number"
+                value={durationMonths}
+                onChange={(e) => setDurationMonths(e.target.value)}
+                placeholder="যেমন: ১২"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                অংশীদারের লাভ %
+              </label>
+              <input
+                type="number"
+                value={investorProfitPct}
+                onChange={(e) => setInvestorProfitPct(e.target.value)}
+                placeholder="যেমন: ৩৫"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                মোট লট / শেয়ার
+              </label>
+              <input
+                type="number"
+                value={totalLots}
+                onChange={(e) => setTotalLots(e.target.value)}
+                placeholder="যেমন: ২০০"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                লট ইউনিট নাম
+              </label>
+              <input
+                type="text"
+                value={lotUnitName}
+                onChange={(e) => setLotUnitName(e.target.value)}
+                placeholder="যেমন: শেয়ার / গরু"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              />
+            </div>
+          </div>
+
             <textarea
               value={profitShareNote}
               onChange={(e) => setProfitShareNote(e.target.value)}

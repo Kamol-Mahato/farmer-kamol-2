@@ -144,24 +144,24 @@ function SubNav() {
   ];
   return (
     <div className="sticky top-[76px] z-40 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
-      <div className="max-w-6xl mx-auto px-3 md:px-4 py-2 flex items-center gap-2">
-        {/* লিংক — মোবাইলে এক লাইনে স্ক্রল, র‌্যাপ নয় */}
-        <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto scrollbar-hide text-sm">
+      <div className="max-w-6xl mx-auto px-3 md:px-4 py-2.5 flex items-center justify-center relative">
+        {/* লিংক — মাঝখানে, বড় ও বোল্ড */}
+        <div className="flex items-center justify-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide text-sm md:text-base">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="shrink-0 px-3 py-1.5 rounded-full font-semibold text-gray-600 hover:text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+              className="shrink-0 px-3.5 py-2 rounded-full font-bold text-gray-700 hover:text-green-800 hover:bg-green-50 active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
             >
               {l.label}
             </a>
           ))}
         </div>
 
-        {/* CTA — সবসময় ডানে দৃশ্যমান */}
+        {/* CTA — ডানে absolute রাখা হয়েছে যাতে লিংকগুলো ঠিক মাঝে থাকে */}
         <Link
           href="/customer/dashboard"
-          className="shrink-0 inline-flex items-center gap-1 bg-green-600 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+          className="absolute right-3 md:right-4 shrink-0 inline-flex items-center gap-1 bg-green-600 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
         >
           বিনিয়োগ করুন
         </Link>
@@ -205,6 +205,17 @@ export default async function InvestPage() {
   const progressPct =
     targetAmount && targetAmount > 0
       ? Math.min(100, Math.round((raisedAmount / targetAmount) * 100))
+      : null;
+
+  // ✅ নতুন ফিল্ড — Admin থেকে আসবে
+  const durationMonths = featuredProject?.durationMonths ?? null;
+  const investorProfitPct = featuredProject?.investorProfitPct ?? null;
+  const totalLots = featuredProject?.totalLots ?? null;
+  const lotUnitName = featuredProject?.lotUnitName ?? "শেয়ার";
+  // লট বিক্রি হয়েছে কত — টার্গেট ও রেইজড থেকে আনুমানিক (বা পরে investments দিয়ে আরও সঠিক করা যাবে)
+  const soldLots =
+    totalLots && targetAmount && targetAmount > 0
+      ? Math.min(totalLots, Math.round((raisedAmount / targetAmount) * totalLots))
       : null;
 
   const duckProjectName = featuredProject?.name ?? "চিনা হাঁস সম্প্রসারণ প্রকল্প";
@@ -382,7 +393,59 @@ export default async function InvestPage() {
                   চলমান
                 </span>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{duckProjectName}</h3>
-                <p className="text-sm text-gray-600 mb-1">{duckProjectDesc}</p>
+                <p className="text-sm text-gray-600 mb-3">{duckProjectDesc}</p>
+
+                {/* ✅ সামারি গ্রিড — মেয়াদ / লাভ / মূলধন / লট */}
+                <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">মেয়াদ</p>
+                    <p className="font-bold text-gray-900">
+                      {durationMonths != null ? `${durationMonths} মাস` : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">লাভ বণ্টন</p>
+                    <p className="font-bold text-gray-900">
+                      {investorProfitPct != null
+                        ? `প্রফিটের ${investorProfitPct}%`
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">মূলধন</p>
+                    <p className="font-bold text-gray-900">
+                      {targetAmount != null
+                        ? `৳ ${targetAmount.toLocaleString("bn-BD")}`
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">লট</p>
+                    <p className="font-bold text-gray-900">
+                      {soldLots != null && totalLots != null
+                        ? `${soldLots} / ${totalLots}`
+                        : totalLots != null
+                          ? `০ / ${totalLots}`
+                          : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* অগ্রগতি বার */}
+                {progressPct !== null && (
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>অগ্রগতি</span>
+                      <span className="font-semibold text-gray-700">{progressPct}%</span>
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-600 rounded-full transition-all"
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <DetailToggle>
                   <div className="pt-4 border-t border-gray-100 space-y-3 text-sm">
@@ -408,14 +471,6 @@ export default async function InvestPage() {
                             ৳{raisedAmount.toLocaleString("bn-BD")}
                           </span>
                         </div>
-                        {progressPct !== null && (
-                          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-green-600 rounded-full"
-                              style={{ width: `${progressPct}%` }}
-                            />
-                          </div>
-                        )}
                       </>
                     ) : (
                       <p className="text-gray-400 text-xs">
@@ -445,7 +500,9 @@ export default async function InvestPage() {
                       <p className="text-gray-500 text-xs font-semibold mb-1">লাভ/ক্ষতি বণ্টন</p>
                       <p className="text-gray-700">
                         {featuredProject?.profitShareNote ??
-                          "লাভ হলে খামারি ৬৫% ও অংশীদার ৩৫% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।"}
+                          (investorProfitPct != null
+                            ? `লাভ হলে খামারি ${100 - investorProfitPct}% ও অংশীদার ${investorProfitPct}% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।`
+                            : "লাভ হলে খামারি ৬৫% ও অংশীদার ৩৫% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।")}
                       </p>
                     </div>
                     <Link

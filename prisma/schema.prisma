@@ -518,6 +518,11 @@ model Project {
   timeline               String?
   risks                  String?
   profitShareNote        String?
+  // ✅ নতুন ফিল্ড — Admin থেকে কন্ট্রোল হবে
+  durationMonths         Int?         // মেয়াদ (মাস), যেমন ১২
+  investorProfitPct      Float?       // অংশীদারের লাভ %, যেমন ৩৫
+  totalLots              Int?         // মোট লট/শেয়ার, যেমন ২০০
+  lotUnitName           String?      // "শেয়ার" / "গরু" ইত্যাদি
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
   investments            Investment[]

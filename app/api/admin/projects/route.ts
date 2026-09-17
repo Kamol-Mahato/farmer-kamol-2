@@ -35,6 +35,10 @@ export async function POST(request: Request) {
     timeline,
     risks,
     profitShareNote,
+    durationMonths,
+    investorProfitPct,
+    totalLots,
+    lotUnitName,
   } = await request.json();
 
   if (!name || typeof name !== "string" || !name.trim()) {
@@ -69,6 +73,12 @@ export async function POST(request: Request) {
       risks: typeof risks === "string" ? risks.trim() : null,
       profitShareNote:
         typeof profitShareNote === "string" ? profitShareNote.trim() : null,
+      durationMonths: typeof durationMonths === "number" ? durationMonths : null,
+      investorProfitPct:
+        typeof investorProfitPct === "number" ? investorProfitPct : null,
+      totalLots: typeof totalLots === "number" ? totalLots : null,
+      lotUnitName:
+        typeof lotUnitName === "string" ? lotUnitName.trim() || null : null,
     },
   });
 

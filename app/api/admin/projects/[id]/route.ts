@@ -32,6 +32,10 @@ export async function PATCH(
     timeline,
     risks,
     profitShareNote,
+    durationMonths,
+    investorProfitPct,
+    totalLots,
+    lotUnitName,
   } = body;
 
   const data: Prisma.ProjectUpdateInput = {};
@@ -48,6 +52,12 @@ export async function PATCH(
   if (typeof risks === "string") data.risks = risks.trim();
   if (typeof profitShareNote === "string")
     data.profitShareNote = profitShareNote.trim();
+  if (typeof durationMonths === "number") data.durationMonths = durationMonths;
+  if (typeof investorProfitPct === "number")
+    data.investorProfitPct = investorProfitPct;
+  if (typeof totalLots === "number") data.totalLots = totalLots;
+  if (typeof lotUnitName === "string")
+    data.lotUnitName = lotUnitName.trim() || null;
 
   if (typeof isFeaturedOnInvestPage === "boolean") {
     if (isFeaturedOnInvestPage) {
