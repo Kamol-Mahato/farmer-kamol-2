@@ -7,23 +7,39 @@ import type { Prisma } from "@prisma/client";
 function isProfileComplete(p: {
   emailVerified: boolean;
   fatherName: string | null;
+  motherName: string | null;
+  district: string | null;
+  upazila: string | null;
   address: string | null;
   nidNumber: string | null;
   nidImageUrl: string | null;
   photoImageUrl: string | null;
   signatureImageUrl: string | null;
   paymentNumber: string | null;
+  nomineeName: string | null;
+  nomineePhone: string | null;
+  nomineeRelation: string | null;
+  nomineeNid: string | null;
+  nomineeImageUrl: string | null;
   termsAcceptedAt: Date | null;
 }) {
   return Boolean(
     p.emailVerified &&
       p.fatherName &&
+      p.motherName &&
+      p.district &&
+      p.upazila &&
       p.address &&
       p.nidNumber &&
       p.nidImageUrl &&
       p.photoImageUrl &&
       p.signatureImageUrl &&
       p.paymentNumber &&
+      p.nomineeName &&
+      p.nomineePhone &&
+      p.nomineeRelation &&
+      p.nomineeNid &&
+      p.nomineeImageUrl &&
       p.termsAcceptedAt,
   );
 }
@@ -58,14 +74,36 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json();
-  const { fatherName, address, nidNumber, paymentNumber, acceptTerms } = body;
+  const {
+    fatherName,
+    motherName,
+    district,
+    upazila,
+    address,
+    nidNumber,
+    paymentNumber,
+    nomineeName,
+    nomineePhone,
+    nomineeRelation,
+    nomineeNid,
+    acceptTerms,
+  } = body;
 
   const data: Prisma.InvestorProfileUpdateInput = {};
   if (typeof fatherName === "string") data.fatherName = fatherName.trim();
+  if (typeof motherName === "string") data.motherName = motherName.trim();
+  if (typeof district === "string") data.district = district.trim();
+  if (typeof upazila === "string") data.upazila = upazila.trim();
   if (typeof address === "string") data.address = address.trim();
   if (typeof nidNumber === "string") data.nidNumber = nidNumber.trim();
   if (typeof paymentNumber === "string")
     data.paymentNumber = paymentNumber.trim();
+  if (typeof nomineeName === "string") data.nomineeName = nomineeName.trim();
+  if (typeof nomineePhone === "string")
+    data.nomineePhone = nomineePhone.trim();
+  if (typeof nomineeRelation === "string")
+    data.nomineeRelation = nomineeRelation.trim();
+  if (typeof nomineeNid === "string") data.nomineeNid = nomineeNid.trim();
   if (acceptTerms === true && !existing.termsAcceptedAt) {
     data.termsAcceptedAt = new Date();
   }

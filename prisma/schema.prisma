@@ -482,12 +482,22 @@ model InvestorProfile {
   email                String?                    @unique
   emailVerified        Boolean                    @default(false)
   fatherName           String?
-  address              String?
+  motherName           String?
+  // ঠিকানা
+  district             String?
+  upazila              String?
+  address              String?                    // বিস্তারিত ঠিকানা
   nidNumber            String?
   nidImageUrl          String?
-  photoImageUrl        String?
+  photoImageUrl        String?                    // পাসপোর্ট সাইজ — UI রাউন্ড, অ্যাগ্রিমেন্ট স্কয়ার
   signatureImageUrl    String?
   paymentNumber        String?
+  // নমিনি
+  nomineeName          String?
+  nomineePhone         String?
+  nomineeRelation      String?
+  nomineeNid           String?
+  nomineeImageUrl      String?
   termsAcceptedAt      DateTime?
   profileCompletedAt   DateTime?
   verificationStatus   InvestorVerificationStatus @default(PENDING)

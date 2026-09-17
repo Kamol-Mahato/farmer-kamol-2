@@ -4,17 +4,28 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import InvestmentsSection from "./InvestmentsSection";
+import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
+import { DistrictSearch, UpazilaSearch } from "@/app/components/LocationSearch";
+import { normalizePhone, isValidBDPhone } from "@/lib/phone";
 
 interface InvestorProfile {
   email: string | null;
   emailVerified: boolean;
   fatherName: string | null;
+  motherName: string | null;
+  district: string | null;
+  upazila: string | null;
   address: string | null;
   nidNumber: string | null;
   nidImageUrl: string | null;
   photoImageUrl: string | null;
   signatureImageUrl: string | null;
   paymentNumber: string | null;
+  nomineeName: string | null;
+  nomineePhone: string | null;
+  nomineeRelation: string | null;
+  nomineeNid: string | null;
+  nomineeImageUrl: string | null;
   termsAcceptedAt: string | null;
   profileCompletedAt: string | null;
   verificationStatus: "PENDING" | "APPROVED" | "REJECTED";
@@ -26,11 +37,13 @@ function DocUpload({
   kind,
   currentUrl,
   onUploaded,
+  round,
 }: {
   label: string;
-  kind: "nid" | "photo" | "signature";
+  kind: "nid" | "photo" | "signature" | "nominee";
   currentUrl: string | null;
   onUploaded: (url: string) => void;
+  round?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -68,15 +81,21 @@ function DocUpload({
         {label}
       </label>
       <div className="flex items-center gap-3">
-        {currentUrl ? (
+      {currentUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentUrl}
             alt={label}
-            className="w-16 h-16 rounded-lg object-cover border border-green-200"
+            className={`w-16 h-16 object-cover border border-green-200 ${
+              round ? "rounded-full" : "rounded-lg"
+            }`}
           />
         ) : (
-          <div className="w-16 h-16 rounded-lg bg-gray-50 border border-dashed border-gray-300 flex items-center justify-center text-gray-300 text-xs">
+          <div
+            className={`w-16 h-16 bg-gray-50 border border-dashed border-gray-300 flex items-center justify-center text-gray-300 text-xs ${
+              round ? "rounded-full" : "rounded-lg"
+            }`}
+          >
             নেই
           </div>
         )}
@@ -115,9 +134,17 @@ export default function InvestorPage() {
 
   // Profile form state
   const [fatherName, setFatherName] = useState("");
+  const [motherName, setMotherName] = useState("");
+  const [district, setDistrict] = useState("");
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [upazila, setUpazila] = useState("");
   const [address, setAddress] = useState("");
   const [nidNumber, setNidNumber] = useState("");
   const [paymentNumber, setPaymentNumber] = useState("");
+  const [nomineeName, setNomineeName] = useState("");
+  const [nomineePhone, setNomineePhone] = useState("");
+  const [nomineeRelation, setNomineeRelation] = useState("");
+  const [nomineeNid, setNomineeNid] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -143,9 +170,20 @@ export default function InvestorPage() {
         setProfile(p);
         if (p) {
           setFatherName(p.fatherName || "");
+          setMotherName(p.motherName || "");
+          setDistrict(p.district || "");
+          const dMatch = districts.find(
+            (d) => d.name === p.district || d.en_name === p.district,
+          );
+          setDistrictId(dMatch?.id ?? null);
+          setUpazila(p.upazila || "");
           setAddress(p.address || "");
           setNidNumber(p.nidNumber || "");
           setPaymentNumber(p.paymentNumber || "");
+          setNomineeName(p.nomineeName || "");
+          setNomineePhone(p.nomineePhone || "");
+          setNomineeRelation(p.nomineeRelation || "");
+          setNomineeNid(p.nomineeNid || "");
           setAcceptTerms(Boolean(p.termsAcceptedAt));
         }
       } else {
@@ -217,20 +255,91 @@ export default function InvestorPage() {
     e.preventDefault();
     setSaveError("");
     setSaveMsg("");
+
+    if (!fatherName.trim()) {
+      setSaveError("পিতার নাম দিন");
+      return;
+    }
+    if (!motherName.trim()) {
+      setSaveError("মাতার নাম দিন");
+      return;
+    }
+    if (!district.trim()) {
+      setSaveError("জেলা নির্বাচন করুন");
+      return;
+    }
+    if (!upazila.trim()) {
+      setSaveError("উপজেলা নির্বাচন করুন");
+      return;
+    }
+    if (!address.trim()) {
+      setSaveError("বিস্তারিত ঠিকানা লিখুন");
+      return;
+    }
+    if (!nidNumber.trim()) {
+      setSaveError("এনআইডি নম্বর দিন");
+      return;
+    }
+    const payPhone = normalizePhone(paymentNumber);
+    if (!isValidBDPhone(payPhone)) {
+      setSaveError("সঠিক বিকাশ/মোবাইল নম্বর দিন (01XXXXXXXXX)");
+      return;
+    }
+    if (!profile?.nidImageUrl) {
+      setSaveError("এনআইডি ছবি আপলোড করুন");
+      return;
+    }
+    if (!profile?.photoImageUrl) {
+      setSaveError("পাসপোর্ট সাইজ ছবি আপলোড করুন");
+      return;
+    }
+    if (!profile?.signatureImageUrl) {
+      setSaveError("স্বাক্ষরের ছবি আপলোড করুন");
+      return;
+    }
+    if (!nomineeName.trim()) {
+      setSaveError("নমিনির নাম দিন");
+      return;
+    }
+    const nomPhone = normalizePhone(nomineePhone);
+    if (!isValidBDPhone(nomPhone)) {
+      setSaveError("নমিনির সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");
+      return;
+    }
+    if (!nomineeRelation.trim()) {
+      setSaveError("নমিনির সাথে সম্পর্ক লিখুন");
+      return;
+    }
+    if (!nomineeNid.trim()) {
+      setSaveError("নমিনির এনআইডি নম্বর দিন");
+      return;
+    }
+    if (!profile?.nomineeImageUrl) {
+      setSaveError("নমিনির ছবি আপলোড করুন");
+      return;
+    }
     if (!acceptTerms) {
       setSaveError("চুক্তির শর্তে সম্মতি দিতে হবে");
       return;
     }
+
     setSaving(true);
     try {
       const res = await fetch("/api/investor/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fatherName,
-          address,
-          nidNumber,
-          paymentNumber,
+          fatherName: fatherName.trim(),
+          motherName: motherName.trim(),
+          district: district.trim(),
+          upazila: upazila.trim(),
+          address: address.trim(),
+          nidNumber: nidNumber.trim(),
+          paymentNumber: payPhone,
+          nomineeName: nomineeName.trim(),
+          nomineePhone: nomPhone,
+          nomineeRelation: nomineeRelation.trim(),
+          nomineeNid: nomineeNid.trim(),
           acceptTerms,
         }),
       });
@@ -387,58 +496,112 @@ export default function InvestorPage() {
           <h2 className="font-bold text-green-800 text-base">
             ধাপ ২ — প্রোফাইল সম্পূর্ণ করুন
           </h2>
+          <p className="text-xs text-gray-500 -mt-2">
+            * চিহ্নিত সব ঘর আবশ্যক
+          </p>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5">
-              পিতার নাম
-            </label>
-            <input
-              type="text"
-              value={fatherName}
-              onChange={(e) => setFatherName(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
-            />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                পিতার নাম <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={fatherName}
+                onChange={(e) => setFatherName(e.target.value)}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                মাতার নাম <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={motherName}
+                onChange={(e) => setMotherName(e.target.value)}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                জেলা <span className="text-red-500">*</span>
+              </label>
+              <DistrictSearch
+                districts={districts}
+                value={district}
+                onSelect={(d) => {
+                  setDistrict(d.name);
+                  setDistrictId(d.id);
+                  setUpazila("");
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                উপজেলা <span className="text-red-500">*</span>
+              </label>
+              <UpazilaSearch
+                upazilas={districtId ? upazilas[districtId] || [] : []}
+                upazilasEn={districtId ? upazilasEn[districtId] || [] : []}
+                value={upazila}
+                onSelect={(u) => setUpazila(u)}
+                disabled={!districtId}
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1.5">
-              বর্তমান ঠিকানা
+              বিস্তারিত ঠিকানা <span className="text-red-500">*</span>
             </label>
             <textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               rows={2}
+              placeholder="গ্রাম/রোড, বাড়ি নং ইত্যাদি"
+              required
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5">
-              এনআইডি নম্বর
-            </label>
-            <input
-              type="text"
-              value={nidNumber}
-              onChange={(e) => setNidNumber(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5">
-              বিকাশ/ব্যাংক নম্বর (টাকা লেনদেনের জন্য)
-            </label>
-            <input
-              type="text"
-              value={paymentNumber}
-              onChange={(e) => setPaymentNumber(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
-            />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                এনআইডি নম্বর <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={nidNumber}
+                onChange={(e) => setNidNumber(e.target.value)}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                বিকাশ/ব্যাংক নম্বর <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={paymentNumber}
+                onChange={(e) => setPaymentNumber(e.target.value)}
+                placeholder="01XXXXXXXXX"
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4 pt-2">
             <DocUpload
-              label="এনআইডি-র ছবি"
+              label="এনআইডি ছবি *"
               kind="nid"
               currentUrl={profile?.nidImageUrl ?? null}
               onUploaded={(url) =>
@@ -446,19 +609,94 @@ export default function InvestorPage() {
               }
             />
             <DocUpload
-              label="পাসপোর্ট সাইজ ছবি"
+              label="পাসপোর্ট ছবি *"
               kind="photo"
+              round
               currentUrl={profile?.photoImageUrl ?? null}
               onUploaded={(url) =>
                 setProfile((p) => (p ? { ...p, photoImageUrl: url } : p))
               }
             />
             <DocUpload
-              label="স্বাক্ষরের ছবি"
+              label="স্বাক্ষর ছবি *"
               kind="signature"
               currentUrl={profile?.signatureImageUrl ?? null}
               onUploaded={(url) =>
                 setProfile((p) => (p ? { ...p, signatureImageUrl: url } : p))
+              }
+            />
+          </div>
+
+          {/* —— নমিনি —— */}
+          <div className="border-t border-gray-100 pt-5 mt-2 space-y-4">
+            <h3 className="font-bold text-green-800 text-sm">
+              নমিনি তথ্য <span className="text-red-500">*</span>
+            </h3>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  নমিনির নাম <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={nomineeName}
+                  onChange={(e) => setNomineeName(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  নমিনির মোবাইল <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={nomineePhone}
+                  onChange={(e) => setNomineePhone(e.target.value)}
+                  placeholder="01XXXXXXXXX"
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  সম্পর্ক <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={nomineeRelation}
+                  onChange={(e) => setNomineeRelation(e.target.value)}
+                  placeholder="যেমন: /মা/ বাবা / স্ত্রী / ভাই /বোন / পুত্র / কন্যা "
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                  নমিনির এনআইডি <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={nomineeNid}
+                  onChange={(e) => setNomineeNid(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                />
+              </div>
+            </div>
+
+            <DocUpload
+              label="নমিনির ছবি *"
+              kind="nominee"
+              round
+              currentUrl={profile?.nomineeImageUrl ?? null}
+              onUploaded={(url) =>
+                setProfile((p) => (p ? { ...p, nomineeImageUrl: url } : p))
               }
             />
           </div>

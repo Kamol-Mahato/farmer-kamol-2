@@ -21,11 +21,20 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 // ধরন অনুযায়ী কোন resize আর কোন DB ফিল্ডে বসবে
 const KIND_CONFIG: Record<
   string,
-  { width: number; height: number; field: "nidImageUrl" | "photoImageUrl" | "signatureImageUrl" }
+  {
+    width: number;
+    height: number;
+    field:
+      | "nidImageUrl"
+      | "photoImageUrl"
+      | "signatureImageUrl"
+      | "nomineeImageUrl";
+  }
 > = {
   nid: { width: 1000, height: 700, field: "nidImageUrl" },
-  photo: { width: 400, height: 400, field: "photoImageUrl" },
+  photo: { width: 400, height: 400, field: "photoImageUrl" }, // পাসপোর্ট — UI রাউন্ড
   signature: { width: 600, height: 300, field: "signatureImageUrl" },
+  nominee: { width: 400, height: 400, field: "nomineeImageUrl" },
 };
 
 export async function POST(request: Request) {
