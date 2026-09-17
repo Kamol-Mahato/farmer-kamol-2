@@ -52,6 +52,9 @@ export async function GET() {
 
   const profile = await prisma.investorProfile.findUnique({
     where: { userId: customerId },
+    include: {
+      user: { select: { name: true, phone: true } },
+    },
   });
 
   return NextResponse.json({ profile });

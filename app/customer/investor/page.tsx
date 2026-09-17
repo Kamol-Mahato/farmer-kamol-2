@@ -11,6 +11,7 @@ import { normalizePhone, isValidBDPhone } from "@/lib/phone";
 interface InvestorProfile {
   email: string | null;
   emailVerified: boolean;
+  user?: { name: string | null; phone: string } | null;
   fatherName: string | null;
   motherName: string | null;
   district: string | null;
@@ -47,11 +48,15 @@ function DocUpload({
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError("");
+    // সাথে সাথে লোকাল প্রিভিউ
+    const previewUrl = URL.createObjectURL(file);
+    setLocalPreview(previewUrl);
     setUploading(true);
     try {
       const formData = new FormData();
@@ -64,16 +69,21 @@ function DocUpload({
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "আপলোড ব্যর্থ");
+        setLocalPreview(null);
       } else {
         onUploaded(data.url);
+        setLocalPreview(null);
       }
     } catch {
       setError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+      setLocalPreview(null);
     } finally {
       setUploading(false);
       e.target.value = "";
     }
   }
+
+  const displayUrl = localPreview || currentUrl;
 
   return (
     <div>
@@ -81,14 +91,14 @@ function DocUpload({
         {label}
       </label>
       <div className="flex items-center gap-3">
-      {currentUrl ? (
+        {displayUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={currentUrl}
+            src={displayUrl}
             alt={label}
             className={`w-16 h-16 object-cover border border-green-200 ${
               round ? "rounded-full" : "rounded-lg"
-            }`}
+            } ${uploading ? "opacity-60" : ""}`}
           />
         ) : (
           <div
@@ -147,6 +157,12 @@ export default function InvestorPage() {
   const [nomineeNid, setNomineeNid] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [editOtpStep, setEditOtpStep] = useState(false); // OTP স্ক্রিন দেখাবে
+  const [editOtp, setEditOtp] = useState("");
+  const [editOtpSent, setEditOtpSent] = useState(false);
+  const [editOtpBusy, setEditOtpBusy] = useState(false);
+  const [editOtpError, setEditOtpError] = useState("");
+  const [editOtpMsg, setEditOtpMsg] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveMsg, setSaveMsg] = useState("");
@@ -252,6 +268,84 @@ export default function InvestorPage() {
     }
   }
 
+  async function startEdit() {
+    // এডিট বাটন → আগে OTP স্টেপ
+    setEditOtpStep(true);
+    setEditOtp("");
+    setEditOtpSent(false);
+    setEditOtpError("");
+    setEditOtpMsg("");
+    setEditing(false);
+  }
+
+  async function requestEditOtp() {
+    setEditOtpError("");
+    setEditOtpMsg("");
+    if (!profile?.email) {
+      setEditOtpError("ইমেইল পাওয়া যায়নি");
+      return;
+    }
+    setEditOtpBusy(true);
+    try {
+      const res = await fetch("/api/investor/request-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: profile.email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEditOtpError(data.error || "কোড পাঠানো যায়নি");
+      } else {
+        setEditOtpSent(true);
+        setEditOtpMsg(data.message || "কোড পাঠানো হয়েছে");
+      }
+    } catch {
+      setEditOtpError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+    } finally {
+      setEditOtpBusy(false);
+    }
+  }
+
+  async function verifyEditOtp() {
+    setEditOtpError("");
+    setEditOtpMsg("");
+    if (!editOtp.trim()) {
+      setEditOtpError("কোড দিন");
+      return;
+    }
+    setEditOtpBusy(true);
+    try {
+      const res = await fetch("/api/investor/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otp: editOtp.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEditOtpError(data.error || "ভেরিফাই করা যায়নি");
+      } else {
+        setEditOtpStep(false);
+        setEditing(true);
+        setEditOtp("");
+        setEditOtpSent(false);
+      }
+    } catch {
+      setEditOtpError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
+    } finally {
+      setEditOtpBusy(false);
+    }
+  }
+
+  function cancelEditFlow() {
+    setEditOtpStep(false);
+    setEditing(false);
+    setEditOtp("");
+    setEditOtpSent(false);
+    setEditOtpError("");
+    setEditOtpMsg("");
+    loadProfile();
+  }
+
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaveError("");
@@ -351,6 +445,9 @@ export default function InvestorPage() {
         setProfile(data.profile);
         setSaveMsg("সেভ হয়েছে");
         setEditing(false);
+        setEditOtpStep(false);
+        setEditOtp("");
+        setEditOtpSent(false);
       }
     } catch {
       setSaveError("সমস্যা হয়েছে, আবার চেষ্টা করুন");
@@ -435,33 +532,34 @@ export default function InvestorPage() {
       {emailVerified && profile && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 flex items-start gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-500 mb-0.5">বিনিয়োগকারী প্রোফাইল</p>
+          <p className="text-xs text-gray-500 mb-0.5">বিনিয়োগকারী প্রোফাইল</p>
             <p className="font-bold text-green-800 text-base truncate">
-              {profile.fatherName
-                ? `${profile.fatherName} এর সন্তান`
-                : "প্রোফাইল"}
+              {profile.user?.name || "প্রোফাইল"}
             </p>
+            {profile.emailVerified && profile.email && (
+              <p className="text-xs text-green-700 mt-0.5 flex items-center gap-1">
+                <span>✓</span>
+                <span className="truncate">{profile.email}</span>
+              </p>
+            )}
             {(profile.district || profile.upazila) && (
               <p className="text-xs text-gray-500 mt-1">
                 {[profile.upazila, profile.district].filter(Boolean).join(", ")}
               </p>
             )}
-            {profileComplete && !editing && (
+            {profileComplete && !editing && !editOtpStep && (
               <button
                 type="button"
-                onClick={() => setEditing(true)}
+                onClick={startEdit}
                 className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition"
               >
                 ✎ এডিট করুন
               </button>
             )}
-            {editing && (
+            {(editing || editOtpStep) && (
               <button
                 type="button"
-                onClick={() => {
-                  setEditing(false);
-                  loadProfile();
-                }}
+                onClick={cancelEditFlow}
                 className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition"
               >
                 বাতিল
@@ -486,11 +584,78 @@ export default function InvestorPage() {
         </div>
       )}
 
-      {/* —— View মোড: লকড সারাংশ (অ্যাপ্রুভড/কমপ্লিট + এডিট না) —— */}
-      {emailVerified && profileComplete && !editing && (
+      {/* —— এডিট OTP স্টেপ —— */}
+      {emailVerified && editOtpStep && (
+        <div className="bg-white rounded-2xl shadow-sm border border-amber-100 p-5 mb-6 space-y-4">
+          <h2 className="font-bold text-green-800 text-base">
+            এডিট করতে ইমেইল ভেরিফাই করুন
+          </h2>
+          <p className="text-sm text-gray-600">
+            নিরাপত্তার জন্য আপনার ভেরিফাইড ইমেইলে (
+            <span className="font-semibold text-green-700">
+              {profile?.email}
+            </span>
+            ) একটি কোড পাঠানো হবে।
+          </p>
+
+          {!editOtpSent ? (
+            <button
+              type="button"
+              onClick={requestEditOtp}
+              disabled={editOtpBusy}
+              className="bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-green-600 disabled:opacity-50"
+            >
+              {editOtpBusy ? "পাঠানো হচ্ছে..." : "কোড পাঠান"}
+            </button>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={editOtp}
+                onChange={(e) => setEditOtp(e.target.value)}
+                placeholder="৬ সংখ্যার কোড"
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              />
+              <button
+                type="button"
+                onClick={verifyEditOtp}
+                disabled={editOtpBusy}
+                className="bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-green-600 disabled:opacity-50"
+              >
+                {editOtpBusy ? "চেক হচ্ছে..." : "ভেরিফাই করুন"}
+              </button>
+            </div>
+          )}
+
+          {editOtpMsg && (
+            <p className="text-green-700 text-sm">{editOtpMsg}</p>
+          )}
+          {editOtpError && (
+            <p className="text-red-500 text-sm">{editOtpError}</p>
+          )}
+        </div>
+      )}
+
+      {/* —— View মোড: লকড সারাংশ —— */}
+      {emailVerified && profileComplete && !editing && !editOtpStep && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 space-y-4 text-sm">
           <h2 className="font-bold text-green-800 text-base">প্রোফাইল সারাংশ</h2>
           <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] text-gray-500">নাম</p>
+              <p className="font-semibold text-gray-800">{profile?.user?.name || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">ভেরিফাইড ইমেইল</p>
+              <p className="font-semibold text-gray-800 text-xs">
+                {profile?.emailVerified && profile?.email ? (
+                  <span className="text-green-700">✓ {profile.email}</span>
+                ) : (
+                  "—"
+                )}
+              </p>
+            </div>
             <div>
               <p className="text-[10px] text-gray-500">পিতার নাম</p>
               <p className="font-semibold text-gray-800">{profile?.fatherName || "—"}</p>
