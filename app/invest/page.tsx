@@ -161,7 +161,7 @@ function SubNav() {
         {/* CTA — সবসময় ডানে দৃশ্যমান */}
         <Link
           href="/customer/dashboard"
-          className="shrink-0 inline-flex items-center gap-1 bg-green-700 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
+          className="shrink-0 inline-flex items-center gap-1 bg-green-600 text-white px-3.5 py-2 rounded-full font-bold text-xs md:text-sm shadow hover:bg-green-800 hover:shadow-md active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap"
         >
           বিনিয়োগ করুন
         </Link>
@@ -250,7 +250,7 @@ export default async function InvestPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/customer/dashboard"
-                  className="inline-flex items-center justify-center gap-2 bg-green-700 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
                 >
                   অংশীদার হওয়ার আবেদন করুন →
                 </Link>
@@ -299,7 +299,7 @@ export default async function InvestPage() {
       {/* =========================================================
           JOURNEY
       ========================================================== */}
-      <section className="py-14 md:py-16 px-4 bg-white">
+      <section className="py-14 md:py-16 px-4 bg-green-50">
         <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>আমার খামারের যাত্রা</SectionHeading>
@@ -336,7 +336,7 @@ export default async function InvestPage() {
       {/* =========================================================
           FARM STATUS (নতুন সেকশন)
       ========================================================== */}
-      <section id="farm-status" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
+        <section id="farm-status" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>খামারের বর্তমান অবস্থা</SectionHeading>
@@ -364,7 +364,7 @@ export default async function InvestPage() {
       {/* =========================================================
           PROJECTS
       ========================================================== */}
-      <section id="projects" className="py-14 md:py-16 px-4 scroll-mt-16">
+      <section id="projects" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>প্রকল্পসমূহ</SectionHeading>
@@ -506,7 +506,7 @@ export default async function InvestPage() {
       {/* =========================================================
           আমাদের খামার পরিদর্শন — ভিডিও + ছবি (প্লেসহোল্ডার)
       ========================================================== */}
-      <section id="farm-visit" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
+      <section id="farm-visit" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>আমাদের খামার পরিদর্শন</SectionHeading>
@@ -537,7 +537,7 @@ export default async function InvestPage() {
       {/* =========================================================
           যারা আমাদের সাথে যাত্রা শুরু করেছেন — ভিডিও (প্লেসহোল্ডার)
       ========================================================== */}
-      <section id="journey-with-us" className="py-14 md:py-16 px-4 scroll-mt-16">
+      <section id="journey-with-us" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>যারা আমাদের সাথে যাত্রা শুরু করেছেন</SectionHeading>
@@ -559,7 +559,7 @@ export default async function InvestPage() {
       {/* =========================================================
           LIVE CALCULATOR
       ========================================================== */}
-      <section id="calculator" className="py-14 md:py-16 px-4 scroll-mt-16">
+      <section id="calculator" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <InvestCalculator />
@@ -648,7 +648,7 @@ export default async function InvestPage() {
       {/* =========================================================
           HOW TO PARTNER
       ========================================================== */}
-      <section id="how-to" className="py-14 md:py-16 px-4 scroll-mt-16">
+      <section id="how-to" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-4xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>কীভাবে অংশীদার হবেন</SectionHeading>
@@ -668,18 +668,106 @@ export default async function InvestPage() {
           <Reveal className="text-center mt-10">
             <Link
               href="/customer/dashboard"
-              className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
+              className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
             >
               অংশীদার হওয়ার আবেদন করুন →
             </Link>
           </Reveal>
+          </div>
+      </section>
+
+      {/* =========================================================
+          E-AGREEMENT + SETTLEMENT
+      ========================================================== */}
+      <section id="agreement" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+        <div className="max-w-5xl mx-auto">
+          <Reveal className="text-center mb-10">
+            <SectionHeading>আপনার জন্য দুইটি গুরুত্বপূর্ণ ডকুমেন্ট</SectionHeading>
+            <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
+              প্রতিটি অংশীদারিত্বের জন্য লিখিত প্রমাণ থাকবে — শুরুতে চুক্তি, শেষে স্বচ্ছ হিসাব।
+            </p>
+          </Reveal>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            <Reveal direction="left">
+              <div className="bg-white rounded-3xl border border-green-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300">
+                <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-2xl mb-4">
+                  📜
+                </div>
+                <h3 className="text-xl font-bold text-green-900 mb-3">e-Agreement কপি</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  আবেদন গৃহীত হলে প্রতিটি অংশীদারিত্বের জন্য একটি স্বতন্ত্র e-Agreement তৈরি হবে — প্রকল্প, বিনিয়োগের পরিমাণ, সময়কাল ও লাভ বণ্টনের শর্ত স্পষ্টভাবে উল্লেখ থাকবে।
+                </p>
+                <div className="text-xs text-gray-500 space-y-2">
+                  <p>✓ স্বতন্ত্র Agreement Number</p>
+                  <p>✓ অংশীদার ও প্রকল্পের তথ্য</p>
+                  <p>✓ ৬৫% / ৩৫% লাভ বণ্টনের শর্ত</p>
+                  <p>✓ বিনিয়োগের পরিমাণ ও তারিখ</p>
+                  <p>✓ প্রিন্ট/সেভ করার সুবিধা</p>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal direction="right">
+              <div className="bg-white rounded-3xl border border-blue-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl mb-4">
+                  📊
+                </div>
+                <h3 className="text-xl font-bold text-blue-900 mb-3">Final Settlement স্টেটমেন্ট</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  প্রকল্প শেষ হলে প্রকৃত বিক্রয় ও খরচের হিসাব থেকে চূড়ান্ত সেটেলমেন্ট তৈরি হবে। অতিরিক্ত বোনাস থাকলে সেটিও একই স্টেটমেন্টে দেখানো হবে।
+                </p>
+                <div className="text-xs text-gray-500 space-y-2">
+                  <p>✓ মোট বিক্রয় ও মোট খরচ</p>
+                  <p>✓ নিট লাভের হিসাব</p>
+                  <p>✓ খামারি ও অংশীদারের ভাগ</p>
+                  <p>✓ অতিরিক্ত বোনাস (যদি থাকে)</p>
+                  <p>✓ প্রতিটি অংশীদারের চূড়ান্ত হিসাব</p>
+                </div>
+              </div>
+            </Reveal>
+            </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          SECURITY & TRANSPARENCY
+      ========================================================== */}
+      <section className="py-14 md:py-16 px-4 bg-green-50">
+        <div className="max-w-5xl mx-auto">
+          <Reveal className="text-center mb-10">
+            <SectionHeading>নিরাপত্তা ও স্বচ্ছতা</SectionHeading>
+          </Reveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: "📄", title: "e-Agreement", text: "প্রতিটি বিনিয়োগের জন্য আলাদা agreement number সহ ডকুমেন্ট থাকবে।" },
+              { icon: "🧾", title: "হিসাবের প্রমাণ", text: "প্রকল্পের খরচের পরিমাণ ও প্রয়োজনীয় রসিদ/ইনভয়েস সংরক্ষণ করা হবে।" },
+              { icon: "📊", title: "স্বচ্ছ Settlement", text: "প্রকল্প শেষে মোট বিক্রয়, খরচ ও নিট লাভ থেকে চূড়ান্ত হিসাব তৈরি হবে।" },
+              { icon: "⭐", title: "Extra Bonus", text: "প্রকৃত লাভ বেশি হলে চাইলে অতিরিক্ত বোনাস দেওয়া হতে পারে।" },
+            ].map((item, i) => (
+              <Reveal
+                key={item.title}
+                direction={i % 2 === 0 ? "left" : "right"}
+                delay={(i % 4) * 100}
+              >
+                <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
+                  <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-xl mb-3">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-bold text-green-800 text-sm mb-2">{item.title}</h3>
+                  <p className="text-gray-600 text-xs leading-relaxed">{item.text}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* =========================================================
           PRINCIPLES
       ========================================================== */}
-      <section id="principles" className="py-14 md:py-16 px-4 bg-gray-50 scroll-mt-16">
+      <section id="principles" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>আমাদের নীতিমালা</SectionHeading>
@@ -712,7 +800,7 @@ export default async function InvestPage() {
       {/* =========================================================
           FINAL CTA
       ========================================================== */}
-      <section className="py-16 px-4 bg-green-700 text-white text-center">
+      <section className="py-16 px-4 bg-green-100 text-white text-center">
         <Reveal className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
             একসাথে এগিয়ে চলুন
