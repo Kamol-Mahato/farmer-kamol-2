@@ -41,12 +41,26 @@ export async function PATCH(
   const data: Prisma.ProjectUpdateInput = {};
   if (typeof name === "string" && name.trim()) data.name = name.trim();
   if (typeof description === "string") data.description = description.trim();
-  if (startDate) data.startDate = new Date(startDate);
+  if (startDate === null || startDate === "") {
+    data.startDate = null;
+  } else if (startDate) {
+    data.startDate = new Date(startDate);
+  }
   if (typeof isAcceptingFunds === "boolean")
     data.isAcceptingFunds = isAcceptingFunds;
-  if (typeof targetAmount === "number") data.targetAmount = targetAmount;
-  if (typeof ownContributionAmount === "number")
+  if (targetAmount === null || typeof targetAmount === "number")
+    data.targetAmount = targetAmount;
+  if (
+    ownContributionAmount === null ||
+    typeof ownContributionAmount === "number"
+  )
     data.ownContributionAmount = ownContributionAmount;
+  if (durationMonths === null || typeof durationMonths === "number")
+    data.durationMonths = durationMonths;
+  if (investorProfitPct === null || typeof investorProfitPct === "number")
+    data.investorProfitPct = investorProfitPct;
+  if (totalLots === null || typeof totalLots === "number")
+    data.totalLots = totalLots;
   if (typeof fundUsage === "string") data.fundUsage = fundUsage.trim();
   if (typeof timeline === "string") data.timeline = timeline.trim();
   if (typeof risks === "string") data.risks = risks.trim();
