@@ -10,11 +10,39 @@ export async function GET() {
   }
 
   const projects = await prisma.project.findMany({
-    include: { _count: { select: { investments: true } } },
+    include: {
+      _count: { select: { investments: true } },
+      investments: {
+        where: { status: { in: ["ACTIVE", "PENDING"] } },
+        select: { amount: true, status: true },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(projects);
+  // ✅ প্রতি প্রজেক্টে raisedAmount + progressPct যোগ করা
+  const withRaised = projects.map((p) => {
+    const raisedAmount = p.investments
+      .filter((i) => i.status === "ACTIVE")
+      .reduce((sum, i) => sum + i.amount, 0);
+    const pendingAmount = p.investments
+      .filter((i) => i.status === "PENDING")
+      .reduce((sum, i) => sum + i.amount, 0);
+    const target = p.targetAmount ?? 0;
+    const progressPct =
+      target > 0 ? Math.min(100, Math.round((raisedAmount / target) * 100)) : null;
+
+    // investments অ্যারে রেসপন্স থেকে বাদ (শুধু হিসাবের জন্য ছিল)
+    const { investments, ...rest } = p;
+    return {
+      ...rest,
+      raisedAmount,
+      pendingAmount,
+      progressPct,
+    };
+  });
+
+  return NextResponse.json(withRaised);
 }
 
 export async function POST(request: Request) {
