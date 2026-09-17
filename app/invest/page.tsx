@@ -323,7 +323,7 @@ export default async function InvestPage() {
                 direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
                 delay={(i % 3) * 80}
               >
-                <div className="bg-green-50 border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
+                <div className="bg-white border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
                 </div>
@@ -800,22 +800,22 @@ export default async function InvestPage() {
       {/* =========================================================
           FINAL CTA
       ========================================================== */}
-      <section className="py-16 px-4 bg-green-100 text-white text-center">
-        <Reveal className="max-w-2xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            একসাথে এগিয়ে চলুন
-          </h2>
-          <p className="text-green-100 mb-8">
-            বাস্তব কাজ, স্বচ্ছ হিসাব এবং ন্যায্য অংশীদারিত্বের ভিত্তিতে।
-          </p>
-          <Link
-            href="/customer/dashboard"
-            className="inline-flex items-center gap-2 bg-white text-green-800 px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-50 transition"
-          >
-            অংশীদার হওয়ার আবেদন করুন →
-          </Link>
-        </Reveal>
-      </section>
+      <section className="py-16 px-4 bg-green-200 text-center">
+  <Reveal className="max-w-2xl mx-auto">
+    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-green-950">
+      একসাথে এগিয়ে চলুন
+    </h2>
+    <p className="text-green-850 mb-8 font-medium">
+      বাস্তব কাজ, স্বচ্ছ হিসাব এবং ন্যায্য অংশীদারিত্বের ভিত্তিতে।
+    </p>
+    <Link
+      href="/customer/dashboard"
+      className="inline-flex items-center gap-2 bg-green-900 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
+    >
+      অংশীদার হওয়ার আবেদন করুন →
+    </Link>
+  </Reveal>
+</section>
 
       </div>
   );
