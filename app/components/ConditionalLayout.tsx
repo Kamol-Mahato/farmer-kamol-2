@@ -2,15 +2,18 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import FloatingCartButton from "./FloatingCartButton";
 import { MobileMenuProvider } from "./MobileMenuContext";
 import MobileBottomNav from "./MobileBottomNav";
-import FloatingWhatsAppButton from "./FloatingWhatsAppButton";
 import AgentModeBanner from "./AgentModeBanner";
-import NotificationPermissionBanner from "./NotificationPermissionBanner";
-import ChatWidget from "./ChatWidget";
+
+// 🚀 প্রথম রেন্ডারে জরুরি না এমন কম্পোনেন্ট — আলাদা chunk-এ lazy load হবে, main-thread work কমবে
+const FloatingWhatsAppButton = dynamic(() => import("./FloatingWhatsAppButton"), { ssr: false });
+const NotificationPermissionBanner = dynamic(() => import("./NotificationPermissionBanner"), { ssr: false });
+const ChatWidget = dynamic(() => import("./ChatWidget"), { ssr: false });
 
 export default function ConditionalLayout({
   children,

@@ -47,22 +47,24 @@ export default function InvestSection({
   return (
     <section
       ref={sectionRef}
-      className="bg-gradient-to-b from-[#FAF9F6] to-[#FAF9F6] py-4 md:py-2 px-4 border-y border-green-100/80"
+      className="bg-[#FAF9F6] py-8 md:py-10 px-4 border-y border-green-100/80"
     >
       <div
         className={`max-w-2xl mx-auto text-center transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
-        {/* ব্যাজ */}
-        <span className="inline-flex items-center border-2 border-green-700 text-green-800 text-sm md:text-base font-bold px-5 py-2 rounded-full mb-5">
-          আমাদের খামারে অংশীদার হোন
-        </span>
+        {/* হেডিং — Product সেকশনের মতো pill স্টাইল */}
+<div className="text-center mb-6">
+  <h2 className="inline-flex items-center border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2.5 rounded-full">
+    আমাদের খামারে অংশীদার হোন
+  </h2>
+</div>
 
         {/* হেডলাইন */}
-        <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-snug mb-4">
-          বিশ্বাস আর লাভের ভিত্তিতে গড়ে উঠুক আমাদের খামার
-        </h2>
+        <p className="text-2xl md:text-3xl font-black text-gray-900 leading-snug mb-4">
+  বিশ্বাস আর লাভের ভিত্তিতে গড়ে উঠুক আমাদের খামার
+</p>
 
         {/* সাব-টেক্সট */}
         <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-6 max-w-md mx-auto">
