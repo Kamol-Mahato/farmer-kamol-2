@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 type InvestSectionProps = {
@@ -8,76 +11,82 @@ type InvestSectionProps = {
 
 export default function InvestSection({
   activeProjects = 1,
-  partnerCount = 0,
+  partnerCount = 1,
   progressPct = null,
 }: InvestSectionProps) {
   const chips = ["স্বচ্ছ হিসাব", "বাস্তব খামার", "লিখিত চুক্তি"];
 
   const stats = [
-    {
-      label: "চলমান প্রকল্প",
-      value: String(activeProjects),
-    },
-    {
-      label: "অংশীদার",
-      value: partnerCount > 0 ? `${partnerCount}+` : "—",
-    },
-    {
-      label: "সংগ্রহ",
-      value: progressPct != null ? `${progressPct}%` : "—",
-    },
+    { label: "চলমান প্রকল্প", value: String(activeProjects) },
+    { label: "অংশীদার", value: partnerCount > 0 ? `${partnerCount}+` : "—" },
+    { label: "সংগ্রহ", value: progressPct != null ? `${progressPct}%` : "—" },
   ];
 
+  // একবারই স্ক্রিনে আসার সময় হালকা fade-slide-up — বারবার না, শুধু প্রথমবার
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="bg-[#FAF9F6] py-12 md:py-16 px-4 border-y border-green-100/80">
-      <div className="max-w-5xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* বাম — ভিজুয়াল */}
-          <div className="order-2 md:order-1">
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-green-100 to-green-50 border border-green-200/60 aspect-[4/3] flex items-center justify-center shadow-sm">
-              <div className="text-center p-6">
-                <div className="text-5xl md:text-6xl mb-3" aria-hidden>
-                  🌾
-                </div>
-                <p className="text-green-800 font-bold text-sm md:text-base">
-                  কৃষক কমলের খামার
-                </p>
-                <p className="text-green-700/70 text-xs mt-1">
-                  বাস্তব সম্পদ · স্বচ্ছ অংশীদারিত্ব
-                </p>
-              </div>
-            </div>
-          </div>
+    <section
+      ref={sectionRef}
+      className="bg-gradient-to-b from-[#FAF9F6] to-[#FAF9F6] py-4 md:py-2 px-4 border-y border-green-100/80"
+    >
+      <div
+        className={`max-w-2xl mx-auto text-center transition-all duration-700 ease-out ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
+        {/* ব্যাজ */}
+        <span className="inline-flex items-center border-2 border-green-700 text-green-800 text-sm md:text-base font-bold px-5 py-2 rounded-full mb-5">
+          আমাদের খামারে অংশীদার হোন
+        </span>
 
-          {/* ডান — টেক্সট + chips */}
-          <div className="order-1 md:order-2 text-center md:text-left">
-            <h2 className="inline-flex items-center gap-2 border-2 border-green-700 text-green-800 text-base md:text-xl font-bold px-5 py-2 rounded-full mb-4">
-              🌱 আমাদের খামারে অংশীদার হোন
-            </h2>
-            <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-5 max-w-md mx-auto md:mx-0">
-              বিশ্বাস আর লাভের অংশীদারিত্বে গড়ে উঠুক আমাদের খামার — আপনিও
-              হতে পারেন এই যাত্রার একজন অংশীদার।
-            </p>
+        {/* হেডলাইন */}
+        <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-snug mb-4">
+          বিশ্বাস আর লাভের ভিত্তিতে গড়ে উঠুক আমাদের খামার
+        </h2>
 
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
-              {chips.map((c) => (
-                <span
-                  key={c}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-green-200 text-green-800 shadow-sm"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-          </div>
+        {/* সাব-টেক্সট */}
+        <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-6 max-w-md mx-auto">
+          আপনিও হতে পারেন এই যাত্রার একজন অংশীদার — বাস্তব সম্পদ, স্বচ্ছ হিসাব।
+        </p>
+
+        {/* chips */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {chips.map((c) => (
+            <span
+              key={c}
+              className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-green-100 text-green-800 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            >
+              {c}
+            </span>
+          ))}
         </div>
 
         {/* স্ট্যাট কার্ড */}
-        <div className="grid grid-cols-3 gap-3 md:gap-5 mt-8 md:mt-10 max-w-2xl mx-auto">
+        <div className="grid grid-cols-3 gap-3 md:gap-5 mb-9 max-w-md mx-auto">
           {stats.map((s) => (
             <div
               key={s.label}
-              className="bg-white rounded-2xl border border-green-100 px-3 py-4 text-center shadow-sm"
+              className="bg-white rounded-2xl border border-green-100/80 px-3 py-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
             >
               <p className="text-xl md:text-2xl font-black text-green-700">
                 {s.value}
@@ -90,18 +99,25 @@ export default function InvestSection({
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-8 md:mt-10">
-          <Link
-            href="/invest"
-            className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold text-base md:text-lg shadow-md shadow-green-900/10 hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300"
-          >
-            বিনিয়োগ করুন →
-          </Link>
-          <p className="text-xs text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
-            গ্যারান্টিড রিটার্ন নয় — শুধু প্রকৃত লাভের অংশীদারিত্ব ও লিখিত
-            চুক্তি।
-          </p>
-        </div>
+        <div>
+  <div className="flex items-center justify-center gap-4">
+    <Link
+      href="/invest"
+      className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold text-base md:text-lg shadow-md shadow-green-900/10 transition-all duration-300 hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+    >
+      বিনিয়োগ করুন →
+    </Link>
+    <Link
+      href="/invest"
+      className="inline-flex items-center gap-2 text-green-800 border-2 border-green-700 px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 hover:bg-green-700 hover:text-white"
+    >
+      বিস্তারিত
+    </Link>
+  </div>
+  <p className="text-xs text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
+    গ্যারান্টিড রিটার্ন নয় — শুধু প্রকৃত লাভের অংশীদারিত্ব ও লিখিত চুক্তি।
+  </p>
+</div>
       </div>
     </section>
   );
