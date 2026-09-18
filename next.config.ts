@@ -31,7 +31,6 @@ const nextConfig = {
   
   // ✅ ১. CSS ও প্যাকেজ বান্ডল অপ্টিমাইজেশন (Render-blocking ও Legacy JS কমাবে)
   experimental: {
-    optimizeCss: true, // Critical CSS ইনলাইন করবে এবং রেন্ডার ব্লকিং কমাবে
     optimizePackageImports: ['lucide-react', 'react-icons', 'framer-motion'], // আনইউজড আইকন/প্যাকেজ বাদ দেবে
   },
   

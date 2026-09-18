@@ -114,6 +114,10 @@ export default function ChatWidget() {
     if (!isOpen) {
       setShowTooltip(false);
       setUnread(0);
+      // ⏱️ ৩ সেকেন্ডের deferred timer শেষ হওয়ার আগেই user চ্যাট খুললে সাথে সাথে init করা
+      if (!initialized) {
+        void fetchInitChat();
+      }
     }
     setIsOpen(!isOpen);
   };
@@ -147,8 +151,13 @@ export default function ChatWidget() {
     }
   }, []);
 
+  // 🚀 পেজ লোডের সাথে সাথে চ্যাট init/WebSocket যুক্ত না করে, ৩ সেকেন্ড পর ব্যাকগ্রাউন্ডে যুক্ত হচ্ছে —
+  // যাতে প্রথম রেন্ডার/LCP-তে এক্সট্রা নেটওয়ার্ক কল বাধা না দেয়
   useEffect(() => {
-    void fetchInitChat();
+    const timer = setTimeout(() => {
+      void fetchInitChat();
+    }, 3000);
+    return () => clearTimeout(timer);
   }, [fetchInitChat]);
 
   useEffect(() => {

@@ -237,6 +237,7 @@ export default function HeroSlider({
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover"
           priority={isPriority}
+          {...(isPriority ? { fetchPriority: "high" } : {})}
         />
         {savePercent !== null && (
           <span className="absolute top-1.5 right-1.5 z-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-save-pop">
