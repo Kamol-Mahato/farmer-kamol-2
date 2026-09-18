@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import QRCode from "qrcode";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface AgreementData {
   id: number;
@@ -24,9 +26,9 @@ interface AgreementData {
   };
 }
 
-const OWNER_NAME = "কমল কুমার মাহাতো (ফার্মার কমল)";
+const OWNER_NAME = "কমল কুমার মাহাতো (Farmer Kamol)";
 const OWNER_ADDRESS = "গ্রাম: সরাইল, জেলা: সিরাজগঞ্জ, বাংলাদেশ";
-const OWNER_PHOTO = "/uploads/kamol.png";
+const OWNER_PHOTO = "/uploads/kamol-mahato-own.jpg";
 const OWNER_SIGNATURE = "/uploads/komol-signature.png";
 
 function Signatory({
@@ -72,6 +74,7 @@ export default function AgreementPage() {
   const investmentId = params.investmentId as string;
   const [data, setData] = useState<AgreementData | null>(null);
   const [error, setError] = useState("");
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
     fetch(`/api/agreement/${investmentId}`)
@@ -85,6 +88,14 @@ export default function AgreementPage() {
       })
       .catch(() => setError("সমস্যা হয়েছে"));
   }, [investmentId]);
+
+  useEffect(() => {
+    if (!data) return;
+    QRCode.toDataURL(
+      `${siteConfig.domain.url}/verify/${data.agreement.agreementNo}`,
+      { width: 96, margin: 1 },
+    ).then(setQrUrl);
+  }, [data]);
 
   if (error)
     return (
@@ -116,7 +127,7 @@ export default function AgreementPage() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/uploads/kamol.png"
+              src="/uploads/kamol-mahato-own.jpg"
               alt="Farmer Kamol"
               className="w-14 h-14 rounded-full object-cover border-2 border-green-700"
             />
@@ -213,11 +224,22 @@ export default function AgreementPage() {
               কোনো নির্দিষ্ট হারে রিটার্নের নিশ্চয়তা এখানে দেওয়া হচ্ছে না।
             </li>
             <li>
-              প্রকৃত লাভ বা ক্ষতি খামারের বাস্তব ফলাফলের উপর নির্ভরশীল, এবং তা
-              উভয় পক্ষের মধ্যে ন্যায্যভাবে ভাগ হবে
-              {data.agreement.profitSharePct
-                ? ` (দ্বিতীয় পক্ষের অংশ: ${data.agreement.profitSharePct}%)।`
-                : " — সুনির্দিষ্ট অনুপাত উভয় পক্ষের পারস্পরিক সম্মতিক্রমে পরবর্তীতে লিখিতভাবে নির্ধারিত হবে।"}
+              প্রকৃত লাভ খামারের বাস্তব ফলাফলের উপর নির্ভরশীল এবং তা প্রথম পক্ষ{" "}
+              {100 - (data.agreement.profitSharePct ?? 35)}% ও দ্বিতীয় পক্ষ{" "}
+              {data.agreement.profitSharePct ?? 35}% অনুপাতে ভাগ হবে। কোনো
+              নির্দিষ্ট মেয়াদে প্রকৃত লাভ না হলে সেই মেয়াদে কোনো অর্থ বণ্টন হবে না।
+            </li>
+            <li>
+              প্রকল্পে প্রকৃত ক্ষতি হলে, সেই মুহূর্তে অবশিষ্ট মূলধন (সম্পূর্ণ
+              মূলধনের নিশ্চয়তা ছাড়াই, বাস্তবে যা অবশিষ্ট থাকে) দ্বিতীয় পক্ষকে
+              ফেরত দেওয়া হবে। উভয় পক্ষ স্বীকার করছে যে কৃষিভিত্তিক ব্যবসায়
+              ক্ষতির ঝুঁকি স্বাভাবিক এবং তা অগ্রিম নিশ্চিতভাবে এড়ানো সম্ভব নয়।
+            </li>
+            <li>
+              কোনো নির্দিষ্ট মেয়াদে প্রত্যাশিত লাভের চেয়ে বাস্তব লাভ বেশি হলে,
+              প্রথম পক্ষ তার একক সিদ্ধান্তে দ্বিতীয় পক্ষকে অতিরিক্ত অংশ (বোনাস)
+              দিতে পারে — এই অতিরিক্ত অংশ সংশ্লিষ্ট Settlement Statement-এ
+              উল্লেখ থাকবে।
             </li>
             <li>
               সকল আর্থিক লেনদেন (জমা/উত্তোলন) farmerkamol.com-এর
@@ -234,7 +256,9 @@ export default function AgreementPage() {
             </li>
             <li>
               কোনো মতবিরোধ দেখা দিলে তা প্রথমে উভয় পক্ষের পারস্পরিক
-              আলোচনার মাধ্যমে সমাধানের চেষ্টা করা হবে।
+              আলোচনার মাধ্যমে সমাধানের চেষ্টা করা হবে। তা সম্ভব না হলে, এই
+              চুক্তি বাংলাদেশের প্রচলিত আইন দ্বারা পরিচালিত হবে এবং এখতিয়ার
+              থাকবে সিরাজগঞ্জ জেলার আদালতে।
             </li>
           </ol>
         </div>
@@ -254,6 +278,43 @@ export default function AgreementPage() {
             role="দ্বিতীয় পক্ষ"
           />
         </div>
+
+        {/* সাক্ষী */}
+        <div className="grid grid-cols-2 gap-8 border-t pt-6 mt-6 text-sm">
+          <div>
+            <p className="text-xs font-bold text-green-700 uppercase mb-4">
+              সাক্ষী ১
+            </p>
+            <div className="h-10 border-b border-gray-400 mb-1" />
+            <p className="text-xs text-gray-400">নাম, ঠিকানা ও স্বাক্ষর</p>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-green-700 uppercase mb-4">
+              সাক্ষী ২
+            </p>
+            <div className="h-10 border-b border-gray-400 mb-1" />
+            <p className="text-xs text-gray-400">নাম, ঠিকানা ও স্বাক্ষর</p>
+          </div>
+        </div>
+
+        {/* যাচাই QR */}
+        <div className="flex items-center justify-center gap-4 border-t pt-6 mt-6">
+          {qrUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={qrUrl} alt="যাচাই QR কোড" className="w-20 h-20" />
+          )}
+          <div className="text-left">
+            <p className="text-xs font-bold text-gray-600">
+              এই চুক্তি যাচাই করতে QR স্ক্যান করুন
+            </p>
+            <p className="text-[11px] text-gray-400 break-all">
+              {siteConfig.domain.url}/verify/{data.agreement.agreementNo}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="agreement-footer">
+        Farmer Kamol · {data.agreement.agreementNo} · গোপনীয় নথি
       </div>
 
       <style>{`
@@ -261,6 +322,20 @@ export default function AgreementPage() {
           body { background: white; }
           .print\\:hidden { display: none !important; }
           .agreement-doc { box-shadow: none !important; border: none !important; }
+          .agreement-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: #9CA3AF;
+            padding: 6px 0;
+          }
+        }
+        .agreement-footer { display: none; }
+        @media print {
+          .agreement-footer { display: block; }
         }
       `}</style>
     </div>

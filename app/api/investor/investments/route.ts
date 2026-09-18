@@ -65,11 +65,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const year = new Date().getFullYear();
-  const countThisYear = await prisma.agreement.count({
-    where: { agreementNo: { startsWith: `FK-INV-${year}-` } },
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  const datePrefix = `FK-INV-${year}-${month}-${date}-`;
+
+  const countToday = await prisma.agreement.count({
+    where: { agreementNo: { startsWith: datePrefix } },
   });
-  const agreementNo = `FK-INV-${year}-${String(countThisYear + 1).padStart(4, "0")}`;
+  const agreementNo = `${datePrefix}${String(countToday + 1).padStart(2, "0")}`;
 
   const investment = await prisma.investment.create({
     data: {

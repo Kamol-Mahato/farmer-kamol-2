@@ -276,6 +276,7 @@ export default function HeroSlider({
     thumb: string | null,
     title: string,
     onPlay: () => void,
+    isPriority: boolean = false
   ) {
     return (
       <button
@@ -283,14 +284,17 @@ export default function HeroSlider({
         onClick={onPlay}
         aria-label={`প্লে করুন: ${title}`}
         className="absolute inset-0 w-full h-full group"
-      >
+      > 
         {thumb ? (
-          <img
-            src={thumb}
-            alt={title}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          <Image
+          src={thumb}
+          alt={title}
+          fill
+          priority={isPriority}
+          {...(isPriority ? { fetchPriority: "high" } : {})}
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
         ) : (
           <div className="w-full h-full bg-green-800" />
         )}
@@ -331,6 +335,7 @@ export default function HeroSlider({
                 pcThumb,
                 currentPcVideo?.title || "ভিডিও",
                 () => setPcPlaying(true),
+                pcVideoIndex === 0
               )
             )
           ) : (
@@ -409,6 +414,7 @@ export default function HeroSlider({
                 mobileThumb,
                 currentMobileVideo?.title || "ভিডিও",
                 () => setMobilePlaying(true),
+                safeMobileIndex === 0
               )
             )
           ) : currentMobileItem?.kind === "product" &&

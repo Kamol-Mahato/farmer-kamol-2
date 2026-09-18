@@ -143,47 +143,51 @@ function SubNav() {
     { href: "/contact", label: "যোগাযোগ" },
   ];
   return (
-    <div className="sticky top-[76px] z-40 px-3 md:px-4 py-2.5 bg-transparent">
+    <div className="sticky top-[76px] z-40 px-3 md:px-4 py-1.5 bg-transparent">
       <div
         className="
           max-w-5xl mx-auto
           flex items-center gap-2 md:gap-3
-          px-2.5 md:px-4 py-2
+          px-2 md:px-3 py-1
           rounded-full
-          bg-white/90 backdrop-blur-md
-          border border-green-300/70
-          shadow-[0_4px_24px_rgba(22,101,52,0.12)]
+          bg-white/55 backdrop-blur-xl
+          border border-white/40
+          shadow-[0_8px_28px_rgba(22,101,52,0.10)]
         "
       >
-        {/* লিংক — স্ক্রলযোগ্য, মাঝখানে */}
-        <div className="flex-1 min-w-0 flex items-center justify-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="
-                shrink-0 px-2.5 md:px-3.5 py-1.5 md:py-2
-                rounded-full
-                text-xs md:text-sm font-semibold
-                text-gray-700
-                hover:text-green-800 hover:bg-white/70
-                active:scale-[0.97]
-                transition-all duration-200 ease-out
-                whitespace-nowrap
-              "
-            >
-              {l.label}
-            </a>
-          ))}
+        {/* লিংক — স্ক্রলযোগ্য, মাঝখানে, দুই পাশে ফেড */}
+        <div className="relative flex-1 min-w-0">
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/70 to-transparent z-10 rounded-l-full" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/70 to-transparent z-10 rounded-r-full" />
+          <div className="flex items-center justify-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide px-1">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="
+                  shrink-0 px-2 md:px-3 py-1 md:py-1.5
+                  rounded-full
+                  text-xs md:text-sm font-semibold
+                  text-gray-700
+                  hover:text-green-800 hover:bg-green-50
+                  active:scale-[0.97]
+                  transition-all duration-200 ease-out
+                  whitespace-nowrap
+                "
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
         </div>
 
-        {/* CTA — ডানে, সবসময় দেখা যায় */}
+        {/* CTA — ডানে, সবসময় দেখা যায় */}
         <Link
           href="/customer/dashboard"
           className="
             shrink-0 inline-flex items-center gap-1
             bg-green-700 text-white
-            px-3.5 md:px-5 py-2 md:py-2.5
+            px-3 md:px-4 py-1.5 md:py-2
             rounded-full
             font-bold text-xs md:text-sm
             shadow-md shadow-green-900/15
@@ -317,7 +321,7 @@ export default async function InvestPage() {
               )}
             </Reveal>
 
-            <Reveal direction="right" className="relative group">
+            <Reveal  className="relative group">
               <div className="relative rounded-3xl overflow-hidden shadow-xl border border-green-100 aspect-[4/3] transition-all duration-500 ease-out group-hover:shadow-2xl group-hover:border-green-300">
                 <img
                   src="/uploads/header-2nd-about.jpg"
@@ -416,7 +420,7 @@ export default async function InvestPage() {
 
           <div className="grid md:grid-cols-3 gap-6 items-start">
             {/* Project 1 - চিনা হাঁস (dynamic, expandable) */}
-            <Reveal direction="right" delay={160}>
+            <Reveal delay={160}>
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
               <div className="h-40 bg-green-100 flex items-center justify-center text-green-700 font-medium">
                 চিনা হাঁসের ছবি
@@ -570,7 +574,7 @@ export default async function InvestPage() {
             </Reveal>
 
             {/* Project 3 - কোরবানির গরু (static, ব্লগে লিংক) */}
-            <Reveal direction="right" delay={240}>
+            <Reveal delay={240}>
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
               <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
                 গরুর ছবি
@@ -689,7 +693,7 @@ export default async function InvestPage() {
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-          <Reveal direction="left" delay={0}>
+          <Reveal  delay={0}>
               <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -706,7 +710,7 @@ export default async function InvestPage() {
               </div>
             </Reveal>
 
-            <Reveal direction="right">
+            <Reveal >
               <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -779,7 +783,7 @@ export default async function InvestPage() {
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-            <Reveal direction="left">
+            <Reveal >
               <div className="bg-white rounded-3xl border border-green-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300">
                 <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-2xl mb-4">
                   📜
@@ -798,7 +802,7 @@ export default async function InvestPage() {
               </div>
             </Reveal>
 
-            <Reveal direction="right">
+            <Reveal >
               <div className="bg-white rounded-3xl border border-blue-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300">
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl mb-4">
                   📊

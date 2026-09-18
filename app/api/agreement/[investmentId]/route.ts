@@ -19,7 +19,15 @@ export async function GET(
       project: true,
       agreement: true,
       investorProfile: {
-        include: { user: { select: { name: true, phone: true } } },
+        select: {
+          userId: true, // ownership-check-এর জন্য দরকার
+          fatherName: true,
+          address: true,
+          nidNumber: true,
+          photoImageUrl: true,
+          signatureImageUrl: true,
+          user: { select: { name: true, phone: true } },
+        },
       },
     },
   });

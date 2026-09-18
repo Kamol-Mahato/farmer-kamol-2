@@ -1,16 +1,19 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import HeroSlider from "./components/HeroSlider";
 import { prisma } from "@/lib/prisma";
 import ProductCard from "./components/ProductCard";
-import BlogSection from "./components/BlogSection";
-import TestimonialSection from "./components/TestimonialSection";
+import TopSellerSection from "./components/TopSellerSection";
 import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
 import type { Metadata } from "next";
-import NoticeModal from "./components/NoticeModal"; // এটি যোগ করুন
-import VideoSection from "./components/VideoSection";
-import InvestSection from "./components/InvestSection";
-import TopSellerSection from "./components/TopSellerSection";
 import { siteConfig } from "@/lib/siteConfig";
+
+// 🚀 ভারী কম্পোনেন্টগুলো Dynamic Import (Lazy Load) করা হলো
+const NoticeModal = dynamic(() => import("./components/NoticeModal"));
+const BlogSection = dynamic(() => import("./components/BlogSection"));
+const VideoSection = dynamic(() => import("./components/VideoSection"));
+const InvestSection = dynamic(() => import("./components/InvestSection"));
+const TestimonialSection = dynamic(() => import("./components/TestimonialSection"));
 
 export const revalidate = 86400; // ২৪ ঘণ্টা safety-net; Admin Save করলেই সাথে সাথে revalidatePath() দিয়ে আগে আপডেট হয়ে যাবে
 

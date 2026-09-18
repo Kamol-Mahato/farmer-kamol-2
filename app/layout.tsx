@@ -15,6 +15,7 @@ const hindSiliguri = Hind_Siliguri({
   subsets: ["bengali"],
   variable: "--font-hind-siliguri",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -63,10 +64,15 @@ export default async function RootLayout({
     <html lang={lang}>
       <head>
         <link rel="preconnect" href="https://images.weserv.nl" />
+        <link rel="dns-prefetch" href="https://images.weserv.nl" />
         <link
           rel="preconnect"
           href="https://pvixtqqcegfbxkhxogww.supabase.co"
           crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://pvixtqqcegfbxkhxogww.supabase.co"
         />
       </head>
       <body
@@ -79,7 +85,7 @@ export default async function RootLayout({
         <EnterKeyNav />
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* গুগল অ্যানালিটিক্স কম্পোনেন্ট */}
-        <GoogleAnalytics gaId="G-8ZRHT134HL" />
+        <GoogleAnalytics gaId="G-8ZRHT134HL" data-strategy="lazyOnload" />
       </body>
     </html>
   );
