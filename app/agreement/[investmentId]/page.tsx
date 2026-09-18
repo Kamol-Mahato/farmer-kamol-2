@@ -97,6 +97,68 @@ export default function AgreementPage() {
     ).then(setQrUrl);
   }, [data]);
 
+  const printIframeRef = useRef<HTMLIFrameElement>(null);
+
+  const buildPrintHTML = () => {
+    const docEl = document.querySelector(".agreement-doc");
+    const footerEl = document.querySelector(".agreement-footer");
+    const styleLinks = Array.from(
+      document.querySelectorAll('link[rel="stylesheet"]'),
+    )
+      .map(
+        (link) =>
+          `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`,
+      )
+      .join("\n");
+
+    return `
+      <html>
+        <head>
+          <title>বিনিয়োগ চুক্তিপত্র - ${data?.agreement.agreementNo ?? ""}</title>
+          ${styleLinks}
+          <style>
+            * { box-sizing: border-box; }
+            html, body { padding: 0; margin: 0; background: #fff; }
+            @media print {
+              @page { size: A4; margin: 12mm; }
+              body { -webkit-print-color-adjust: exact; }
+            }
+            .agreement-doc {
+              box-shadow: none !important;
+              border: none !important;
+              max-width: 100% !important;
+              margin: 0 !important;
+            }
+            .agreement-footer {
+              display: block !important;
+              text-align: center;
+              font-size: 9px;
+              color: #9CA3AF;
+              padding: 10px 0;
+            }
+          </style>
+        </head>
+        <body>
+          ${docEl ? docEl.outerHTML : ""}
+          ${footerEl ? footerEl.outerHTML : ""}
+        </body>
+      </html>
+    `;
+  };
+
+  const printAgreement = () => {
+    const iframe = printIframeRef.current;
+    const doc = iframe?.contentDocument;
+    if (!iframe || !doc) return;
+    doc.open();
+    doc.write(buildPrintHTML());
+    doc.close();
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    }, 500);
+  };
+
   if (error)
     return (
       <div className="text-center py-20 text-red-500 font-medium">{error}</div>
@@ -107,70 +169,7 @@ export default function AgreementPage() {
         লোড হচ্ছে...
       </div>
     );
-
-    const printIframeRef = useRef<HTMLIFrameElement>(null);
-
-    const buildPrintHTML = () => {
-      const docEl = document.querySelector(".agreement-doc");
-      const footerEl = document.querySelector(".agreement-footer");
-      const styleLinks = Array.from(
-        document.querySelectorAll('link[rel="stylesheet"]'),
-      )
-        .map(
-          (link) =>
-            `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`,
-        )
-        .join("\n");
-  
-      return `
-        <html>
-          <head>
-            <title>বিনিয়োগ চুক্তিপত্র - ${data?.agreement.agreementNo ?? ""}</title>
-            ${styleLinks}
-            <style>
-              * { box-sizing: border-box; }
-              html, body { padding: 0; margin: 0; background: #fff; }
-              @media print {
-                @page { size: A4; margin: 12mm; }
-                body { -webkit-print-color-adjust: exact; }
-              }
-              .agreement-doc {
-                box-shadow: none !important;
-                border: none !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-              }
-              .agreement-footer {
-                display: block !important;
-                text-align: center;
-                font-size: 9px;
-                color: #9CA3AF;
-                padding: 10px 0;
-              }
-            </style>
-          </head>
-          <body>
-            ${docEl ? docEl.outerHTML : ""}
-            ${footerEl ? footerEl.outerHTML : ""}
-          </body>
-        </html>
-      `;
-    };
-  
-    const printAgreement = () => {
-      const iframe = printIframeRef.current;
-      const doc = iframe?.contentDocument;
-      if (!iframe || !doc) return;
-      doc.open();
-      doc.write(buildPrintHTML());
-      doc.close();
-      setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      }, 500);
-    };
-
-  const investorName = data.investorProfile.user.name || "—";
+    const investorName = data.investorProfile.user.name || "—";
 
   return (
     <div className="bg-gray-100 min-h-screen py-8 px-4">
