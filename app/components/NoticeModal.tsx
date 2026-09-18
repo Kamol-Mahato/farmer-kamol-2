@@ -5,15 +5,19 @@ export default function NoticeModal() {
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   // ✅ পেজ লোড হলে চেক করা হবে শেষবার কখন নোটিস দেখানো হয়েছিল
+  // LCP খারাপ না হওয়ার জন্য ২.৫ সেকেন্ড পরে দেখানো হচ্ছে
   useEffect(() => {
     const lastShown = localStorage.getItem("farmer_kamol_notice_last_shown");
     const twelveHours = 12 * 60 * 60 * 1000;
     if (!lastShown || Date.now() - parseInt(lastShown) > twelveHours) {
-      setIsVisible(true);
-      localStorage.setItem(
-        "farmer_kamol_notice_last_shown",
-        Date.now().toString(),
-      );
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+        localStorage.setItem(
+          "farmer_kamol_notice_last_shown",
+          Date.now().toString(),
+        );
+      }, 2500); // ২.৫ সেকেন্ড delay
+      return () => clearTimeout(timer);
     }
   }, []);
   useEffect(() => {
@@ -22,7 +26,7 @@ export default function NoticeModal() {
       setIsVisible(false);
     }, 8000);
     return () => clearTimeout(timer);
-  }, [isPaused, isVisible]); // isPaused পরিবর্তন হলে ইফেক্টটি আবার চেক করবে
+  }, [isPaused, isVisible]);
   if (!isVisible) return null;
 
   return (
