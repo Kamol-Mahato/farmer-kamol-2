@@ -24,6 +24,7 @@ const KIND_CONFIG: Record<
   {
     width: number;
     height: number;
+    fit: "inside" | "cover";
     field:
       | "nidImageUrl"
       | "photoImageUrl"
@@ -31,10 +32,10 @@ const KIND_CONFIG: Record<
       | "nomineeImageUrl";
   }
 > = {
-  nid: { width: 1000, height: 700, field: "nidImageUrl" },
-  photo: { width: 400, height: 400, field: "photoImageUrl" }, // পাসপোর্ট — UI রাউন্ড
-  signature: { width: 600, height: 300, field: "signatureImageUrl" },
-  nominee: { width: 400, height: 400, field: "nomineeImageUrl" },
+  nid: { width: 1000, height: 700, fit: "inside", field: "nidImageUrl" },
+  photo: { width: 300, height: 300, fit: "cover", field: "photoImageUrl" }, // পাসপোর্ট — সবসময় পুরোপুরি বর্গাকার
+  signature: { width: 600, height: 300, fit: "inside", field: "signatureImageUrl" },
+  nominee: { width: 300, height: 300, fit: "cover", field: "nomineeImageUrl" },
 };
 
 export async function POST(request: Request) {
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
         .resize({
           width: config.width,
           height: config.height,
-          fit: "inside",
+          fit: config.fit,
           withoutEnlargement: true,
         })
         .jpeg({ quality: 82, mozjpeg: true })

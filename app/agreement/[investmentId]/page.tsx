@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import QRCode from "qrcode";
 import { siteConfig } from "@/lib/siteConfig";
@@ -51,10 +51,10 @@ function Signatory({
         <img
           src={photo}
           alt={name}
-          className="w-16 h-16 rounded-full object-cover border border-green-200 mx-auto mb-2"
+          className="w-24 h-24 rounded-lg object-cover border border-green-200 mx-auto mb-2"
         />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-gray-100 mx-auto mb-2" />
+        <div className="w-24 h-24 rounded-lg bg-gray-100 mx-auto mb-2" />
       )}
       <div className="h-14 flex items-end justify-center border-b border-gray-400 mb-1 px-4">
         {signature && (
@@ -108,13 +108,75 @@ export default function AgreementPage() {
       </div>
     );
 
+    const printIframeRef = useRef<HTMLIFrameElement>(null);
+
+    const buildPrintHTML = () => {
+      const docEl = document.querySelector(".agreement-doc");
+      const footerEl = document.querySelector(".agreement-footer");
+      const styleLinks = Array.from(
+        document.querySelectorAll('link[rel="stylesheet"]'),
+      )
+        .map(
+          (link) =>
+            `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`,
+        )
+        .join("\n");
+  
+      return `
+        <html>
+          <head>
+            <title>বিনিয়োগ চুক্তিপত্র - ${data?.agreement.agreementNo ?? ""}</title>
+            ${styleLinks}
+            <style>
+              * { box-sizing: border-box; }
+              html, body { padding: 0; margin: 0; background: #fff; }
+              @media print {
+                @page { size: A4; margin: 12mm; }
+                body { -webkit-print-color-adjust: exact; }
+              }
+              .agreement-doc {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+              }
+              .agreement-footer {
+                display: block !important;
+                text-align: center;
+                font-size: 9px;
+                color: #9CA3AF;
+                padding: 10px 0;
+              }
+            </style>
+          </head>
+          <body>
+            ${docEl ? docEl.outerHTML : ""}
+            ${footerEl ? footerEl.outerHTML : ""}
+          </body>
+        </html>
+      `;
+    };
+  
+    const printAgreement = () => {
+      const iframe = printIframeRef.current;
+      const doc = iframe?.contentDocument;
+      if (!iframe || !doc) return;
+      doc.open();
+      doc.write(buildPrintHTML());
+      doc.close();
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      }, 500);
+    };
+
   const investorName = data.investorProfile.user.name || "—";
 
   return (
     <div className="bg-gray-100 min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto mb-4 flex justify-end gap-3 print:hidden">
-        <button
-          onClick={() => window.print()}
+      <button
+          onClick={printAgreement}
           className="bg-green-700 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition"
         >
           🖨️ প্রিন্ট / PDF ডাউনলোড
@@ -127,7 +189,7 @@ export default function AgreementPage() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/uploads/kamol-mahato-own.jpg"
+              src="/uploads/kamol.png"
               alt="Farmer Kamol"
               className="w-14 h-14 rounded-full object-cover border-2 border-green-700"
             />
@@ -136,7 +198,7 @@ export default function AgreementPage() {
                 Farmer Kamol
               </h1>
               <p className="text-xs text-yellow-600 font-semibold">
-                প্রকৃতির খাঁটি উপহার, সরাসরি কৃষকের কাছ থেকে
+              খামার থেকে আপনার দরজায়
               </p>
             </div>
           </div>
@@ -318,26 +380,9 @@ export default function AgreementPage() {
       </div>
 
       <style>{`
-        @media print {
-          body { background: white; }
-          .print\\:hidden { display: none !important; }
-          .agreement-doc { box-shadow: none !important; border: none !important; }
-          .agreement-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 9px;
-            color: #9CA3AF;
-            padding: 6px 0;
-          }
-        }
         .agreement-footer { display: none; }
-        @media print {
-          .agreement-footer { display: block; }
-        }
       `}</style>
+      <iframe ref={printIframeRef} title="print-frame" style={{ display: "none" }} />
     </div>
   );
 }
