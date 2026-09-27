@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { connectChatSocket } from "@/lib/chatSocket";
+import { CHAT_WELCOME_TEXT } from "@/lib/chatWelcomeMessage";
 
 interface Message {
   id: number;
@@ -143,7 +144,18 @@ export default function ChatWidget() {
         conversationIdRef.current = Number(data.conversationId);
       }
       if (data.messages) {
-        setMessages(data.messages);
+        setMessages(
+          data.messages.length > 0
+            ? data.messages
+            : [
+                {
+                  id: -1,
+                  senderType: "SYSTEM",
+                  text: CHAT_WELCOME_TEXT,
+                  createdAt: new Date().toISOString(),
+                },
+              ],
+        );
         setInitialized(true);
       }
     } catch (err) {
@@ -259,6 +271,11 @@ export default function ChatWidget() {
       });
 
       if (!res.ok) throw new Error("Failed to send message");
+
+      const data = await res.json();
+      if (data?.conversationId) {
+        conversationIdRef.current = Number(data.conversationId);
+      }
     } catch (err) {
       console.error("Message send failed:", err);
     } finally {

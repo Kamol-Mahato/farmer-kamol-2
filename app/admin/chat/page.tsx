@@ -72,6 +72,10 @@ export default function AdminChatPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState(false);
+  const [siteStats, setSiteStats] = useState<{
+    liveCount: number;
+    totalVisitors: number;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -258,6 +262,31 @@ export default function AdminChatPage() {
     if (detail?.messages) scrollToBottom();
   }, [detail?.messages?.length]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchSiteStats() {
+      try {
+        const res = await fetch("/api/admin/live-visitors");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) {
+          setSiteStats({
+            liveCount: data.liveCount ?? 0,
+            totalVisitors: data.totalVisitors ?? 0,
+          });
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    fetchSiteStats();
+    const interval = setInterval(fetchSiteStats, 20000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   async function openConversation(id: number) {
     setSelectedId(id);
     setError(null);
@@ -339,6 +368,16 @@ export default function AdminChatPage() {
           >
             {live ? "● WebSocket" : "○ সংযোগ..."}
           </span>
+          {siteStats && (
+            <>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                🟢 এই মুহূর্তে সাইটে: {siteStats.liveCount} জন
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                মোট ভিজিটর: {siteStats.totalVisitors}
+              </span>
+            </>
+          )}
         </div>
         <p className="text-sm text-gray-500 mt-1">
           ওয়েবসাইট ভিজিটরদের মেসেজ দেখুন ও রিপ্লাই দিন

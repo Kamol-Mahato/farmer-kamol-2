@@ -22,6 +22,7 @@ type ClientMeta = {
   role: "visitor" | "staff";
   conversationId?: number;
   userId?: number;
+  visitorId?: string;
 };
 
 type WsClient = WebSocket & { meta?: ClientMeta };
@@ -47,8 +48,18 @@ app.prepare().then(async () => {
     handle(req, res, parsedUrl);
   });
 
+  const { setLiveVisitorCount } = await import("./lib/liveVisitors");
+
   const wss = new WebSocketServer({ server, path: "/ws/chat" });
   const clients = new Set<WsClient>();
+
+  function updateLiveVisitorCount() {
+    let n = 0;
+    for (const client of clients) {
+      if (client.meta?.role === "visitor") n++;
+    }
+    setLiveVisitorCount(n);
+  }
 
   function send(ws: WebSocket, type: string, data: unknown) {
     if (ws.readyState !== WebSocket.OPEN) return;
@@ -86,8 +97,23 @@ app.prepare().then(async () => {
     }
   }
 
+  function bindVisitorConversation(payload: {
+    visitorId: string;
+    conversationId: number;
+  }) {
+    for (const client of clients) {
+      if (
+        client.meta?.role === "visitor" &&
+        client.meta.visitorId === payload.visitorId
+      ) {
+        client.meta.conversationId = payload.conversationId;
+      }
+    }
+  }
+
   chatEvents.onMessage(broadcastMessage);
   chatEvents.onConversation(broadcastConversation);
+  chatEvents.onVisitorBound(bindVisitorConversation);
 
   wss.on("connection", async (ws: WsClient, req) => {
     try {
@@ -131,20 +157,23 @@ app.prepare().then(async () => {
           ws.close();
           return;
         }
+        // 🔒 conversation না থাকলেও এখন ভিজিটর কানেক্ট থাকতে পারবে —
+        // প্রথম মেসেজ পাঠালে conversation তৈরি হবে, তখন visitorBound
+        // ইভেন্ট দিয়ে conversationId এই ক্লায়েন্টে বসিয়ে দেওয়া হবে
         const conversation = await prisma.chatConversation.findUnique({
           where: { visitorId },
           select: { id: true },
         });
-        if (!conversation) {
-          send(ws, "error", { message: "Chat not initialized" });
-          ws.close();
-          return;
-        }
-        ws.meta = { role: "visitor", conversationId: conversation.id };
+        ws.meta = {
+          role: "visitor",
+          visitorId,
+          conversationId: conversation?.id,
+        };
         clients.add(ws);
+        updateLiveVisitorCount();
         send(ws, "connected", {
           role: "visitor",
-          conversationId: conversation.id,
+          conversationId: conversation?.id ?? null,
         });
       } else {
         send(ws, "error", { message: "No session" });
@@ -174,10 +203,12 @@ app.prepare().then(async () => {
 
     ws.on("close", () => {
       clients.delete(ws);
+      if (ws.meta?.role === "visitor") updateLiveVisitorCount();
     });
 
     ws.on("error", () => {
       clients.delete(ws);
+      if (ws.meta?.role === "visitor") updateLiveVisitorCount();
     });
   });
 

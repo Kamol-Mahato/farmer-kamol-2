@@ -6,7 +6,11 @@ import {
   verifyVisitorSession,
   generateVisitorId,
 } from "@/lib/visitorSession";
-import { checkAndIncrementRate, getClientIp } from "@/lib/rateLimiter";
+import {
+  checkAndIncrementRate,
+  getClientIp,
+  getRedis,
+} from "@/lib/rateLimiter";
 
 // 🔒 এই রুট কখনো CDN/ব্রাউজারে ক্যাশ হলে দুই ভিজিটর একই visitorId পেতে পারে
 export const dynamic = "force-dynamic";
@@ -21,9 +25,6 @@ const NO_STORE_HEADERS: HeadersInit = {
   Expires: "0",
   Vary: "Cookie",
 };
-
-const WELCOME_TEXT =
-  "Farmer Kamol-এ আপনাকে স্বাগতম 🌿\n\nআমরা সিরাজগঞ্জের রায়গঞ্জ থেকে সরাসরি খাঁটি ও মানসম্মত দেশি পণ্য পৌঁছে দিচ্ছি আপনার দরজায়।\n\nআপনাকে কীভাবে সাহায্য করতে পারি? আপনার প্রশ্নটি নিচে লিখে দিন, আমাদের প্রতিনিধি শীঘ্রই আপনার সাথে যুক্ত হবেন।\n\n📞 দ্রুত উত্তরের জন্য কল বা হোয়াটসঅ্যাপ করুন: 01737939688\n\n🌐 আমাদের ফেসবুক পেজ ও ইউটিউব চ্যানেল ঘুরে আসতে পারেন:\n- Facebook: https://www.facebook.com/farmerkamol\n- YouTube: https://www.youtube.com/@FarmerKamol";
 
 function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status, headers: NO_STORE_HEADERS });
@@ -61,53 +62,27 @@ export async function GET(request: Request) {
         maxAge: 60 * 60 * 24 * 365,
         path: "/",
       });
+
+      // 🔢 সর্বমোট ভিজিটর কাউন্টার — শুধু নতুন visitor_session ইস্যু হলেই +১,
+      // এক বছরের কুকি থাকা অবস্থায় বারবার এলে আবার গোনা হবে না
+      try {
+        await getRedis().incr("stats:total_visitors");
+      } catch (err) {
+        console.error("TOTAL VISITORS INCR ERROR:", err);
+      }
     }
 
-    let conversation = await prisma.chatConversation.findUnique({
+    // 🔒 এখন আর এখানে conversation তৈরি হয় না — ভিজিটর প্রথম মেসেজ পাঠালে
+    // /api/chat/send-এ তৈরি হবে। শুধু ভিজিট করলে DB-তে কিছু জমবে না।
+    const conversation = await prisma.chatConversation.findUnique({
       where: { visitorId },
       include: { messages: { orderBy: { createdAt: "asc" } } },
     });
 
-    if (!conversation) {
-      try {
-        conversation = await prisma.chatConversation.create({
-          data: {
-            visitorId,
-            status: "OPEN",
-            messages: {
-              create: {
-                senderType: "SYSTEM",
-                text: WELCOME_TEXT,
-              },
-            },
-          },
-          include: { messages: { orderBy: { createdAt: "asc" } } },
-        });
-      } catch (err: unknown) {
-        // রেস: একই visitorId-তে দুই রিকোয়েস্ট একসাথে create চাইলে unique conflict
-        const code =
-          err && typeof err === "object" && "code" in err
-            ? String((err as { code?: string }).code)
-            : "";
-        if (code === "P2002") {
-          conversation = await prisma.chatConversation.findUnique({
-            where: { visitorId },
-            include: { messages: { orderBy: { createdAt: "asc" } } },
-          });
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    if (!conversation) {
-      return json({ error: "চ্যাট শুরু করতে সমস্যা হয়েছে" }, 500);
-    }
-
     return json({
-      conversationId: conversation.id,
+      conversationId: conversation?.id ?? null,
       visitorIdIssued: issuedNewSession,
-      messages: conversation.messages,
+      messages: conversation?.messages ?? [],
     });
   } catch (error) {
     console.error("CHAT INIT ERROR:", error);

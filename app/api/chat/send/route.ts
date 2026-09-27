@@ -7,6 +7,7 @@ import { sendTelegramAlert, escapeHtml } from "@/lib/telegram";
 import { chatEvents } from "@/lib/chatEvents";
 import { checkAndIncrementRate } from "@/lib/rateLimiter";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { CHAT_WELCOME_TEXT } from "@/lib/chatWelcomeMessage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -62,12 +63,49 @@ export async function POST(req: Request) {
       return json({ error: "মেসেজ খুব বড়" }, 400);
     }
 
-    const conversation = await prisma.chatConversation.findUnique({
+    let conversation = await prisma.chatConversation.findUnique({
       where: { visitorId },
     });
+    let isNewConversation = false;
 
     if (!conversation) {
-      return json({ error: "কনভারসেশন পাওয়া যায়নি" }, 404);
+      isNewConversation = true;
+      try {
+        conversation = await prisma.chatConversation.create({
+          data: {
+            visitorId,
+            status: "OPEN",
+            messages: {
+              create: { senderType: "SYSTEM", text: CHAT_WELCOME_TEXT },
+            },
+          },
+        });
+      } catch (err: unknown) {
+        // রেস: একই visitorId থেকে দুইটা রিকোয়েস্ট একসাথে এলে unique conflict
+        const code =
+          err && typeof err === "object" && "code" in err
+            ? String((err as { code?: string }).code)
+            : "";
+        if (code === "P2002") {
+          isNewConversation = false;
+          conversation = await prisma.chatConversation.findUnique({
+            where: { visitorId },
+          });
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (!conversation) {
+      return json({ error: "কনভারসেশন শুরু করতে সমস্যা হয়েছে" }, 500);
+    }
+
+    if (isNewConversation) {
+      chatEvents.emitVisitorBound({
+        visitorId,
+        conversationId: conversation.id,
+      });
     }
 
     const newMessage = await prisma.chatMessage.create({
@@ -121,7 +159,7 @@ export async function POST(req: Request) {
         `Admin: /admin/chat`,
     );
 
-    return json({ message: newMessage });
+    return json({ message: newMessage, conversationId: conversation.id });
   } catch (error) {
     console.error("CHAT SEND ERROR:", error);
     return json({ error: "মেসেজ পাঠাতে সমস্যা হয়েছে" }, 500);

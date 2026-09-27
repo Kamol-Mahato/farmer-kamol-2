@@ -28,9 +28,15 @@ export type ChatConversationPayload = {
   } | null;
 };
 
+export type ChatVisitorBoundPayload = {
+  visitorId: string;
+  conversationId: number;
+};
+
 type ChatEvents = {
   message: (payload: ChatMessagePayload) => void;
   conversation: (payload: ChatConversationPayload) => void;
+  visitorBound: (payload: ChatVisitorBoundPayload) => void;
 };
 
 // 🔒 Single Node process (Railway `next start`) — in-memory bus is instant, zero polling.
@@ -52,6 +58,15 @@ class ChatEventBus extends EventEmitter {
   onConversation(handler: (payload: ChatConversationPayload) => void) {
     this.on("conversation", handler);
     return () => this.off("conversation", handler);
+  }
+
+  emitVisitorBound(payload: ChatVisitorBoundPayload) {
+    this.emit("visitorBound", payload);
+  }
+
+  onVisitorBound(handler: (payload: ChatVisitorBoundPayload) => void) {
+    this.on("visitorBound", handler);
+    return () => this.off("visitorBound", handler);
   }
 }
 
