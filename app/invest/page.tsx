@@ -366,11 +366,7 @@ export default async function InvestPage() {
               { title: "বর্তমান অবস্থা", desc: "ছোট পরিসরে কাজ চলছে। মানুষ দেখছে আমি শুধু কথা বলি না, কাজও করি।" },
               { title: "ভবিষ্যৎ ভিশন", desc: "প্রথমে প্রমাণ, তারপর ছোট pilot, তারপর ধীরে ধীরে বড় করা।" },
             ].map((item, i) => (
-              <Reveal
-                key={item.title}
-                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
-                delay={(i % 3) * 80}
-              >
+              <Reveal key={item.title} delay={(i % 3) * 80}>
                 <div className="bg-white border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
@@ -638,11 +634,7 @@ export default async function InvestPage() {
           </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {journeyVideos.map((v, i) => (
-              <Reveal
-                key={`journey-video-${i}`}
-                direction={i % 2 === 0 ? "left" : "right"}
-                delay={(i % 4) * 100}
-              >
+              <Reveal key={`journey-video-${i}`} delay={(i % 4) * 100}>
                 <YoutubeCard title={v.title} description={v.description} youtubeUrl={v.youtubeUrl} />
               </Reveal>
             ))}
@@ -840,11 +832,7 @@ export default async function InvestPage() {
               { icon: "📊", title: "স্বচ্ছ Settlement", text: "প্রকল্প শেষে মোট বিক্রয়, খরচ ও নিট লাভ থেকে চূড়ান্ত হিসাব তৈরি হবে।" },
               { icon: "⭐", title: "Extra Bonus", text: "প্রকৃত লাভ বেশি হলে চাইলে অতিরিক্ত বোনাস দেওয়া হতে পারে।" },
             ].map((item, i) => (
-              <Reveal
-                key={item.title}
-                direction={i % 2 === 0 ? "left" : "right"}
-                delay={(i % 4) * 100}
-              >
+              <Reveal key={item.title} delay={(i % 4) * 100}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-xl mb-3">
                     {item.icon}
@@ -876,11 +864,7 @@ export default async function InvestPage() {
               { title: "ঝুঁকি ভাগাভাগি", desc: "লাভ-লোকসান দুটোই অংশীদারিত্বের ভিত্তিতে ভাগ হয়।" },
               { title: "চুক্তিভিত্তিক", desc: "প্রতিটি বিনিয়োগের জন্য লিখিত চুক্তি থাকে।" },
             ].map((item, i) => (
-              <Reveal
-                key={item.title}
-                direction={i % 3 === 0 ? "left" : i % 3 === 1 ? "up" : "right"}
-                delay={(i % 3) * 120}
-              >
+              <Reveal key={item.title} delay={(i % 3) * 120}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
                   <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
