@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { connectChatSocket } from "@/lib/chatSocket";
 import { CHAT_WELCOME_TEXT } from "@/lib/chatWelcomeMessage";
@@ -59,6 +60,35 @@ function playVisitorNotify() {
       /* blocked */
     }
   })();
+}
+
+function FacebookIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-3.5 h-3.5 inline-block align-[-2px] mr-1 shrink-0"
+    >
+      <path
+        fill="#1877F2"
+        d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"
+      />
+    </svg>
+  );
+}
+
+function YoutubeIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-3.5 h-3.5 inline-block align-[-2px] mr-1 shrink-0"
+    >
+      <path
+        fill="#FF0000"
+        d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.53 3.5 12 3.5 12 3.5s-7.53 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14C4.47 20.5 12 20.5 12 20.5s7.53 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8Z"
+      />
+      <path fill="#fff" d="M9.75 15.5v-7l6.25 3.5-6.25 3.5Z" />
+    </svg>
+  );
 }
 
 export default function ChatWidget() {
@@ -284,29 +314,50 @@ export default function ChatWidget() {
   };
 
   const renderMessageText = (text: string, isCustomer: boolean) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // [লেবেল](url) ফরম্যাট আর সাধারণ বেয়ার URL — দুটোই চিনবে
+    const linkRegex =
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s]+)/g;
+    const linkClass = `underline font-medium break-all transition-colors ${
+      isCustomer
+        ? "text-emerald-100 hover:text-white"
+        : "text-blue-600 hover:text-blue-800"
+    }`;
+
+    const renderLine = (line: string, lineKey: number) => {
+      const nodes: (string | ReactNode)[] = [];
+      let lastIndex = 0;
+      let partIndex = 0;
+      let match: RegExpExecArray | null;
+      linkRegex.lastIndex = 0;
+      while ((match = linkRegex.exec(line)) !== null) {
+        if (match.index > lastIndex) {
+          nodes.push(line.slice(lastIndex, match.index));
+        }
+        const [, label, labeledUrl, bareUrl] = match;
+        const url = labeledUrl || bareUrl;
+        const lower = (label || url).toLowerCase();
+        nodes.push(
+          <a
+            key={`${lineKey}-${partIndex++}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${linkClass} inline-flex items-center`}
+          >
+            {lower.includes("facebook") && <FacebookIcon />}
+            {lower.includes("youtube") && <YoutubeIcon />}
+            {label || url}
+          </a>,
+        );
+        lastIndex = match.index + match[0].length;
+      }
+      if (lastIndex < line.length) nodes.push(line.slice(lastIndex));
+      return nodes;
+    };
+
     return text.split("\n").map((line, i) => (
       <span key={i}>
-        {line.split(urlRegex).map((part, index) => {
-          if (part.match(urlRegex)) {
-            return (
-              <a
-                key={index}
-                href={part}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`underline font-medium break-all transition-colors ${
-                  isCustomer
-                    ? "text-emerald-100 hover:text-white"
-                    : "text-blue-600 hover:text-blue-800"
-                }`}
-              >
-                {part}
-              </a>
-            );
-          }
-          return part;
-        })}
+        {renderLine(line, i)}
         <br />
       </span>
     ));
