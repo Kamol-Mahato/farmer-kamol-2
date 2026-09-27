@@ -11,18 +11,25 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status"); // OPEN | CLOSED | ALL
-    const where =
+    const statusWhere =
       status === "CLOSED"
         ? { status: "CLOSED" as const }
         : status === "ALL"
           ? {}
           : { status: "OPEN" as const };
 
+    // শুধু সেই কনভারসেশন, যেখানে গ্রাহক নিজে অন্তত একটি মেসেজ পাঠিয়েছে
+    const where = {
+      ...statusWhere,
+      messages: { some: { senderType: "CUSTOMER" as const } },
+    };
+
     const conversations = await prisma.chatConversation.findMany({
       where,
       orderBy: { lastMessageAt: "desc" },
       include: {
         messages: {
+          where: { senderType: { not: "SYSTEM" as const } },
           orderBy: { createdAt: "desc" },
           take: 1,
         },

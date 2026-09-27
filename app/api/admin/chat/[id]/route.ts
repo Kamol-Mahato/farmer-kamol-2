@@ -26,7 +26,10 @@ export async function GET(
     const conversation = await prisma.chatConversation.findUnique({
       where: { id: conversationId },
       include: {
-        messages: { orderBy: { createdAt: "asc" } },
+        messages: {
+          where: { senderType: { not: "SYSTEM" as const } },
+          orderBy: { createdAt: "asc" },
+        },
         assignedTo: { select: { id: true, name: true } },
       },
     });

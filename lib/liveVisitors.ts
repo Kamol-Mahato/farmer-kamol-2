@@ -1,12 +1,14 @@
-// server.ts ভিজিটর WebSocket কানেকশনের সংখ্যা এখানে সেট করে, /api/admin/live-visitors
-// রুট এখান থেকে পড়ে অ্যাডমিন প্যানেলে "এই মুহূর্তে সাইটে" সংখ্যা দেখায়।
-// আলাদা টেবিল বা Redis লাগছে না — শুধু একটা in-memory ভ্যারিয়েবল।
-let count = 0;
-
-export function setLiveVisitorCount(n: number) {
-  count = n;
-}
-
-export function liveVisitorCount(): number {
-  return count;
-}
+// server.ts (custom Node সার্ভার) আর Next.js API রুট আলাদা মডিউল-সিস্টেমে চলে,
+// তাই সাধারণ module-level ভ্যারিয়েবল শেয়ার হয় না। globalThis ব্যবহার করে
+// পুরো প্রসেস জুড়ে একই মান শেয়ার করা হচ্ছে (lib/chatEvents.ts-এও একই কৌশল)।
+const globalForVisitors = globalThis as unknown as {
+    __liveVisitorCount?: number;
+  };
+  
+  export function setLiveVisitorCount(n: number) {
+    globalForVisitors.__liveVisitorCount = n;
+  }
+  
+  export function liveVisitorCount(): number {
+    return globalForVisitors.__liveVisitorCount ?? 0;
+  }
