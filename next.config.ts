@@ -63,35 +63,40 @@ const nextConfig = {
           },
         ],
       },
-      {
-        // ✅ স্ট্যাটিক ফন্ট, ছবি এবং সিএসএস/জেএস ফাইল ১ বছর ব্রাউজারে ক্যাশ থাকবে
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        // ✅ পুরনো uploads ও static tool ফাইলগুলো ব্রাউজারে ১ বছর cache থাকবে
-        source: "/uploads/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/tools/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
+      // শুধুমাত্র Production-এ Cache-Control হেডার চলবে (Dev mode ভাঙবে না)
+      ...(process.env.NODE_ENV === "production"
+        ? [
+            {
+              // ✅ স্ট্যাটিক ফন্ট, ছবি এবং সিএসএস/জেএস ফাইল ১ বছর ব্রাউজারে ক্যাশ থাকবে
+              source: "/_next/static/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
+            {
+              // ✅ পুরনো uploads ও static tool ফাইলগুলো ব্রাউজারে ১ বছর cache থাকবে
+              source: "/uploads/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
+            {
+              source: "/tools/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
+          ]
+        : []),
     ];
   },
 };
