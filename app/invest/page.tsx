@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import InvestCalculator from "./InvestCalculator";
 import { DetailToggle, StepAccordion } from "./InvestAccordion";
 import Reveal from "./Reveal";
+import FaqAccordion from "./FaqAccordion";
 
 export const revalidate = 3600;
 
@@ -148,8 +149,8 @@ function SubNav() {
         className="
           max-w-5xl mx-auto
           flex items-center gap-2 md:gap-3
-          px-2 md:px-3 py-1
-          rounded-full
+          px-2 md:px-3 py-1.5 md:py-1
+          rounded-2xl md:rounded-full
           bg-white/55 backdrop-blur-xl
           border border-white/40
           shadow-[0_8px_28px_rgba(22,101,52,0.10)]
@@ -157,9 +158,9 @@ function SubNav() {
       >
         {/* লিংক — স্ক্রলযোগ্য, মাঝখানে, দুই পাশে ফেড */}
         <div className="relative flex-1 min-w-0">
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/70 to-transparent z-10 rounded-l-full" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/70 to-transparent z-10 rounded-r-full" />
-          <div className="flex items-center justify-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide px-1">
+        <div className="hidden md:block pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/70 to-transparent z-10 rounded-l-full" />
+        <div className="hidden md:block pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/70 to-transparent z-10 rounded-r-full" />
+        <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-x-0.5 gap-y-0.5 md:gap-1 md:overflow-x-auto scrollbar-hide px-1">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -296,19 +297,24 @@ export default async function InvestPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                  href="#projects"
+                  className="inline-flex items-center justify-center gap-2 bg-green-700 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
+                >
+                                    প্রকল্পসমূহ দেখুন →
+                </Link>
                 <Link
                   href="/customer/dashboard"
-                  className="inline-flex items-center justify-center gap-2 bg-green-500 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
-                >
-                  অংশীদার হওয়ার আবেদন করুন →
-                </Link>
-                <a
-                  href="#projects"
                   className="inline-flex items-center justify-center px-7 py-3.5 rounded-full font-semibold text-green-700 border border-green-300 bg-white hover:bg-green-50 hover:border-green-500 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 ease-out"
                 >
-                  প্রকল্পসমূহ দেখুন
-                </a>
+                  অংশীদার হওয়ার আবেদন করুন
+                </Link>
               </div>
+
+              <p className="mt-4 text-xs md:text-sm text-gray-500 max-w-lg leading-relaxed">
+                <span className="font-semibold text-gray-700">ঝুঁকি:</span>{" "}
+                এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+              </p>
 
               {systemSettings?.youtubeChannelUrl && (
                 <a
@@ -336,8 +342,8 @@ export default async function InvestPage() {
                 </div>
               </div>
               <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-lg px-4 py-3 border border-green-100 transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-xl">
-                <p className="text-xs text-gray-500">লাভ বণ্টন</p>
-                <p className="text-sm font-bold text-green-700">স্বচ্ছ ও ন্যায্য</p>
+              <p className="text-xs text-gray-500">লাভ বণ্টন (খামারি : অংশীদার)</p>
+              <p className="text-sm font-bold text-green-700">৬৫ : ৩৫</p>
               </div>
             </Reveal>
           </div>
@@ -352,7 +358,7 @@ export default async function InvestPage() {
         <Reveal className="text-center mb-10">
             <SectionHeading>আমার খামারের যাত্রা</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-              Investment দিয়ে শুরু করিনি। নিজের টাকা দিয়ে কাজ শুরু করেছি।
+            বিনিয়োগ  দিয়ে শুরু করিনি। নিজের টাকা দিয়ে কাজ শুরু করেছি।
               নিচে সেই সত্য গল্প।
             </p>
           </Reveal>
@@ -364,7 +370,7 @@ export default async function InvestPage() {
               { title: "ভুলগুলো", desc: "অনেক ভুল করেছি। শিখেছি। এখন সেই অভিজ্ঞতা কাজে লাগাচ্ছি।" },
               { title: "সমাধান", desc: "ধাপে ধাপে সমস্যা সমাধান করে এগিয়েছি। হিসাব ও রেকর্ড রাখা শুরু করেছি।" },
               { title: "বর্তমান অবস্থা", desc: "ছোট পরিসরে কাজ চলছে। মানুষ দেখছে আমি শুধু কথা বলি না, কাজও করি।" },
-              { title: "ভবিষ্যৎ ভিশন", desc: "প্রথমে প্রমাণ, তারপর ছোট pilot, তারপর ধীরে ধীরে বড় করা।" },
+              { title: "ভবিষ্যৎ ভিশন", desc: "প্রথমে প্রমাণ, তারপর ছোট পরীক্ষামূলক ধাপ, তারপর ধীরে ধীরে বড় করা।" },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 3) * 80}>
                 <div className="bg-white border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
@@ -380,25 +386,25 @@ export default async function InvestPage() {
       {/* =========================================================
           FARM STATUS (নতুন সেকশন)
       ========================================================== */}
-        <section id="farm-status" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+        <section id="farm-status" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
         <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>খামারের বর্তমান অবস্থা</SectionHeading>
           </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Reveal delay={0}>
-              <StatCard label="গরু" value={`${systemSettings?.farmCowCount ?? 5}টি`} />
+              <StatCard label="গরু" value={`${(systemSettings?.farmCowCount ?? 5).toLocaleString("bn-BD")}টি`} />
             </Reveal>
             <Reveal delay={80}>
-              <StatCard label="চীনা হাঁস" value={`${systemSettings?.farmDuckCount ?? 15}টি`} />
+              <StatCard label="চীনা হাঁস"value={`${(systemSettings?.farmDuckCount ?? 15).toLocaleString("bn-BD")}টি`} />
             </Reveal>
             <Reveal delay={160}>
-              <StatCard label="ছাগল" value={`${systemSettings?.farmGoatCount ?? 4}টি`} />
+              <StatCard label="ছাগল" value={`${(systemSettings?.farmGoatCount ?? 4).toLocaleString("bn-BD")}টি`} />
             </Reveal>
             <Reveal delay={240}>
               <StatCard
                 label="জমি"
-                value={`${systemSettings?.farmLandBigha ?? 3} বিঘা`}
+                value={`${(systemSettings?.farmLandBigha ?? 3).toLocaleString("bn-BD")} বিঘা`}
               />
             </Reveal>
           </div>
@@ -433,14 +439,14 @@ export default async function InvestPage() {
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">মেয়াদ</p>
                     <p className="font-bold text-gray-900">
-                      {durationMonths != null ? `${durationMonths} মাস` : "—"}
+                      {durationMonths != null ? `${durationMonths.toLocaleString("bn-BD")} মাস` : "—"}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">লাভ বণ্টন</p>
                     <p className="font-bold text-gray-900">
                       {investorProfitPct != null
-                        ? `প্রফিটের ${investorProfitPct}%`
+                        ? `প্রফিটের ${investorProfitPct.toLocaleString("bn-BD")}%`
                         : "—"}
                     </p>
                   </div>
@@ -456,9 +462,9 @@ export default async function InvestPage() {
                     <p className="text-xs text-gray-500 mb-0.5">লট</p>
                     <p className="font-bold text-gray-900">
                       {soldLots != null && totalLots != null
-                        ? `${soldLots} / ${totalLots}`
+                        ? `${soldLots.toLocaleString("bn-BD")} / ${totalLots.toLocaleString("bn-BD")}`
                         : totalLots != null
-                          ? `০ / ${totalLots}`
+                          ? `০ / ${totalLots.toLocaleString("bn-BD")}`
                           : "—"}
                     </p>
                   </div>
@@ -534,7 +540,7 @@ export default async function InvestPage() {
                       <p className="text-gray-700">
                         {featuredProject?.profitShareNote ??
                           (investorProfitPct != null
-                            ? `লাভ হলে খামারি ${100 - investorProfitPct}% ও অংশীদার ${investorProfitPct}% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।`
+                            ? `লাভ হলে খামারি ${(100 - investorProfitPct).toLocaleString("bn-BD")}% ও অংশীদার ${investorProfitPct.toLocaleString("bn-BD")}% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।`
                             : "লাভ হলে খামারি ৬৫% ও অংশীদার ৩৫% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।")}
                       </p>
                     </div>
@@ -596,7 +602,8 @@ export default async function InvestPage() {
       {/* =========================================================
           আমাদের খামার পরিদর্শন — ভিডিও + ছবি (প্লেসহোল্ডার)
       ========================================================== */}
-      <section id="farm-visit" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      {/* 🔒 LOCKED — আসল ভিডিও/ছবি পাওয়ার পর এই লাইন এবং নিচের "*​/}" লাইন মুছলেই সেকশন চালু হবে
+      <section id="farm-visit" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>আমাদের খামার পরিদর্শন</SectionHeading>
@@ -623,10 +630,12 @@ export default async function InvestPage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* =========================================================
           যারা আমাদের সাথে যাত্রা শুরু করেছেন — ভিডিও (প্লেসহোল্ডার)
       ========================================================== */}
+      {/* 🔒 LOCKED — সত্যিকারের অংশীদারদের ভিডিও পেলে এই কমেন্ট খুলে দাও
       <section id="journey-with-us" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
@@ -641,11 +650,12 @@ export default async function InvestPage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* =========================================================
           LIVE CALCULATOR
       ========================================================== */}
-      <section id="calculator" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section id="calculator" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <InvestCalculator />
@@ -692,7 +702,7 @@ export default async function InvestPage() {
                     <p className="text-xs text-green-700 font-medium">খামারি (Farmer Kamol)</p>
                     <h3 className="text-2xl font-bold text-green-900">৬৫% লাভ</h3>
                   </div>
-                  <div className="text-4xl font-black text-green-700">65%</div>
+                  <div className="text-4xl font-black text-green-700">৬৫%</div>
                 </div>
                 <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
                   <div className="h-full w-[65%] bg-green-600 rounded-full" />
@@ -709,7 +719,7 @@ export default async function InvestPage() {
                     <p className="text-xs text-blue-700 font-medium">সকল বিনিয়োগকারী</p>
                     <h3 className="text-2xl font-bold text-blue-900">৩৫% লাভ</h3>
                   </div>
-                  <div className="text-4xl font-black text-blue-700">35%</div>
+                  <div className="text-4xl font-black text-blue-700">৩৫%</div>
                 </div>
                 <div className="h-3 bg-white rounded-full overflow-hidden mb-4">
                   <div className="h-full w-[35%] bg-blue-600 rounded-full" />
@@ -734,7 +744,7 @@ export default async function InvestPage() {
       {/* =========================================================
           HOW TO PARTNER
       ========================================================== */}
-      <section id="how-to" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section id="how-to" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
         <div className="max-w-4xl mx-auto">
         <Reveal className="text-center mb-10">
             <SectionHeading>কীভাবে অংশীদার হবেন</SectionHeading>
@@ -819,7 +829,7 @@ export default async function InvestPage() {
       {/* =========================================================
           SECURITY & TRANSPARENCY
       ========================================================== */}
-      <section className="py-14 md:py-16 px-4 bg-green-50">
+      <section className="py-14 md:py-16 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>নিরাপত্তা ও স্বচ্ছতা</SectionHeading>
@@ -872,6 +882,60 @@ export default async function InvestPage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          FAQ — প্রশ্নোত্তর
+      ========================================================== */}
+      <section id="faq" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+        <div className="max-w-3xl mx-auto">
+          <Reveal className="text-center mb-10">
+            <SectionHeading>সাধারণ প্রশ্নোত্তর</SectionHeading>
+          </Reveal>
+
+          <Reveal>
+            <FaqAccordion
+              items={[
+                {
+                  q: "এটা কি ব্যাংকের মতো নির্ধারিত সুদ বা লাভের স্কিম?",
+                  a: "না। কোনো নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্ন নেই। প্রকল্পে প্রকৃত যে লাভ হবে, শুধু তারই নির্ধারিত অংশ আপনি পাবেন। কোনো পর্যায়ে লাভ না হলে সেই পর্যায়ে লাভ ভাগ হবে না।",
+                },
+                {
+                  q: "লাভ কীভাবে ভাগ হয়?",
+                  a: "প্রকৃত আয়-ব্যয়ের হিসাব করে নিট লাভের ৬৫% খামারি (কৃষক কমল) এবং ৩৫% অংশীদার পান। লাভ কম হলেও এই হারেই ভাগ হবে।",
+                },
+                {
+                  q: "কী কী ঝুঁকি আছে?",
+                  a: "খামারে রোগবালাই, আবহাওয়া, খাবারের দাম ও বাজারদরের ওঠানামায় লাভ কমতে বা লোকসান হতে পারে। প্রতিটি প্রকল্পের বিবরণে সেই প্রকল্পের ঝুঁকি আলাদাভাবে দেওয়া আছে।",
+                },
+                {
+                  q: "লোকসান হলে কী হবে?",
+                  a: "লোকসান হলে কোনো লাভ পাওয়া যাবে না। মূলধনের যতটুকু অবশিষ্ট থাকবে তা ফেরত দেওয়া হবে, তবে পুরো মূলধন ফেরতের কোনো নিশ্চয়তা নেই। এটা বিনিয়োগের আগেই জেনে নেওয়া জরুরি।",
+                },
+                {
+                  q: "লাভের টাকা কখন ও কীভাবে পাব?",
+                  a: "প্রতিটি পর্যায়ের হিসাব শেষে লাভের অংশ নগদে দেওয়া হবে। আপনার মূলধন প্রকল্পেই বিনিয়োগ করা থাকবে, লাভের টাকা মূলধনের সাথে যোগ হবে না।",
+                },
+                {
+                  q: "মূলধন কি তুলে নেওয়া যাবে?",
+                  a: "আপনি আলাদাভাবে মূলধন তোলার অনুরোধ করতে পারবেন। সময়সীমা ও শর্তসহ বিস্তারিত চুক্তিপত্রে থাকবে।",
+                },
+                {
+                  q: "অংশীদার হতে কী কী লাগবে?",
+                  a: "নিজের ফোন নম্বর ও পাসওয়ার্ড দিয়ে অ্যাকাউন্টে ঢুকে প্রথমবার ইমেইল ওটিপি যাচাই করতে হবে। এরপর জাতীয় পরিচয়পত্র (NID), ছবি, স্বাক্ষর, ঠিকানা এবং বিকাশ/ব্যাংক নম্বর দিয়ে প্রোফাইল সম্পূর্ণ করতে হবে। আমরা যাচাই করে অনুমোদন দিলে তবেই বিনিয়োগ করা যাবে।",
+                },
+                {
+                  q: "টাকা কীভাবে জমা দেব?",
+                  a: "বিকাশ বা ব্যাংকের মাধ্যমে টাকা পাঠিয়ে পেমেন্টের স্লিপ আপলোড করবেন। আমরা যাচাই করে নিশ্চিত করলে আপনার বিনিয়োগ সক্রিয় হবে।",
+                },
+                {
+                  q: "চুক্তি কীভাবে হয়?",
+                  a: "প্রতিটি বিনিয়োগের জন্য আলাদা ক্রমিক নম্বর ও তারিখসহ বিস্তারিত ই-চুক্তি তৈরি হয়, যেখানে উভয় পক্ষের ছবি ও স্বাক্ষর থাকে। আপনি কাগজে স্বাক্ষর করে তার ছবি তুলে আপলোড করবেন।",
+                },
+              ]}
+            />
+          </Reveal>
         </div>
       </section>
 

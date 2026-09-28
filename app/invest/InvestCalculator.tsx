@@ -7,9 +7,9 @@ export default function InvestCalculator() {
 
   // সম্ভাব্য নিট লাভের অনুমান (বিনিয়োগের উপর)
   const scenarios = [
-    { label: "কম লাভ", rate: 0.35, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
-    { label: "মাঝারি লাভ", rate: 0.60, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
-    { label: "ভালো লাভ", rate: 1.00, color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
+    { label: "১ম বছর", note: "খামার দাঁড় করানোর সময়, তাই লাভ কম", min: 0.07, max: 0.10, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
+    { label: "২য় বছর", note: "খামার গুছিয়ে উঠলে", min: 0.25, max: 0.30, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+    { label: "৩য় বছর", note: "স্থিতিশীল অবস্থায়", min: 0.30, max: 0.35, color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
   ];
 
   const investorSharePercent = 0.35; // ৩৫%
@@ -59,34 +59,47 @@ export default function InvestCalculator() {
 
       {/* Results */}
       <div className="space-y-3">
-        {scenarios.map((item) => {
-          const estimatedProfit = amount * item.rate;
-          const investorGet = estimatedProfit * investorSharePercent;
+      {scenarios.map((item) => {
+          const profitMin = Math.round(amount * item.min);
+          const profitMax = Math.round(amount * item.max);
+          const getMin = Math.round(amount * item.min * investorSharePercent);
+          const getMax = Math.round(amount * item.max * investorSharePercent);
 
           return (
             <div
               key={item.label}
               className={`rounded-2xl border p-4 ${item.bg} ${item.border}`}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className={`text-sm font-bold ${item.color}`}>
                     {item.label}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    নিট লাভ ≈ ৳{estimatedProfit.toLocaleString("bn-BD")}
+                    {item.note}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    খামারের নিট লাভ ≈ ৳{profitMin.toLocaleString("bn-BD")} – ৳{profitMax.toLocaleString("bn-BD")}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-500">আপনি পাবেন</p>
-                  <p className={`text-xl font-bold ${item.color}`}>
-                    ৳{Math.round(investorGet).toLocaleString("bn-BD")}
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-gray-500">আপনার সম্ভাব্য লাভ</p>
+                  <p className={`text-lg md:text-xl font-bold ${item.color}`}>
+                    ৳{getMin.toLocaleString("bn-BD")} – ৳{getMax.toLocaleString("bn-BD")}
                   </p>
                 </div>
               </div>
             </div>
           );
         })}
+
+        {/* লোকসানের দৃশ্য */}
+        <div className="rounded-2xl border border-gray-300 bg-gray-50 p-4">
+          <p className="text-sm font-bold text-gray-700">লোকসান হলে</p>
+          <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+            কোনো লাভ পাওয়া যাবে না। অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, তবে পুরো মূলধন ফেরতের কোনো নিশ্চয়তা নেই।
+          </p>
+        </div>
       </div>
 
       {/* Warning */}
