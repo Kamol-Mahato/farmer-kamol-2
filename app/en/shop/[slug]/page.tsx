@@ -6,7 +6,7 @@ import ProductCard from "@/app/en/components/ProductCard";
 import ProductActions from "./ProductActions";
 import { safeJsonLd } from "@/lib/jsonLd";
 import { cache } from "react";
-import ReviewForm from "@/app/components/ReviewForm";
+import ReviewForm from "@/app/en/components/ReviewForm";
 import { getSavePercent } from "@/lib/pricing";
 
 export const revalidate = 86400;
