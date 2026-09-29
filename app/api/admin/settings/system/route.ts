@@ -60,6 +60,7 @@ export async function PUT(request: Request) {
       "farmGoatCount",
       "farmLandBigha",
       "farmLocation",
+      "farmLocationEn",
     ];
 
     const updateData: Record<string, unknown> = {};
@@ -78,6 +79,7 @@ export async function PUT(request: Request) {
     revalidatePath("/media/video");
     revalidatePath("/en/media/video");
     revalidatePath("/invest");
+    revalidatePath("/en/invest");
     return NextResponse.json(settings);
   } catch (error) {
     console.error("SYSTEM SETTINGS PUT ERROR:", error);

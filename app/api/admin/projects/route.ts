@@ -67,6 +67,13 @@ export async function POST(request: Request) {
     investorProfitPct,
     totalLots,
     lotUnitName,
+    nameEn,
+    descriptionEn,
+    fundUsageEn,
+    timelineEn,
+    risksEn,
+    profitShareNoteEn,
+    lotUnitNameEn,
   } = await request.json();
 
   if (!name || typeof name !== "string" || !name.trim()) {
@@ -107,9 +114,24 @@ export async function POST(request: Request) {
       totalLots: typeof totalLots === "number" ? totalLots : null,
       lotUnitName:
         typeof lotUnitName === "string" ? lotUnitName.trim() || null : null,
+      nameEn: typeof nameEn === "string" ? nameEn.trim() || null : null,
+      descriptionEn:
+        typeof descriptionEn === "string" ? descriptionEn.trim() || null : null,
+      fundUsageEn:
+        typeof fundUsageEn === "string" ? fundUsageEn.trim() || null : null,
+      timelineEn:
+        typeof timelineEn === "string" ? timelineEn.trim() || null : null,
+      risksEn: typeof risksEn === "string" ? risksEn.trim() || null : null,
+      profitShareNoteEn:
+        typeof profitShareNoteEn === "string"
+          ? profitShareNoteEn.trim() || null
+          : null,
+      lotUnitNameEn:
+        typeof lotUnitNameEn === "string" ? lotUnitNameEn.trim() || null : null,
     },
   });
 
   revalidatePath("/invest");
+  revalidatePath("/en/invest");
   return NextResponse.json({ success: true, project });
 }

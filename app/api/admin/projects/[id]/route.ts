@@ -36,6 +36,13 @@ export async function PATCH(
     investorProfitPct,
     totalLots,
     lotUnitName,
+    nameEn,
+    descriptionEn,
+    fundUsageEn,
+    timelineEn,
+    risksEn,
+    profitShareNoteEn,
+    lotUnitNameEn,
   } = body;
 
   const data: Prisma.ProjectUpdateInput = {};
@@ -72,6 +79,19 @@ export async function PATCH(
   if (typeof totalLots === "number") data.totalLots = totalLots;
   if (typeof lotUnitName === "string")
     data.lotUnitName = lotUnitName.trim() || null;
+  // ✅ ইংরেজি ফিল্ড — খালি রাখলে null (তখন EN পেজে ডিফল্ট টেক্সট দেখাবে)
+  if (typeof nameEn === "string") data.nameEn = nameEn.trim() || null;
+  if (typeof descriptionEn === "string")
+    data.descriptionEn = descriptionEn.trim() || null;
+  if (typeof fundUsageEn === "string")
+    data.fundUsageEn = fundUsageEn.trim() || null;
+  if (typeof timelineEn === "string")
+    data.timelineEn = timelineEn.trim() || null;
+  if (typeof risksEn === "string") data.risksEn = risksEn.trim() || null;
+  if (typeof profitShareNoteEn === "string")
+    data.profitShareNoteEn = profitShareNoteEn.trim() || null;
+  if (typeof lotUnitNameEn === "string")
+    data.lotUnitNameEn = lotUnitNameEn.trim() || null;
 
   if (typeof isFeaturedOnInvestPage === "boolean") {
     if (isFeaturedOnInvestPage) {
@@ -89,5 +109,6 @@ export async function PATCH(
   });
 
   revalidatePath("/invest");
+  revalidatePath("/en/invest");
   return NextResponse.json({ success: true, project });
 }

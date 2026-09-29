@@ -27,6 +27,7 @@ type Settings = {
   farmGoatCount: number | null;
   farmLandBigha: number | null;
   farmLocation: string | null;
+  farmLocationEn: string | null;
 };
 
 // ✅ একটা টগল সুইচ — ক্লিক করলেই সাথে সাথে সেভ হয়ে যাবে (notification on/off-এর মতো)
@@ -499,6 +500,21 @@ export default function AdminSystemSettingsPage() {
               }
               onBlur={(e) => updateField("farmLocation", e.target.value)}
               placeholder="সারাইল, সিরাজগঞ্জ"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Location (English)
+            </label>
+            <input
+              type="text"
+              value={settings.farmLocationEn ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, farmLocationEn: e.target.value })
+              }
+              onBlur={(e) => updateField("farmLocationEn", e.target.value)}
+              placeholder="Sarail, Sirajganj"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
             />
           </div>

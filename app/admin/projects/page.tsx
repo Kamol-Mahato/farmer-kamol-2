@@ -18,12 +18,138 @@ interface Project {
   investorProfitPct: number | null;
   totalLots: number | null;
   lotUnitName: string | null;
+  // ✅ /en/invest এর ইংরেজি ফিল্ড
+  nameEn: string | null;
+  descriptionEn: string | null;
+  fundUsageEn: string | null;
+  timelineEn: string | null;
+  risksEn: string | null;
+  profitShareNoteEn: string | null;
+  lotUnitNameEn: string | null;
   createdAt: string;
   _count: { investments: number };
   // ✅ ধাপ ১ — লাইভ সংগ্রহ
   raisedAmount: number;
   pendingAmount: number;
   progressPct: number | null;
+}
+
+// ✅ ইংরেজি ফিল্ডগুলো — নতুন ও এডিট দুই ফর্মেই এই একই ব্লক ব্যবহার হবে
+type EnFields = {
+  nameEn: string;
+  descriptionEn: string;
+  fundUsageEn: string;
+  timelineEn: string;
+  risksEn: string;
+  profitShareNoteEn: string;
+  lotUnitNameEn: string;
+};
+
+const EMPTY_EN: EnFields = {
+  nameEn: "",
+  descriptionEn: "",
+  fundUsageEn: "",
+  timelineEn: "",
+  risksEn: "",
+  profitShareNoteEn: "",
+  lotUnitNameEn: "",
+};
+
+function EnglishFields({
+  value,
+  onChange,
+}: {
+  value: EnFields;
+  onChange: (v: EnFields) => void;
+}) {
+  const set =
+    (k: keyof EnFields) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange({ ...value, [k]: e.target.value });
+
+  const inputCls =
+    "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 bg-white";
+  const labelCls = "block text-xs font-semibold text-gray-500 mb-1";
+
+  return (
+    <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 space-y-3">
+      <div>
+        <p className="text-sm font-bold text-blue-800">
+          English version (/en/invest পেজের জন্য)
+        </p>
+        <p className="text-xs text-gray-500 mt-0.5">
+          খালি রাখলে ইংরেজি পেজে ডিফল্ট ইংরেজি টেক্সট দেখাবে।
+        </p>
+      </div>
+      <div>
+        <label className={labelCls}>Project name</label>
+        <input
+          type="text"
+          value={value.nameEn}
+          onChange={set("nameEn")}
+          placeholder="e.g. Chinese Duck Expansion Project"
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Description</label>
+        <textarea
+          value={value.descriptionEn}
+          onChange={set("descriptionEn")}
+          rows={3}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>How the funds will be used</label>
+        <textarea
+          value={value.fundUsageEn}
+          onChange={set("fundUsageEn")}
+          rows={2}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Timeline</label>
+        <input
+          type="text"
+          value={value.timelineEn}
+          onChange={set("timelineEn")}
+          placeholder="e.g. Aug–Dec 2027"
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Risks</label>
+        <textarea
+          value={value.risksEn}
+          onChange={set("risksEn")}
+          rows={2}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Profit / loss sharing note</label>
+        <textarea
+          value={value.profitShareNoteEn}
+          onChange={set("profitShareNoteEn")}
+          rows={2}
+          placeholder="Leave empty to show the default 65/35 text"
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Lot unit name</label>
+        <input
+          type="text"
+          value={value.lotUnitNameEn}
+          onChange={set("lotUnitNameEn")}
+          placeholder="e.g. Share / Cow"
+          className={inputCls}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default function AdminProjectsPage() {
@@ -50,6 +176,7 @@ export default function AdminProjectsPage() {
   const [eInvestorProfitPct, setEInvestorProfitPct] = useState("");
   const [eTotalLots, setETotalLots] = useState("");
   const [eLotUnitName, setELotUnitName] = useState("");
+  const [eEn, setEEn] = useState<EnFields>(EMPTY_EN);
   const [viewing, setViewing] = useState<Project | null>(null);
 
   const [name, setName] = useState("");
@@ -65,6 +192,7 @@ export default function AdminProjectsPage() {
   const [investorProfitPct, setInvestorProfitPct] = useState("");
   const [totalLots, setTotalLots] = useState("");
   const [lotUnitName, setLotUnitName] = useState("");
+  const [en, setEn] = useState<EnFields>(EMPTY_EN);
 
   function loadProjects() {
     setLoading(true);
@@ -109,9 +237,10 @@ export default function AdminProjectsPage() {
           investorProfitPct: investorProfitPct
             ? Number(investorProfitPct)
             : null,
-          totalLots: totalLots ? Number(totalLots) : null,
-          lotUnitName: lotUnitName.trim() || null,
-        }),
+            totalLots: totalLots ? Number(totalLots) : null,
+            lotUnitName: lotUnitName.trim() || null,
+            ...en,
+          }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -131,6 +260,7 @@ export default function AdminProjectsPage() {
       setInvestorProfitPct("");
       setTotalLots("");
       setLotUnitName("");
+      setEn(EMPTY_EN);
       setShowForm(false);
       loadProjects();
     } catch {
@@ -213,6 +343,15 @@ export default function AdminProjectsPage() {
       project.totalLots != null ? String(project.totalLots) : "",
     );
     setELotUnitName(project.lotUnitName || "");
+    setEEn({
+      nameEn: project.nameEn || "",
+      descriptionEn: project.descriptionEn || "",
+      fundUsageEn: project.fundUsageEn || "",
+      timelineEn: project.timelineEn || "",
+      risksEn: project.risksEn || "",
+      profitShareNoteEn: project.profitShareNoteEn || "",
+      lotUnitNameEn: project.lotUnitNameEn || "",
+    });
   }
 
   async function handleUpdate(e: React.FormEvent) {
@@ -244,9 +383,10 @@ export default function AdminProjectsPage() {
           investorProfitPct: eInvestorProfitPct
             ? Number(eInvestorProfitPct)
             : null,
-          totalLots: eTotalLots ? Number(eTotalLots) : null,
-          lotUnitName: eLotUnitName.trim() || null,
-        }),
+            totalLots: eTotalLots ? Number(eTotalLots) : null,
+            lotUnitName: eLotUnitName.trim() || null,
+            ...eEn,
+          }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -447,6 +587,7 @@ export default function AdminProjectsPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
             />
           </div>
+          <EnglishFields value={en} onChange={setEn} />
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"
@@ -923,6 +1064,8 @@ export default function AdminProjectsPage() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
                 />
               </div>
+
+              <EnglishFields value={eEn} onChange={setEEn} />
 
               {editError && (
                 <p className="text-red-500 text-sm">{editError}</p>

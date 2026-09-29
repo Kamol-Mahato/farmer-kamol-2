@@ -17,6 +17,7 @@ model SystemControlCenter {
   farmGoatCount             Int?
   farmLandBigha             Float?
   farmLocation              String?
+  farmLocationEn            String?
   maskCustomerData          Boolean @default(true)
   disableLiveCourierAPI     Boolean @default(true)
   paperSizeMode             String  @default("POS")
@@ -533,6 +534,14 @@ model Project {
   investorProfitPct      Float?       // অংশীদারের লাভ %, যেমন ৩৫
   totalLots              Int?         // মোট লট/শেয়ার, যেমন ২০০
   lotUnitName           String?      // "শেয়ার" / "গরু" ইত্যাদি
+  // ✅ /en/invest পেজের জন্য ইংরেজি ফিল্ড — admin থেকে এডিট হবে
+  nameEn                String?
+  descriptionEn         String?
+  fundUsageEn           String?
+  timelineEn            String?
+  risksEn               String?
+  profitShareNoteEn     String?
+  lotUnitNameEn         String?
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
   investments            Investment[]
