@@ -24,14 +24,19 @@ const cspHeader = `
 
 const nextConfig = {
   allowedDevOrigins: [
-    "3000-firebase-farmer-kamolgit-1781445602919.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev",
+    "*.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev",
   ],
   poweredByHeader: false,
   reactStrictMode: true, // ✅ রিঅ্যাক্ট মোড পারফর্মেন্স ট্র্যাকিং
   
   // ✅ ১. CSS ও প্যাকেজ বান্ডল অপ্টিমাইজেশন (Render-blocking ও Legacy JS কমাবে)
   experimental: {
-    optimizePackageImports: ['lucide-react', 'react-icons', 'framer-motion'], // আনইউজড আইকন/প্যাকেজ বাদ দেবে
+    optimizePackageImports: [
+      "lucide-react",
+      "react-icons",
+      "framer-motion",
+      "@next/third-parties",
+    ],
   },
   
   // ✅ ২. প্রোডাকশন বিল্ডে অপ্রয়োজনীয় console.log তুলে ফেলা (কোড সাইজ ছোট করবে)

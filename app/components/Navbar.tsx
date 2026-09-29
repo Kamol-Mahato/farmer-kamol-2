@@ -122,33 +122,49 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    checkUser();
-    checkCart();
+    // প্রথম পেইন্টের পর নন-ক্রিটিক্যাল কাজ চালানো — TBT কমায়
+    const run = () => {
+      checkUser();
+      checkCart();
+
+      fetch("/api/navigation")
+        .then((res) => res.json())
+        .then((data) => setMenus(localizeMenus(data)))
+        .catch(() => {});
+
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        fetch("/api/profile/avatar")
+          .then((r) => r.json())
+          .then((data) => {
+            if (data?.avatarUrl) {
+              setAvatarUrl(data.avatarUrl);
+              try {
+                const u = JSON.parse(localStorage.getItem("user") || "{}");
+                u.avatarUrl = data.avatarUrl;
+                localStorage.setItem("user", JSON.stringify(u));
+              } catch {}
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    // requestIdleCallback সাপোর্ট না থাকলে ছোট ডিলে
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const id = (window as any).requestIdleCallback(run, { timeout: 1800 });
+      return () => (window as any).cancelIdleCallback?.(id);
+    } else {
+      const t = setTimeout(run, 300);
+      return () => clearTimeout(t);
+    }
+  }, [locale]);
+
+  useEffect(() => {
     window.addEventListener("storage", checkUser);
     window.addEventListener("storage", checkCart);
     window.addEventListener("cartUpdated", checkCart);
     window.addEventListener("avatarUpdated", checkUser);
-    fetch("/api/navigation")
-      .then((res) => res.json())
-      .then((data) => setMenus(localizeMenus(data)));
-
-    // লগইন থাকলে সার্ভার থেকে latest avatar আনো
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      fetch("/api/profile/avatar")
-        .then((r) => r.json())
-        .then((data) => {
-          if (data?.avatarUrl) {
-            setAvatarUrl(data.avatarUrl);
-            try {
-              const u = JSON.parse(localStorage.getItem("user") || "{}");
-              u.avatarUrl = data.avatarUrl;
-              localStorage.setItem("user", JSON.stringify(u));
-            } catch {}
-          }
-        })
-        .catch(() => {});
-    }
 
     return () => {
       window.removeEventListener("storage", checkUser);
@@ -156,7 +172,7 @@ export default function Navbar() {
       window.removeEventListener("cartUpdated", checkCart);
       window.removeEventListener("avatarUpdated", checkUser);
     };
-  }, [locale]);
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("user");

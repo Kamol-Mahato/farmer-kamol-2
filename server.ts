@@ -50,7 +50,20 @@ app.prepare().then(async () => {
 
   const { setLiveVisitorCount } = await import("./lib/liveVisitors");
 
-  const wss = new WebSocketServer({ server, path: "/ws/chat" });
+  // ✅ noServer: true — নইলে ws অন্য সব upgrade রিকোয়েস্ট (Next-এর HMR /_next/webpack-hmr) 400 দিয়ে কেটে দেয়
+  const wss = new WebSocketServer({ noServer: true });
+  server.on("upgrade", (req, socket, head) => {
+    const { pathname } = parse(req.url || "", true);
+    if (pathname === "/ws/chat") {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit("connection", ws, req);
+      });
+    } else if (!dev) {
+      // প্রোডাকশনে অন্য কোনো WebSocket দরকার নেই — আগের মতোই বন্ধ
+      socket.destroy();
+    }
+    // dev-এ অন্য path (যেমন /_next/webpack-hmr) Next নিজে handle করবে
+  });
   const clients = new Set<WsClient>();
 
   function updateLiveVisitorCount() {

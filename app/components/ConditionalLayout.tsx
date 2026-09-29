@@ -5,15 +5,28 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import FloatingCartButton from "./FloatingCartButton";
+// FloatingCartButton এখন dynamic — উপরের dynamic() দেখো
 import { MobileMenuProvider } from "./MobileMenuContext";
 import MobileBottomNav from "./MobileBottomNav";
 import AgentModeBanner from "./AgentModeBanner";
 
-// 🚀 প্রথম রেন্ডারে জরুরি না এমন কম্পোনেন্ট — আলাদা chunk-এ lazy load হবে, main-thread work কমবে
-const FloatingWhatsAppButton = dynamic(() => import("./FloatingWhatsAppButton"), { ssr: false });
-const NotificationPermissionBanner = dynamic(() => import("./NotificationPermissionBanner"), { ssr: false });
-const ChatWidget = dynamic(() => import("./ChatWidget"), { ssr: false });
+// 🚀 প্রথম রেন্ডারে জরুরি না — আলাদা chunk + ssr:false → LCP/TBT ভালো হয়
+const FloatingWhatsAppButton = dynamic(() => import("./FloatingWhatsAppButton"), {
+  ssr: false,
+  loading: () => null,
+});
+const FloatingCartButton = dynamic(() => import("./FloatingCartButton"), {
+  ssr: false,
+  loading: () => null,
+});
+const NotificationPermissionBanner = dynamic(() => import("./NotificationPermissionBanner"), {
+  ssr: false,
+  loading: () => null,
+});
+const ChatWidget = dynamic(() => import("./ChatWidget"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function ConditionalLayout({
   children,

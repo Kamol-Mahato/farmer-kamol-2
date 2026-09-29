@@ -8,6 +8,9 @@ import NoticeModal from "@/app/en/components/NoticeModal";
 import VideoSection from "@/app/en/components/VideoSection";
 import TopSellerSection from "@/app/en/components/TopSellerSection";
 import { siteConfig } from "@/lib/siteConfig";
+import dynamic from "next/dynamic";
+
+const InvestSection = dynamic(() => import("@/app/en/components/InvestSection"));
 
 export const revalidate = 86400;
 
@@ -152,6 +155,12 @@ export default async function HomePageEn() {
           systemSettings?.facebookPageUrl || siteConfig.social.facebook
         }
       />
+
+      {/* Investment CTA — on/off from the admin panel */}
+      {systemSettings?.enableInvestmentProgram && <InvestSection />}
+
+      {/* Investment CTA — on/off from the admin panel */}
+      {systemSettings?.enableInvestmentProgram && <InvestSection />}
 
       <div className="bg-yellow-50 py-6 px-4">
         <div className="max-w-7xl mx-auto">

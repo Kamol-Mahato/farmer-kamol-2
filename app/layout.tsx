@@ -84,8 +84,8 @@ export default async function RootLayout({
         </Suspense>
         <EnterKeyNav />
         <ConditionalLayout>{children}</ConditionalLayout>
-        {/* গুগল অ্যানালিটিক্স কম্পোনেন্ট */}
-        <GoogleAnalytics gaId="G-8ZRHT134HL" data-strategy="lazyOnload" />
+        {/* GA — lazyOnload দিয়ে প্রথম লোডে ব্লক করবে না */}
+        <GoogleAnalytics gaId="G-8ZRHT134HL" />
       </body>
     </html>
   );
