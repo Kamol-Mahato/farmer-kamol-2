@@ -10,8 +10,10 @@ import {
   checkIpRateLimit,
   getClientIp,
 } from "@/lib/rateLimiter";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   try {
     // 🔒 IP ভিত্তিক হালকা limit (৬০ / ঘণ্টা) — shared network-এ conflict কম
     const ip = getClientIp(request);
@@ -19,8 +21,11 @@ export async function POST(request: Request) {
     if (!ipCheck.allowed) {
       return NextResponse.json(
         {
-          error:
+          error: tr(
+            locale,
             "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+            "Too many attempts. Please try again in a little while.",
+          ),
         },
         { status: 429 },
       );
@@ -31,7 +36,13 @@ export async function POST(request: Request) {
 
     if (!phone || !password) {
       return NextResponse.json(
-        { error: "মোবাইল নম্বর এবং পাসওয়ার্ড দুটিই আবশ্যক" },
+        {
+          error: tr(
+            locale,
+            "মোবাইল নম্বর এবং পাসওয়ার্ড দুটিই আবশ্যক",
+            "Both mobile number and password are required",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -41,7 +52,11 @@ export async function POST(request: Request) {
       const minutes = Math.ceil((rateCheck.remainingMs || 0) / 60000);
       return NextResponse.json(
         {
-          error: `অনেকবার ভুল চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+          error: tr(
+            locale,
+            `অনেকবার ভুল চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+            `Too many failed attempts. Please try again in ${minutes} minute(s).`,
+          ),
         },
         { status: 429 },
       );
@@ -54,7 +69,13 @@ export async function POST(request: Request) {
     if (!user || !user.isActive || !user.password) {
       await recordFailedAttempt(`login:${phone}`);
       return NextResponse.json(
-        { error: "মোবাইল নম্বর বা পাসওয়ার্ড সঠিক নয়" },
+        {
+          error: tr(
+            locale,
+            "মোবাইল নম্বর বা পাসওয়ার্ড সঠিক নয়",
+            "Mobile number or password is incorrect",
+          ),
+        },
         { status: 401 },
       );
     }
@@ -63,7 +84,13 @@ export async function POST(request: Request) {
     if (!isPasswordValid) {
       await recordFailedAttempt(`login:${phone}`);
       return NextResponse.json(
-        { error: "মোবাইল নম্বর বা পাসওয়ার্ড সঠিক নয়" },
+        {
+          error: tr(
+            locale,
+            "মোবাইল নম্বর বা পাসওয়ার্ড সঠিক নয়",
+            "Mobile number or password is incorrect",
+          ),
+        },
         { status: 401 },
       );
     }
@@ -114,14 +141,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "লগইন সফল হয়েছে",
+      message: tr(locale, "লগইন সফল হয়েছে", "Login successful"),
       user: { id: user.id, name: user.name, role: user.role },
       redirectTo,
     });
   } catch (error) {
     console.error("LOGIN API ERROR:", error);
     return NextResponse.json(
-      { error: "লগইন করতে অভ্যন্তরীণ সমস্যা হয়েছে" },
+      {
+        error: tr(
+          locale,
+          "লগইন করতে অভ্যন্তরীণ সমস্যা হয়েছে",
+          "An internal error occurred while logging in",
+        ),
+      },
       { status: 500 },
     );
   }

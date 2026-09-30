@@ -32,7 +32,7 @@ export default function ReviewForm({ productId }: { productId: number }) {
     try {
       const res = await fetch("/api/reviews", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({ productId, rating, comment }),
       });
       const data = await res.json();

@@ -192,7 +192,7 @@ export default function CustomerSettingsPageEn() {
     try {
       const res = await fetch("/api/customer/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({
           name: form.name.trim(),
           district: form.district || null,

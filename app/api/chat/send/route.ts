@@ -7,7 +7,11 @@ import { sendTelegramAlert, escapeHtml } from "@/lib/telegram";
 import { chatEvents } from "@/lib/chatEvents";
 import { checkAndIncrementRate } from "@/lib/rateLimiter";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { CHAT_WELCOME_TEXT } from "@/lib/chatWelcomeMessage";
+import {
+  CHAT_WELCOME_TEXT,
+  CHAT_WELCOME_TEXT_EN,
+} from "@/lib/chatWelcomeMessage";
+import { getApiLocale } from "@/lib/apiLocale";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -76,7 +80,13 @@ export async function POST(req: Request) {
             visitorId,
             status: "OPEN",
             messages: {
-              create: { senderType: "SYSTEM", text: CHAT_WELCOME_TEXT },
+              create: {
+                senderType: "SYSTEM",
+                text:
+                  getApiLocale(req) === "en"
+                    ? CHAT_WELCOME_TEXT_EN
+                    : CHAT_WELCOME_TEXT,
+              },
             },
           },
         });

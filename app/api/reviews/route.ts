@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 // ✅ এই কাস্টমার এই প্রোডাক্টে রিভিউ দেওয়ার যোগ্য কিনা চেক করা
 // (শর্ত: এই প্রোডাক্টের একটা DELIVERED অর্ডার আছে, এবং এখনো রিভিউ দেয়নি)
@@ -50,10 +51,17 @@ export async function GET(request: Request) {
 
 // ✅ রিভিউ সাবমিট করা — সার্ভারে আবার eligibility চেক করা হচ্ছে (client-side bypass ঠেকাতে)
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
     return NextResponse.json(
-      { error: "রিভিউ দিতে লগইন করুন" },
+      {
+        error: tr(
+          locale,
+          "রিভিউ দিতে লগইন করুন",
+          "Please log in to leave a review",
+        ),
+      },
       { status: 401 },
     );
   }
@@ -68,7 +76,12 @@ export async function POST(request: Request) {
         : null;
 
     if (!productId || !rating || rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "সঠিক তথ্য দিন" }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: tr(locale, "সঠিক তথ্য দিন", "Please provide valid details"),
+        },
+        { status: 400 },
+      );
     }
 
     /* 🔒 LOCKED — ভবিষ্যতে "শুধু অর্ডার করা কাস্টমার review দিতে পারবে" চালু করতে চাইলে
@@ -95,7 +108,13 @@ export async function POST(request: Request) {
     });
     if (!orderItem) {
       return NextResponse.json(
-        { error: "শুধুমাত্র অর্ডার করা পণ্যেই রিভিউ দেওয়া যাবে" },
+        {
+          error: tr(
+            locale,
+            "শুধুমাত্র অর্ডার করা পণ্যেই রিভিউ দেওয়া যাবে",
+            "You can only review products you have ordered",
+          ),
+        },
         { status: 403 },
       );
     }
@@ -105,7 +124,13 @@ export async function POST(request: Request) {
     });
     if (existingReview) {
       return NextResponse.json(
-        { error: "আপনি ইতিমধ্যে এই পণ্যে রিভিউ দিয়েছেন" },
+        {
+          error: tr(
+            locale,
+            "আপনি ইতিমধ্যে এই পণ্যে রিভিউ দিয়েছেন",
+            "You have already reviewed this product",
+          ),
+        },
         { status: 409 },
       );
     }
@@ -125,7 +150,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("REVIEW SUBMIT ERROR:", error);
     return NextResponse.json(
-      { error: "রিভিউ জমা দেওয়া যায়নি" },
+      {
+        error: tr(
+          locale,
+          "রিভিউ জমা দেওয়া যায়নি",
+          "Could not submit your review",
+        ),
+      },
       { status: 500 },
     );
   }

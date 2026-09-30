@@ -123,7 +123,7 @@ export default function LoginPageEn() {
     try {
       const res = await fetch("/api/forgot-password-request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({ phone: forgotPhone }),
       });
       const data = await res.json();
@@ -145,7 +145,7 @@ export default function LoginPageEn() {
     try {
       const res = await fetch("/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({ phone, password }),
       });
       const data = await res.json();

@@ -9,16 +9,21 @@ import {
   checkIpRateLimit,
   getClientIp,
 } from "@/lib/rateLimiter";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   try {
     const ip = getClientIp(request);
     const ipCheck = await checkIpRateLimit(ip, 60, 60 * 60);
     if (!ipCheck.allowed) {
       return NextResponse.json(
         {
-          error:
+          error: tr(
+            locale,
             "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+            "Too many attempts. Please try again in later.",
+          ),
         },
         { status: 429 },
       );
@@ -29,7 +34,13 @@ export async function POST(request: Request) {
 
     if (!name || !phone || !password) {
       return NextResponse.json(
-        { error: "নাম, মোবাইল নম্বর এবং পাসওয়ার্ড দিন" },
+        {
+          error: tr(
+            locale,
+            "নাম, মোবাইল নম্বর এবং পাসওয়ার্ড দিন",
+            "Please enter your name, mobile number and password",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -39,7 +50,11 @@ export async function POST(request: Request) {
       const minutes = Math.ceil((rateCheck.remainingMs || 0) / 60000);
       return NextResponse.json(
         {
-          error: `অনেকবার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+          error: tr(
+            locale,
+            `অনেকবার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+            `Too many attempts. Please try again in ${minutes} minute(s).`,
+          ),
         },
         { status: 429 },
       );
@@ -47,7 +62,13 @@ export async function POST(request: Request) {
 
     if (typeof password !== "string" || password.length < 6) {
       return NextResponse.json(
-        { error: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে" },
+        {
+          error: tr(
+            locale,
+            "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে",
+            "Password must be at least 6 characters",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -79,7 +100,11 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
           success: true,
-          message: "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে",
+          message: tr(
+            locale,
+            "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে",
+            "Account created successfully",
+          ),
           user: {
             id: updatedUser.id,
             name: updatedUser.name,
@@ -90,7 +115,13 @@ export async function POST(request: Request) {
       await recordFailedAttempt(`register:${phone}`);
 
       return NextResponse.json(
-        { error: "এই মোবাইল নম্বরে অ্যাকাউন্ট আগে থেকেই আছে, লগইন করুন" },
+        {
+          error: tr(
+            locale,
+            "এই মোবাইল নম্বরে অ্যাকাউন্ট আগে থেকেই আছে, লগইন করুন",
+            "An account already exists with this mobile number. Please log in.",
+          ),
+        },
         { status: 409 },
       );
     }
@@ -121,13 +152,23 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে",
+      message: tr(
+        locale,
+        "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে",
+        "Account created successfully",
+      ),
       user: { id: newUser.id, name: newUser.name, role: newUser.role },
     });
   } catch (error) {
     console.error("REGISTER API ERROR:", error);
     return NextResponse.json(
-      { error: "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে" },
+      {
+        error: tr(
+          locale,
+          "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে",
+          "There was a problem creating your account",
+        ),
+      },
       { status: 500 },
     );
   }

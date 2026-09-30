@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyOrderPhoneToken } from "@/lib/orderPhoneToken";
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 import bcrypt from "bcryptjs"; // পাসওয়ার্ড সিকিউরিটির জন্য (নোট নিচে দেখুন)
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   try {
     const body = await request.json();
     const { phone, password } = body;
@@ -17,14 +19,26 @@ export async function POST(request: Request) {
       password.length < 6
     ) {
       return NextResponse.json(
-        { error: "ফোন নম্বর এবং ন্যূনতম ৬ অক্ষরের পাসওয়ার্ড আবশ্যক" },
+        {
+          error: tr(
+            locale,
+            "ফোন নম্বর এবং ন্যূনতম ৬ অক্ষরের পাসওয়ার্ড আবশ্যক",
+            "Phone number and a password of at least 6 characters are required",
+          ),
+        },
         { status: 400 },
       );
     }
     const rateCheck = await checkRateLimit(`set-password:${phone}`);
     if (!rateCheck.allowed) {
       return NextResponse.json(
-        { error: "অনেকবার চেষ্টা করা হয়েছে, কিছুক্ষণ পর আবার চেষ্টা করুন" },
+        {
+          error: tr(
+            locale,
+            "অনেকবার চেষ্টা করা হয়েছে, কিছুক্ষণ পর আবার চেষ্টা করুন",
+            "Too many attempts. Please try again in a little while.",
+          ),
+        },
         { status: 429 },
       );
     }
@@ -39,8 +53,11 @@ export async function POST(request: Request) {
       await recordFailedAttempt(`set-password:${phone}`);
       return NextResponse.json(
         {
-          error:
+          error: tr(
+            locale,
             "নিরাপত্তার জন্য, অর্ডার করার সাথে সাথেই শুধু এই ব্রাউজারে পাসওয়ার্ড সেট করা যায়। পরে সেট করতে চাইলে লগইন পেজ থেকে 'পাসওয়ার্ড ভুলে গেছেন' অপশন ব্যবহার করুন।",
+            "For security, a password can only be set in this browser right after placing an order. To set it later, use the 'Forgot password?' option on the login page.",
+          ),
         },
         { status: 403 },
       );
@@ -53,7 +70,13 @@ export async function POST(request: Request) {
 
     if (!customer) {
       return NextResponse.json(
-        { error: "এই ফোন নম্বরের কোনো কাস্টমার খুঁজে পাওয়া যায়নি" },
+        {
+          error: tr(
+            locale,
+            "এই ফোন নম্বরের কোনো কাস্টমার খুঁজে পাওয়া যায়নি",
+            "No customer was found with this phone number",
+          ),
+        },
         { status: 404 },
       );
     }
@@ -63,8 +86,11 @@ export async function POST(request: Request) {
     if (customer.password) {
       return NextResponse.json(
         {
-          error:
+          error: tr(
+            locale,
             "এই অ্যাকাউন্টে আগে থেকেই পাসওয়ার্ড সেট করা আছে। পরিবর্তন করতে লগইন করুন বা সাহায্যের জন্য যোগাযোগ করুন।",
+            "A password is already set for this account. Please log in to change it, or contact us for help.",
+          ),
         },
         { status: 409 },
       );
@@ -86,12 +112,22 @@ export async function POST(request: Request) {
     cookieStore.delete("order_phone_token");
     return NextResponse.json({
       success: true,
-      message: "পাসওয়ার্ড সফলভাবে সেট হয়েছে",
+      message: tr(
+        locale,
+        "পাসওয়ার্ড সফলভাবে সেট হয়েছে",
+        "Password set successfully",
+      ),
     });
   } catch (error: any) {
     console.error("SET PASSWORD API ERROR:", error);
     return NextResponse.json(
-      { error: "পাসওয়ার্ড সংরক্ষণ করতে অভ্যন্তরীণ সমস্যা হয়েছে" },
+      {
+        error: tr(
+          locale,
+          "পাসওয়ার্ড সংরক্ষণ করতে অভ্যন্তরীণ সমস্যা হয়েছে",
+          "An internal error occurred while saving your password",
+        ),
+      },
       { status: 500 },
     );
   }

@@ -33,7 +33,7 @@ export default function ResetPasswordPageEn() {
     try {
       const res = await fetch("/api/customer/confirm-reset", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({ phone, tempPassword, newPassword }),
       });
       const data = await res.json();

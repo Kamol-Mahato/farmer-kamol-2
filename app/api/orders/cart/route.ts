@@ -10,8 +10,10 @@ import { sendTelegramAlert } from "@/lib/telegram";
 import { sendPushToAdmin } from "@/lib/webpush";
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
 import { signOrderPhoneToken } from "@/lib/orderPhoneToken";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   try {
     const body = await request.json();
     const {
@@ -33,7 +35,13 @@ export async function POST(request: Request) {
       items.length === 0
     ) {
       return NextResponse.json(
-        { error: "সব তথ্য সঠিকভাবে দিন" },
+        {
+          error: tr(
+            locale,
+            "সব তথ্য সঠিকভাবে দিন",
+            "Please fill in all the details correctly",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -44,19 +52,37 @@ export async function POST(request: Request) {
 
     if (safeName.length < 2 || safeName.length > 50) {
       return NextResponse.json(
-        { error: "নাম ২ থেকে ৫০ অক্ষরের মধ্যে হতে হবে" },
+        {
+          error: tr(
+            locale,
+            "নাম ২ থেকে ৫০ অক্ষরের মধ্যে হতে হবে",
+            "Name must be between 2 and 50 characters",
+          ),
+        },
         { status: 400 },
       );
     }
     if (safeAddress.length < 10 || safeAddress.length > 300) {
       return NextResponse.json(
-        { error: "ঠিকানা ১০ থেকে ৩০০ অক্ষরের মধ্যে হতে হবে" },
+        {
+          error: tr(
+            locale,
+            "ঠিকানা ১০ থেকে ৩০০ অক্ষরের মধ্যে হতে হবে",
+            "Address must be between 10 and 300 characters",
+          ),
+        },
         { status: 400 },
       );
     }
     if (rawNote.length > 500) {
       return NextResponse.json(
-        { error: "নোট সর্বোচ্চ ৫০০ অক্ষর হতে পারবে" },
+        {
+          error: tr(
+            locale,
+            "নোট সর্বোচ্চ ৫০০ অক্ষর হতে পারবে",
+            "Note can be at most 500 characters",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -66,7 +92,13 @@ export async function POST(request: Request) {
       /[<>]/.test(rawNote)
     ) {
       return NextResponse.json(
-        { error: "নাম/ঠিকানা/নোটে < বা > ব্যবহার করা যাবে না" },
+        {
+          error: tr(
+            locale,
+            "নাম/ঠিকানা/নোটে < বা > ব্যবহার করা যাবে না",
+            "The characters < and > are not allowed in name, address or note",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -81,7 +113,11 @@ export async function POST(request: Request) {
       const minutes = Math.ceil((rateCheck.remainingMs || 0) / 60000);
       return NextResponse.json(
         {
-          error: `অনেকবার অর্ডার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+          error: tr(
+            locale,
+            `অনেকবার অর্ডার চেষ্টা হয়েছে। ${minutes} মিনিট পর আবার চেষ্টা করুন।`,
+            `Too many order attempts. Please try again in ${minutes} minute(s).`,
+          ),
         },
         { status: 429 },
       );
@@ -93,14 +129,26 @@ export async function POST(request: Request) {
       (paymentMethod !== "COD" && paymentMethod !== "GATEWAY")
     ) {
       return NextResponse.json(
-        { error: "পেমেন্ট পদ্ধতি বেছে নিন" },
+        {
+          error: tr(
+            locale,
+            "পেমেন্ট পদ্ধতি বেছে নিন",
+            "Please choose a payment method",
+          ),
+        },
         { status: 400 },
       );
     }
     if (paymentMethod === "GATEWAY") {
       if (!gatewayName || !trxId || !String(trxId).trim()) {
         return NextResponse.json(
-          { error: "অনলাইন পেমেন্টের জন্য মাধ্যম ও Transaction ID দিন" },
+          {
+            error: tr(
+              locale,
+              "অনলাইন পেমেন্টের জন্য মাধ্যম ও Transaction ID দিন",
+              "For online payment, please provide the payment method and Transaction ID",
+            ),
+          },
           { status: 400 },
         );
       }
@@ -110,8 +158,11 @@ export async function POST(request: Request) {
       if (existingTrx) {
         return NextResponse.json(
           {
-            error:
+            error: tr(
+              locale,
               "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।",
+              "An order has already been placed with this Transaction ID. Please enter the correct TrxID.",
+            ),
           },
           { status: 409 },
         );
@@ -125,7 +176,13 @@ export async function POST(request: Request) {
 
     if (products.length !== items.length) {
       return NextResponse.json(
-        { error: "এক বা একাধিক পণ্য খুঁজে পাওয়া যায়নি" },
+        {
+          error: tr(
+            locale,
+            "এক বা একাধিক পণ্য খুঁজে পাওয়া যায়নি",
+            "One or more products were not found",
+          ),
+        },
         { status: 404 },
       );
     }
@@ -137,7 +194,11 @@ export async function POST(request: Request) {
       if (!product || product.stockQty < stockDeduction) {
         return NextResponse.json(
           {
-            error: `দুঃখিত, "${product?.name}" এর পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product?.stockQty ?? 0} কেজি`,
+            error: tr(
+              locale,
+              `দুঃখিত, "${product?.name}" এর পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product?.stockQty ?? 0} কেজি`,
+              `Sorry, there is not enough stock for "${product?.nameEn || product?.name}". Available stock: ${product?.stockQty ?? 0} kg`,
+            ),
           },
           { status: 400 },
         );
@@ -253,15 +314,24 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         {
-          error:
+          error: tr(
+            locale,
             "এই Transaction ID দিয়ে আগেই একটি অর্ডার করা হয়েছে। সঠিক TrxID দিন।",
+            "An order has already been placed with this Transaction ID. Please enter the correct TrxID.",
+          ),
         },
         { status: 409 },
       );
     }
     console.error("CRITICAL CART ORDER API ERROR ->", error);
     return NextResponse.json(
-      { error: "ডাটাবেস বা সার্ভারে সমস্যা হয়েছে" },
+      {
+        error: tr(
+          locale,
+          "ডাটাবেস বা সার্ভারে সমস্যা হয়েছে",
+          "A database or server error occurred",
+        ),
+      },
       { status: 500 },
     );
   }

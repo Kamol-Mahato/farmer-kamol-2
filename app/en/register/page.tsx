@@ -57,7 +57,7 @@ export default function RegisterPageEn() {
     try {
       const res = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({ name, phone, password }),
       });
       const data = await res.json();

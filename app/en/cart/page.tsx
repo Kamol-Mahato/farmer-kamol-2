@@ -295,7 +295,7 @@ export default function CartPage() {
     try {
       const res = await fetch("/api/orders/cart", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-locale": "en" },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,

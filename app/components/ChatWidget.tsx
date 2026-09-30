@@ -4,7 +4,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { connectChatSocket } from "@/lib/chatSocket";
-import { CHAT_WELCOME_TEXT } from "@/lib/chatWelcomeMessage";
+import {
+  CHAT_WELCOME_TEXT,
+  CHAT_WELCOME_TEXT_EN,
+} from "@/lib/chatWelcomeMessage";
 
 interface Message {
   id: number;
@@ -181,7 +184,7 @@ export default function ChatWidget() {
                 {
                   id: -1,
                   senderType: "SYSTEM",
-                  text: CHAT_WELCOME_TEXT,
+                  text: isEn ? CHAT_WELCOME_TEXT_EN : CHAT_WELCOME_TEXT,
                   createdAt: new Date().toISOString(),
                 },
               ],
@@ -191,7 +194,7 @@ export default function ChatWidget() {
     } catch (err) {
       console.error("Failed to load chat history:", err);
     }
-  }, []);
+  }, [isEn]);
 
   // 🚀 পেজ লোডের সাথে সাথে চ্যাট init/WebSocket যুক্ত না করে, ৩ সেকেন্ড পর ব্যাকগ্রাউন্ডে যুক্ত হচ্ছে —
   // যাতে প্রথম রেন্ডার/LCP-তে এক্সট্রা নেটওয়ার্ক কল বাধা না দেয়
@@ -296,7 +299,10 @@ export default function ChatWidget() {
         method: "POST",
         cache: "no-store",
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-locale": isEn ? "en" : "bn",
+        },
         body: JSON.stringify({ text: userText }),
       });
 

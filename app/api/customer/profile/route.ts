@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
 import { NextRequest, NextResponse } from "next/server";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 // প্রোফাইল ডেটা আনা — order/cart পেজে auto-fill এর জন্য
 export async function GET() {
@@ -39,9 +40,13 @@ export async function GET() {
 
 // প্রোফাইল আপডেট — Settings পেজ থেকে কাস্টমার নাম/ঠিকানা বদলাবে
 export async function PUT(req: NextRequest) {
+  const locale = getApiLocale(req);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
+    return NextResponse.json(
+      { error: tr(locale, "লগইন করুন", "Please log in") },
+      { status: 401 },
+    );
   }
 
   try {
@@ -70,6 +75,9 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(updated);
   } catch (error) {
     console.error("CUSTOMER PROFILE UPDATE ERROR:", error);
-    return NextResponse.json({ error: "আপডেট করা যায়নি" }, { status: 500 });
+    return NextResponse.json(
+      { error: tr(locale, "আপডেট করা যায়নি", "Could not update profile") },
+      { status: 500 },
+    );
   }
 }
