@@ -18,7 +18,7 @@ export async function GET() {
   const investments = await prisma.investment.findMany({
     where: { investorProfileId: profile.id },
     include: {
-      project: { select: { name: true } },
+      project: { select: { name: true, nameEn: true } },
       agreement: true,
       transactions: { orderBy: { createdAt: "desc" } },
     },
@@ -89,7 +89,10 @@ export async function POST(request: Request) {
         create: { agreementNo },
       },
     },
-    include: { agreement: true, project: { select: { name: true } } },
+    include: {
+      agreement: true,
+      project: { select: { name: true, nameEn: true } },
+    },
   });
 
   return NextResponse.json({ success: true, investment });

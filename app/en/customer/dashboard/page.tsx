@@ -29,6 +29,14 @@ export default function CustomerDashboardEn() {
   );
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showInvestor, setShowInvestor] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings/investment-flag")
+      .then((res) => res.json())
+      .then((data) => setShowInvestor(Boolean(data.enabled)))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -81,6 +89,14 @@ export default function CustomerDashboardEn() {
             className="bg-white text-green-800 border border-green-200 px-5 py-2.5 rounded-xl font-bold text-sm text-center hover:bg-green-50 transition"
           >
             ⚙️ My Info
+          </Link>
+          <Link
+            href="/en/customer/investor"
+            className={`bg-white text-green-800 border border-green-200 px-5 py-2.5 rounded-xl font-bold text-sm text-center hover:bg-green-50 transition ${
+              showInvestor ? "" : "hidden"
+            }`}
+          >
+            🌱 Investor
           </Link>
           <Link
             href="/en/shop"

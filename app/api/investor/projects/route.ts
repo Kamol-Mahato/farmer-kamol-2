@@ -10,7 +10,13 @@ export async function GET() {
 
   const projects = await prisma.project.findMany({
     where: { isAcceptingFunds: true },
-    select: { id: true, name: true, description: true, startDate: true },
+    select: {
+      id: true,
+      name: true,
+      nameEn: true,
+      description: true,
+      startDate: true,
+    },
     orderBy: { createdAt: "desc" },
   });
 
