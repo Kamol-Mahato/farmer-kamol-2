@@ -781,13 +781,16 @@
         background: var(--panel);
         border-top: 1px solid var(--border);
         z-index: 200;
-        max-height: 72vh;
+        max-height: 38vh;
         overflow-y: auto;
         overflow-x: hidden;
         border-radius: 16px 16px 0 0;
         transform: translateY(100%);
         transition: transform 0.25s ease;
         -webkit-overflow-scrolling: touch;
+      }
+      .mob-panel.expanded {
+        max-height: 72vh;
       }
       .mob-panel.open {
         transform: translateY(0);
@@ -1128,17 +1131,55 @@
         }
         .mob-panel {
           display: block;
+          max-height: 38vh;
+        }
+        .canvas-area.with-mob-panel {
+          padding-bottom: calc(38vh + 60px);
+          justify-content: center;
+          align-items: center;
         }
         .topbar {
-          padding: 0 8px;
+          padding: 0 6px;
           gap: 4px;
           height: 48px;
+          overflow: hidden;
         }
         .logo {
-          font-size: 11px;
+          font-size: 10px;
+        }
+        .logo span {
+          display: none;
         }
         .badge {
           display: none;
+        }
+        /* মোবাইলে Clear/Save/Load/Preview লুকাও — জায়গা বাঁচাও */
+        .topbar > .btn-ghost[onclick="clearCanvas()"],
+        .topbar > .btn-ghost[onclick="saveProject()"],
+        .topbar > label.btn-ghost,
+        .topbar > .btn-ghost[onclick="showPreview()"] {
+          display: none !important;
+        }
+        .topbar > .btn-green {
+          display: inline-flex !important;
+          background: #2ecc71 !important;
+          color: #fff !important;
+          min-width: 40px;
+          padding: 6px 10px;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        .badge {
+          display: none;
+        }
+        .topbar-sep {
+          display: none;
+        }
+        #sizeDropdown {
+          max-width: 110px;
+          min-width: 90px;
+          font-size: 10px;
+          padding: 4px 6px;
         }
         .ur-btn {
           width: 32px;
@@ -1146,18 +1187,29 @@
           font-size: 14px;
         }
         .btn {
-          padding: 5px 8px;
-          font-size: 11px;
+          padding: 5px 7px;
+          font-size: 12px;
           min-height: 32px;
         }
         .zoom-controls {
-          bottom: 6px;
+          bottom: 58px;
           right: 6px;
           gap: 4px;
         }
         .zoom-btn {
           width: 36px;
           height: 36px;
+          font-size: 16px;
+        }
+        .hide-on-mobile {
+          display: none !important;
+        }
+        #btnDownload {
+          display: inline-flex !important;
+          flex-shrink: 0;
+          background: #2ecc71 !important;
+          color: #fff !important;
+          min-width: 42px;
           font-size: 18px;
         }
       }
@@ -1324,17 +1376,17 @@
             </optgroup>
           </select>
         </div>
-        <button class="btn btn-ghost" onclick="clearCanvas()" title="Clear all">🗑</button>
-        <button class="btn btn-ghost" onclick="saveProject()" title="Save project (JSON)">💾</button>
-        <label class="btn btn-ghost" style="cursor: pointer; margin: 0" title="Load project">
+        <button class="btn btn-ghost hide-on-mobile" onclick="clearCanvas()" title="Clear all">🗑</button>
+        <button class="btn btn-ghost hide-on-mobile" onclick="saveProject()" title="Save project (JSON)">💾</button>
+        <label class="btn btn-ghost hide-on-mobile" style="cursor: pointer; margin: 0" title="Load project">
           📂
           <input type="file" accept=".json,application/json" style="display: none" onchange="loadProjectFile(this)" />
         </label>
-        <button class="btn btn-ghost" onclick="showPreview()">
+        <button class="btn btn-ghost hide-on-mobile" onclick="showPreview()">
           👁 <span style="display: none" class="mob-label">Preview</span>
         </button>
-        <button class="btn btn-green" onclick="showDownload()">
-          ⬇ <span style="display: none" class="mob-label">Download</span>
+        <button class="btn btn-green" id="btnDownload" onclick="showDownload()" title="Download">
+          ⬇
         </button>
       </div>
 
@@ -6241,11 +6293,17 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
         }
 
         function closeMobPanel() {
-          document.getElementById("mobPanel").classList.remove("open");
+          const panel = document.getElementById("mobPanel");
+          panel.classList.remove("open");
+          panel.classList.remove("expanded");
+          panel.style.maxHeight = "";
           currentMobTab = null;
           document
             .querySelectorAll(".mob-tab")
             .forEach((t) => t.classList.remove("active"));
+          const area = document.getElementById("canvasArea");
+          if (area) area.classList.remove("with-mob-panel");
+          if (typeof fitZoom === "function") fitZoom();
         }
 
         // ── Panel builder — সম্পূর্ণ স্বাধীন ──
@@ -6270,7 +6328,29 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
         // ── BG Panel ──
         function _mobBgHtml() {
           const mode = bgMode;
+          const gl = typeof globalLook !== "undefined" ? globalLook : { grade: "none", vignette: 0, grain: 0 };
           return `
+<div class="msec-title">🎬 Global Look</div>
+<div class="mob-btns-row" style="flex-wrap:wrap;">
+  <button class="mob-opt-btn ${gl.grade === "none" ? "active" : ""}" onclick="setGlobalGrade('none');_mobBuildPanel('bg')">None</button>
+  <button class="mob-opt-btn ${gl.grade === "warm" ? "active" : ""}" onclick="setGlobalGrade('warm');_mobBuildPanel('bg')">🌡 Warm</button>
+  <button class="mob-opt-btn ${gl.grade === "golden" ? "active" : ""}" onclick="setGlobalGrade('golden');_mobBuildPanel('bg')">🌅 Gold</button>
+  <button class="mob-opt-btn ${gl.grade === "vivid" ? "active" : ""}" onclick="setGlobalGrade('vivid');_mobBuildPanel('bg')">🌿 Vivid</button>
+  <button class="mob-opt-btn ${gl.grade === "cinematic" ? "active" : ""}" onclick="setGlobalGrade('cinematic');_mobBuildPanel('bg')">🎬 Cinema</button>
+  <button class="mob-opt-btn ${gl.grade === "contrast" ? "active" : ""}" onclick="setGlobalGrade('contrast');_mobBuildPanel('bg')">⚡ Contrast</button>
+</div>
+<div class="mob-row"><span class="mob-lbl">Vignette</span>
+  <input type="range" class="mob-range" min="0" max="100" value="${gl.vignette || 0}"
+    oninput="setVignette(+this.value);this.nextElementSibling.textContent=this.value">
+  <span class="mob-val">${gl.vignette || 0}</span>
+</div>
+<div class="mob-row"><span class="mob-lbl">Grain</span>
+  <input type="range" class="mob-range" min="0" max="100" value="${gl.grain || 0}"
+    oninput="setGrain(+this.value);this.nextElementSibling.textContent=this.value">
+  <span class="mob-val">${gl.grain || 0}</span>
+</div>
+<button class="mob-add-btn" style="margin-bottom:12px;" onclick="applyThumbnailPolish();_mobBuildPanel('bg')">✨ One-click Polish</button>
+
 <div class="msec-title">🎨 Background</div>
 <div class="mob-btns-row">
   <button class="mob-opt-btn ${mode === "solid" ? "active" : ""}" onclick="mobBgMode('solid')">Solid</button>
@@ -6343,6 +6423,7 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
   </label>
   <button class="mob-add-btn" onclick="addShape('rect');mobTab('props')">▭ Rectangle</button>
   <button class="mob-add-btn" onclick="addShape('circle');mobTab('props')">◯ Circle</button>
+  <button class="mob-add-btn" style="background:#2ecc71;color:#fff;border-color:#2ecc71;margin-top:8px;" onclick="closeMobPanel();showDownload()">⬇ Download Thumbnail</button>
 </div>`;
         }
 
@@ -6373,12 +6454,16 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
                     : el.type === "image"
                       ? "Image"
                       : el.shape;
-              return `<div class="mob-layer-item ${el.id === selectedId ? "selected" : ""}" data-id="${el.id}">
+                      const isHidden = el.visible === false;
+              const isLocked = !!el.locked;
+              return `<div class="mob-layer-item ${el.id === selectedId ? "selected" : ""}" data-id="${el.id}" style="${isHidden ? "opacity:0.45" : ""}">
       <span style="font-size:18px;padding:0 6px;cursor:grab;" class="layer-handle">⠿</span>
       <span style="font-size:16px;">${icon}</span>
-      <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
-      <button style="background:none;border:none;color:var(--accent2);font-size:18px;padding:4px 8px;min-width:40px;" 
-        data-del="${el.id}">✕</button>
+      <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}${isLocked ? " 🔒" : ""}</span>
+      <button style="background:none;border:none;color:var(--text2);font-size:16px;padding:4px;min-width:32px;" data-vis="${el.id}">${isHidden ? "👁‍🗨" : "👁"}</button>
+      <button style="background:none;border:none;color:var(--text2);font-size:14px;padding:4px;min-width:32px;" data-lock="${el.id}">${isLocked ? "🔒" : "🔓"}</button>
+      <button style="background:none;border:none;color:var(--text2);font-size:14px;padding:4px;min-width:32px;" data-dup="${el.id}">⧉</button>
+      <button style="background:none;border:none;color:var(--accent2);font-size:18px;padding:4px 6px;min-width:32px;" data-del="${el.id}">✕</button>
     </div>`;
             })
             .join("");
@@ -6396,6 +6481,24 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
             const delBtn = e.target.closest("[data-del]");
             if (delBtn) {
               deleteElement(parseInt(delBtn.dataset.del));
+              _mobBuildPanel("layers");
+              return;
+            }
+            const visBtn = e.target.closest("[data-vis]");
+            if (visBtn) {
+              toggleLayerVisible(parseInt(visBtn.dataset.vis));
+              _mobBuildPanel("layers");
+              return;
+            }
+            const lockBtn = e.target.closest("[data-lock]");
+            if (lockBtn) {
+              toggleLayerLock(parseInt(lockBtn.dataset.lock));
+              _mobBuildPanel("layers");
+              return;
+            }
+            const dupBtn = e.target.closest("[data-dup]");
+            if (dupBtn) {
+              duplicateElement(parseInt(dupBtn.dataset.dup));
               _mobBuildPanel("layers");
               return;
             }
@@ -6581,6 +6684,13 @@ ${
         function _mobImageProps(el) {
           return `
 <div class="msec-title">🖼 Image</div>
+<div class="mob-btns-row" style="flex-wrap:wrap;margin-bottom:8px;">
+  <button class="mob-opt-btn" onclick="applySoftEdge();_mobBuildPanel('props')">✨ Soft Edge</button>
+  <button class="mob-opt-btn" onclick="matchImageColor();_mobBuildPanel('props')">🎚 Match BG</button>
+  <button class="mob-opt-btn" onclick="applyImagePreset('warm');_mobBuildPanel('props')">🌡 Warm</button>
+  <button class="mob-opt-btn" onclick="applyImagePreset('vivid');_mobBuildPanel('props')">🌿 Vivid</button>
+  <button class="mob-opt-btn" onclick="applyImagePreset('cinematic');_mobBuildPanel('props')">🎬 Cinema</button>
+</div>
 <div class="mob-row"><span class="mob-lbl">Opacity</span><input type="range" class="mob-range" min="0" max="1" step="0.01" value="${el.opacity ?? 1}" oninput="updatePropNoHistory('opacity',+this.value)"><span class="mob-val">${Math.round((el.opacity ?? 1) * 100)}%</span></div>
 <div class="mob-row"><span class="mob-lbl">Rotate</span><input type="range" class="mob-range" min="-180" max="180" value="${el.rotation || 0}" oninput="updatePropNoHistory('rotation',+this.value)"><span class="mob-val">${el.rotation || 0}°</span></div>
 
@@ -6659,13 +6769,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         function _mobOnSelect() {
           if (window.innerWidth > 768) return;
           currentMobTab = "props";
-          document.getElementById("mobPanel").classList.add("open");
+          const panel = document.getElementById("mobPanel");
+          panel.classList.add("open");
+          panel.classList.remove("expanded");
+          panel.style.maxHeight = "";
+          const area = document.getElementById("canvasArea");
+          if (area) area.classList.add("with-mob-panel");
           document
             .querySelectorAll(".mob-tab")
             .forEach((t) => t.classList.remove("active"));
           const tb = document.getElementById("tab-props");
           if (tb) tb.classList.add("active");
           _mobBuildPanel("props");
+          // একটু পরে fit — প্যানেল height হিসাব হলে ক্যানভাস দেখা যাবে
+          setTimeout(function () {
+            if (typeof fitZoom === "function") fitZoom();
+          }, 50);
         }
 
         // updateProp এর পরে mobile panel refresh
@@ -6958,8 +7077,16 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           (e) => {
             if (!panelDragStart) return;
             const dy = panelDragStart.y - e.changedTouches[0].clientY;
-            // ছোট swipe — close করো, বড় swipe — সেই height রাখো
-            if (dy < -60) closeMobPanel();
+            // নিচে swipe — close; উপরে swipe — expanded
+            if (dy < -50) {
+              closeMobPanel();
+            } else if (dy > 40) {
+              mobPanel.classList.add("expanded");
+              mobPanel.style.maxHeight = "";
+            } else {
+              mobPanel.classList.remove("expanded");
+              mobPanel.style.maxHeight = "";
+            }
             panelDragStart = null;
           },
           { passive: false },
@@ -8209,7 +8336,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           selectElement(title.id);
           showProps();
           alert(
-            "Template বসানো হয়েছে।\\n• বামে/ডানে নিজের ছবি Add Image করে বসান\\n• টেক্সট এডিট করুন\\n• Logo Lock চালু রাখলে লোগো থাকবে",
+            "Template বসানো হয়েছে।\n• বামে/ডানে নিজের ছবি Add Image করে বসান\\n• টেক্সট এডিট করুন\\n• Logo Lock চালু রাখলে লোগো থাকবে",
           );
         }
 
