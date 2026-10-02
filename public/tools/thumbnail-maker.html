@@ -2130,8 +2130,12 @@
           <div class="modal-row">
             <label>Format</label>
             <select id="dlFormat">
-              <option value="png">PNG (High Quality)</option>
+              <option value="png">PNG (High Quality / Transparent)</option>
               <option value="jpeg">JPG</option>
+              <option value="webp">WebP (ছোট সাইজ)</option>
+              <option value="avif">AVIF (সবচেয়ে ছোট)</option>
+              <option value="bmp">BMP</option>
+              <option value="tiff">TIFF</option>
             </select>
           </div>
           <div class="modal-row">
@@ -2163,8 +2167,8 @@
           <div class="modal-row">
             <label>Scale</label>
             <select id="dlScale">
-              <h3 id="previewTitle">👁 Preview — 16:9 (1280×720)</h3>
-              <option value="2" selected id="dlScale2">2x — 2560×1440</option>
+              <option value="1" selected id="dlScale1">1x — 1280×720</option>
+              <option value="2" id="dlScale2">2x — 2560×1440</option>
             </select>
           </div>
 
@@ -7530,7 +7534,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           const tc = temp.getContext("2d");
           tc.clearRect(0, 0, CW, CH);
           _renderAll(tc, CW, CH);
-          applyGlobalLookOverlay(tc, CW, CH); // zone overlay ছাড়া
+          applyGlobalLookOverlay(tc, CW, CH);
           let finalCanvas = temp;
           if (scale > 1) {
             finalCanvas = document.createElement("canvas");
@@ -7541,12 +7545,37 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             fcc.imageSmoothingQuality = "high";
             fcc.drawImage(temp, 0, 0, CW * scale, CH * scale);
           }
+
+          // Format mapping
+          const mimeMap = {
+            png: "image/png",
+            jpeg: "image/jpeg",
+            jpg: "image/jpeg",
+            webp: "image/webp",
+            avif: "image/avif",
+            bmp: "image/bmp",
+            tiff: "image/tiff",
+          };
+          const extMap = {
+            png: "png",
+            jpeg: "jpg",
+            jpg: "jpg",
+            webp: "webp",
+            avif: "avif",
+            bmp: "bmp",
+            tiff: "tiff",
+          };
+          const mime = mimeMap[format] || "image/png";
+          const ext = extMap[format] || "png";
+
           const link = document.createElement("a");
-          link.download = `${filename}.${format === "jpeg" ? "jpg" : "png"}`;
-          link.href = finalCanvas.toDataURL(
-            format === "jpeg" ? "image/jpeg" : "image/png",
-            quality,
-          );
+          link.download = `${filename}.${ext}`;
+          // quality শুধু jpeg/webp/avif এ কাজ করে
+          if (format === "png" || format === "bmp" || format === "tiff") {
+            link.href = finalCanvas.toDataURL(mime);
+          } else {
+            link.href = finalCanvas.toDataURL(mime, quality);
+          }
           link.click();
           hideDownload();
         }
