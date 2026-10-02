@@ -36,7 +36,7 @@ export default function PanelNavbar({
   const pathname = usePathname();
   const mobileTitle = getMobileTitle(pathname || "");
   return (
-    <nav className="sticky top-0 z-[60] w-full bg-green-800 text-white py-1.5 px-3 md:px-4 shadow-md">
+    <nav className="sticky top-0 z-[60] w-full bg-green-800 text-white py-1 px-2 md:px-2 shadow-md">
       {/* full width — no max-w-7xl so desktop-site / wide view has no empty right gap */}
       <div className="w-full flex items-center gap-2 md:gap-3">
         {leftSlot}
@@ -55,7 +55,7 @@ export default function PanelNavbar({
             <span className="text-base md:text-xl font-extrabold text-white drop-shadow-lg whitespace-nowrap">
               Farmer Kamol
             </span>
-            <span className="text-[10px] md:text-xs text-yellow-300 whitespace-nowrap">
+            <span className="text-[10px] md:text-sm text-yellow-300 whitespace-nowrap">
               খামার থেকে আপনার দরজায়
             </span>
           </div>
