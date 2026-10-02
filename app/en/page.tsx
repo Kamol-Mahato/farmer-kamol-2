@@ -11,6 +11,7 @@ import { siteConfig } from "@/lib/siteConfig";
 import dynamic from "next/dynamic";
 
 const InvestSection = dynamic(() => import("@/app/en/components/InvestSection"));
+const TestimonialSection = dynamic(() => import("@/app/en/components/TestimonialSection"));
 
 export const revalidate = 86400;
 
@@ -36,6 +37,7 @@ export default async function HomePageEn() {
     blogs,
     videos,
     heroVideos,
+    reviews,
   ] = await Promise.all([
     prisma.product.findMany({
       where: { isActive: true },
@@ -94,6 +96,12 @@ export default async function HomePageEn() {
         titleEn: true,
         thumbnailUrl: true,
       },
+    }),
+    prisma.productReview.findMany({
+      where: { isApproved: true },
+      include: { user: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 30,
     }),
   ]);
 
@@ -159,41 +167,7 @@ export default async function HomePageEn() {
       {/* Investment CTA — on/off from the admin panel */}
       {systemSettings?.enableInvestmentProgram && <InvestSection />}
 
-      {/* Investment CTA — on/off from the admin panel */}
-      {systemSettings?.enableInvestmentProgram && <InvestSection />}
-
-      <div className="bg-yellow-50 py-6 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-2">
-            <h2 className="text-xl font-bold text-green-800">
-              What Our Happy Customers Say
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Rohima Begum",
-                location: "Dhaka",
-                text: "I bought this after watching a YouTube video — the mustard oil has a truly pure smell and taste. I'll buy again when I need more.",
-                stars: 5,
-              },
-            ].map((review) => (
-              <div
-                key={review.name}
-                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default"
-              >
-                <div className="text-yellow-500 mb-2 text-lg">
-                  {"★".repeat(review.stars)}
-                  {"☆".repeat(5 - review.stars)}
-                </div>
-                <p className="text-gray-600 text-sm mb-4">"{review.text}"</p>
-                <p className="font-bold text-green-800">{review.name}</p>
-                <p className="text-gray-400 text-xl">{review.location}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <TestimonialSection reviews={reviews} />
     </div>
   );
 }

@@ -8,7 +8,14 @@ type Review = {
   user: { name: string | null };
 };
 
-export default function TestimonialSlider({ reviews }: { reviews: Review[] }) {
+export default function TestimonialSlider({
+  reviews,
+  locale = "bn",
+}: {
+  reviews: Review[];
+  locale?: "bn" | "en";
+}) {
+  const isEn = locale === "en";
   const [perView, setPerView] = useState(3);
   const [index, setIndex] = useState(0);
 
@@ -66,7 +73,7 @@ export default function TestimonialSlider({ reviews }: { reviews: Review[] }) {
                   <p className="text-gray-600 text-sm mb-4">{review.comment}</p>
                 )}
                 <p className="font-bold text-green-800">
-                  {review.user.name || "আমাদের সন্তুষ্ট গ্রাহক"}
+                {review.user.name || (isEn ? "Our Happy Customer" : "আমাদের সন্তুষ্ট গ্রাহক")}
                 </p>
               </div>
             </div>
@@ -78,14 +85,14 @@ export default function TestimonialSlider({ reviews }: { reviews: Review[] }) {
         <>
           <button
             onClick={goPrev}
-            aria-label="আগের রিভিউ"
+            aria-label={isEn ? "Previous review" : "আগের রিভিউ"}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 bg-white shadow rounded-full w-9 h-9 flex items-center justify-center text-green-700 font-bold hover:bg-green-50 transition"
           >
             {"<"}
           </button>
           <button
             onClick={goNext}
-            aria-label="পরের রিভিউ"
+            aria-label={isEn ? "Next review" : "পরের রিভিউ"}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 bg-white shadow rounded-full w-9 h-9 flex items-center justify-center text-green-700 font-bold hover:bg-green-50 transition"
           >
             {">"}
@@ -95,7 +102,7 @@ export default function TestimonialSlider({ reviews }: { reviews: Review[] }) {
               <button
                 key={i}
                 onClick={() => setIndex(i)}
-                aria-label={`রিভিউ স্লাইড ${i + 1}`}
+                aria-label={isEn ? `Review slide ${i + 1}` : `রিভিউ স্লাইড ${i + 1}`}
                 className={`w-2.5 h-2.5 rounded-full transition ${i === index ? "bg-green-700" : "bg-green-200"}`}
               />
             ))}

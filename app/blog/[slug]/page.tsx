@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { safeJsonLd } from "@/lib/jsonLd";
@@ -8,8 +8,12 @@ import { siteConfig } from "@/lib/siteConfig";
 
 export const revalidate = 86400;
 
+// BN slug আগে; না মিললে EN slug দিয়েও খোঁজা হয় (ভাষা-সুইচ চাপলে EN slug নিয়ে আসতে পারে)
 const getBlog = cache(async (slug: string) => {
-  return prisma.blog.findUnique({ where: { slug } });
+  return (
+    (await prisma.blog.findUnique({ where: { slug } })) ??
+    (await prisma.blog.findUnique({ where: { slugEn: slug } }))
+  );
 });
 
 export async function generateMetadata({
@@ -45,6 +49,11 @@ export default async function BlogDetailPage({
 
   if (!blog || !blog.isPublished) {
     notFound();
+  }
+
+  // EN slug দিয়ে ঢুকলে সঠিক BN slug-এর পেজে পাঠানো
+  if (blog.slugEn === slug && blog.slug !== slug) {
+    redirect(`/blog/${encodeURIComponent(blog.slug)}`);
   }
   const breadcrumbSchema = {
     "@context": "https://schema.org",

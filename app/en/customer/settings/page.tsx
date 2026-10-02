@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
+import ProfileAvatarUpload from "@/app/components/ProfileAvatarUpload";
 
 /** English upazila list — BN/EN mismatch হলে Bangla থেকে (English) অংশ বের করে */
 function getEnglishUpazilas(districtId: number): string[] {
@@ -134,6 +135,7 @@ function UpazilaSearch({
 interface Profile {
   name: string | null;
   phone: string;
+  avatarUrl?: string | null;
   district: string | null;
   districtId: number | null;
   upazila: string | null;
@@ -154,6 +156,7 @@ export default function CustomerSettingsPageEn() {
     address: "",
   });
   const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -165,6 +168,7 @@ export default function CustomerSettingsPageEn() {
         }
         const data: Profile = await res.json();
         setPhone(data.phone);
+        setAvatarUrl(data.avatarUrl || null);
         setForm({
           name: data.name || "",
           district: data.district || "",
@@ -236,6 +240,15 @@ export default function CustomerSettingsPageEn() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
+      <div className="flex justify-center py-2">
+          <ProfileAvatarUpload
+            currentUrl={avatarUrl}
+            onUploaded={(url) => setAvatarUrl(url)}
+            size={100}
+            locale="en"
+          />
+        </div>
+
         <p className="text-xs text-gray-500">
           Save your name and address here so future orders fill in
           automatically.

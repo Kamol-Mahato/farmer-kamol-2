@@ -8,18 +8,25 @@ function getResend() {
   return resend;
 }
 
-export async function sendOtpEmail(to: string, otp: string) {
+export async function sendOtpEmail(
+  to: string,
+  otp: string,
+  locale: "bn" | "en" = "bn",
+) {
+  const isEn = locale === "en";
   const from = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
   await getResend().emails.send({
     from: `Farmer Kamol <${from}>`,
     to,
-    subject: "আপনার ভেরিফিকেশন কোড — Farmer Kamol",
+    subject: isEn
+      ? "Your verification code — Farmer Kamol"
+      : "আপনার ভেরিফিকেশন কোড — Farmer Kamol",
     html: `
       <div style="font-family: sans-serif; padding: 20px;">
-        <h2 style="color:#1B4332;">Farmer Kamol বিনিয়োগ ভেরিফিকেশন</h2>
-        <p>আপনার ভেরিফিকেশন কোড:</p>
+        <h2 style="color:#1B4332;">${isEn ? "Farmer Kamol Investment Verification" : "Farmer Kamol বিনিয়োগ ভেরিফিকেশন"}</h2>
+        <p>${isEn ? "Your verification code:" : "আপনার ভেরিফিকেশন কোড:"}</p>
         <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${otp}</p>
-        <p style="color:#888; font-size: 13px;">এই কোডটি ৫ মিনিটের জন্য কার্যকর থাকবে। আপনি যদি এই অনুরোধ না করে থাকেন, এই ইমেইলটি উপেক্ষা করুন।</p>
+        <p style="color:#888; font-size: 13px;">${isEn ? "This code is valid for 5 minutes. If you did not make this request, please ignore this email." : "এই কোডটি ৫ মিনিটের জন্য কার্যকর থাকবে। আপনি যদি এই অনুরোধ না করে থাকেন, এই ইমেইলটি উপেক্ষা করুন।"}</p>
       </div>
     `,
   });

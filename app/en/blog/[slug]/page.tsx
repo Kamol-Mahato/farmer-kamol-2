@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { safeJsonLd } from "@/lib/jsonLd";
@@ -8,8 +8,12 @@ import { siteConfig } from "@/lib/siteConfig";
 
 export const revalidate = 86400;
 
+// EN slug আগে; না মিললে BN slug দিয়েও খোঁজা হয় (ভাষা-সুইচ চাপলে BN slug নিয়ে আসতে পারে)
 const getBlogEn = cache(async (slug: string) => {
-  return prisma.blog.findUnique({ where: { slugEn: slug } });
+  return (
+    (await prisma.blog.findUnique({ where: { slugEn: slug } })) ??
+    (await prisma.blog.findUnique({ where: { slug } }))
+  );
 });
 
 export async function generateMetadata({
@@ -43,9 +47,18 @@ export default async function BlogDetailPageEn({
   const { slug } = await params;
   const blog = await getBlogEn(slug);
 
-  // ✅ ইংরেজি কনটেন্ট এখনো লেখা না থাকলে পেজটাই দেখাবে না (বাংলা fallback না দিয়ে)
-  if (!blog || !blog.isPublished || !blog.titleEn || !blog.contentEn) {
+  if (!blog || !blog.isPublished) {
     notFound();
+  }
+
+  // ইংরেজি লেখা এখনো নেই → 404 না দেখিয়ে BN পোস্টেই পাঠানো
+  if (!blog.titleEn || !blog.contentEn || !blog.slugEn) {
+    redirect(`/blog/${encodeURIComponent(blog.slug)}`);
+  }
+
+  // BN slug দিয়ে ঢুকলে সঠিক EN slug-এর পেজে পাঠানো
+  if (blog.slugEn !== slug) {
+    redirect(`/en/blog/${blog.slugEn}`);
   }
 
   const breadcrumbSchema = {

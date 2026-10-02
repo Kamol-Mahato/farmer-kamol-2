@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminOnly } from "@/lib/adminAuth";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   request: Request,
@@ -21,6 +22,8 @@ export async function PATCH(
       data: { isApproved },
     });
 
+    revalidatePath("/");
+    revalidatePath("/en");
     return NextResponse.json(review);
   } catch (error) {
     console.error("ADMIN REVIEW PATCH ERROR:", error);
@@ -40,6 +43,8 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.productReview.delete({ where: { id: Number(id) } });
+    revalidatePath("/");
+    revalidatePath("/en");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("ADMIN REVIEW DELETE ERROR:", error);

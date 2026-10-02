@@ -363,7 +363,7 @@ export default function Navbar() {
                 searchParams.toString(),
               )}
               className="hidden lg:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-6 text-[11px] font-bold shrink-0 transition hover:border-yellow-400 group ml-2"
-              aria-label="ভাষা পরিবর্তন"
+              aria-label="Language Switch"
               title={t.langSwitch}
             >
               <span

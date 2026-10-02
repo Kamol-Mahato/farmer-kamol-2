@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 import sharp from "sharp";
 
 let supabase: ReturnType<typeof createClient> | null = null;
@@ -39,9 +40,10 @@ const KIND_CONFIG: Record<
 };
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
+    return NextResponse.json({ error: tr(locale, "লগইন করুন", "Please log in") }, { status: 401 });
   }
 
   const existing = await prisma.investorProfile.findUnique({
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
   });
   if (!existing || !existing.emailVerified) {
     return NextResponse.json(
-      { error: "আগে ইমেইল ভেরিফাই করুন" },
+      { error: tr(locale, "আগে ইমেইল ভেরিফাই করুন", "Please verify your email first") },
       { status: 400 },
     );
   }
@@ -61,25 +63,25 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "কোনো ফাইল পাওয়া যায়নি" },
+        { error: tr(locale, "কোনো ফাইল পাওয়া যায়নি", "No file was found") },
         { status: 400 },
       );
     }
     if (!kind || !KIND_CONFIG[kind]) {
       return NextResponse.json(
-        { error: "অজানা ফাইল টাইপ" },
+        { error: tr(locale, "অজানা ফাইল টাইপ", "Unknown file type") },
         { status: 400 },
       );
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে" },
+        { error: tr(locale, "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে", "Only JPG, PNG or WEBP images can be uploaded") },
         { status: 400 },
       );
     }
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না" },
+        { error: tr(locale, "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না", "Image size cannot exceed 10 MB") },
         { status: 400 },
       );
     }
@@ -115,7 +117,7 @@ export async function POST(request: Request) {
     if (uploadError) {
       console.error("Investor doc upload error:", uploadError);
       return NextResponse.json(
-        { error: "আপলোড ব্যর্থ হয়েছে" },
+        { error: tr(locale, "আপলোড ব্যর্থ হয়েছে", "Upload failed") },
         { status: 500 },
       );
     }
@@ -139,6 +141,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, url, field: config.field });
   } catch (error) {
     console.error("Investor doc upload API error:", error);
-    return NextResponse.json({ error: "সমস্যা হয়েছে" }, { status: 500 });
+    return NextResponse.json({ error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") }, { status: 500 });
   }
 }

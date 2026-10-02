@@ -36,6 +36,86 @@ function FacebookIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+/* ---------- Header Clock: Welcome → Time → Date ---------- */
+function HeaderClock() {
+  const [phase, setPhase] = useState(0); // 0 = Welcome, 1 = Time, 2 = Date
+  const [now, setNow] = useState<Date | null>(null);
+
+  // লাইভ সময় — প্রতি সেকেন্ডে আপডেট (শুধু ক্লায়েন্টে, তাই hydration মিসম্যাচ হবে না)
+  useEffect(() => {
+    setNow(new Date());
+    const tick = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(tick);
+  }, []);
+
+  // Welcome ২ সেকেন্ড → সময় ৫ সেকেন্ড → তারিখ ৪ সেকেন্ড → আবার Welcome
+  useEffect(() => {
+    const durations = [2000, 5000, 4000];
+    const t = setTimeout(() => setPhase((p) => (p + 1) % 3), durations[phase]);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  const time = now
+    ? now.toLocaleTimeString("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      })
+    : "";
+  const date = now
+    ? now.toLocaleDateString("en-GB", {
+        timeZone: "Asia/Dhaka",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+  return (
+    <div className="w-[190px] sm:w-[250px] whitespace-nowrap">
+      <style>{`@keyframes meFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}`}</style>
+      <span
+        key={phase}
+        className="inline-block text-xs sm:text-sm font-semibold text-indigo-200 tabular-nums"
+        style={{ animation: "meFade 0.4s ease-out" }}
+      >
+        {phase === 0 ? "Welcome" : phase === 1 ? time : date}
+      </span>
+    </div>
+  );
+}
+
+/* ---------- Gmail Icon (multicolor) ---------- */
+function GmailIcon() {
+  return (
+    <svg viewBox="52 42 88 66" aria-hidden="true">
+      <path fill="#4285f4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" />
+      <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
+      <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
+      <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92" />
+      <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
+    </svg>
+  );
+}
+
+/* ---------- Custom LinkedIn Icon ---------- */
+function LinkedInIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
+
 /* ---------- Reveal on scroll ---------- */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -147,16 +227,24 @@ const projects = [
 ];
 
 export default function MeContent() {
-  const printCV = () => window.print();
+  const cvUrl = "/cv/Kamol-Kumar-Mahato-CV.pdf";
+  const [showCall, setShowCall] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyNumber = async () => {
+    try {
+      await navigator.clipboard.writeText("01737939688");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b0f2a] via-[#12183a] to-[#0d1329] text-slate-100">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0b0f2a]/80 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-          <span className="font-mono text-sm text-indigo-300">
-            &lt;Kamol Mahato/&gt;
-          </span>
+        <HeaderClock />
 
           <nav className="hidden md:flex gap-8 text-sm text-slate-300">
             <a href="#home" className="hover:text-white transition">
@@ -176,12 +264,13 @@ export default function MeContent() {
             </a>
           </nav>
 
-          <button
-            onClick={printCV}
+          <a
+            href={cvUrl}
+            download="Kamol-Kumar-Mahato-CV.pdf"
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition text-white text-sm font-medium px-4 py-2 rounded-lg"
           >
             <Download size={16} /> Resume
-          </button>
+          </a>
         </div>
       </header>
 
@@ -206,28 +295,29 @@ export default function MeContent() {
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                onClick={printCV}
+            <a
+                href={cvUrl}
+                download="Kamol-Kumar-Mahato-CV.pdf"
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition text-white text-sm font-medium px-5 py-2.5 rounded-lg"
               >
                 <Download size={16} /> Resume
-              </button>
-              <a
-                href="mailto:kamolmahato@gmail.com"
+              </a>
+              <button
+                onClick={() => setShowCall(true)}
                 className="flex items-center gap-2 border border-white/20 hover:border-white/40 transition text-slate-200 text-sm font-medium px-5 py-2.5 rounded-lg"
               >
                 CONTACT ME
-              </a>
+              </button>
             </div>
           </Reveal>
 
           <Reveal className="flex justify-center">
             <div className="relative">
-              <div className="w-64 h-64 md:w-72 md:h-72 rounded-[40%_60%_60%_40%/50%_40%_60%_50%] overflow-hidden border-4 border-indigo-500/30 shadow-2xl shadow-indigo-900/40">
+            <div className="group w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-indigo-500/30 shadow-2xl shadow-indigo-900/40 transition-all duration-500 hover:border-indigo-400 hover:shadow-indigo-500/50 hover:-translate-y-1">
                 <img
                   src="/uploads/kamol-mahato.png"
                   alt="Kamol Kumar Mahato"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               </div>
             </div>
@@ -388,26 +478,81 @@ export default function MeContent() {
         © {new Date().getFullYear()} Kamol Kumar Mahato
       </footer>
 
-      {/* Fixed Social Icons */}
-      <div className="fixed right-5 bottom-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2 flex md:flex-col gap-3 z-30">
+      {/* Call number modal */}
+      {showCall && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowCall(false)}
+        >
+          <div
+            className="bg-[#111827] border border-white/10 rounded-2xl p-6 w-full max-w-xs text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-slate-400 text-sm mb-1">Call me on</p>
+            <p className="text-2xl font-bold text-white tracking-wide mb-5">
+              01737939688
+            </p>
+            <div className="flex gap-2">
+              <a
+                href="tel:01737939688"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#22c55e] hover:bg-[#16a34a] transition text-white text-sm font-semibold py-2.5 rounded-lg"
+              >
+                <Phone size={16} /> Call now
+              </a>
+              <button
+                onClick={copyNumber}
+                className="flex-1 border border-white/20 hover:border-white/40 transition text-slate-200 text-sm font-semibold py-2.5 rounded-lg"
+              >
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <button
+              onClick={() => setShowCall(false)}
+              className="mt-4 text-xs text-slate-500 hover:text-slate-300 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fixed Social Icons — সব ডিভাইসে লম্বা সারি; মোবাইলে ছোট */}
+      <div className="fixed right-3 bottom-4 md:right-5 md:bottom-5 flex flex-col gap-2 md:gap-3 z-30">
         <a
           href="mailto:kamolmahato@gmail.com"
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-indigo-600 transition flex items-center justify-center"
+          aria-label="Email"
+          title="Email"
+          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-white hover:bg-gray-100 shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
         >
-          <Mail size={18} />
+          <GmailIcon />
         </a>
         <a
           href="tel:01737939688"
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-indigo-600 transition flex items-center justify-center"
+          aria-label="Call"
+          title="Call"
+          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
         >
-          <Phone size={18} />
+          <Phone />
         </a>
         <a
           href="https://www.facebook.com/komolmahato67"
           target="_blank"
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-indigo-600 transition flex items-center justify-center"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          title="Facebook"
+          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#1877F2] hover:bg-[#0f5fd0] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
         >
-          <FacebookIcon size={18} />
+          <FacebookIcon />
+        </a>
+        <a
+          href="https://www.linkedin.com/in/kamol-kumar-mahato-552a06184"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          title="LinkedIn"
+          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#0A66C2] hover:bg-[#084e96] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
+        >
+          <LinkedInIcon />
         </a>
       </div>
     </div>

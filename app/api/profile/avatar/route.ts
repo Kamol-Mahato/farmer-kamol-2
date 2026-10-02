@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyCustomer } from "@/lib/customerAuth";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
 import sharp from "sharp";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
 let supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -28,6 +29,7 @@ async function getCurrentUser() {
 }
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -38,21 +40,21 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File | null;
     if (!file) {
       return NextResponse.json(
-        { error: "কোনো ফাইল পাওয়া যায়নি" },
+        { error: tr(locale, "কোনো ফাইল পাওয়া যায়নি", "No file was found") },
         { status: 400 },
       );
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে" },
+        { error: tr(locale, "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে", "Only JPG, PNG or WEBP images can be uploaded") },
         { status: 400 },
       );
     }
 
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না" },
+        { error: tr(locale, "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না", "Image size cannot exceed 10 MB") },
         { status: 400 },
       );
     }
@@ -111,7 +113,7 @@ export async function POST(request: Request) {
     if (uploadError) {
       console.error("Avatar upload error:", uploadError);
       return NextResponse.json(
-        { error: "আপলোড ব্যর্থ হয়েছে" },
+        { error: tr(locale, "আপলোড ব্যর্থ হয়েছে", "Upload failed") },
         { status: 500 },
       );
     }
@@ -130,7 +132,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ avatarUrl });
   } catch (error) {
     console.error("Avatar API Error:", error);
-    return NextResponse.json({ error: "সমস্যা হয়েছে" }, { status: 500 });
+    return NextResponse.json({ error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") }, { status: 500 });
   }
 }
 

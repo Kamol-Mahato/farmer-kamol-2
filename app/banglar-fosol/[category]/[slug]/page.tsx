@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/siteConfig";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { safeJsonLd } from "@/lib/jsonLd";
 import { cache } from "react";
 
@@ -11,7 +11,7 @@ export const revalidate = 3600;
 const getItem = cache(async (categorySlug: string, slug: string) => {
   return prisma.fosolItem.findFirst({
     where: {
-      slug,
+      OR: [{ slug }, { slugEn: slug }],
       isPublished: true,
       category: { slug: categorySlug, isVisible: true },
     },
@@ -69,6 +69,13 @@ export default async function FosolItemPage({
   const { category, slug } = await params;
   const item = await getItem(category, slug);
   if (!item) notFound();
+
+  // EN slug দিয়ে ঢুকলে সঠিক BN slug-এর পেজে পাঠানো
+  if (item.slugEn === slug && item.slug !== slug) {
+    redirect(
+      `/banglar-fosol/${item.category.slug}/${encodeURIComponent(item.slug)}`,
+    );
+  }
 
   const pageUrl = `${siteConfig.domain.url}/banglar-fosol/${item.category.slug}/${item.slug}`;
 

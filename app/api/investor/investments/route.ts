@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
+    return NextResponse.json(
+      { error: tr(locale, "লগইন করুন", "Please log in") },
+      { status: 401 },
+    );
   }
 
   const profile = await prisma.investorProfile.findUnique({
@@ -29,9 +34,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
+    return NextResponse.json(
+      { error: tr(locale, "লগইন করুন", "Please log in") },
+      { status: 401 },
+    );
   }
 
   const profile = await prisma.investorProfile.findUnique({
@@ -39,7 +48,7 @@ export async function POST(request: Request) {
   });
   if (!profile || profile.verificationStatus !== "APPROVED") {
     return NextResponse.json(
-      { error: "প্রোফাইল এখনো অনুমোদিত হয়নি" },
+      { error: tr(locale, "প্রোফাইল এখনো অনুমোদিত হয়নি", "Your profile has not been approved yet") },
       { status: 400 },
     );
   }
@@ -50,7 +59,7 @@ export async function POST(request: Request) {
 
   if (!projectIdNum || !amountNum || amountNum <= 0) {
     return NextResponse.json(
-      { error: "প্রজেক্ট ও সঠিক পরিমাণ দিন" },
+      { error: tr(locale, "প্রজেক্ট ও সঠিক পরিমাণ দিন", "Please select a project and enter a valid amount") },
       { status: 400 },
     );
   }
@@ -60,7 +69,7 @@ export async function POST(request: Request) {
   });
   if (!project || !project.isAcceptingFunds) {
     return NextResponse.json(
-      { error: "এই প্রজেক্টে এখন বিনিয়োগ নেওয়া হচ্ছে না" },
+      { error: tr(locale, "এই প্রজেক্টে এখন বিনিয়োগ নেওয়া হচ্ছে না", "This project is not accepting investments right now") },
       { status: 400 },
     );
   }

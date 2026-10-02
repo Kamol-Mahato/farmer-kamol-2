@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   title: `আমাদের খামারে অংশীদার হোন - ${siteConfig.brand.name}`,
   description:
     "কৃষক কমলের খামারে স্বচ্ছ অংশীদারিত্ব। প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব।",
+  alternates: {
+    canonical: "/invest",
+    languages: {
+      bn: "/invest",
+      en: "/en/invest",
+    },
+  },
 };
 
 function SectionHeading({ children }: { children: React.ReactNode }) {

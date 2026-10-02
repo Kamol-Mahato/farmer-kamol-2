@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
+import { getApiLocale, tr } from "@/lib/apiLocale";
 import sharp from "sharp";
 
 let supabase: ReturnType<typeof createClient> | null = null;
@@ -22,29 +23,30 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: "লগইন করুন" }, { status: 401 });
+    return NextResponse.json({ error: tr(locale, "লগইন করুন", "Please log in") }, { status: 401 });
   }
 
   const { id } = await params;
   const investmentId = parseInt(id, 10);
   if (!investmentId) {
-    return NextResponse.json({ error: "ভুল আইডি" }, { status: 400 });
+    return NextResponse.json({ error: tr(locale, "ভুল আইডি", "Invalid ID") }, { status: 400 });
   }
 
   const profile = await prisma.investorProfile.findUnique({
     where: { userId: customerId },
   });
   if (!profile) {
-    return NextResponse.json({ error: "প্রোফাইল পাওয়া যায়নি" }, { status: 400 });
+    return NextResponse.json({ error: tr(locale, "প্রোফাইল পাওয়া যায়নি", "Profile not found") }, { status: 400 });
   }
 
   const investment = await prisma.investment.findUnique({
     where: { id: investmentId },
   });
   if (!investment || investment.investorProfileId !== profile.id) {
-    return NextResponse.json({ error: "ইনভেস্টমেন্ট পাওয়া যায়নি" }, { status: 404 });
+    return NextResponse.json({ error: tr(locale, "ইনভেস্টমেন্ট পাওয়া যায়নি", "Investment not found") }, { status: 404 });
   }
 
   try {
@@ -54,20 +56,20 @@ export async function POST(
     const note = (formData.get("note") as string) || null;
 
     if (!file) {
-      return NextResponse.json({ error: "কোনো ফাইল পাওয়া যায়নি" }, { status: 400 });
+      return NextResponse.json({ error: tr(locale, "কোনো ফাইল পাওয়া যায়নি", "No file was found") }, { status: 400 });
     }
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: "সঠিক পরিমাণ দিন" }, { status: 400 });
+      return NextResponse.json({ error: tr(locale, "সঠিক পরিমাণ দিন", "Please enter a valid amount") }, { status: 400 });
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে" },
+        { error: tr(locale, "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে", "Only JPG, PNG or WEBP images can be uploaded") },
         { status: 400 },
       );
     }
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না" },
+        { error: tr(locale, "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না", "Image size cannot exceed 10 MB") },
         { status: 400 },
       );
     }
@@ -94,7 +96,7 @@ export async function POST(
 
     if (uploadError) {
       console.error("Slip upload error:", uploadError);
-      return NextResponse.json({ error: "আপলোড ব্যর্থ হয়েছে" }, { status: 500 });
+      return NextResponse.json({ error: tr(locale, "আপলোড ব্যর্থ হয়েছে", "Upload failed") }, { status: 500 });
     }
 
     const { data } = getSupabase()
@@ -114,6 +116,6 @@ export async function POST(
     return NextResponse.json({ success: true, transaction });
   } catch (error) {
     console.error("Deposit slip upload error:", error);
-    return NextResponse.json({ error: "সমস্যা হয়েছে" }, { status: 500 });
+    return NextResponse.json({ error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") }, { status: 500 });
   }
 }
