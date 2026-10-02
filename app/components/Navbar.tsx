@@ -369,7 +369,7 @@ export default function Navbar() {
               <span
                 className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === "bn" ? "bg-yellow-400 text-green-900" : "text-green-300 group-hover:text-white"}`}
               >
-                BN
+                বাং
               </span>
               <span
                 className={`px-1.5 h-full flex items-center justify-center transition-colors ${locale === "en" ? "bg-yellow-400 text-green-900" : "text-green-300 group-hover:text-white"}`}
