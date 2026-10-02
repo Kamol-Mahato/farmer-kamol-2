@@ -27,13 +27,13 @@ export default function GalleryCard({ item }: { item: GalleryItem }) {
   }
   return (
     <div className="bg-white rounded-xl shadow group overflow-hidden">
-      <div className="relative w-full aspect-[4/3] overflow-hidden max-h-30 md:max-h-20">
+      <div className="relative w-full aspect-[4/3] overflow-hidden max-h-60 md:max-h-60">
         <Image
           src={item.images[index].imageUrl}
           alt={`${item.title} - ছবি ${index + 1}`}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-110"
-          sizes="(max-width: 768px) 50vw, 33vw"
+          sizes="(max-width: 600px) 50vw, 33vw"
         />
         {item.images.length > 1 && (
           <>
