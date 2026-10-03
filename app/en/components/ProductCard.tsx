@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 import { translateUnit } from "@/lib/unitTranslate";
 import { getSavePercent } from "@/lib/pricing";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type Product = {
   id: number;
@@ -161,6 +162,25 @@ export default function ProductCard({
     // ✅ custom event — works even within the same tab
     window.dispatchEvent(new CustomEvent("cartUpdated"));
 
+    // 📊 GA4 Add to Cart Tracking (BN-এর সাথে একই name, যাতে রিপোর্টে একসাথে মেলে)
+    sendGAEvent({
+      event: "add_to_cart",
+      value: product.name,
+      ecommerce: {
+        items: [
+          {
+            item_id: String(product.id),
+            item_name: product.name,
+            price:
+              savePercent !== null
+                ? product.discountPrice
+                : product.pricePerUnit,
+            quantity: 1,
+          },
+        ],
+      },
+    });
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
 
@@ -195,22 +215,20 @@ export default function ProductCard({
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  Out of Stock
-                  {deliveryMode !== "NORMAL" && (
-                    <span
-                      className={`absolute bottom-1.5 right-1.5 z-10 text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow ${
-                        deliveryMode === "FREE"
-                          ? "bg-green-600"
-                          : "bg-yellow-500"
-                      }`}
-                    >
-                      {deliveryMode === "FREE"
-                        ? "🟢 Free Delivery"
-                        : "🟡 Half Delivery Charge"}
-                    </span>
-                  )}
+                Out of Stock
                 </span>
               </div>
+            )}
+            {deliveryMode !== "NORMAL" && (
+              <span
+                className={`absolute bottom-1.5 right-1.5 z-10 text-[11px] md:text-xs font-bold px-2 py-0.5 rounded-full text-white shadow ${
+                  deliveryMode === "FREE" ? "bg-green-600" : "bg-yellow-500"
+                }`}
+              >
+                {deliveryMode === "FREE"
+                  ? "🟢 Free Delivery"
+                  : "🟡 Half Delivery Charge"}
+              </span>
             )}
             {images.length > 1 && (
               <>
@@ -240,14 +258,14 @@ export default function ProductCard({
             )}
           </div>
         </Link>
-        <div className="pl-2 pr-6 md:px-4">
+        <div className="px-2 md:px-4">
           {displayCategory && (
             <span className="text-xs text-green-700 font-semibold bg-green-100 px-2.5 py-1 rounded-full">
               {displayCategory}
             </span>
           )}
           <Link href={`/en/shop/${product.slug}`}>
-            <h2 className="text-sm md:text-lg font-bold text-gray-800 mt-1 mb-1 min-h-[36px] md:min-h-[48px] line-clamp-2 hover:text-green-700 transition">
+          <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
               {displayName}
             </h2>
           </Link>
@@ -256,10 +274,8 @@ export default function ProductCard({
               Per {translateUnit(product.unit)}
             </span>
             <div className="flex items-baseline gap-1 flex-wrap">
-              <span className="text-[10px] md:text-xs text-gray-500 font-medium">
-                Price
-              </span>
-              <span className="text-base md:text-xl font-extrabold text-black">
+            <span className="text-xs text-black font-bold">Price</span>
+            <span className="text-lg md:text-xl font-extrabold text-black">
                 ৳{" "}
                 {savePercent !== null
                   ? product.discountPrice
@@ -274,12 +290,18 @@ export default function ProductCard({
           </div>
         </div>
       </div>
-      <div className="mt-3 pt-3 border-t border-gray-100 px-1 pb-4">
+      <div className="mt-2 pt-2 border-t border-gray-100 px-1 pb-2">
         {product.priceType === "NEGOTIABLE" ? (
           // ✅ Direct WhatsApp button for negotiable-price products
           <a
-            href={buildWhatsAppLink(displayName)}
-            target="_blank"
+          href={buildWhatsAppLink(displayName)}
+          onClick={() =>
+            sendGAEvent({
+              event: "whatsapp_product_click",
+              value: product.name,
+            })
+          }
+          target="_blank"
             rel="noopener noreferrer"
             className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-700 text-white hover:bg-green-600 active:scale-95 transition"
           >
@@ -290,7 +312,7 @@ export default function ProductCard({
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex-1 py-1 md:py-2 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap transition border-2 ${
+              className={`flex-1 py-2 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap transition border-2 ${
                 isOutOfStock
                   ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                   : added
@@ -298,12 +320,18 @@ export default function ProductCard({
                     : "border-green-600 bg-white text-green-700 hover:bg-green-50"
               }`}
             >
-              {added ? "✓ Added" : " Add to Cart"}
+              {added ? "✓ Added" : "Add to Cart"}
             </button>
             <Link
               ref={btnRef}
               href={isOutOfStock ? "#" : `/en/order?productId=${product.id}`}
-              className={`flex-1 py-1.5 md:py-2 rounded-full font-bold text-[10px] md:text-sm whitespace-nowrap flex items-center justify-center text-center transition ${
+              onClick={() =>
+                sendGAEvent({
+                  event: "begin_checkout_click",
+                  value: product.name,
+                })
+              }
+              className={`flex-1 py-2 md:py-2.5 rounded-xl font-bold text-[10px] md:text-sm whitespace-nowrap flex items-center justify-center text-center transition ${
                 isOutOfStock
                   ? "bg-gray-100 text-gray-500 cursor-not-allowed pointer-events-none"
                   : `bg-green-700 text-white hover:bg-green-600 active:scale-95 ${

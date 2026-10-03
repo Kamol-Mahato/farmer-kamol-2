@@ -2,14 +2,16 @@ import Link from "next/link";
 import HeroSlider from "@/app/en/components/HeroSlider";
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/app/en/components/ProductCard";
-import BlogSection from "@/app/en/components/BlogSection";
-import type { Metadata } from "next";
-import NoticeModal from "@/app/en/components/NoticeModal";
-import VideoSection from "@/app/en/components/VideoSection";
 import TopSellerSection from "@/app/en/components/TopSellerSection";
+import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
+import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import dynamic from "next/dynamic";
 
+// 🚀 BN হোমপেজের মতোই ভারী কম্পোনেন্টগুলো Lazy Load
+const NoticeModal = dynamic(() => import("@/app/en/components/NoticeModal"));
+const BlogSection = dynamic(() => import("@/app/en/components/BlogSection"));
+const VideoSection = dynamic(() => import("@/app/en/components/VideoSection"));
 const InvestSection = dynamic(() => import("@/app/en/components/InvestSection"));
 const TestimonialSection = dynamic(() => import("@/app/en/components/TestimonialSection"));
 
@@ -18,6 +20,28 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
   description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
+  openGraph: {
+    title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+    description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
+    url: "/en",
+    siteName: siteConfig.brand.nameEn,
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: siteConfig.domain.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+    description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
+    images: [siteConfig.domain.ogImage],
+  },
   alternates: {
     canonical: "/en",
     languages: {
@@ -39,12 +63,7 @@ export default async function HomePageEn() {
     heroVideos,
     reviews,
   ] = await Promise.all([
-    prisma.product.findMany({
-      where: { isActive: true },
-      include: { images: true, category: true },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
+    getHomeProducts(),
     prisma.systemControlCenter.findUnique({ where: { id: 1 } }),
     prisma.product.findMany({
       where: { isActive: true, isFeatured: true },
@@ -71,16 +90,7 @@ export default async function HomePageEn() {
       take: 2,
     }),
     prisma.blogCategory.findMany({ orderBy: { name: "asc" } }),
-    prisma.blog.findMany({
-      where: {
-        isPublished: true,
-        titleEn: { not: null },
-        slugEn: { not: null },
-        contentEn: { not: null },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
+    getHomeBlogs("en"),
     prisma.youtubeVideo.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: "asc" },

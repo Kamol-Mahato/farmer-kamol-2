@@ -242,7 +242,7 @@ export default function MeContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b0f2a] via-[#12183a] to-[#0d1329] text-slate-100">
       {/* Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0b0f2a]/80 border-b border-white/5">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/5 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
         <HeaderClock />
 
@@ -312,12 +312,16 @@ export default function MeContent() {
           </Reveal>
 
           <Reveal className="flex justify-center">
-            <div className="relative">
-            <div className="group w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-indigo-500/30 shadow-2xl shadow-indigo-900/40 transition-all duration-500 hover:border-indigo-400 hover:shadow-indigo-500/50 hover:-translate-y-1">
+            <div className="relative w-64 h-64 md:w-72 md:h-72">
+              {/* Spinning colorful border */}
+              <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_100deg,transparent_0deg,#0af525_70deg,transparent_120deg)] animate-[spin_10s_linear_infinite]"></div>
+              
+              {/* Inner image container */}
+              <div className="absolute inset-[4px] rounded-full overflow-hidden bg-[#0b0f2a] shadow-2xl shadow-indigo-900/40">
                 <img
                   src="/uploads/kamol-mahato.png"
                   alt="Kamol Kumar Mahato"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -518,42 +522,61 @@ export default function MeContent() {
 
       {/* Fixed Social Icons — সব ডিভাইসে লম্বা সারি; মোবাইলে ছোট */}
       <div className="fixed right-3 bottom-4 md:right-5 md:bottom-5 flex flex-col gap-2 md:gap-3 z-30">
-        <a
-          href="mailto:kamolmahato@gmail.com"
-          aria-label="Email"
-          title="Email"
-          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-white hover:bg-gray-100 shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
-        >
-          <GmailIcon />
-        </a>
-        <a
-          href="tel:01737939688"
-          aria-label="Call"
-          title="Call"
-          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
-        >
-          <Phone />
-        </a>
-        <a
-          href="https://www.facebook.com/komolmahato67"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Facebook"
-          title="Facebook"
-          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#1877F2] hover:bg-[#0f5fd0] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
-        >
-          <FacebookIcon />
-        </a>
-        <a
-          href="https://www.linkedin.com/in/kamol-kumar-mahato-552a06184"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LinkedIn"
-          title="LinkedIn"
-          className="w-9 h-9 md:w-11 md:h-11 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5 rounded-full bg-[#0A66C2] hover:bg-[#084e96] text-white shadow-lg shadow-black/40 ring-2 ring-white/25 hover:scale-110 transition flex items-center justify-center"
-        >
-          <LinkedInIcon />
-        </a>
+        {/* Email */}
+        <div className="relative w-9 h-9 md:w-11 md:h-11">
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,#22c55e_80deg,transparent_120deg)] animate-[spin_5s_linear_infinite]"></div>
+          <a
+            href="mailto:kamolmahato@gmail.com"
+            aria-label="Email"
+            title="Email"
+            className="absolute inset-[2px] rounded-full bg-white hover:bg-gray-100 shadow-lg shadow-black/40 hover:scale-105 transition flex items-center justify-center [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5"
+          >
+            <GmailIcon />
+          </a>
+        </div>
+
+        {/* Call */}
+        <div className="relative w-9 h-9 md:w-11 md:h-11">
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,#eb34de_80deg,transparent_120deg)] animate-[spin_4s_linear_infinite]"></div>
+          <a
+            href="tel:01737939688"
+            aria-label="Call"
+            title="Call"
+            className="absolute inset-[2px] rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-white shadow-lg shadow-black/40 hover:scale-105 transition flex items-center justify-center [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5"
+          >
+            <Phone />
+          </a>
+        </div>
+
+        {/* Facebook */}
+        <div className="relative w-9 h-9 md:w-11 md:h-11">
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,#22c55e_80deg,transparent_120deg)] animate-[spin_6s_linear_infinite]"></div>
+          <a
+            href="https://www.facebook.com/komolmahato67"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            title="Facebook"
+            className="absolute inset-[2px] rounded-full bg-[#1877F2] hover:bg-[#0f5fd0] text-white shadow-lg shadow-black/40 hover:scale-105 transition flex items-center justify-center [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5"
+          >
+            <FacebookIcon />
+          </a>
+        </div>
+
+        {/* LinkedIn */}
+        <div className="relative w-9 h-9 md:w-11 md:h-11">
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,#eb34de_80deg,transparent_120deg)] animate-[spin_2.90s_linear_infinite]"></div>
+          <a
+            href="https://www.linkedin.com/in/kamol-kumar-mahato-552a06184"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+            title="LinkedIn"
+            className="absolute inset-[2px] rounded-full bg-[#0A66C2] hover:bg-[#084e96] text-white shadow-lg shadow-black/40 hover:scale-105 transition flex items-center justify-center [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5"
+          >
+            <LinkedInIcon />
+          </a>
+        </div>
       </div>
     </div>
   );

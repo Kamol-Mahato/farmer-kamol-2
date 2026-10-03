@@ -212,6 +212,7 @@ export default function HeroSlider({
     p: Product,
     key: number | string,
     extraClass: string,
+    isPriority: boolean = false,
   ) {
     const imageUrl =
       p.images?.[0]?.imageUrl || "/uploads/1781611130414-modhu.jpg";
@@ -223,6 +224,9 @@ export default function HeroSlider({
           src={imageUrl}
           alt={displayName}
           fill
+          priority={isPriority}
+          fetchPriority={isPriority ? "high" : "auto"}
+          quality={isPriority ? 80 : 70}
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover"
         />
@@ -263,6 +267,7 @@ export default function HeroSlider({
     thumb: string | null,
     title: string,
     onPlay: () => void,
+    isPriority: boolean = false,
   ) {
     return (
       <button
@@ -272,12 +277,16 @@ export default function HeroSlider({
         className="absolute inset-0 w-full h-full group"
       >
         {thumb ? (
-          <img
-            src={thumb}
-            alt={title}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
+          <Image
+          src={thumb}
+          alt={title}
+          fill
+          priority={isPriority}
+          fetchPriority={isPriority ? "high" : "auto"}
+          quality={isPriority ? 80 : 70}
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
         ) : (
           <div className="w-full h-full bg-green-800" />
         )}
@@ -317,6 +326,7 @@ export default function HeroSlider({
                 pcThumb,
                 currentPcVideo?.titleEn || currentPcVideo?.title || "Video",
                 () => setPcPlaying(true),
+                pcVideoIndex === 0,
               )
             )
           ) : (
@@ -352,6 +362,7 @@ export default function HeroSlider({
               featuredProducts[pcProductIndex],
               featuredProducts[pcProductIndex].id,
               "opacity-100 animate-fadeIn",
+              pcProductIndex === 0,
             )
           )}
           {featuredProducts.length > 1 && (
@@ -394,7 +405,8 @@ export default function HeroSlider({
                 currentMobileVideo?.titleEn ||
                   currentMobileVideo?.title ||
                   "Video",
-                () => setMobilePlaying(true),
+                  () => setMobilePlaying(true),
+                  safeMobileIndex === 0,
               )
             )
           ) : currentMobileItem?.kind === "product" &&
@@ -403,6 +415,7 @@ export default function HeroSlider({
               featuredProducts[currentMobileItem.productIdx],
               `m-${safeMobileIndex}`,
               "opacity-100",
+              safeMobileIndex === 0,
             )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-green-800">

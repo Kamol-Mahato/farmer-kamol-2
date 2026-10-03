@@ -71,7 +71,13 @@ function buildWhatsAppLink(productName: string) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-function TopSellerCard({ product }: { product: Product }) {
+function TopSellerCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
   const [added, setAdded] = useState(false);
   const isOutOfStock = product.stockQty <= 0;
   const savePercent = getSavePercent(
@@ -123,6 +129,7 @@ function TopSellerCard({ product }: { product: Product }) {
             alt={displayName}
             fill
             sizes="(max-width: 768px) 65vw, 400px"
+            priority={priority}
             className="object-cover group-hover:scale-135 transition duration-300"
           />
           {savePercent !== null && !isOutOfStock && (
@@ -154,9 +161,7 @@ function TopSellerCard({ product }: { product: Product }) {
             </h3>
           </Link>
           <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-[9px] md:text-xs text-gray-500 font-medium">
-              Price
-            </span>
+          <span className="text-xs text-black font-bold">Price</span>
             <span className="text-sm md:text-xl font-extrabold text-black">
               ৳{" "}
               {savePercent !== null
@@ -271,8 +276,12 @@ export default function TopSellerSection({
 
         {/* ✅ PC — আগের মতোই পাশাপাশি গ্রিড */}
         <div className="hidden md:grid md:grid-cols-2 gap-6">
-          {products.map((product) => (
-            <TopSellerCard key={product.id} product={product} />
+        {products.map((product, i) => (
+            <TopSellerCard
+              key={product.id}
+              product={product}
+              priority={i === 0}
+            />
           ))}
         </div>
 
@@ -282,9 +291,9 @@ export default function TopSellerSection({
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${mobileIndex * 100}%)` }}
           >
-            {products.map((product) => (
+            {products.map((product, i) => (
               <div key={product.id} className="w-full shrink-0">
-                <TopSellerCard product={product} />
+                <TopSellerCard product={product} priority={i === 0} />
               </div>
             ))}
           </div>

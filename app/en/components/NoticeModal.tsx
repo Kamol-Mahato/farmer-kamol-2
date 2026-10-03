@@ -9,11 +9,15 @@ export default function NoticeModal() {
     const lastShown = localStorage.getItem("farmer_kamol_notice_last_shown");
     const twelveHours = 12 * 60 * 60 * 1000;
     if (!lastShown || Date.now() - parseInt(lastShown) > twelveHours) {
-      setIsVisible(true);
-      localStorage.setItem(
-        "farmer_kamol_notice_last_shown",
-        Date.now().toString(),
-      );
+      // LCP খারাপ না হওয়ার জন্য ২.৫ সেকেন্ড পরে দেখানো হচ্ছে (BN-এর মতো)
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+        localStorage.setItem(
+          "farmer_kamol_notice_last_shown",
+          Date.now().toString(),
+        );
+      }, 2500);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -21,7 +25,7 @@ export default function NoticeModal() {
     if (isPaused || !isVisible) return;
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 2000);
+    }, 8000);
     return () => clearTimeout(timer);
   }, [isPaused, isVisible]);
 
