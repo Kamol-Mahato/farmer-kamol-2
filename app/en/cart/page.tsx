@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { districts, upazilas, upazilasEn } from "@/lib/bd-locations";
 import { normalizePhone, isValidBDPhone } from "@/lib/phone";
 import { siteConfig } from "@/lib/siteConfig";
+import { translateUnit } from "@/lib/unitTranslate";
 
 type CartItem = {
   id: number;
@@ -138,6 +139,8 @@ export default function CartPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  // ✅ কার্টে শুধু বাংলা নাম সেভ থাকে — তাই ইংরেজি নাম DB থেকে এনে এখানে রাখা হয়
+  const [namesEn, setNamesEn] = useState<Record<number, string>>({});
   const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(
     null,
   );
@@ -181,6 +184,30 @@ export default function CartPage() {
       window.removeEventListener("storage", loadCart);
     };
   }, []);
+
+  const cartIdsKey = cart.map((i) => i.id).join(",");
+  useEffect(() => {
+    if (!cartIdsKey) return;
+    let cancelled = false;
+    cartIdsKey.split(",").forEach(async (idStr) => {
+      const id = Number(idStr);
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data?.nameEn) {
+          setNamesEn((prev) =>
+            prev[id] === data.nameEn ? prev : { ...prev, [id]: data.nameEn },
+          );
+        }
+      } catch {
+        // নেটওয়ার্ক সমস্যা হলে বাংলা নামই দেখাবে
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cartIdsKey]);
 
   useEffect(() => {
     // ✅ Auto-fill name/address for logged-in customers
@@ -379,15 +406,17 @@ export default function CartPage() {
           >
             <img
               src={item.image}
-              alt={item.name}
+              alt={namesEn[item.id] || item.name}
               className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
             />
             <div className="flex-1">
-              <p className="font-bold text-gray-800 text-sm">{item.name}</p>
+            <p className="font-bold text-gray-800 text-sm">
+                {namesEn[item.id] || item.name}
+              </p>
               <p className="text-black font-bold text-sm">
                 ৳ {item.price}{" "}
                 <span className="text-gray-500 text-xs font-normal">
-                  / {item.unit}
+                / {translateUnit(item.unit)}
                 </span>
               </p>
             </div>
