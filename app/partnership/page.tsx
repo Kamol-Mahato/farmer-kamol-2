@@ -176,7 +176,7 @@ export default function PartnershipPage() {
           </h2>
 
           <p className="mt-3 text-gray-600">
-            নিচের button থেকে questionnaire-টি পূরণ করুন।
+          Questionnaire-টি পূরণ করুন।
           </p>
 
           <div className="mt-7">
@@ -186,7 +186,7 @@ export default function PartnershipPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-green-700 px-8 py-3.5 font-bold text-white shadow-lg shadow-green-900/15 transition-all duration-200 hover:bg-green-800 hover:-translate-y-0.5 active:scale-[0.98]"
             >
-              উত্তর দিন
+              Click Here
               <span aria-hidden>→</span>
             </a>
           </div>
