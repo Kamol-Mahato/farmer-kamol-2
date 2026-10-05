@@ -8,6 +8,7 @@ import {
   UserRole,
 } from "@/lib/orderStatusRules";
 import { applyStockChangeForStatusTransition } from "@/lib/orderUtils";
+import { addToLifetimeCollected } from "@/lib/lifetimeStats";
 const STATUS_LABEL_MAP: Record<string, string> = {
   DELIVERED: "Delivered",
   PAID_RETURN: "Paid Return",
@@ -172,7 +173,7 @@ export async function POST(request: Request) {
 
       const currentOrder = await prisma.order.findUnique({
         where: { id: orderIdInt },
-        select: { orderStatus: true },
+        select: { orderStatus: true, collectedAmount: true },
       });
 
       if (!currentOrder) {
@@ -240,10 +241,17 @@ export async function POST(request: Request) {
             data: {
               orderStatus: status,
               ...(requiresCollectedAmount(status)
-                ? { collectedAmount: Number(collectedAmount) }
-                : {}),
-            },
-          });
+              ? { collectedAmount: Number(collectedAmount) }
+              : {}),
+          },
+        });
+        if (requiresCollectedAmount(status)) {
+          await addToLifetimeCollected(
+            tx,
+            Number(collectedAmount),
+            currentOrder.collectedAmount,
+          );
+        }
           await tx.orderStatusLog.create({
             data: {
               orderId: orderIdInt,

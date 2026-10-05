@@ -34,7 +34,7 @@ export default async function MediaVideoPage() {
 
   return (
     <div>
-      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Videos" }]} />
+      <Breadcrumb items={[{ label: "Home", href: "/en" }, { label: "Videos" }]} />
       <div className="max-w-6xl mx-auto px-4 py-2">
         <h1 className="text-3xl font-bold text-green-800 mb-2 text-center">
           Our Videos

@@ -259,6 +259,12 @@ model OrderItem {
   product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
+model LifetimeStats {
+  id             Int      @id @default(1)
+  totalCollected Float    @default(0.0)
+  updatedAt      DateTime @updatedAt
+}
+
 model CourierSummary {
   id              Int      @id @default(autoincrement())
   orderId         Int      @unique

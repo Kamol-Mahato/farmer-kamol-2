@@ -9,11 +9,23 @@ export default async function AdminDashboard() {
   const pendingOrders = await prisma.order.count({
     where: { orderStatus: "PENDING" },
   });
+  const lifetimeStats = await prisma.lifetimeStats.findUnique({
+    where: { id: 1 },
+  });
+  const lifetimeCollected = lifetimeStats?.totalCollected ?? 0;
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
-      <h1 className="text-3xl font-bold text-green-800 mb-8">
-        অ্যাডমিন ড্যাশবোর্ড
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 className="text-3xl font-bold text-green-800">
+          অ্যাডমিন ড্যাশবোর্ড
+        </h1>
+        <div className="bg-white rounded-xl shadow px-5 py-3 border-l-4 border-emerald-600">
+          <p className="text-gray-500 text-xs">লাইফটাইম মোট কালেকশন</p>
+          <p className="text-2xl font-bold text-emerald-700">
+            ৳{lifetimeCollected.toLocaleString("bn-BD")}
+          </p>
+        </div>
+      </div>
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-10">
         <div className="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">

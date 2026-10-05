@@ -12,6 +12,7 @@ import {
   UserRole,
 } from "@/lib/orderStatusRules";
 import { OrderStatus } from "@prisma/client";
+import { addToLifetimeCollected } from "@/lib/lifetimeStats";
 
 interface BulkRow {
   orderIdRaw: string;
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
 
       const currentOrder = await prisma.order.findUnique({
         where: { id: orderId },
-        select: { orderStatus: true },
+        select: { orderStatus: true, collectedAmount: true },
       });
       if (!currentOrder) {
         results.push({
@@ -241,6 +242,13 @@ export async function POST(request: Request) {
               ...(needsAmount ? { collectedAmount: Number(row.amount) } : {}),
             },
           });
+          if (needsAmount) {
+            await addToLifetimeCollected(
+              tx,
+              Number(row.amount),
+              currentOrder.collectedAmount,
+            );
+          }
           await tx.orderStatusLog.create({
             data: {
               orderId,
