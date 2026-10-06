@@ -274,6 +274,46 @@ export default function HeroSlider({
   }
 
   // ✅ ভিডিও থাম্বনেইল + Play বাটন (ক্লিক করলে play হবে)
+  function renderChannelLink(
+    url: string,
+    thumb: string | null,
+    title: string,
+    isPriority: boolean = false,
+  ) {
+    const label = /facebook\.com|fb\.watch/.test(url)
+      ? "ফেসবুক পেজে যান"
+      : "ইউটিউব চ্যানেলে যান";
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${label}: ${title}`}
+        className="absolute inset-0 w-full h-full group"
+      >
+        {thumb ? (
+          <Image
+            src={thumb}
+            alt={title}
+            fill
+            priority={isPriority}
+            fetchPriority={isPriority ? "high" : "auto"}
+            quality={isPriority ? 80 : 70}
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-green-800" />
+        )}
+        <div className="absolute inset-0 flex items-end justify-center pb-4 bg-black/20 group-hover:bg-black/35 transition">
+          <span className="bg-red-600 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+            ▶ {label}
+          </span>
+        </div>
+      </a>
+    );
+  }
+
   function renderVideoThumbnail(
     thumb: string | null,
     title: string,
@@ -321,7 +361,14 @@ export default function HeroSlider({
       <div className="hidden md:grid md:grid-cols-2 h-[280px]">
         {/* বাম — ভিডিও (থাম্বনেইল ঘুরবে, ক্লিক করলে play হবে) */}
         <div className="relative overflow-hidden">
-          {pcEmbedUrl ? (
+        {currentPcVideo && !pcYtId ? (
+            renderChannelLink(
+              currentPcVideo.youtubeUrl,
+              pcThumb,
+              currentPcVideo.title || "চ্যানেল",
+              pcVideoIndex === 0,
+            )
+          ) : pcEmbedUrl ? (
             pcPlaying ? (
               <iframe
                 key={pcVideoIndex}
@@ -400,7 +447,16 @@ export default function HeroSlider({
       {/* ── MOBILE LAYOUT — ভিডিও ও প্রোডাক্ট একই queue-তে, ‹ › দিয়ে পুরো queue-তে ঘোরা যাবে ── */}
       <div className="md:hidden">
         <div className="relative" style={{ paddingTop: "56.25%" }}>
-          {currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
+        {currentMobileItem?.kind === "video" &&
+          currentMobileVideo &&
+          !mobileYtId ? (
+            renderChannelLink(
+              currentMobileVideo.youtubeUrl,
+              mobileThumb,
+              currentMobileVideo.title || "চ্যানেল",
+              safeMobileIndex === 0,
+            )
+          ) : currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
             mobilePlaying ? (
               <iframe
                 key={`m-${safeMobileIndex}`}
