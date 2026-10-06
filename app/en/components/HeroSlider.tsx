@@ -95,6 +95,7 @@ export default function HeroSlider({
   const mobileTotal = mobileQueue.length || 1;
   const safeMobileIndex = mobileQueueIndex % mobileTotal;
   const currentMobileItem = mobileQueue[safeMobileIndex];
+  const currentMobileKind = currentMobileItem?.kind;
 
   useEffect(() => {
     if (featuredProducts.length === 0) return;
@@ -121,20 +122,20 @@ export default function HeroSlider({
   }, [safeMobileIndex]);
 
   useEffect(() => {
-    if (!currentMobileItem) return;
-    if (currentMobileItem.kind === "product") {
+    if (!currentMobileKind) return;
+    if (currentMobileKind === "product") {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
       }, 2000);
       return () => clearTimeout(timer);
     }
-    if (currentMobileItem.kind === "video" && !mobilePlaying) {
+    if (currentMobileKind === "video" && !mobilePlaying) {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
       }, THUMBNAIL_ADVANCE_MS);
       return () => clearTimeout(timer);
     }
-  }, [safeMobileIndex, currentMobileItem, mobileTotal, mobilePlaying]);
+  }, [safeMobileIndex, currentMobileKind, mobileTotal, mobilePlaying]);
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {

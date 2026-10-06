@@ -100,6 +100,7 @@ export default function HeroSlider({
   const mobileTotal = mobileQueue.length || 1;
   const safeMobileIndex = mobileQueueIndex % mobileTotal;
   const currentMobileItem = mobileQueue[safeMobileIndex];
+  const currentMobileKind = currentMobileItem?.kind;
 
   // ===== PC: প্রোডাক্ট অটো-স্লাইড (২.৫ সেকেন্ড পরপর) =====
   useEffect(() => {
@@ -131,20 +132,20 @@ export default function HeroSlider({
 
   // ===== Mobile: প্রোডাক্টে ২ সেকেন্ড, অথবা "play না করা" ভিডিও থাম্বনেইলে একটা সময় পর পরের আইটেমে যাওয়া =====
   useEffect(() => {
-    if (!currentMobileItem) return;
-    if (currentMobileItem.kind === "product") {
+    if (!currentMobileKind) return;
+    if (currentMobileKind === "product") {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
       }, 2000);
       return () => clearTimeout(timer);
     }
-    if (currentMobileItem.kind === "video" && !mobilePlaying) {
+    if (currentMobileKind === "video" && !mobilePlaying) {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
       }, THUMBNAIL_ADVANCE_MS);
       return () => clearTimeout(timer);
     }
-  }, [safeMobileIndex, currentMobileItem, mobileTotal, mobilePlaying]);
+  }, [safeMobileIndex, currentMobileKind, mobileTotal, mobilePlaying]);
 
   // ===== YouTube "ভিডিও শেষ" ইভেন্ট শোনা (PC ও Mobile দুই জায়গার জন্য) — শুধু play হওয়া ভিডিওর জন্য প্রাসঙ্গিক =====
   useEffect(() => {
