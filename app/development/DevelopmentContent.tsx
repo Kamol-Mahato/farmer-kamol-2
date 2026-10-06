@@ -14,6 +14,14 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
+import Reveal from "../invest/Reveal";
+
+/* ───────────── রং (গাঢ়/হালকা বদলাতে শুধু এই ৩টা লাইন বদলান) ───────────── */
+const THEME = {
+  hero: "from-green-600 via-green-600 to-green-600", // হিরো ব্যাকগ্রাউন্ড
+  proHeader: "bg-green-900", // প্রফেশনাল কার্ডের মাথা
+  cta: "bg-green-700", // নিচের "কোন প্যাকেজ ঠিক হবে?" ব্যান্ড
+};
 
 /* ───────────── ডেটা (এখান থেকেই প্যাকেজ, ফিচার ও দাম বদলাবেন) ───────────── */
 
@@ -33,105 +41,113 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "ecommerce", label: "ই-কমার্স ওয়েবসাইট" },
 ];
 
+type Extra = { text: string; highlight?: boolean };
+
+// প্রফেশনাল ও প্রিমিয়াম একই সারিতে সাজানো: প্রফেশনালে ✗ থাকে, প্রিমিয়ামে ✓ — তাই দুই কার্ড সবসময় সমান
+function buildPlans(
+  base: Feature[],
+  extras: Extra[],
+  pro: Omit<Plan, "features" | "featured">,
+  premium: Omit<Plan, "features" | "featured">,
+): Plan[] {
+  return [
+    {
+      ...pro,
+      featured: false,
+      features: [
+        ...base,
+        ...extras.map((e) => ({ text: e.text, included: false })),
+      ],
+    },
+    {
+      ...premium,
+      featured: true,
+      features: [
+        ...base.map((f) => ({ ...f, highlight: false })),
+        ...extras.map((e) => ({
+          text: e.text,
+          included: true,
+          highlight: e.highlight,
+        })),
+      ],
+    },
+  ];
+}
+
 const PLANS: Record<TabKey, Plan[]> = {
-  landing: [
+  landing: buildPlans(
+    [
+      { text: "মোবাইল-ফার্স্ট রেসপনসিভ ল্যান্ডিং পেজ", included: true },
+      {
+        text: "প্রফেশনাল ডিজাইন (আপনার ব্র্যান্ড কালারে)",
+        included: true,
+        highlight: true,
+      },
+      { text: "স্পষ্ট কল-টু-অ্যাকশন ও অর্ডার ফর্ম", included: true },
+      { text: "ডেলিভারি চার্জ সেটআপ", included: true },
+      { text: "Facebook Pixel ও GTM সেটআপ (ফ্রি)", included: true },
+    ],
+    [
+      { text: "কনভারশন অপটিমাইজেশন", highlight: true },
+      { text: "অটো কুরিয়ার ইন্টিগ্রেশন" },
+      { text: "ফেক কাস্টমার ও আইপি ব্লক" },
+    ],
     {
       name: "প্রফেশনাল প্যাকেজ",
       tagline: "নতুন ও ছোট ব্যবসার জন্য সেরা শুরু",
       badge: "স্টার্টআপের জন্য",
       price: 2000,
-      featured: false,
-      features: [
-        { text: "মোবাইল-ফার্স্ট রেসপনসিভ ল্যান্ডিং পেজ", included: true },
-        {
-          text: "প্রফেশনাল ডিজাইন (আপনার ব্র্যান্ড কালারে)",
-          included: true,
-          highlight: true,
-        },
-        { text: "স্পষ্ট কল-টু-অ্যাকশন ও অর্ডার ফর্ম", included: true },
-        { text: "ডেলিভারি চার্জ সেটআপ", included: true },
-        { text: "Facebook Pixel ও GTM সেটআপ (ফ্রি)", included: true },
-        { text: "কনভারশন অপটিমাইজেশন", included: false },
-        { text: "অটো কুরিয়ার ইন্টিগ্রেশন", included: false },
-        { text: "ফেক কাস্টমার ও আইপি ব্লক", included: false },
-      ],
     },
     {
       name: "প্রিমিয়াম প্যাকেজ",
-      tagline: "গুরুত্ব দিয়ে ব্র্যান্ড বড় করতে চাইলে",
+      tagline: "প্রফেশনালের সব ফিচারসহ আরও বেশি",
       badge: "সবচেয়ে জনপ্রিয়",
       price: 3000,
-      featured: true,
-      features: [
-        {
-          text: "প্রফেশনাল প্যাকেজের সব ফিচার",
-          included: true,
-          highlight: true,
-        },
-        {
-          text: "কনভারশন অপটিমাইজেশন",
-          included: true,
-          highlight: true,
-        },
-        { text: "অটো কুরিয়ার ইন্টিগ্রেশন", included: true },
-        { text: "ফেক কাস্টমার ও আইপি ব্লক", included: true },
-      ],
     },
-  ],
-  ecommerce: [
+  ),
+  ecommerce: buildPlans(
+    [
+      {
+        text: "পূর্ণাঙ্গ ই-কমার্স ওয়েবসাইট (শপ, কার্ট, চেকআউট)",
+        included: true,
+        highlight: true,
+      },
+      {
+        text: "অ্যাডমিন ড্যাশবোর্ড: পণ্য, অর্ডার ও কাস্টমার ম্যানেজমেন্ট",
+        included: true,
+      },
+      {
+        text: "অর্ডার স্ট্যাটাস ট্র্যাকিং ও কাস্টমার ট্র্যাক পেজ",
+        included: true,
+      },
+      { text: "ক্যাশ অন ডেলিভারি ও ডেলিভারি চার্জ সেটআপ", included: true },
+      { text: "মোবাইল-ফার্স্ট ডিজাইন ও SEO-বান্ধব কাঠামো", included: true },
+      {
+        text: "Facebook Pixel, GTM ও Google Analytics সেটআপ",
+        included: true,
+      },
+    ],
+    [
+      { text: "অনলাইন পেমেন্ট গেটওয়ে (বিকাশ, নগদ, কার্ড)", highlight: true },
+      { text: "অটো কুরিয়ার ইন্টিগ্রেশন", highlight: true },
+      { text: "লাইভ চ্যাট ও পুশ নোটিফিকেশন" },
+      { text: "কুপন, ইনভয়েস ও অর্ডার CSV এক্সপোর্ট" },
+      { text: "দ্বিভাষিক সাইট (বাংলা ও ইংরেজি)" },
+      { text: "এজেন্ট অ্যাকাউন্ট ও রোলভিত্তিক অ্যাক্সেস" },
+    ],
     {
       name: "প্রফেশনাল ই-কমার্স",
       tagline: "ছোট থেকে মাঝারি অনলাইন শপের জন্য",
       badge: "ব্যবসা শুরুর জন্য",
       price: 30000,
-      featured: false,
-      features: [
-        {
-          text: "পূর্ণাঙ্গ ই-কমার্স ওয়েবসাইট (শপ, কার্ট, চেকআউট)",
-          included: true,
-          highlight: true,
-        },
-        {
-          text: "অ্যাডমিন ড্যাশবোর্ড: পণ্য, অর্ডার ও কাস্টমার ম্যানেজমেন্ট",
-          included: true,
-        },
-        { text: "অর্ডার স্ট্যাটাস ট্র্যাকিং ও কাস্টমার ট্র্যাক পেজ", included: true },
-        { text: "ক্যাশ অন ডেলিভারি ও ডেলিভারি চার্জ সেটআপ", included: true },
-        { text: "মোবাইল-ফার্স্ট ডিজাইন ও SEO-বান্ধব কাঠামো", included: true },
-        {
-          text: "Facebook Pixel, GTM ও Google Analytics সেটআপ",
-          included: true,
-        },
-        { text: "অনলাইন পেমেন্ট গেটওয়ে (বিকাশ, নগদ, কার্ড)", included: false },
-        { text: "অটো কুরিয়ার ইন্টিগ্রেশন", included: false },
-        { text: "লাইভ চ্যাট ও পুশ নোটিফিকেশন", included: false },
-      ],
     },
     {
       name: "প্রিমিয়াম ই-কমার্স",
-      tagline: "বড় পরিসরে ব্যবসা চালাতে চাইলে",
+      tagline: "প্রফেশনালের সব ফিচারসহ আরও বেশি",
       badge: "সবচেয়ে জনপ্রিয়",
       price: 40000,
-      featured: true,
-      features: [
-        {
-          text: "প্রফেশনাল ই-কমার্সের সব ফিচার",
-          included: true,
-          highlight: true,
-        },
-        {
-          text: "অনলাইন পেমেন্ট গেটওয়ে (বিকাশ, নগদ, কার্ড)",
-          included: true,
-          highlight: true,
-        },
-        { text: "অটো কুরিয়ার ইন্টিগ্রেশন", included: true },
-        { text: "লাইভ চ্যাট ও পুশ নোটিফিকেশন", included: true },
-        { text: "কুপন, ইনভয়েস ও অর্ডার CSV এক্সপোর্ট", included: true },
-        { text: "দ্বিভাষিক সাইট (বাংলা ও ইংরেজি)", included: true },
-        { text: "এজেন্ট অ্যাকাউন্ট ও রোলভিত্তিক অ্যাক্সেস", included: true },
-      ],
     },
-  ],
+  ),
 };
 
 const WHY = [
@@ -218,9 +234,9 @@ function PlanCard({
 
   return (
     <article
-      className={`relative flex flex-col rounded-3xl overflow-hidden bg-white shadow-xl ${
+      className={`relative flex flex-col h-full rounded-3xl overflow-hidden bg-white shadow-xl animate-fadeIn transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
         plan.featured
-          ? "ring-2 ring-yellow-400 md:-translate-y-3 shadow-2xl"
+          ? "ring-2 ring-yellow-400"
           : "ring-1 ring-green-900/10"
       }`}
     >
@@ -229,7 +245,7 @@ function PlanCard({
         className={`px-6 pt-8 pb-6 text-center text-white ${
           plan.featured
             ? "bg-gradient-to-br from-green-700 to-emerald-600"
-            : "bg-green-950"
+            : THEME.proHeader
         }`}
       >
         <span
@@ -255,7 +271,7 @@ function PlanCard({
           </span>
         </div>
         <h3 className="mt-3 text-2xl font-bold">{plan.name}</h3>
-        <p className="mt-1 text-sm text-green-100/90">{plan.tagline}</p>
+        <p className="mt-1 text-sm text-green-100/90 min-h-5">{plan.tagline}</p>
       </div>
 
       {/* ফিচার তালিকা */}
@@ -326,9 +342,9 @@ export default function DevelopmentContent({
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)]">
       {/* ── হিরো + প্যাকেজ ── */}
-      <section className="bg-gradient-to-b from-green-950 via-green-900 to-green-800 text-white">
+      <section className={`bg-gradient-to-b ${THEME.hero} text-white`}>
         <div className="max-w-5xl mx-auto px-4 pt-12 pb-16 md:pt-16 md:pb-20">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto animate-fadeIn">
             <span className="inline-block text-xs font-bold tracking-wider bg-white/10 text-green-100 px-4 py-1.5 rounded-full">
               ওয়েব ডেভেলপমেন্ট সার্ভিস
             </span>
@@ -337,7 +353,7 @@ export default function DevelopmentContent({
               <span className="text-yellow-300">ল্যান্ডিং পেজ ও ই-কমার্স</span>{" "}
               ওয়েবসাইট
             </h1>
-            <p className="mt-4 text-green-100/90 text-base md:text-lg leading-relaxed">
+            <p className="mt-4 text-black-100/90 text-base md:text-lg leading-relaxed">
               ডিজাইন থেকে অর্ডার ম্যানেজমেন্ট পর্যন্ত, দ্রুত, নির্ভরযোগ্য ও
               ব্যবহার-বান্ধব সমাধান। আমার কাজের প্রমাণ হিসেবে দেখতে পারেন{" "}
               <a
@@ -376,7 +392,7 @@ export default function DevelopmentContent({
 
           {/* কার্ড */}
           <div
-            className={`mt-10 grid gap-6 md:gap-8 items-start mx-auto ${
+            className={`mt-10 grid gap-6 md:gap-8 items-stretch mx-auto ${
               PLANS[tab].length > 1 ? "md:grid-cols-2 max-w-4xl" : "max-w-md"
             }`}
           >
@@ -392,26 +408,27 @@ export default function DevelopmentContent({
         </div>
       </section>
 
-      {/* ── কেন আমার সাথে ── */}
+      {/* ── যা পাচ্ছেন ── */}
       <section className="bg-green-50 py-14 md:py-20">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-green-900 text-center">
-            যা পাচ্ছেন প্রতিটা প্যাকেজে
-          </h2>
+          <Reveal className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-green-900">
+              যা পাচ্ছেন প্রতিটা প্যাকেজে
+            </h2>
+          </Reveal>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {WHY.map(({ icon: Icon, title, text }) => (
-              <div
-                key={title}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-green-100"
-              >
-                <span className="w-11 h-11 rounded-xl bg-green-100 text-green-800 flex items-center justify-center">
-                  <Icon className="w-5 h-5" />
-                </span>
-                <h3 className="mt-4 font-bold text-green-900">{title}</h3>
-                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                  {text}
-                </p>
-              </div>
+            {WHY.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={i * 80} className="h-full">
+                <div className="group h-full bg-white rounded-2xl p-6 shadow-sm border border-green-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-green-300">
+                  <span className="w-11 h-11 rounded-xl bg-green-100 text-green-600 flex items-center justify-center transition-colors duration-200 group-hover:bg-green-700 group-hover:text-white">
+                    <Icon className="w-5 h-5" />
+                  </span>
+                  <h3 className="mt-4 font-bold text-green-900">{title}</h3>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                    {text}
+                  </p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -420,59 +437,64 @@ export default function DevelopmentContent({
       {/* ── কাজের ধাপ ── */}
       <section className="bg-white py-14 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-green-900 text-center">
-            কাজ হয় যেভাবে
-          </h2>
-          <ol className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Reveal className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-green-900">
+              কাজ হয় যেভাবে
+            </h2>
+          </Reveal>
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {STEPS.map((s, i) => (
-              <li key={s.title} className="relative">
-                <span className="w-10 h-10 rounded-full bg-green-800 text-white font-bold flex items-center justify-center">
-                  {bn(i + 1)}
-                </span>
-                <h3 className="mt-4 font-bold text-green-900">{s.title}</h3>
-                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                  {s.text}
-                </p>
-              </li>
+              <Reveal key={s.title} delay={i * 80} className="h-full">
+                <div className="group h-full bg-green-50 rounded-2xl p-6 border border-green-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-green-300">
+                  <span className="w-10 h-10 rounded-full bg-green-700 text-white font-bold flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+                    {bn(i + 1)}
+                  </span>
+                  <h3 className="mt-4 font-bold text-green-900">{s.title}</h3>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                    {s.text}
+                  </p>
+                </div>
+              </Reveal>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
       {/* ── প্রশ্ন ও উত্তর ── */}
       <section className="bg-green-50 py-14 md:py-20">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-green-900 text-center">
-            সাধারণ প্রশ্ন
-          </h2>
+          <Reveal className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-green-900">
+              সাধারণ প্রশ্ন
+            </h2>
+          </Reveal>
           <div className="mt-8 space-y-3">
-            {FAQS.map((f) => (
-              <details
-                key={f.q}
-                className="group bg-white rounded-2xl border border-green-100 px-5 py-4"
-              >
-                <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-bold text-green-900">
-                  {f.q}
-                  <span className="text-green-700 text-xl leading-none transition group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 text-sm text-gray-600 leading-relaxed">
-                  {f.a}
-                </p>
-              </details>
+            {FAQS.map((f, i) => (
+              <Reveal key={f.q} delay={i * 70}>
+                <details className="group bg-white rounded-2xl border border-green-100 px-5 py-4 transition-all duration-200 hover:border-green-300 hover:shadow-sm">
+                  <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-bold text-green-900">
+                    {f.q}
+                    <span className="text-green-700 text-xl leading-none transition-transform duration-200 group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                    {f.a}
+                  </p>
+                </details>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── শেষ CTA ── */}
-      <section className="bg-green-900 text-white py-14">
-        <div className="max-w-3xl mx-auto px-4 text-center">
+      <section className={`${THEME.cta} text-white py-14`}>
+        <Reveal className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold">
             আপনার ব্যবসার জন্য কোন প্যাকেজ ঠিক হবে?
           </h2>
-          <p className="mt-3 text-green-100/90">
+          <p className="mt-3 text-green-50/90">
             কথা বলুন, আপনার প্রয়োজন শুনে সঠিক প্যাকেজটা বেছে দেওয়া হবে।
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
@@ -480,7 +502,7 @@ export default function DevelopmentContent({
               href={`https://wa.me/${whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-green-950 font-bold px-6 py-3 rounded-xl transition"
+              className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-green-950 font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
             >
               <MessageCircle className="w-5 h-5" />
               WhatsApp-এ কথা বলুন
@@ -488,13 +510,13 @@ export default function DevelopmentContent({
             </a>
             <a
               href={`tel:${phone}`}
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 font-bold px-6 py-3 rounded-xl transition"
+              className="inline-flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5"
             >
               <Phone className="w-5 h-5" />
               {phoneDisplay}
             </a>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );

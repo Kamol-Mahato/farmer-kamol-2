@@ -433,6 +433,8 @@ export default function Footer() {
               Developed by{" "}
               <Link
                 href="/development"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="relative font-semibold text-yellow-300 hover:text-yellow-200 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
               >
                 Kamol Kumar Mahato
