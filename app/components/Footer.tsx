@@ -408,9 +408,9 @@ export default function Footer() {
 
       {/* কপিরাইট বার */}
       <div className="bg-green-800 text-white border-t border-green-700 py-3 mt-2">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center text-[11px] text-green-200 gap-2">
+      <div className="max-w-7xl mx-auto px-4 sm:pr-24 flex flex-col sm:flex-row justify-between items-center text-[11px] text-green-200 gap-2">
           <p>{t.copyright}</p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <Link
               href={href("/privacy-policy")}
               className="relative hover:text-yellow-400 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
@@ -429,6 +429,15 @@ export default function Footer() {
             >
               {t.returnPolicy}
             </Link>
+            <span className="text-green-300">
+              Developed by{" "}
+              <Link
+                href="/development"
+                className="relative font-semibold text-yellow-300 hover:text-yellow-200 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
+              >
+                Kamol Kumar Mahato
+              </Link>
+            </span>
           </div>
         </div>
       </div>
