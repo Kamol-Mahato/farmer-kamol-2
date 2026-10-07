@@ -18,9 +18,10 @@ import Reveal from "../invest/Reveal";
 
 /* ───────────── রং (গাঢ়/হালকা বদলাতে শুধু এই ৩টা লাইন বদলান) ───────────── */
 const THEME = {
-  hero: "from-green-600 via-green-600 to-green-600", // হিরো ব্যাকগ্রাউন্ড
-  proHeader: "bg-green-900", // প্রফেশনাল কার্ডের মাথা
-  cta: "bg-green-700", // নিচের "কোন প্যাকেজ ঠিক হবে?" ব্যান্ড
+  hero: "from-emerald-950 via-emerald-900 to-teal-900",
+  proHeader: "bg-emerald-950",
+  premiumHeader: "from-emerald-600 to-teal-500",
+  cta: "bg-emerald-900",
 };
 
 /* ───────────── ডেটা (এখান থেকেই প্যাকেজ, ফিচার ও দাম বদলাবেন) ───────────── */
@@ -244,7 +245,7 @@ function PlanCard({
       <div
         className={`px-6 pt-8 pb-6 text-center text-white ${
           plan.featured
-            ? "bg-gradient-to-br from-green-700 to-emerald-600"
+            ? `bg-gradient-to-br ${THEME.premiumHeader}`  
             : THEME.proHeader
         }`}
       >

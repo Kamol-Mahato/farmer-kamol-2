@@ -75,26 +75,6 @@ export default function VideoSection({
                       </div>
                     </div>
                   </Link>
-
-                  {video.platform === "FACEBOOK" ? (
-                    <a
-                      href={facebookPageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-2 left-2 z-20 inline-flex min-h-11 items-center gap-1 bg-[#0f5fce] text-white text-xs md:text-sm font-bold px-3 py-2 rounded-full shadow-lg hover:bg-[#0c4ea8] transition"
-                    >
-                      👍 Follow
-                    </a>
-                  ) : (
-                    <a
-                      href={youtubeChannelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-2 left-2 z-20 inline-flex items-center gap-1 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full shadow-lg hover:bg-red-700 transition"
-                    >
-                      ▶️ Subscribe
-                    </a>
-                  )}
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-green-800 text-sm line-clamp-2">
