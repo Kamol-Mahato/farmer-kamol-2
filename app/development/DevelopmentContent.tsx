@@ -305,7 +305,7 @@ function PlanCard({
       {/* দাম ও বাটন */}
       <div className="px-6 pb-6 pt-4 border-t border-gray-100 bg-gray-50/60">
         <p className="text-center text-2xl font-extrabold text-green-900">
-          আলোচনা সাপেক্ষে
+        প্রাইস :আলোচনা সাপেক্ষে
         </p>
         <a
           href={waHref}
