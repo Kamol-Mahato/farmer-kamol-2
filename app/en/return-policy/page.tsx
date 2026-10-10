@@ -1,4 +1,4 @@
-import PolicyPage from "@/app/components/PolicyPage";
+import PolicyAccordion from "@/app/components/PolicyAccordion";
 import { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -57,15 +57,13 @@ const sections = [
 
 export default function ReturnPolicyPageEn() {
   return (
-    <PolicyPage title="Return Policy">
-      {sections.map((section) => (
-        <div key={section.title}>
-          <h2 className="text-xl font-semibold text-green-700 mb-2">
-            {section.title}
-          </h2>
-          <p className="text-gray-600">{section.content}</p>
-        </div>
-      ))}
-    </PolicyPage>
+    <main className="max-w-3xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold text-green-800 mb-8 text-center">
+        Return Policy
+      </h1>
+      <PolicyAccordion
+        items={sections.map((s) => ({ q: s.title, a: s.content }))}
+      />
+    </main>
   );
 }
