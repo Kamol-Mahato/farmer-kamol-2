@@ -24,7 +24,7 @@ export default function NoticeModal() {
     if (isPaused || !isVisible) return; // পজ থাকলে টাইমার চলবে না
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 8000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [isPaused, isVisible]);
   if (!isVisible) return null;

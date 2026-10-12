@@ -25,7 +25,7 @@ export default function NoticeModal() {
     if (isPaused || !isVisible) return;
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 8000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [isPaused, isVisible]);
 
