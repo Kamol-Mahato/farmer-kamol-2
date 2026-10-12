@@ -6,6 +6,7 @@ import InvestCalculator from "./InvestCalculator";
 import { DetailToggle, StepAccordion } from "@/app/invest/InvestAccordion";
 import Reveal from "@/app/invest/Reveal";
 import FaqAccordion from "@/app/invest/FaqAccordion";
+import InvestSubNav from "./InvestSubNav";
 
 export const revalidate = 3600;
 
@@ -162,80 +163,6 @@ function PhotoCard({ title, imageUrl }: { title: string; imageUrl: string }) {
 }
 
 // ✅ Rounded glass sub-nav (in-page anchors)
-function SubNav() {
-  const links = [
-    { href: "#projects", label: "Projects" },
-    { href: "#farm-status", label: "Farm Status" },
-    { href: "#calculator", label: "Profit Sharing" },
-    { href: "#how-to", label: "How to Partner" },
-    { href: "#principles", label: "Principles" },
-    { href: "/en/contact", label: "Contact" },
-  ];
-  return (
-    <div className="sticky top-[76px] z-40 px-3 md:px-4 py-1.5 bg-transparent">
-      <div
-        className="
-          max-w-5xl mx-auto
-          flex items-center gap-2 md:gap-3
-          px-2 md:px-3 py-1.5 md:py-1
-          rounded-2xl md:rounded-full
-          bg-white/55 backdrop-blur-xl
-          border border-white/40
-          shadow-[0_8px_28px_rgba(22,101,52,0.10)]
-        "
-      >
-        {/* Links — scrollable, centred, with fades on both sides */}
-        <div className="relative flex-1 min-w-0">
-          <div className="hidden md:block pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/70 to-transparent z-10 rounded-l-full" />
-          <div className="hidden md:block pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/70 to-transparent z-10 rounded-r-full" />
-          <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-x-0.5 gap-y-0.5 md:gap-1 md:overflow-x-auto scrollbar-hide px-1">
-            {links.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="
-                  shrink-0 px-2 md:px-3 py-1 md:py-1.5
-                  rounded-full
-                  text-xs md:text-sm font-semibold
-                  text-gray-700
-                  hover:text-green-800 hover:bg-green-50
-                  active:scale-[0.97]
-                  transition-all duration-200 ease-out
-                  whitespace-nowrap
-                "
-              >
-                {l.label}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA — on the right, always visible */}
-        <Link
-          href="/en/customer/dashboard"
-          className="
-            shrink-0 inline-flex items-center gap-1
-            bg-green-700 text-white
-            px-3 md:px-4 py-1.5 md:py-2
-            rounded-full
-            font-bold text-xs md:text-sm
-            shadow-md shadow-green-900/15
-            hover:bg-green-800 hover:shadow-lg
-            active:scale-[0.97]
-            transition-all duration-200 ease-out
-            whitespace-nowrap
-          "
-        >
-          Invest Now
-          <span className="hidden sm:inline" aria-hidden>
-            →
-          </span>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
@@ -293,7 +220,7 @@ export default async function InvestPageEn() {
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)] text-gray-800">
 
-      <SubNav />
+      <InvestSubNav />
 
       {/* =========================================================
           HERO
@@ -441,188 +368,98 @@ export default async function InvestPageEn() {
       </section>
 
       {/* =========================================================
-          PROJECTS
+          PROJECTS / CATEGORIES
       ========================================================== */}
       <section id="projects" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
-            <SectionHeading>Projects</SectionHeading>
+            <SectionHeading>Agriculture Investment Sectors</SectionHeading>
+            <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
+              Agriculture Invest, Farming Invest and Livestock Invest — three main sectors where our projects run and will expand.
+            </p>
           </Reveal>
 
           <div className="grid md:grid-cols-3 gap-6 items-start">
-            {/* Project 1 - Chinese ducks (dynamic, expandable) */}
-            <Reveal delay={160}>
-              <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-                <div className="h-40 bg-green-100 flex items-center justify-center text-green-700 font-medium">
-                  Chinese duck photo
+            {/* Livestock Category */}
+            <Reveal delay={80}>
+              <Link
+                href="/en/invest/livestock"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
+              >
+                <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
+                  Livestock
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                    Ongoing
+                    Ongoing + New
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{duckProjectName}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{duckProjectDesc}</p>
-
-                  {/* ✅ Summary grid — duration / profit / capital / lots */}
-                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Duration</p>
-                      <p className="font-bold text-gray-900">
-                        {durationMonths != null ? `${durationMonths.toLocaleString("en-US")} months` : "—"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Profit share</p>
-                      <p className="font-bold text-gray-900">
-                        {investorProfitPct != null
-                          ? `${investorProfitPct.toLocaleString("en-US")}% of profit`
-                          : "—"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Capital</p>
-                      <p className="font-bold text-gray-900">
-                        {targetAmount != null
-                          ? `৳ ${targetAmount.toLocaleString("en-US")}`
-                          : "—"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Lots</p>
-                      <p className="font-bold text-gray-900">
-                        {soldLots != null && totalLots != null
-                          ? `${soldLots.toLocaleString("en-US")} / ${totalLots.toLocaleString("en-US")}`
-                          : totalLots != null
-                            ? `0 / ${totalLots.toLocaleString("en-US")}`
-                            : "—"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  {progressPct !== null && (
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Progress</span>
-                        <span className="font-semibold text-gray-700">{progressPct}%</span>
-                      </div>
-                      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-green-600 rounded-full transition-all"
-                          style={{ width: `${progressPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <DetailToggle closedLabel="View details" openLabel="Show less">
-                    <div className="pt-4 border-t border-gray-100 space-y-3 text-sm">
-                      {targetAmount ? (
-                        <>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Total required</span>
-                            <span className="font-bold text-gray-800">
-                              ৳{targetAmount.toLocaleString("en-US")}
-                            </span>
-                          </div>
-                          {featuredProject?.ownContributionAmount != null && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">My own investment</span>
-                              <span className="font-bold text-gray-800">
-                                ৳{featuredProject.ownContributionAmount.toLocaleString("en-US")}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Raised so far</span>
-                            <span className="font-bold text-green-700">
-                              ৳{raisedAmount.toLocaleString("en-US")}
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-gray-400 text-xs">
-                          Funding details will be added soon.
-                        </p>
-                      )}
-
-                      {featuredProject?.fundUsageEn && (
-                        <div>
-                          <p className="text-gray-500 text-xs font-semibold mb-1">Where the money will be spent</p>
-                          <p className="text-gray-700">{featuredProject.fundUsageEn}</p>
-                        </div>
-                      )}
-                      {featuredProject?.timelineEn && (
-                        <div>
-                          <p className="text-gray-500 text-xs font-semibold mb-1">Timeline</p>
-                          <p className="text-gray-700">{featuredProject.timelineEn}</p>
-                        </div>
-                      )}
-                      {featuredProject?.risksEn && (
-                        <div>
-                          <p className="text-gray-500 text-xs font-semibold mb-1">Risks</p>
-                          <p className="text-gray-700">{featuredProject.risksEn}</p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-gray-500 text-xs font-semibold mb-1">Profit / loss sharing</p>
-                        <p className="text-gray-700">
-                          {featuredProject?.profitShareNoteEn ||
-                            (investorProfitPct != null
-                              ? `If there is a profit, the farm operator gets ${(100 - investorProfitPct).toLocaleString("en-US")}% and the partner gets ${investorProfitPct.toLocaleString("en-US")}%, based on actual income and expense accounts. If there is a loss, we will try to return the remaining capital, with no guarantee.`
-                              : "If there is a profit, the farm operator gets 65% and the partner gets 35%, based on actual income and expense accounts. If there is a loss, we will try to return the remaining capital, with no guarantee.")}
-                        </p>
-                      </div>
-                      <Link
-                        href="/en/customer/dashboard"
-                        className="inline-flex items-center gap-1 text-green-700 font-bold text-sm hover:underline pt-1"
-                      >
-                        Apply to become a partner in this project →
-                      </Link>
-                    </div>
-                  </DetailToggle>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Livestock Investment</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    Chinese duck breeding and cattle rearing projects. Real farm, written agreement and transparent accounts.
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• Chinese Duck Expansion</li>
+                    <li>• Cattle Rearing Project</li>
+                  </ul>
+                  <span className="inline-flex items-center text-green-700 font-bold text-sm">
+                    View details →
+                  </span>
                 </div>
-              </div>
+              </Link>
             </Reveal>
 
-            {/* Project 2 - Crops (static, coming soon) */}
-            <Reveal direction="up" delay={120}>
-              <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-                <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-700 font-medium">
-                  Crop photo
+            {/* Crop Category */}
+            <Reveal delay={160}>
+              <Link
+                href="/en/invest/crop"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
+              >
+                <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
+                  Crop Farming
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     Coming soon
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Crop Cultivation on Suitable Land</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Cultivation of high-value crops including rice and mustard. Steady and sustainable production.
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Crop Farming on Arable Land</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    Rice, mustard and high-value crops. Steady and sustainable production-based investment.
                   </p>
-                  <span className="text-gray-400 text-sm">Launching soon</span>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• Crop cultivation on arable land</li>
+                  </ul>
+                  <span className="inline-flex items-center text-amber-700 font-bold text-sm">
+                    View details →
+                  </span>
                 </div>
-              </div>
+              </Link>
             </Reveal>
 
-            {/* Project 3 - Qurbani cattle (static, blog link) */}
+            {/* Aquaculture Category */}
             <Reveal delay={240}>
-              <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-                <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
-                  Cattle photo
+              <Link
+                href="/en/invest/aquaculture"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
+              >
+                <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
+                  Fish Farming
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                    Ongoing
+                    Coming soon
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Qurbani Cattle Sponsorship</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    A sponsorship project for raising cattle for Qurbani. Learn more on our blog.
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Fish Farming Project</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    Pond-based fish farming investment. Planned production and market linkage.
                   </p>
-                  <Link href="/en/blog" className="text-blue-700 font-semibold text-sm hover:underline">
-                    Read on the blog →
-                  </Link>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• Pond fish farming</li>
+                  </ul>
+                  <span className="inline-flex items-center text-blue-700 font-bold text-sm">
+                    View details →
+                  </span>
                 </div>
-              </div>
+              </Link>
             </Reveal>
           </div>
         </div>

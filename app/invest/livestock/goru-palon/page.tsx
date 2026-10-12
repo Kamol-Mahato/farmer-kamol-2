@@ -85,7 +85,7 @@ export default function GoruPalonInvestPage() {
                 href="/customer/dashboard"
                 className="inline-flex items-center justify-center px-6 py-3 rounded-full font-bold text-white bg-green-700 hover:bg-green-800 transition"
               >
-                আগ্রহ প্রকাশ করুন
+                বিনিয়োগ শুরু করুন
               </Link>
               <Link
                 href="/invest/livestock"
@@ -178,7 +178,7 @@ export default function GoruPalonInvestPage() {
               href="/customer/dashboard"
               className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-bold text-white bg-green-700 hover:bg-green-800 transition shadow-md"
             >
-              আগ্রহ প্রকাশ করুন / নোটিফিকেশন নিন
+              বিনিয়োগ শুরু করুন / নোটিফিকেশন নিন
             </Link>
           </Reveal>
         </div>
@@ -200,7 +200,7 @@ export default function GoruPalonInvestPage() {
               {
                 step: "২",
                 title: "আগ্রহ জানান",
-                desc: "গরু পালন প্রকল্প চালু হলে নোটিফিকেশন পেতে আগ্রহ প্রকাশ করুন।",
+                desc: "গরু পালন প্রকল্প চালু হলে নোটিফিকেশন পেতে বিনিয়োগ শুরু করুন।",
               },
               {
                 step: "৩",

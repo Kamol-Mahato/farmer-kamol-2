@@ -47,21 +47,28 @@ export default function ConditionalLayout({
     return <main className="flex-grow">{children}</main>;
   }
 
-  // ✅ order/cart পেজে floating cart button দরকার নেই — customer ইতিমধ্যে checkout ফ্লো-তে আছে
+  // ✅ order/cart পেজে floating cart দরকার নেই
   const hideFloatingCart =
     pathname === "/order" ||
     pathname === "/en/order" ||
     pathname === "/cart" ||
     pathname === "/en/cart";
 
+  // ✅ invest-related পেজে cart + live chat লুকাবে — শুধু WhatsApp থাকবে
+  const isInvestPage =
+    pathname === "/invest" ||
+    pathname.startsWith("/invest/") ||
+    pathname === "/en/invest" ||
+    pathname.startsWith("/en/invest/");
+
   return (
     <MobileMenuProvider>
       <AgentModeBanner />
       <Navbar />
       <NotificationPermissionBanner />
-      {!hideFloatingCart && <FloatingCartButton />}
-      {!hideFloatingCart && <FloatingWhatsAppButton />}
-      <ChatWidget />
+      {!hideFloatingCart && !isInvestPage && <FloatingCartButton />}
+      <FloatingWhatsAppButton />
+      {!isInvestPage && <ChatWidget />}
       <div className="h-[76px]" />
       <main className="flex-grow">{children}</main>
       <Footer />
