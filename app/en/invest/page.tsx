@@ -10,9 +10,30 @@ import FaqAccordion from "@/app/invest/FaqAccordion";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: `Become a Partner in Our Farm - ${siteConfig.brand.nameEn}`,
+  title: `Agriculture & Farming Invest | Livestock Invest - ${siteConfig.brand.nameEn}`,
   description:
-    "A transparent partnership in Farmer Kamol's farm. First the work, then trust, then partnership.",
+    "Transparent agriculture investment and partnership at Farmer Kamol's farm. Agriculture Invest, Farming Invest, Livestock Invest. Chinese Duck, Cattle Rearing, Crop Farming and Fish Farming projects. First the work, then trust.",
+  keywords: [
+    "Agriculture Invest",
+    "Farming Invest",
+    "Livestock Invest",
+    "Krishi Invest",
+    "Khamar Invest",
+    "Chinese Duck Investment",
+    "Cattle Farming Invest",
+    "Crop Farming Invest",
+    "Fish Farming Invest",
+    "Farmer Kamol Invest",
+  ],
+  openGraph: {
+    title: `Agriculture Investment & Farm Partnership | Farmer Kamol`,
+    description:
+      "Transparent agri investment. Chinese Duck, Cattle, Crop and Fish Farming projects. 35% profit share for partners. Written agreement.",
+    url: "https://farmerkamol.com/en/invest",
+    siteName: siteConfig.brand.nameEn,
+    locale: "en_US",
+    type: "website",
+  },
   alternates: {
     canonical: "/en/invest",
     languages: {

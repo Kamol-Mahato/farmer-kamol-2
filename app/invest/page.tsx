@@ -10,9 +10,32 @@ import FaqAccordion from "./FaqAccordion";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: `আমাদের খামারে অংশীদার হোন - ${siteConfig.brand.name}`,
+  title: `কৃষি বিনিয়োগ | Agriculture & Farming Invest - ${siteConfig.brand.name}`,
   description:
-    "কৃষক কমলের খামারে স্বচ্ছ অংশীদারিত্ব। প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব।",
+    "কৃষক কমলের খামারে স্বচ্ছ কৃষি বিনিয়োগ ও অংশীদারিত্ব। Agriculture Invest, Farming Invest, Livestock Invest, কৃষি বিনিয়োগ। চিনা হাঁস, গরু পালন, ফসল চাষ ও মাছ চাষ প্রকল্প। প্রথমে কাজ, তারপর বিশ্বাস।",
+  keywords: [
+    "কৃষি বিনিয়োগ",
+    "Agriculture Invest",
+    "Farming Invest",
+    "Livestock Invest",
+    "খামারে বিনিয়োগ",
+    "Khamar Invest",
+    "Krishi Invest",
+    "চিনা হাঁস বিনিয়োগ",
+    "গরু পালন বিনিয়োগ",
+    "ফসল চাষ বিনিয়োগ",
+    "মাছ চাষ বিনিয়োগ",
+    "Farmer Kamol Invest",
+  ],
+  openGraph: {
+    title: `কৃষি বিনিয়োগ ও খামারে অংশীদারিত্ব | Farmer Kamol`,
+    description:
+      "স্বচ্ছ কৃষি বিনিয়োগ। চিনা হাঁস, গরু পালন, ফসল চাষ ও মাছ চাষ প্রকল্প। লাভের ৩৫% অংশীদারের। লিখিত চুক্তি।",
+    url: "https://farmerkamol.com/invest",
+    siteName: siteConfig.brand.name,
+    locale: "bn_BD",
+    type: "website",
+  },
   alternates: {
     canonical: "/invest",
     languages: {
@@ -140,80 +163,7 @@ function PhotoCard({ title, imageUrl }: { title: string; imageUrl: string }) {
   );
 }
 
-// ✅ Kamol Own Des-স্টাইল — রাউন্ডেড গ্লাস/জল-ঝাপ সাব-নেভ
-function SubNav() {
-  const links = [
-    { href: "#projects", label: "প্রকল্পসমূহ" },
-    { href: "#farm-status", label: "খামারের অবস্থা" },
-    { href: "#calculator", label: "লাভ বণ্টন" },
-    { href: "#how-to", label: "কীভাবে অংশীদার হবেন" },
-    { href: "#principles", label: "নীতিমালা" },
-    { href: "/contact", label: "যোগাযোগ" },
-  ];
-  return (
-    <div className="sticky top-[76px] z-40 px-3 md:px-4 py-1.5 bg-transparent">
-      <div
-        className="
-          max-w-5xl mx-auto
-          flex items-center gap-2 md:gap-3
-          px-2 md:px-3 py-1.5 md:py-1
-          rounded-2xl md:rounded-full
-          bg-white/55 backdrop-blur-xl
-          border border-white/40
-          shadow-[0_8px_28px_rgba(22,101,52,0.10)]
-        "
-      >
-        {/* লিংক — স্ক্রলযোগ্য, মাঝখানে, দুই পাশে ফেড */}
-        <div className="relative flex-1 min-w-0">
-        <div className="hidden md:block pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/70 to-transparent z-10 rounded-l-full" />
-        <div className="hidden md:block pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/70 to-transparent z-10 rounded-r-full" />
-        <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-x-0.5 gap-y-0.5 md:gap-1 md:overflow-x-auto scrollbar-hide px-1">
-            {links.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="
-                  shrink-0 px-2 md:px-3 py-1 md:py-1.5
-                  rounded-full
-                  text-xs md:text-sm font-semibold
-                  text-gray-700
-                  hover:text-green-800 hover:bg-green-50
-                  active:scale-[0.97]
-                  transition-all duration-200 ease-out
-                  whitespace-nowrap
-                "
-              >
-                {l.label}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA — ডানে, সবসময় দেখা যায় */}
-        <Link
-          href="/customer/dashboard"
-          className="
-            shrink-0 inline-flex items-center gap-1
-            bg-green-700 text-white
-            px-3 md:px-4 py-1.5 md:py-2
-            rounded-full
-            font-bold text-xs md:text-sm
-            shadow-md shadow-green-900/15
-            hover:bg-green-800 hover:shadow-lg
-            active:scale-[0.97]
-            transition-all duration-200 ease-out
-            whitespace-nowrap
-          "
-        >
-          বিনিয়োগ করুন
-          <span className="hidden sm:inline" aria-hidden>
-            →
-          </span>
-        </Link>
-      </div>
-    </div>
-  );
-}
+import InvestSubNav from "./InvestSubNav";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -271,7 +221,7 @@ export default async function InvestPage() {
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)] text-gray-800">
 
-      <SubNav />
+      <InvestSubNav />
 
       {/* =========================================================
           HERO
@@ -419,188 +369,98 @@ export default async function InvestPage() {
       </section>
 
       {/* =========================================================
-          PROJECTS
+          PROJECTS / CATEGORIES
       ========================================================== */}
       <section id="projects" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
         <div className="max-w-6xl mx-auto">
-        <Reveal className="text-center mb-10">
-            <SectionHeading>প্রকল্পসমূহ</SectionHeading>
+          <Reveal className="text-center mb-10">
+            <SectionHeading>কৃষি বিনিয়োগের খাতসমূহ</SectionHeading>
+            <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
+              Agriculture Invest, Farming Invest ও Livestock Invest — তিনটি মূল খাতে আমাদের প্রকল্প চলছে ও চলবে।
+            </p>
           </Reveal>
 
           <div className="grid md:grid-cols-3 gap-6 items-start">
-            {/* Project 1 - চিনা হাঁস (dynamic, expandable) */}
-            <Reveal delay={160}>
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-              <div className="h-40 bg-green-100 flex items-center justify-center text-green-700 font-medium">
-                চিনা হাঁসের ছবি
-              </div>
-              <div className="p-5">
-                <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                  চলমান
-                </span>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{duckProjectName}</h3>
-                <p className="text-sm text-gray-600 mb-3">{duckProjectDesc}</p>
-
-                {/* ✅ সামারি গ্রিড — মেয়াদ / লাভ / মূলধন / লট */}
-                <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">মেয়াদ</p>
-                    <p className="font-bold text-gray-900">
-                      {durationMonths != null ? `${durationMonths.toLocaleString("bn-BD")} মাস` : "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">লাভ বণ্টন</p>
-                    <p className="font-bold text-gray-900">
-                      {investorProfitPct != null
-                        ? `প্রফিটের ${investorProfitPct.toLocaleString("bn-BD")}%`
-                        : "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">মূলধন</p>
-                    <p className="font-bold text-gray-900">
-                      {targetAmount != null
-                        ? `৳ ${targetAmount.toLocaleString("bn-BD")}`
-                        : "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">লট</p>
-                    <p className="font-bold text-gray-900">
-                      {soldLots != null && totalLots != null
-                        ? `${soldLots.toLocaleString("bn-BD")} / ${totalLots.toLocaleString("bn-BD")}`
-                        : totalLots != null
-                          ? `০ / ${totalLots.toLocaleString("bn-BD")}`
-                          : "—"}
-                    </p>
-                  </div>
+            {/* Livestock Category */}
+            <Reveal delay={80}>
+              <Link
+                href="/invest/livestock"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
+              >
+                <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
+                  পশুপালন / Livestock
                 </div>
-
-                {/* অগ্রগতি বার */}
-                {progressPct !== null && (
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>অগ্রগতি</span>
-                      <span className="font-semibold text-gray-700">{progressPct}%</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-green-600 rounded-full transition-all"
-                        style={{ width: `${progressPct}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <DetailToggle>
-                  <div className="pt-4 border-t border-gray-100 space-y-3 text-sm">
-                    {targetAmount ? (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">মোট প্রয়োজন</span>
-                          <span className="font-bold text-gray-800">
-                            ৳{targetAmount.toLocaleString("bn-BD")}
-                          </span>
-                        </div>
-                        {featuredProject?.ownContributionAmount != null && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">আমার নিজের বিনিয়োগ</span>
-                            <span className="font-bold text-gray-800">
-                              ৳{featuredProject.ownContributionAmount.toLocaleString("bn-BD")}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">এখন পর্যন্ত সংগ্রহ</span>
-                          <span className="font-bold text-green-700">
-                            ৳{raisedAmount.toLocaleString("bn-BD")}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <p className="text-gray-400 text-xs">
-                        ফান্ডিংয়ের বিস্তারিত শীঘ্রই যোগ হবে।
-                      </p>
-                    )}
-
-                    {featuredProject?.fundUsage && (
-                      <div>
-                        <p className="text-gray-500 text-xs font-semibold mb-1">টাকা কোথায় খরচ হবে</p>
-                        <p className="text-gray-700">{featuredProject.fundUsage}</p>
-                      </div>
-                    )}
-                    {featuredProject?.timeline && (
-                      <div>
-                        <p className="text-gray-500 text-xs font-semibold mb-1">সময়সীমা</p>
-                        <p className="text-gray-700">{featuredProject.timeline}</p>
-                      </div>
-                    )}
-                    {featuredProject?.risks && (
-                      <div>
-                        <p className="text-gray-500 text-xs font-semibold mb-1">ঝুঁকি</p>
-                        <p className="text-gray-700">{featuredProject.risks}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-gray-500 text-xs font-semibold mb-1">লাভ/ক্ষতি বণ্টন</p>
-                      <p className="text-gray-700">
-                        {featuredProject?.profitShareNote ??
-                          (investorProfitPct != null
-                            ? `লাভ হলে খামারি ${(100 - investorProfitPct).toLocaleString("bn-BD")}% ও অংশীদার ${investorProfitPct.toLocaleString("bn-BD")}% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।`
-                            : "লাভ হলে খামারি ৬৫% ও অংশীদার ৩৫% পাবেন, প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।")}
-                      </p>
-                    </div>
-                    <Link
-                      href="/customer/dashboard"
-                      className="inline-flex items-center gap-1 text-green-700 font-bold text-sm hover:underline pt-1"
-                    >
-                      এই প্রকল্পে অংশীদার হতে আবেদন করুন →
-                    </Link>
-                  </div>
-                </DetailToggle>
-              </div>
-            </div>
+                <div className="p-5">
+                  <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                    চলমান + নতুন
+                  </span>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">লাইভস্টক বিনিয়োগ</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    চিনা হাঁস প্রজনন ও গরু পালন প্রকল্প। বাস্তব খামার, লিখিত চুক্তি ও স্বচ্ছ হিসাব।
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• চিনা হাঁস সম্প্রসারণ</li>
+                    <li>• গরু পালন প্রকল্প</li>
+                  </ul>
+                  <span className="inline-flex items-center text-green-700 font-bold text-sm">
+                    বিস্তারিত দেখুন →
+                  </span>
+                </div>
+              </Link>
             </Reveal>
 
-            {/* Project 2 - ফসল (static, শীঘ্রই) */}
-            <Reveal direction="up" delay={120}>
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-              <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-700 font-medium">
-                ফসলের ছবি
-              </div>
-              <div className="p-5">
-                <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                  শীঘ্রই আসছে
-                </span>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">যোগ্য জমিতে ফসল চাষ</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  ধান, সরিষাসহ উচ্চমূল্যের ফসল চাষ। স্থায়ী ও টেকসই উৎপাদন।
-                </p>
-                <span className="text-gray-400 text-sm">শীঘ্রই চালু হবে</span>
-              </div>
-            </div>
+            {/* Crop Category */}
+            <Reveal delay={160}>
+              <Link
+                href="/invest/crop"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
+              >
+                <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
+                  ফসল চাষ / Crop
+                </div>
+                <div className="p-5">
+                  <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                    শীঘ্রই
+                  </span>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">আবাদি জমিতে ফসল চাষ</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্থায়ী ও টেকসই উৎপাদন ভিত্তিক বিনিয়োগ।
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• আবাদি জমিতে ফসল চাষ</li>
+                  </ul>
+                  <span className="inline-flex items-center text-amber-700 font-bold text-sm">
+                    বিস্তারিত দেখুন →
+                  </span>
+                </div>
+              </Link>
             </Reveal>
 
-            {/* Project 3 - কোরবানির গরু (static, ব্লগে লিংক) */}
+            {/* Aquaculture Category */}
             <Reveal delay={240}>
-            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-200">
-              <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
-                গরুর ছবি
-              </div>
-              <div className="p-5">
-                <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
-                  চলমান
-                </span>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">কোরবানির গরু স্পন্সরশিপ</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  কোরবানির উদ্দেশ্যে গরু পালানোর স্পন্সরশিপ প্রকল্প। বিস্তারিত জানুন আমাদের ব্লগে।
-                </p>
-                <Link href="/blog" className="text-blue-700 font-semibold text-sm hover:underline">
-                ব্লগে পড়ুন →
-                </Link>
-              </div>
-            </div>
+              <Link
+                href="/invest/aquaculture"
+                className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
+              >
+                <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
+                  মাছ চাষ / Aquaculture
+                </div>
+                <div className="p-5">
+                  <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                    শীঘ্রই
+                  </span>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">মাছ চাষ প্রকল্প</h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    পুকুরে মাছ চাষ ভিত্তিক বিনিয়োগ। পরিকল্পিত উৎপাদন ও বাজার সংযোগ।
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
+                    <li>• পুকুরে মাছ চাষ</li>
+                  </ul>
+                  <span className="inline-flex items-center text-blue-700 font-bold text-sm">
+                    বিস্তারিত দেখুন →
+                  </span>
+                </div>
+              </Link>
             </Reveal>
           </div>
         </div>
