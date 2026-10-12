@@ -28,7 +28,7 @@ export default function InvestSubNav() {
         <div className="relative flex-1 min-w-0 overflow-hidden">
           <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white/90 to-transparent z-10 md:hidden" />
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white/90 to-transparent z-10 md:hidden" />
-          <div className="flex flex-nowrap items-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide px-1">
+          <div className="flex flex-nowrap items-center justify-start md:justify-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide px-1">
             {links.map((l) => (
               <Link
                 key={l.href}
