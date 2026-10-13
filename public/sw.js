@@ -1,5 +1,41 @@
 // ✅ এই ফাইলটি সাধারণ কাস্টমার, এজেন্ট এবং অ্যাডমিন — সবার জন্যই কাজ করবে
 
+// ০. Offline ফলব্যাক — শুধু নেট না থাকলে পেজ খোলার সময় কাজ করবে, আর কিছুই ক্যাশ হয় না
+const OFFLINE_CACHE = "fk-offline-v1";
+const OFFLINE_URL = "/offline.html";
+
+self.addEventListener("install", function (event) {
+  event.waitUntil(
+    caches
+      .open(OFFLINE_CACHE)
+      .then((cache) => cache.add(OFFLINE_URL))
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener("activate", function (event) {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => k.startsWith("fk-offline-") && k !== OFFLINE_CACHE)
+            .map((k) => caches.delete(k)),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener("fetch", function (event) {
+  const req = event.request;
+  // শুধু GET পেজ-নেভিগেশন; API, পেমেন্ট POST, চ্যাট, ছবি — কিছুতেই হাত দেবে না
+  if (req.mode !== "navigate" || req.method !== "GET") return;
+
+  event.respondWith(fetch(req).catch(() => caches.match(OFFLINE_URL)));
+});
+
 // ১. Push Notification হ্যান্ডলার
 self.addEventListener("push", function (event) {
   let data = { title: "Farmer Kamol", body: "নতুন আপডেট!", url: "/" };

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.brand.name}`,
   },
   description: siteConfig.seo.description,
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   keywords: [...siteConfig.seo.keywords],
   openGraph: {
     title: siteConfig.seo.defaultTitle,

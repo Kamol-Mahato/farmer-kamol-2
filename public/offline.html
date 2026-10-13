@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#16a34a" />
+    <title>ইন্টারনেট সংযোগ নেই | Farmer Kamol</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #f0fdf4;
+        color: #14532d;
+        font-family: "Hind Siliguri", system-ui, -apple-system, "Segoe UI",
+          sans-serif;
+        text-align: center;
+      }
+      .card {
+        max-width: 380px;
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #bbf7d0;
+        border-radius: 20px;
+        padding: 32px 24px;
+        box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12);
+      }
+      .icon {
+        font-size: 56px;
+        line-height: 1;
+        margin-bottom: 12px;
+      }
+      .brand {
+        font-size: 18px;
+        font-weight: 700;
+        color: #16a34a;
+        margin: 0 0 16px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 24px;
+        color: #166534;
+      }
+      button {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 17px;
+        font-weight: 600;
+        font-family: inherit;
+        color: #ffffff;
+        background: #16a34a;
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      button:active {
+        background: #15803d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon">🌾</div>
+      <p class="brand">Farmer Kamol</p>
+      <h1>ইন্টারনেট সংযোগ নেই</h1>
+      <p>
+        অর্ডার করতে বা পণ্য দেখতে ইন্টারনেট দরকার। সংযোগ চালু করে আবার চেষ্টা
+        করুন।
+      </p>
+      <button type="button" onclick="location.reload()">আবার চেষ্টা করুন</button>
+    </div>
+    <script>
+      // নেট ফিরে এলে নিজে থেকেই পেজ রিলোড হবে
+      window.addEventListener("online", function () {
+        location.reload();
+      });
+    </script>
+  </body>
+</html>
