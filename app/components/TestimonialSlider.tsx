@@ -61,7 +61,7 @@ export default function TestimonialSlider({
               className="px-3"
               style={{ flex: `0 0 ${100 / perView}%` }}
             >
-              <div className="relative flex flex-col h-full bg-white rounded-2xl p-6 border border-yellow-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:border-yellow-200">
+              <div className="relative flex flex-col h-full bg-white rounded-2xl p-6 border border-green-200/80 border-t-4 border-t-green-600 shadow-md shadow-green-900/5 transition-all duration-500 ease-out hover:shadow-lg hover:border-green-300">
                 <span
                   aria-hidden="true"
                   className="absolute top-3 right-5 text-6xl leading-none font-serif text-green-100 select-none"
@@ -84,7 +84,7 @@ export default function TestimonialSlider({
                     {review.comment}
                   </p>
                 )}
-                <div className="mt-auto flex items-center gap-3 pt-4 border-t border-yellow-50">
+                <div className="mt-auto flex items-center gap-3 pt-4 border-t border-green-100">
                   <span className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-700 text-white font-bold">
                     {Array.from((review.user.name || (isEn ? "Customer" : "গ্রাহক")).trim())[0]}
                   </span>

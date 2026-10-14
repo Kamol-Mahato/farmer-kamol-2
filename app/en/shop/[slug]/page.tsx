@@ -136,12 +136,14 @@ export default async function ProductDetailPage({
         },
       },
     }),
-    // ⭐️ aggregateRating: Fallback 5/5 rating to fix Google warning
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.reviews.length > 0 ? avgRating.toFixed(1) : "5.0",
-      reviewCount: product.reviews.length > 0 ? product.reviews.length : 1,
-    },
+    // Send aggregateRating only when real approved reviews exist — never a fake rating
+    ...(product.reviews.length > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: avgRating.toFixed(1),
+        reviewCount: product.reviews.length,
+      },
+    }),
   };
 
   const breadcrumbSchema = {
