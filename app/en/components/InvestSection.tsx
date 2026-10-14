@@ -2,6 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import {
+  Handshake,
+  Sprout,
+  FileText,
+  Banknote,
+  Eye,
+  ShieldAlert,
+  BadgeCheck,
+  Video,
+  type LucideIcon,
+} from "lucide-react";
 
 type InvestSectionProps = {
   activeProjects?: number;
@@ -20,6 +31,53 @@ export default function InvestSection({
     { label: "Ongoing projects", value: String(activeProjects) },
     { label: "Partners", value: partnerCount > 0 ? `${partnerCount}+` : "—" },
     { label: "Raised", value: progressPct != null ? `${progressPct}%` : "—" },
+  ];
+
+  // Side cards — beside the center content on large screens, below it in 2 columns on mobile
+  const leftCards = [
+    {
+      icon: Handshake,
+      title: "Profit partnership",
+      desc: "35% of the actual profit goes to the investor, the rest to the farm",
+    },
+    {
+      icon: Sprout,
+      title: "A real project",
+      desc: "Our journey begins with Muscovy duck breeding",
+    },
+    {
+      icon: FileText,
+      title: "Written e-agreement",
+      desc: "A detailed agreement with a serial number for every investment",
+    },
+    {
+      icon: Banknote,
+      title: "Cash profit payout",
+      desc: "You receive profit in cash, while your capital keeps working in the project",
+    },
+  ];
+
+  const rightCards = [
+    {
+      icon: Eye,
+      title: "Transparent accounts",
+      desc: "The real income and expense figures are shared openly",
+    },
+    {
+      icon: ShieldAlert,
+      title: "Honest about risk",
+      desc: "In case of loss, the remaining capital is returned — not a guarantee of full return",
+    },
+    {
+      icon: BadgeCheck,
+      title: "Verified partners",
+      desc: "You can invest only after your profile is complete and verified",
+    },
+    {
+      icon: Video,
+      title: "The farm's journey",
+      desc: "See the farm's real progress in videos and photos",
+    },
   ];
 
   // A light fade-slide-up once, the first time it enters the screen — not repeatedly
@@ -50,10 +108,18 @@ export default function InvestSection({
       className="bg-[#FAF9F6] py-8 md:py-10 px-4 border-y border-green-100/80"
     >
       <div
-        className={`max-w-2xl mx-auto text-center transition-all duration-700 ease-out ${
+        className={`max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1fr_minmax(0,42rem)_1fr] lg:gap-8 lg:items-center transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
+        {/* Left cards (below the center content on mobile) */}
+        <div className="order-2 lg:order-1 grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+          {leftCards.map((c) => (
+            <SideCard key={c.title} {...c} />
+          ))}
+        </div>
+
+        <div className="order-1 lg:order-2 text-center">
         {/* Heading — pill style like the Product section */}
         <div className="text-center mb-6">
           <h2 className="inline-flex items-center border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2.5 rounded-full">
@@ -118,9 +184,40 @@ export default function InvestSection({
           </div>
           <p className="text-xs text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
             Not a guaranteed return — only a partnership in actual profit, with a written agreement.
-          </p>
+            </p>
+        </div>
+        </div>
+
+        {/* Right cards */}
+        <div className="order-3 grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+          {rightCards.map((c) => (
+            <SideCard key={c.title} {...c} />
+          ))}
         </div>
       </div>
     </section>
+  );
+}
+
+// Small info card — icon + title + one-line description
+function SideCard({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 lg:gap-3 bg-white rounded-2xl border border-green-100/80 p-4 shadow-sm text-center lg:text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+      <span className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-700">
+        <Icon className="h-5 w-5" />
+      </span>
+      <div>
+        <p className="text-sm font-bold text-gray-900">{title}</p>
+        <p className="text-xs text-gray-600 mt-1 leading-relaxed">{desc}</p>
+      </div>
+    </div>
   );
 }

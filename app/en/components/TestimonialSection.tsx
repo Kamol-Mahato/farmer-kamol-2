@@ -15,7 +15,7 @@ export default function TestimonialSection({ reviews }: { reviews: Review[] }) {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-green-800">
-            What Our Happy Customers Say
+            Our Happy Customer's
           </h2>
         </div>
         <TestimonialSlider reviews={reviews} locale="en" />

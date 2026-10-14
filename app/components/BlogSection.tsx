@@ -19,12 +19,12 @@ export default function BlogSection({ blogs }: { blogs: Blog[] }) {
             আমাদের কৃষি বিষয়ক ব্লগ
           </h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
           {blogs.map((blog) => (
             <Link
               key={blog.id}
               href={`/blog/${blog.slug}`}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden group border border-gray-100"
+              className="flex flex-col h-full bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden group transition-all duration-500 ease-out hover:shadow-md hover:border-green-200"
             >
               {blog.image && blog.image.startsWith("/") && (
                 <div className="relative w-full h-48 overflow-hidden">
@@ -33,20 +33,26 @@ export default function BlogSection({ blogs }: { blogs: Blog[] }) {
                     alt={blog.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition duration-300"
+                    className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                   />
                 </div>
               )}
-              <div className="p-4 text-left">
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+              <div className="p-5 text-left flex flex-col flex-1">
+                <span className="self-start text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">
                   {blog.category}
                 </span>
-                <h3 className="text-lg font-bold text-green-800 mt-2 group-hover:text-green-600 transition">
+                <h3 className="text-lg font-bold text-green-800 mt-3 leading-snug group-hover:text-green-600 transition">
                   {blog.title}
                 </h3>
-                <p className="text-gray-500 text-xs mt-2">
-                  {new Date(blog.createdAt).toLocaleDateString("bn-BD")}
-                </p>
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-green-50">
+                  <p className="text-gray-500 text-xs">
+                    {new Date(blog.createdAt).toLocaleDateString("bn-BD")}
+                  </p>
+                  <span className="text-xs font-semibold text-green-700 inline-flex items-center gap-1">
+                    আরও পড়ুন
+                    <span>→</span>
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
