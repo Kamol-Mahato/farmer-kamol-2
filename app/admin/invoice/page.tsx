@@ -195,7 +195,7 @@ function POSInvoice({ order, qrUrl }: { order: Order; qrUrl: string }) {
       </div>
       <p className="text-center text-xs text-gray-400 mt-2">
         {" "}
-        ধন্যবাদান্তে farmerkamol.com
+        ধন্যবাদান্তে Farmer Kamol
       </p>
     </div>
   );
