@@ -1,12 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-type Review = {
-  id: number;
-  rating: number;
-  comment: string | null;
-  user: { name: string | null };
-};
+import type { TestimonialItem } from "@/lib/placeholderReviews";
+
+type Review = TestimonialItem;
 
 export default function TestimonialSlider({
   reviews,
@@ -64,17 +61,44 @@ export default function TestimonialSlider({
               className="px-3"
               style={{ flex: `0 0 ${100 / perView}%` }}
             >
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
-                <div className="text-yellow-500 mb-2 text-lg">
-                  {"★".repeat(review.rating)}
-                  {"☆".repeat(5 - review.rating)}
-                </div>
-                {review.comment && (
-                  <p className="text-gray-600 text-sm mb-4">{review.comment}</p>
+              <div className="relative flex flex-col h-full bg-white rounded-2xl p-6 border border-yellow-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:border-yellow-200">
+                <span
+                  aria-hidden="true"
+                  className="absolute top-3 right-5 text-6xl leading-none font-serif text-green-100 select-none"
+                >
+                  ”
+                </span>
+                {review.productLabel && (
+                  <span className="self-start text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full mb-3">
+                    {review.productLabel}
+                  </span>
                 )}
-                <p className="font-bold text-green-800">
-                {review.user.name || (isEn ? "Our Happy Customer" : "আমাদের সন্তুষ্ট গ্রাহক")}
-                </p>
+                {review.rating > 0 && (
+                  <div className="text-yellow-500 mb-2 text-lg">
+                    {"★".repeat(review.rating)}
+                    {"☆".repeat(5 - review.rating)}
+                  </div>
+                )}
+                {review.comment && (
+                  <p className="relative text-gray-700 text-sm leading-relaxed mb-5">
+                    {review.comment}
+                  </p>
+                )}
+                <div className="mt-auto flex items-center gap-3 pt-4 border-t border-yellow-50">
+                  <span className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-700 text-white font-bold">
+                    {Array.from((review.user.name || (isEn ? "Customer" : "গ্রাহক")).trim())[0]}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold text-green-800 truncate">
+                      {review.user.name || (isEn ? "Our Happy Customer" : "আমাদের সন্তুষ্ট গ্রাহক")}
+                    </p>
+                    {review.verified && (
+                      <p className="text-[11px] font-medium text-green-700">
+                        ✓ {isEn ? "Verified order" : "যাচাইকৃত অর্ডার"}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -86,16 +110,38 @@ export default function TestimonialSlider({
           <button
             onClick={goPrev}
             aria-label={isEn ? "Previous review" : "আগের রিভিউ"}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 bg-white shadow rounded-full w-9 h-9 flex items-center justify-center text-green-700 font-bold hover:bg-green-50 transition"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-md text-green-800 transition-all duration-300 hover:bg-white/70"
           >
-            {"<"}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
           <button
             onClick={goNext}
             aria-label={isEn ? "Next review" : "পরের রিভিউ"}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 bg-white shadow rounded-full w-9 h-9 flex items-center justify-center text-green-700 font-bold hover:bg-green-50 transition"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-md text-green-800 transition-all duration-300 hover:bg-white/70"
           >
-            {">"}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </button>
           <div className="flex justify-center gap-2 mt-6">
             {Array.from({ length: maxIndex + 1 }).map((_, i) => (

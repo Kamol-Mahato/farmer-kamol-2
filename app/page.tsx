@@ -79,7 +79,10 @@ export default async function HomePage() {
     }),
     prisma.productReview.findMany({
       where: { isApproved: true },
-      include: { user: { select: { name: true } } },
+      include: {
+        user: { select: { name: true } },
+        product: { select: { name: true, nameEn: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: 30,
     }),

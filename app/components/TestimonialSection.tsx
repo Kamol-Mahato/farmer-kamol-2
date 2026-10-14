@@ -1,14 +1,9 @@
 import TestimonialSlider from "./TestimonialSlider";
+import { buildTestimonials, type RealReview } from "@/lib/placeholderReviews";
 
-type Review = {
-  id: number;
-  rating: number;
-  comment: string | null;
-  user: { name: string | null };
-};
-
-export default function TestimonialSection({ reviews }: { reviews: Review[] }) {
-  if (reviews.length === 0) return null; // Approved রিভিউ না থাকলে সেকশনই দেখাবে না
+export default function TestimonialSection({ reviews }: { reviews: RealReview[] }) {
+  const items = buildTestimonials(reviews, "bn");
+  if (items.length === 0) return null;
 
   return (
     <div className="bg-yellow-50 py-6 px-4">
@@ -18,7 +13,7 @@ export default function TestimonialSection({ reviews }: { reviews: Review[] }) {
             আমাদের সন্তুষ্ট গ্রাহকদের অভিজ্ঞতা
           </h2>
         </div>
-        <TestimonialSlider reviews={reviews} />
+        <TestimonialSlider reviews={items} />
       </div>
     </div>
   );
