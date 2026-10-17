@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 
-const pageTitle = `About Us - Integrated Farming, Livestock & Crop Cultivation | ${siteConfig.brand.nameEn}`;
-const pageDescription = `Learn about ${siteConfig.brand.nameEn}'s story, mission, and vision — pure honey, ghee, and mustard oil through integrated farming in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, delivered straight from the farm to your door.`;
+const pageTitle = `About Us - Integrated Farming, Livestock & Crop Cultivation | ${siteConfig.brand.displayName}`;
+const pageDescription = `Learn about ${siteConfig.brand.nameEn} (${siteConfig.brand.nameBn})'s story, mission, and vision — pure honey, ghee, and mustard oil through integrated farming in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, delivered straight from the farm to your door.`;
 const pageUrl = `${siteConfig.domain.url}/en/about`;
 const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`;
 

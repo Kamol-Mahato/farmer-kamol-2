@@ -229,8 +229,8 @@ export default function AboutPage() {
               আমাদের সম্পর্কে
             </p>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 leading-snug">
-              সিরাজগঞ্জের মাটি থেকে আপনার রান্নাঘর পর্যন্ত — Farmer Kamol-এর
-              যাত্রা
+            সিরাজগঞ্জের মাটি থেকে আপনার রান্নাঘর পর্যন্ত — Farmer Kamol
+            (কৃষক কমল)-এর যাত্রা
             </h1>
           </Reveal>
           <Reveal delay={100}>

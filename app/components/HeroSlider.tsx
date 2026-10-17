@@ -354,7 +354,7 @@ export default function HeroSlider({
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
-        Farmer Kamol - সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার তেল
+      Farmer Kamol – কৃষক কমল | সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার তেল
         ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
       </h1>
 

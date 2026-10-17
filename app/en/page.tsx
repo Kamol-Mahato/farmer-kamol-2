@@ -17,11 +17,13 @@ const TestimonialSection = dynamic(() => import("@/app/en/components/Testimonial
 
 export const revalidate = 86400;
 
+const homeTitleEn = `${siteConfig.brand.displayName} | ${siteConfig.brand.sloganEn}`;
+
 export const metadata: Metadata = {
-  title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+  title: homeTitleEn,
   description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
   openGraph: {
-    title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+    title: homeTitleEn,
     description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
     url: "/en",
     siteName: siteConfig.brand.nameEn,
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.brand.nameEn} - ${siteConfig.brand.sloganEn}`,
+    title: homeTitleEn,
     description: `Pure honey, ghee, mustard oil, and duck chicks — delivered directly from our farm in ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, with no middlemen.`,
     images: [siteConfig.domain.ogImage],
   },

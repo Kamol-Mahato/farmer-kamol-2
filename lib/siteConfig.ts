@@ -6,6 +6,9 @@ export const siteConfig = {
   brand: {
     name: "Farmer Kamol",
     nameEn: "Farmer Kamol",
+    nameBn: "কৃষক কমল",
+    displayName: "Farmer Kamol – কৃষক কমল",
+    alternateNames: ["Krishok Kamol", "Krishak Kamal"],
     slogan: "খামার থেকে আপনার দরজায়",
     sloganEn: "From the Farm to Your Door",
     founderName: "Kamol Kumar Mahato",
@@ -65,7 +68,7 @@ export const siteConfig = {
 
   // মেটাডেটা / SEO
   seo: {
-    defaultTitle: "Farmer Kamol - খামার থেকে আপনার দরজায়",
+    defaultTitle: "Farmer Kamol – কৃষক কমল | খামার থেকে আপনার দরজায়",
     titleTemplate: "%s | Farmer Kamol",
     description:
       "সিরাজগঞ্জের রায়গঞ্জ থেকে সরাসরি খাঁটি দেশি পণ্য, ন্যায্য মূল্যে।",
@@ -78,6 +81,8 @@ export const siteConfig = {
       "চীন হাঁসের বাচ্চা",
       "সিরাজগঞ্জ খামার",
       "Farmer Kamol",
+      "কৃষক কমল",
+      "Farmer Kamol কৃষক কমল",
     ],
   },
 

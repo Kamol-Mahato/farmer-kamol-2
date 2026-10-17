@@ -4,12 +4,19 @@ import { siteConfig } from "@/lib/siteConfig";
 export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
   const isEn = lang === "en";
 
-  const schema = {
-    "@context": "https://schema.org",
+  const siteUrl = siteConfig.domain.url;
+  const alternateNames = [
+    siteConfig.brand.nameBn,
+    ...siteConfig.brand.alternateNames,
+  ];
+
+  const business = {
     "@type": "LocalBusiness",
+    "@id": `${siteUrl}/#organization`,
     name: siteConfig.brand.name,
+    alternateName: alternateNames,
     image: `${siteConfig.domain.url}${siteConfig.domain.logo}`,
-    url: isEn ? `${siteConfig.domain.url}/en` : siteConfig.domain.url,
+    url: siteUrl,
     telephone: siteConfig.contact.phone,
     priceRange: siteConfig.business.priceRange,
     address: {
@@ -40,7 +47,12 @@ export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
     foundingDate: siteConfig.brand.foundingYear,
     founder: {
       "@type": "Person",
+      "@id": `${siteUrl}/#founder`,
       name: siteConfig.brand.founderName,
+      alternateName: [
+        siteConfig.brand.founderNameBn,
+        `${siteConfig.brand.nameBn} (${siteConfig.brand.founderNameBn})`,
+      ],
     },
     openingHoursSpecification: {
       "@type": "OpeningHoursSpecification",
@@ -53,6 +65,21 @@ export default function OrganizationSchema({ lang }: { lang: "bn" | "en" }) {
     currenciesAccepted: siteConfig.business.currenciesAccepted,
     areaServed: "Bangladesh",
     knowsLanguage: ["bn", "en"],
+  };
+
+  const website = {
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    url: siteUrl,
+    name: siteConfig.brand.name,
+    alternateName: alternateNames,
+    inLanguage: isEn ? "en" : "bn",
+    publisher: { "@id": `${siteUrl}/#organization` },
+  };
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [website, business],
   };
 
   return (

@@ -18,8 +18,8 @@ const TestimonialSection = dynamic(() => import("./components/TestimonialSection
 export const revalidate = 86400; // ২৪ ঘণ্টা safety-net; Admin Save করলেই সাথে সাথে revalidatePath() দিয়ে আগে আপডেট হয়ে যাবে
 
 export const metadata: Metadata = {
-  title: `${siteConfig.brand.name} - ${siteConfig.brand.slogan}`,
-  description: `${siteConfig.address.region}ের ${siteConfig.address.locality} থেকে সরাসরি খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা — কোনো মধ্যস্থতাকারী ছাড়া, খামার থেকে আপনার দরজায়।`,
+  title: `${siteConfig.brand.displayName} | ${siteConfig.brand.slogan}`,
+  description: `${siteConfig.brand.displayName}: ${siteConfig.address.region}ের ${siteConfig.address.locality} থেকে সরাসরি খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা — কোনো মধ্যস্থতাকারী ছাড়া, খামার থেকে আপনার দরজায়।`,
   alternates: {
     canonical: "/",
     languages: {

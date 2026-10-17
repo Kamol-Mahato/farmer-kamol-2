@@ -343,7 +343,7 @@ export default function HeroSlider({
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
-        Farmer Kamol - Pure honey, ghee, mustard oil, and duck chicks, delivered
+      Farmer Kamol – কৃষক কমল | Pure honey, ghee, mustard oil, and duck chicks, delivered
         directly from our farm in Raiganj, Sirajganj
       </h1>
 

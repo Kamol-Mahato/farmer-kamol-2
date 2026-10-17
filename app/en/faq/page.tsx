@@ -20,6 +20,10 @@ const faqGroups = [
     category: `About ${siteConfig.brand.nameEn}`,
     items: [
       {
+        q: `Who is ${siteConfig.brand.nameEn} (${siteConfig.brand.nameBn})?`,
+        a: `${siteConfig.brand.nameEn} and ${siteConfig.brand.nameBn} are the same brand — the English and Bangla forms of one name. It is an agricultural brand based in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, founded by ${siteConfig.brand.founderName}, delivering pure honey, ghee, mustard oil, and duck chicks directly from the farm.`,
+      },
+      {
         q: `What is ${siteConfig.brand.nameEn}?`,
         a: `${siteConfig.brand.nameEn} is an agricultural brand based in ${siteConfig.address.villageEn}, ${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}, delivering pure honey, ghee, mustard oil, and duck chicks directly from the farm to customers, with no middlemen.`,
       },

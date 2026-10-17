@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 
-const pageTitle = `আমাদের সম্পর্কে - সমন্বিত কৃষি, পশুপালন ও ফসল চাষ | ${siteConfig.brand.name}`;
-const pageDescription = `${siteConfig.brand.name}-এর গল্প, মিশন ও ভিশন — সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রাম থেকে সমন্বিত কৃষিতে খাঁটি মধু, ঘি ও সরিষার তেল সরাসরি খামার থেকে আপনার দরজায়।`;
+const pageTitle = `আমাদের সম্পর্কে - সমন্বিত কৃষি, পশুপালন ও ফসল চাষ | ${siteConfig.brand.displayName}`;
+const pageDescription = `${siteConfig.brand.name} (${siteConfig.brand.nameBn})-এর গল্প, মিশন ও ভিশন — সিরাজগঞ্জের রায়গঞ্জের সারইল গ্রাম থেকে সমন্বিত কৃষিতে খাঁটি মধু, ঘি ও সরিষার তেল সরাসরি খামার থেকে আপনার দরজায়।`;
 const pageUrl = `${siteConfig.domain.url}/about`;
 const ogImage = `${siteConfig.domain.url}${siteConfig.domain.ogImage}`;
 

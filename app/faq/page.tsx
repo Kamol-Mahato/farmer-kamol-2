@@ -20,6 +20,10 @@ const faqGroups = [
     category: `${siteConfig.brand.name} সম্পর্কে`,
     items: [
       {
+        q: `${siteConfig.brand.nameBn} কে বা কী?`,
+        a: `${siteConfig.brand.nameBn} ও ${siteConfig.brand.name} একই ব্র্যান্ড — একটি নামেরই বাংলা ও ইংরেজি রূপ। এটি ${siteConfig.address.region}ের ${siteConfig.address.locality}, ${siteConfig.address.village} গ্রামভিত্তিক একটি কৃষি ব্র্যান্ড, যার প্রতিষ্ঠাতা ${siteConfig.brand.founderNameBn}। খামার থেকে সরাসরি খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা সরবরাহ করা হয়।`,
+      },
+      {
         q: `${siteConfig.brand.name} কী?`,
         a: `${siteConfig.brand.name} হলো ${siteConfig.address.region}ের ${siteConfig.address.locality}, ${siteConfig.address.village} ভিত্তিক একটি কৃষি-পণ্যের ব্র্যান্ড, যা সরাসরি খামার থেকে খাঁটি মধু, ঘি, সরিষার তেল ও চীন হাঁসের বাচ্চা গ্রাহকের কাছে পৌঁছে দেয়, কোনো মধ্যস্থতাকারী ছাড়া।`,
       },
