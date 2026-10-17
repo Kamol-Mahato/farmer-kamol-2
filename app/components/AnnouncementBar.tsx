@@ -66,8 +66,8 @@ export default function AnnouncementBar() {
   });
 
   // ইংরেজি ভার্সনের আইটেম লিস্ট (আগের মতোই ৩টি আইটেম)
-  const itemsDesktopEn = [timeStr, englishDateStr, "Rainy Season"];
-  const itemsMobileEn = [timeStr, englishDateShort, "Rainy Season"];
+  const itemsDesktopEn = [timeStr, englishDateStr, `${bDate.rituEn} Season`];
+  const itemsMobileEn = [timeStr, englishDateShort, `${bDate.rituEn} Season`];
 
   // বাংলা ভার্সনের আইটেম লিস্ট (১ম: সময়, ২য়: ইংরেজি তারিখ, ৩য়: বাংলা তারিখ, ৪র্থ: ঋতু)
   const itemsDesktopBn = [

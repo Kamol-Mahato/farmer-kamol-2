@@ -89,6 +89,10 @@ const jsonLd = {
       "@type": "Organization",
       "@id": `${siteConfig.domain.url}/#organization`,
       name: siteConfig.brand.name,
+      alternateName: [
+        siteConfig.brand.nameBn,
+        ...siteConfig.brand.alternateNames,
+      ],
       url: siteConfig.domain.url,
       logo: `${siteConfig.domain.url}${siteConfig.domain.logo}`,
       foundingDate: siteConfig.brand.foundingYear,
