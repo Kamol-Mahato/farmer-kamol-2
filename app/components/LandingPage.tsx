@@ -39,6 +39,28 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
   const { products, deliveryMode } = await getData(landing.productMatch);
   const pageUrl = `${siteConfig.domain.url}/${landing.slug}`;
 
+  const productSchemas = products.map((p) => {
+    const img = p.images?.[0]?.imageUrl;
+    return {
+      "@type": "Product",
+      name: p.name,
+      description: landing.description,
+      image: img
+        ? img.startsWith("http")
+          ? img
+          : `${siteConfig.domain.url}${img.startsWith("/") ? "" : "/"}${img}`
+        : undefined,
+      url: `${siteConfig.domain.url}/shop/${p.slug}`,
+      brand: { "@type": "Brand", name: "Farmer Kamol" },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "BDT",
+        availability: "https://schema.org/InStock",
+        url: `${siteConfig.domain.url}/shop/${p.slug}`,
+      },
+    };
+  });
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -67,6 +89,7 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
           acceptedAnswer: { "@type": "Answer", text: f.a },
         })),
       },
+      ...productSchemas,
     ],
   };
 

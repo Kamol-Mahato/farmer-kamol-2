@@ -22,12 +22,21 @@ const cspHeader = `
   .replace(/\s{2,}/g, " ")
   .trim();
 
-const nextConfig = {
-  allowedDevOrigins: [
-    "*.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev",
-  ],
-  poweredByHeader: false,
-  reactStrictMode: true, // ✅ রিঅ্যাক্ট মোড পারফর্মেন্স ট্র্যাকিং
+  const nextConfig = {
+    allowedDevOrigins: [
+      "*.cluster-edb2jv34dnhjisxuq5m7l37ccy.cloudworkstations.dev",
+    ],
+    poweredByHeader: false,
+    reactStrictMode: true, // ✅ রিঅ্যাক্ট মোড পারফর্মেন্স ট্র্যাকিং
+  
+    // ছোট কিওয়ার্ড URL → আসল ল্যান্ডিং পেজে রিডাইরেক্ট
+    async redirects() {
+      return [
+        { source: "/modhu", destination: "/khati-modhu", permanent: true },
+        { source: "/sorisha-tel", destination: "/khati-sorisha-tel", permanent: true },
+        { source: "/ghee", destination: "/khati-ghee", permanent: true },
+      ];
+    },
   
   // ✅ ১. CSS ও প্যাকেজ বান্ডল অপ্টিমাইজেশন (Render-blocking ও Legacy JS কমাবে)
   experimental: {
