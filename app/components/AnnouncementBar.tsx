@@ -121,7 +121,7 @@ export default function AnnouncementBar() {
             <span key={i}>
               {locale === "en" ? (
                 <>
-                  Nomoskar / Assalamu Alaikum Pure Honey, Ghee, Mustard oil &
+                  Nomoskar / Assalamu Alaikum Pure Honey, Pure Ghee, Pure Mustard oil,Pure Date Palm Jaggery &
                   Duck Chicks — straight from our farm to your door. Welcome
                   &nbsp;
                   <a
@@ -143,7 +143,7 @@ export default function AnnouncementBar() {
               ) : (
                 <>
                   নমস্কার / আসসালামুআলাইকুম, {siteConfig.brand.name}-এ পেয়ে
-                  যাচ্ছেন খাঁটিমধু - ঘি - সরিষার তেল ও হাঁসের বাচ্চা — সরাসরি
+                  যাচ্ছেন খাঁটিমধু - খাঁটি ঘি - খাঁটি সরিষার তেল,খেজুরের খাঁটি গুড়  ও হাঁসের বাচ্চা — সরাসরি
                   খামার থেকে আপনার দরজায়।&nbsp;
                   <a
                     href={localizeHref("/", locale)}
