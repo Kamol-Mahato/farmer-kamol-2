@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/siteConfig";
+import { seoLandings } from "@/lib/seoLandings";
 
 const BASE_URL = siteConfig.domain.url;
 
@@ -8,6 +9,12 @@ export const revalidate = 3600; // ১ ঘণ্টা caching — প্রত�
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
+    ...seoLandings.map((l) => ({
+      url: `${BASE_URL}/${l.slug}`,
+      lastModified: new Date(l.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    })),
     {
       url: BASE_URL,
       lastModified: new Date(),

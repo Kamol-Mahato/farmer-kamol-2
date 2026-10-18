@@ -244,7 +244,7 @@ export default async function InvestPageEn() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
                 Farmer Kamol&apos;s Farm
                 <br />
-                <span className="text-green-700">Partnership</span>
+                <span className="text-green-700">Agricultural Investment &amp; Partnership</span>
               </h1>
 
               <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mb-8">

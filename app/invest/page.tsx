@@ -10,9 +10,9 @@ import FaqAccordion from "./FaqAccordion";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: `কৃষি বিনিয়োগ | Agriculture & Farming Invest - ${siteConfig.brand.name}`,
+  title: `কৃষিতে ইনভেস্ট | Agricultural Invest ও কৃষি বিনিয়োগ - ${siteConfig.brand.name}`,
   description:
-    "কৃষক কমলের খামারে স্বচ্ছ কৃষি বিনিয়োগ ও অংশীদারিত্ব। Agriculture Invest, Farming Invest, Livestock Invest, কৃষি বিনিয়োগ। চিনা হাঁস, গরু পালন, ফসল চাষ ও মাছ চাষ প্রকল্প। প্রথমে কাজ, তারপর বিশ্বাস।",
+    "কৃষিতে ইনভেস্ট (Agricultural Invest) করতে চান? কৃষক কমলের খামারে স্বচ্ছ কৃষি বিনিয়োগ ও অংশীদারিত্ব, কোনো নির্দিষ্ট রিটার্নের নিশ্চয়তা ছাড়া, প্রকৃত লাভের ভাগে। Agriculture Invest, Farming Invest, Livestock Invest, কৃষি বিনিয়োগ। চিনা হাঁস, গরু পালন, ফসল চাষ ও মাছ চাষ প্রকল্প। প্রথমে কাজ, তারপর বিশ্বাস।",
   keywords: [
     "কৃষি বিনিয়োগ",
     "Agriculture Invest",
@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     "ফসল চাষ বিনিয়োগ",
     "মাছ চাষ বিনিয়োগ",
     "Farmer Kamol Invest",
+    "কৃষিতে ইনভেস্ট",
+    "কৃষিতে বিনিয়োগ",
+    "Agricultural Invest",
+    "খামারে ইনভেস্ট",
   ],
   openGraph: {
     title: `কৃষি বিনিয়োগ ও খামারে অংশীদারিত্ব | Farmer Kamol`,
@@ -245,11 +249,11 @@ export default async function InvestPage() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
                 কৃষক কমলের খামারে
                 <br />
-                <span className="text-green-700">অংশীদারিত্ব</span>
+                <span className="text-green-700">কৃষি বিনিয়োগ ও অংশীদারিত্ব</span>
               </h1>
 
               <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mb-8">
-                প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব।
+              কৃষিতে ইনভেস্ট (কৃষি বিনিয়োগ) করতে চাইলে এখানে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। কোনো নির্দিষ্ট সুদ বা রিটার্নের নিশ্চয়তা নেই, প্রকৃত লাভের নির্ধারিত অংশ আপনি পাবেন।
                 বাস্তব খামার, স্বচ্ছ হিসাব এবং ন্যায্য লাভ ভাগাভাগির মাধ্যমে একসাথে এগিয়ে চলা।
               </p>
 
@@ -764,6 +768,10 @@ export default async function InvestPage() {
           <Reveal>
             <FaqAccordion
               items={[
+                {
+                  q: "কৃষিতে ইনভেস্ট (কৃষি বিনিয়োগ) বলতে এখানে কী বোঝানো হচ্ছে?",
+                  a: "কৃষক কমলের খামারের নির্দিষ্ট প্রকল্পে (যেমন চিনা হাঁস প্রজনন) অংশীদার হওয়া। প্রকল্পে প্রকৃত যে লাভ হবে তার নির্ধারিত অংশ আপনি পাবেন, কোনো নির্দিষ্ট রিটার্নের নিশ্চয়তা নেই। প্রতিটি বিনিয়োগের জন্য লিখিত ই-চুক্তি করা হয়।",
+                },
                 {
                   q: "এটা কি ব্যাংকের মতো নির্ধারিত সুদ বা লাভের স্কিম?",
                   a: "না। কোনো নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্ন নেই। প্রকল্পে প্রকৃত যে লাভ হবে, শুধু তারই নির্ধারিত অংশ আপনি পাবেন। কোনো পর্যায়ে লাভ না হলে সেই পর্যায়ে লাভ ভাগ হবে না।",
