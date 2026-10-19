@@ -23,7 +23,13 @@ export async function generateMetadata({
     title: l.title,
     description: l.description,
     keywords: l.keywords,
-    alternates: { canonical: `/${l.slug}` },
+    alternates: {
+      canonical: `/${l.slug}`,
+      languages: {
+        bn: `/${l.slug}`,
+        en: `/en/${l.slug}`,
+      },
+    },
     openGraph: {
       title: l.title,
       description: l.description,

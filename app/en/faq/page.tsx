@@ -86,7 +86,7 @@ const faqGroups = [
       },
       {
         q: "Are your products adulteration-free?",
-        a: "Yes. No sugar or syrup is mixed into our honey, no vegetable oil is in our ghee, and our mustard oil is made through a proper cold-pressed process.",
+        a: "Yes. No sugar or syrup is mixed into our honey, no vegetable oil is in our ghee, and our mustard oil is mill-pressed with nothing added.",
       },
       {
         q: "How is your ghee made?",

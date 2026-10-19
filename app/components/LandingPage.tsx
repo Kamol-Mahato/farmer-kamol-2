@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { safeJsonLd } from "@/lib/jsonLd";
 import { siteConfig } from "@/lib/siteConfig";
 import type { SeoLanding } from "@/lib/seoLandings";
+import ProductCardEn from "@/app/en/components/ProductCard";
+import { localizeHref, type Locale } from "@/lib/i18n";
 
 async function getData(terms: string[]) {
   try {
@@ -35,28 +37,36 @@ async function getData(terms: string[]) {
   }
 }
 
-export default async function LandingPage({ landing }: { landing: SeoLanding }) {
+export default async function LandingPage({
+  landing,
+  locale = "bn",
+}: {
+  landing: SeoLanding;
+  locale?: Locale;
+}) {
   const { products, deliveryMode } = await getData(landing.productMatch);
-  const pageUrl = `${siteConfig.domain.url}/${landing.slug}`;
+  const isEn = locale === "en";
+  const pageUrl = `${siteConfig.domain.url}${isEn ? "/en" : ""}/${landing.slug}`;
+  const shopBase = `${siteConfig.domain.url}${isEn ? "/en" : ""}/shop`;
 
   const productSchemas = products.map((p) => {
     const img = p.images?.[0]?.imageUrl;
     return {
       "@type": "Product",
-      name: p.name,
+      name: isEn ? p.nameEn || p.name : p.name,
       description: landing.description,
       image: img
         ? img.startsWith("http")
           ? img
           : `${siteConfig.domain.url}${img.startsWith("/") ? "" : "/"}${img}`
         : undefined,
-      url: `${siteConfig.domain.url}/shop/${p.slug}`,
+      url: `${shopBase}/${p.slug}`,
       brand: { "@type": "Brand", name: "Farmer Kamol" },
       offers: {
         "@type": "Offer",
         priceCurrency: "BDT",
         availability: "https://schema.org/InStock",
-        url: `${siteConfig.domain.url}/shop/${p.slug}`,
+        url: `${shopBase}/${p.slug}`,
       },
     };
   });
@@ -70,14 +80,19 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
         url: pageUrl,
         name: landing.title,
         description: landing.description,
-        inLanguage: "bn-BD",
+        inLanguage: isEn ? "en" : "bn-BD",
         dateModified: landing.updatedAt,
         isPartOf: { "@type": "WebSite", url: siteConfig.domain.url },
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "হোম", item: siteConfig.domain.url },
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: isEn ? "Home" : "হোম",
+            item: isEn ? `${siteConfig.domain.url}/en` : siteConfig.domain.url,
+          },
           { "@type": "ListItem", position: 2, name: landing.h1, item: pageUrl },
         ],
       },
@@ -99,7 +114,12 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <Breadcrumb items={[{ label: "হোম", href: "/" }, { label: landing.h1 }]} />
+      <Breadcrumb
+        items={[
+          { label: isEn ? "Home" : "হোম", href: isEn ? "/en" : "/" },
+          { label: landing.h1 },
+        ]}
+      />
 
       <div className="max-w-5xl mx-auto px-3 py-4">
         <h1 className="text-2xl md:text-3xl font-bold text-green-800 mb-3">
@@ -111,11 +131,19 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
           <section className="mb-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
               {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  deliveryMode={deliveryMode}
-                />
+                isEn ? (
+                  <ProductCardEn
+                    key={product.id}
+                    product={product}
+                    deliveryMode={deliveryMode}
+                  />
+                ) : (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    deliveryMode={deliveryMode}
+                  />
+                )
               ))}
             </div>
           </section>
@@ -134,7 +162,7 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
 
         <section className="mb-8">
           <h2 className="text-xl font-bold text-green-800 mb-3">
-            সাধারণ প্রশ্ন ও উত্তর
+          {isEn ? "Frequently Asked Questions" : "সাধারণ প্রশ্ন ও উত্তর"}
           </h2>
           <div className="space-y-2">
             {landing.faqs.map((f) => (
@@ -158,18 +186,18 @@ export default async function LandingPage({ landing }: { landing: SeoLanding }) 
             rel="noopener noreferrer"
             className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
           >
-            WhatsApp-এ অর্ডার করুন
+            {isEn ? "Order on WhatsApp" : "WhatsApp-এ অর্ডার করুন"}
           </a>
           <a
             href={`tel:${siteConfig.contact.phone}`}
             className="bg-green-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-900"
           >
-            ফোনে কথা বলুন
+            {isEn ? "Call Us" : "ফোনে কথা বলুন"}
           </a>
           {landing.related.map((r) => (
             <Link
               key={r.href}
-              href={r.href}
+              href={localizeHref(r.href, locale)}
               className="border border-green-600 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-50"
             >
               {r.label}

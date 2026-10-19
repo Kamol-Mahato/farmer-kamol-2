@@ -2,7 +2,7 @@
 
 > Farmer Kamol (বাংলায় "কৃষক কমল") হলো সিরাজগঞ্জের রায়গঞ্জ ভিত্তিক একটি কৃষি-পণ্যের ব্র্যান্ড, যা সরাসরি খামার থেকে খাঁটি মধু (Modhu), ঘি (Ghee), সরিষার তেল (Sorisha Tel) ও চীন হাঁসের বাচ্চা (Duck Chicks) সরবরাহ করে — কোনো মধ্যস্থতাকারী ছাড়া।
 >
-> Farmer Kamol (known in Bangla as "কৃষক কমল") is an agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying pure honey, ghee, cold-pressed mustard oil, and Chinese duck chicks directly from the farm — with no middlemen involved.
+> Farmer Kamol (known in Bangla as "কৃষক কমল") is an agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying pure honey, ghee, mustard oil, and Chinese duck chicks directly from the farm — with no middlemen involved.
 
 ## ব্যবসায়িক তথ্য
 - নাম: Farmer Kamol (বাংলায়: কৃষক কমল)
@@ -22,21 +22,35 @@
 - [সব পণ্য দেখুন](https://www.farmerkamol.com/shop)
 - খাঁটি মধু (Modhu / Pure Honey) — সরিষা ফুলের মধু (Sorisha Fuler Modhu), কোনো চিনি বা সিরাপ মেশানো নেই
 - দেশি গাওয়া ঘি (Ghee / Pure Ghee) — দেশি গাভীর দুধ থেকে ঐতিহ্যবাহী পদ্ধতিতে তৈরি
-- কোল্ড-প্রেসড সরিষার তেল (Sorisha Tel / Mustard Oil) — কোনো রাসায়নিক প্রক্রিয়া ছাড়া ঘানিতে তৈরি
+- সরিষার তেল (Sorisha Tel / Mustard Oil) — নিজের জমি ও সিরাজগঞ্জ এলাকার সরিষা থেকে মিলে ভাঙানো, কোনো ভেজাল বা অন্য কিছু মেশানো হয় না
 - চীন হাঁসের বাচ্চা (Duck Chicks) — দাম বয়স/সাইজ অনুযায়ী আলোচনা সাপেক্ষে, হোয়াটসঅ্যাপে যোগাযোগ করে অর্ডার করতে হয়
 
 ## Products (English Version)
 - [Shop all products](https://www.farmerkamol.com/en/shop)
 - Pure Honey — raw mustard-flower honey, no added sugar or syrup
 - Pure Ghee — traditionally made from native cow's milk
-- Cold-Pressed Mustard Oil — chemical-free, extracted using a traditional ghani (oil press)
+- Mustard Oil — mill-pressed from mustard grown on our own land and bought locally in Sirajganj, nothing added or adulterated
 - Chinese Duck Chicks — price depends on age/size, order via WhatsApp
+
+## পণ্যভিত্তিক বিস্তারিত গাইড (বাংলা)
+- [খাঁটি খেজুরের গুড়](https://www.farmerkamol.com/khejurer-gur) — ঝোলা ও দানাদার গুড়, সিরাজগঞ্জের গাছিদের কাছ থেকে সংগৃহীত রসের, ১ কেজি ও আধা কেজির প্যাক
+- [খাঁটি সরিষা ফুলের মধু](https://www.farmerkamol.com/khati-modhu) — নিজস্ব মৌবক্সের মধু, এক্সট্র্যাক্টরে সংগ্রহ, তাপ ছাড়া, কিছু না মিশিয়ে বোতলজাত
+- [খাঁটি সরিষার তেল](https://www.farmerkamol.com/khati-sorisha-tel) — মিলে ভাঙানো, ৫০০ গ্রাম, ১ কেজি ও ৫ কেজির বোতল, কোনো ভেজাল নেই
+- [খাঁটি গরুর ঘি](https://www.farmerkamol.com/khati-ghee) — পাবনা ও সিরাজগঞ্জের খামারের দুধ থেকে তৈরি, ৫০০ গ্রাম, ১ কেজি ও ২ কেজি, ঘি তৈরি ও যাচাইয়ের কারিগরি তথ্যসহ
+- [হাঁসের বাচ্চা](https://www.farmerkamol.com/hasher-bacha) — চিনা হাঁসসহ সব জাত, ১ দিন থেকে ১ মাস বয়সী, ন্যূনতম ৫০টি, ফোনে অর্ডার ও অগ্রিম বুকিং
 
 ## নীতি ও শর্তাবলী
 - [প্রশ্ন ও উত্তর (FAQ)](https://www.farmerkamol.com/faq)
 - [গোপনীয়তা নীতি](https://www.farmerkamol.com/privacy-policy)
 - [শর্তাবলী](https://www.farmerkamol.com/terms)
 - [রিটার্ন পলিসি](https://www.farmerkamol.com/return-policy)
+
+## Detailed Product Guides (English)
+- [Pure Date Palm Jaggery](https://www.farmerkamol.com/en/khejurer-gur) — liquid and granular jaggery from sap collected from tappers in Sirajganj, 1 kg and half-kg packs
+- [Pure Mustard Flower Honey](https://www.farmerkamol.com/en/khati-modhu) — honey from our own beehives, collected with an extractor, no heat, nothing added
+- [Pure Mustard Oil](https://www.farmerkamol.com/en/khati-sorisha-tel) — mill-pressed, 500 g, 1 kg and 5 kg bottles, nothing adulterated
+- [Pure Cow Ghee](https://www.farmerkamol.com/en/khati-ghee) — made from milk of farms in Pabna and Sirajganj, 500 g, 1 kg and 2 kg, with technical details on how ghee is made and judged
+- [Ducklings](https://www.farmerkamol.com/en/hasher-bacha) — all breeds including Chinese ducks, 1 day to 1 month old, minimum 50 pieces, phone orders with advance booking
 
 ## Policies & Terms (English)
 - [FAQ](https://www.farmerkamol.com/en/faq)
@@ -65,15 +79,4 @@
 - [Photo Gallery](https://www.farmerkamol.com/en/media/image)
 
 ## প্রতিষ্ঠাতার পরিচয়
-- [আমাদের সম্পর্কে](https://www.farmerkamol.com/about) — Kamol Kumar Mahato, প্রতিষ্ঠাতা, সিরাজগঞ্জের রায়গঞ্জে জন্ম ও বেড়ে ওঠা, সমন্বিত কৃষি পদ্ধতিতে খামার পরিচালনা করেন।
-
-## About the Founder (English)
-- [About Us](https://www.farmerkamol.com/en/about) — Kamol Kumar Mahato, founder, born and raised in Raiganj, Sirajganj, runs the farm using an integrated farming approach.
-
-## ডেলিভারি ও পেমেন্ট
-- সারা বাংলাদেশে কুরিয়ারের মাধ্যমে ডেলিভারি
-- পেমেন্ট: ক্যাশ অন ডেলিভারি (COD), এবং বিকাশ/নগদ/রকেট সেন্ড মানি
-
-## Delivery & Payment (English)
-- Delivery across Bangladesh via courier
-- Payment: Cash on Delivery (COD), and bKash/Nagad/Rocket send money
+- [আমাদের সম্পর্কে](https://www.farmerkamol.com/about) — Kamol Kumar Mahato, প্রতিষ্ঠাতা, সিরাজগঞ্জের রায়গঞ্জে জন্ম ও বেড়ে ওঠা, সমন্�
