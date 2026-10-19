@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { verifyAdminOnly } from "@/lib/adminAuth";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { sendPushToCustomers } from "@/lib/webpush";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function GET() {
   const blogs = await prisma.blog.findMany({
@@ -47,6 +49,15 @@ export async function POST(req: Request) {
       blog.title,
       `/blog/${blog.slug}`,
     ).catch((err) => console.error("Push notify error:", err));
+
+    // IndexNow — Published হলেই সাবমিট
+    const urls = [`${siteConfig.domain.url}/blog/${blog.slug}`];
+    if (blog.slugEn) {
+      urls.push(`${siteConfig.domain.url}/en/blog/${blog.slugEn}`);
+    }
+    submitUrls(...urls).catch((err) =>
+      console.error("IndexNow blog create error:", err),
+    );
   }
 
   revalidatePath("/");

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function GET(
   req: NextRequest,
@@ -94,6 +96,19 @@ export async function PUT(
               : undefined,
       },
     });
+    // IndexNow — Active থাকলে সাবমিট
+    if (product.isActive && product.slug) {
+      const urls = [`${siteConfig.domain.url}/shop/${product.slug}`];
+      if (product.slugEn) {
+        urls.push(`${siteConfig.domain.url}/en/shop/${product.slugEn}`);
+      } else {
+        urls.push(`${siteConfig.domain.url}/en/shop/${product.slug}`);
+      }
+      submitUrls(...urls).catch((err) =>
+        console.error("IndexNow product update error:", err),
+      );
+    }
+
     return NextResponse.json(product);
   } catch (error) {
     console.error(error);

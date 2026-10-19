@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { sendPushToCustomers } from "@/lib/webpush";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function GET() {
   const isAuthorized = await verifyAdminOrAgent();
@@ -138,6 +140,17 @@ export async function POST(request: Request) {
         product.name,
         `/shop/${product.slug}`,
       ).catch((err) => console.error("Push notify error:", err));
+
+      // IndexNow
+      const urls = [`${siteConfig.domain.url}/shop/${product.slug}`];
+      if (product.slugEn) {
+        urls.push(`${siteConfig.domain.url}/en/shop/${product.slugEn}`);
+      } else {
+        urls.push(`${siteConfig.domain.url}/en/shop/${product.slug}`);
+      }
+      submitUrls(...urls).catch((err) =>
+        console.error("IndexNow product create error:", err),
+      );
     }
 
     return NextResponse.json(product);

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
 import { sendPushToCustomers } from "@/lib/webpush";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function GET() {
   const isAuthorized = await verifyAdminOrAgent();
@@ -59,6 +61,12 @@ export async function POST(req: Request) {
     revalidatePath("/media/video");
     revalidatePath("/en/media/video");
 
+    // IndexNow — Video page
+    submitUrls(
+      `${siteConfig.domain.url}/media/video`,
+      `${siteConfig.domain.url}/en/media/video`,
+    ).catch((err) => console.error("IndexNow video create error:", err));
+
     return NextResponse.json(video);
   } catch (error) {
     console.error("POST Error:", error);
@@ -96,6 +104,12 @@ export async function PUT(req: Request) {
     revalidatePath("/en");
     revalidatePath("/media/video");
     revalidatePath("/en/media/video");
+
+    // IndexNow — Video page
+    submitUrls(
+      `${siteConfig.domain.url}/media/video`,
+      `${siteConfig.domain.url}/en/media/video`,
+    ).catch((err) => console.error("IndexNow video update error:", err));
 
     return NextResponse.json(video);
   } catch (error) {

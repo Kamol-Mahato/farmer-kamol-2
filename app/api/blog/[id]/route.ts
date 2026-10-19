@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { verifyAdminOnly } from "@/lib/adminAuth";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function DELETE(
   req: Request,
@@ -69,5 +71,17 @@ export async function PUT(
   revalidatePath("/en/blog");
   if (updated.slug) revalidatePath(`/blog/${updated.slug}`);
   if (updated.slugEn) revalidatePath(`/en/blog/${updated.slugEn}`);
+
+  // IndexNow — Published থাকলে সাবমিট
+  if (updated.isPublished) {
+    const urls = [`${siteConfig.domain.url}/blog/${updated.slug}`];
+    if (updated.slugEn) {
+      urls.push(`${siteConfig.domain.url}/en/blog/${updated.slugEn}`);
+    }
+    submitUrls(...urls).catch((err) =>
+      console.error("IndexNow blog update error:", err),
+    );
+  }
+
   return NextResponse.json(updated);
 }
