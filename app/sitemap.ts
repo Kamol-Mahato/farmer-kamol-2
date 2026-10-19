@@ -306,4 +306,68 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       pages.push({
         url: `${BASE_URL}/en/blog/${post.slugEn}`,
         lastModified: post.updatedAt,
- 
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      });
+    }
+    return pages;
+  });
+
+  const fosolCategories = await prisma.fosolCategory.findMany({
+    where: { isVisible: true },
+    select: { slug: true, updatedAt: true },
+  });
+
+  const fosolCategoryPages = fosolCategories.flatMap((c) => [
+    {
+      url: `${BASE_URL}/banglar-fosol/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/en/banglar-fosol/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+  ]);
+
+  const fosolItems = await prisma.fosolItem.findMany({
+    where: { isPublished: true },
+    select: {
+      slug: true,
+      slugEn: true,
+      updatedAt: true,
+      category: { select: { slug: true } },
+    },
+  });
+
+  const fosolItemPages = fosolItems.flatMap((item) => {
+    const pages = [
+      {
+        url: `${BASE_URL}/banglar-fosol/${item.category.slug}/${item.slug}`,
+        lastModified: item.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      },
+    ];
+    if (item.slugEn && item.slugEn.trim() !== "") {
+      pages.push({
+        url: `${BASE_URL}/en/banglar-fosol/${item.category.slug}/${item.slugEn}`,
+        lastModified: item.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      });
+    }
+    return pages;
+  });
+
+  return [
+    ...staticPages,
+    ...productPages,
+    ...blogPages,
+    ...fosolCategoryPages,
+    ...fosolItemPages,
+  ];
+}
