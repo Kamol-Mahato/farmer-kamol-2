@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   "/agent/login",
   "/api/agent/login",
   "/api/agent/me",
+  "/api/admin/me",
   "/admin/forgot-password",
   "/api/admin/forgot-password",
   "/api/admin/verify-otp",

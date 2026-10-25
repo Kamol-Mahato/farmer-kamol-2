@@ -75,6 +75,12 @@ export default function LoginPageEn() {
         localStorage.removeItem("user");
       }
     }
+    fetch("/api/admin/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.admin) router.push("/admin");
+      })
+      .catch(() => {});
   }, []);
 
   function handleLogout() {

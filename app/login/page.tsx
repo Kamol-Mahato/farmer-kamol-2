@@ -81,7 +81,15 @@ export default function LoginPage() {
     fetch("/api/agent/me")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.agent) router.push("/agent");
+        if (data?.agent) {
+          router.push("/agent");
+          return;
+        }
+        return fetch("/api/admin/me")
+          .then((res) => res.json())
+          .then((d) => {
+            if (d?.admin) router.push("/admin");
+          });
       })
       .catch(() => {});
   }, []);
