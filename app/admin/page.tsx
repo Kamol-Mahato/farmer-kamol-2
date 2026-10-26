@@ -154,6 +154,18 @@ export default async function AdminDashboard() {
             থাম্বনেইল / ইমেজ এডিটর খুলুন
           </p>
         </a>
+        <a
+          href="/tools/video-edit.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block bg-indigo-700 text-white rounded-xl p-6 hover:bg-indigo-600 transition"
+        >
+          <p className="text-2xl mb-2">🎬</p>
+          <p className="text-lg font-bold">ভিডিও এডিট করুন</p>
+          <p className="text-indigo-100 text-sm mt-1">
+            সারাদিনের ক্লিপ → ১৬:৯ + ৯:১৬
+          </p>
+        </a>
       </div>
     </div>
   );
