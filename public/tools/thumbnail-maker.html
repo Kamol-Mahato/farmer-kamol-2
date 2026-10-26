@@ -8812,6 +8812,57 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             </select>
           </label>
 
+          <label>
+            দিনের নাম (ম্যানুয়াল)
+            <input type="text" id="dpWeekday" oninput="dpRender()" placeholder="যেমন: সোমবার">
+          </label>
+
+          <label>
+            বাংলা তারিখ (ম্যানুয়াল)
+            <input type="text" id="dpBnDate" oninput="dpRender()" placeholder="যেমন: ১০ই কার্তিক ১৪৩৩ বঙ্গাব্দ">
+          </label>
+
+          <label>
+            ইংরেজি তারিখ (ম্যানুয়াল)
+            <input type="text" id="dpEnDate" oninput="dpRender()" placeholder="যেমন: ২৬শে অক্টোবর ২০২৬">
+          </label>
+
+          <label>
+            হিজরি তারিখ (ম্যানুয়াল)
+            <input type="text" id="dpHijriDate" oninput="dpRender()" placeholder="যেমন: ১৪ই জমাদিউল আউয়াল ১৪৪৮">
+          </label>
+
+          <label>
+            ছবি জুম (Zoom)
+            <input type="range" id="dpZoom" min="1" max="3" step="0.05" value="1"
+              oninput="window.dpSetZoom(this.value)">
+          </label>
+
+          <label>
+            বিশেষ নোট / সময় ১ (ঐচ্ছিক)
+            <input type="text" id="dpExtra1" oninput="dpRender()"
+              placeholder="যেমন: আজ সেহরি ৪:১২ • ইফতার ৫:২৮">
+          </label>
+
+          <label>
+            বিশেষ নোট / সময় ২ (ঐচ্ছিক)
+            <input type="text" id="dpExtra2" oninput="dpRender()"
+              placeholder="যেমন: আজ একাদশী • উপবাস রাখুন">
+          </label>
+
+          <div style="display:flex; gap:8px;">
+            <button class="dp-btn dp-secondary" style="flex:1"
+              onclick="dpOffsetY -= 20; dpRender()">↑ উপরে</button>
+            <button class="dp-btn dp-secondary" style="flex:1"
+              onclick="dpOffsetY += 20; dpRender()">↓ নিচে</button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="dp-btn dp-secondary" style="flex:1"
+              onclick="dpOffsetX -= 20; dpRender()">← বামে</button>
+            <button class="dp-btn dp-secondary" style="flex:1"
+              onclick="dpOffsetX += 20; dpRender()">→ ডানে</button>
+          </div>
+
           <div class="dp-note">
             বাংলা তারিখ ও ঋতু বাংলাদেশের বাংলা ক্যালেন্ডারের নিয়মে
             হিসাব করা হবে। হিজরি তারিখ ব্রাউজারের ইসলামিক ক্যালেন্ডার
@@ -8845,10 +8896,26 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       let dpPhoto = null;
       let dpLogo = new Image();
       let dpDates = null;
+      let dpZoom = 1;
+      let dpOffsetX = 0;
+      let dpOffsetY = 0;
+
+      function dpResetImagePos() {
+        dpZoom = 1;
+        dpOffsetX = 0;
+        dpOffsetY = 0;
+        const zoomSlider = $("dpZoom");
+        if (zoomSlider) zoomSlider.value = 1;
+      }
+
+      window.dpSetZoom = function(val) {
+        dpZoom = parseFloat(val) || 1;
+        dpRender();
+      };
 
       dpLogo.onload = () => dpRender();
       dpLogo.onerror = () => dpRender();
-      dpLogo.src = "/upload/kamol.png";
+      dpLogo.src = "/uploads/kamol.png";   // সঠিক পাথ
 
       const dpBnMonths = [
         "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র",
@@ -8959,15 +9026,35 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       }
 
       function dpCover(img, x, y, w, h) {
-        const scale = Math.max(w / img.width, h / img.height);
-        const sw = w / scale;
-        const sh = h / scale;
-        pctx.drawImage(
-          img,
-          (img.width - sw) / 2,
-          (img.height - sh) / 2,
-          sw, sh, x, y, w, h
-        );
+        if (!img || !img.width) return;
+
+        const baseScale = Math.max(w / img.width, h / img.height);
+        const scale = baseScale * (dpZoom || 1);
+
+        // সোর্স সাইজ (যতটা কাটব)
+        let sw = w / scale;
+        let sh = h / scale;
+
+        // সেন্টার থেকে শুরু + ইউজার অফসেট
+        let sx = (img.width - sw) / 2 - (dpOffsetX || 0);
+        let sy = (img.height - sh) / 2 - (dpOffsetY || 0);
+
+        // বাউন্ডারি যাতে বাইরে না যায়
+        if (sw > img.width) {
+          sx = 0;
+          sw = img.width;
+        } else {
+          sx = Math.max(0, Math.min(sx, img.width - sw));
+        }
+
+        if (sh > img.height) {
+          sy = 0;
+          sh = img.height;
+        } else {
+          sy = Math.max(0, Math.min(sy, img.height - sh));
+        }
+
+        pctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
       }
 
       function dpWrap(text, x, y, maxWidth, lineHeight, maxLines) {
@@ -9033,20 +9120,19 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         pctx.font = "700 37px 'Noto Sans Bengali', sans-serif";
         dpWrap($("dpTitle").value || "আজকের কৃষি", 38, 475, 1000, 49, 2);
 
-        // Date cards
-        const dates = dpDates || {
-          bn: "তারিখ আপডেট হচ্ছে",
-          english: "",
-          hijri: "",
-          season: "",
-          weekday: ""
+        // Date cards — শুধু মান দেখাবে, লেবেল থাকবে না
+        const dates = {
+          bn: ($("dpBnDate") && $("dpBnDate").value) || (dpDates && dpDates.bn) || "",
+          english: ($("dpEnDate") && $("dpEnDate").value) || (dpDates && dpDates.english) || "",
+          hijri: ($("dpHijriDate") && $("dpHijriDate").value) || (dpDates && dpDates.hijri) || "",
+          weekday: ($("dpWeekday") && $("dpWeekday").value) || (dpDates && dpDates.weekday) || ""
         };
 
         const cards = [
-          { x: 28, y: 555, label: "বাংলা তারিখ", value: dates.bn },
-          { x: 548, y: 555, label: "ইংরেজি তারিখ", value: dates.english },
-          { x: 28, y: 640, label: "হিজরি তারিখ", value: dates.hijri },
-          { x: 548, y: 640, label: "বাংলার ঋতু", value: dates.season }
+          { x: 28,  y: 555, value: dates.weekday },
+          { x: 548, y: 555, value: dates.bn },
+          { x: 28,  y: 640, value: dates.english },
+          { x: 548, y: 640, value: dates.hijri }
         ];
 
         cards.forEach(card => {
@@ -9055,43 +9141,71 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           pctx.roundRect(card.x, card.y, 504, 70, 9);
           pctx.fill();
 
-          pctx.fillStyle = "#6b806e";
-          pctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
-          pctx.fillText(card.label, card.x + 16, card.y + 25);
-
+          // শুধু মান — মাঝখানে সুন্দর করে
           pctx.fillStyle = "#214c31";
-          pctx.font = "600 23px 'Noto Sans Bengali', sans-serif";
-          pctx.fillText(card.value, card.x + 16, card.y + 55, 470);
+          pctx.font = "600 26px 'Noto Sans Bengali', sans-serif";
+          pctx.textAlign = "left";
+          pctx.fillText(card.value, card.x + 20, card.y + 45, 460);
         });
+
+        // ── অতিরিক্ত ২টা নোট / সময় ──
+        const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
+        const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
+
+        let brandStartY = 730;
+
+        if (extra1 || extra2) {
+          pctx.fillStyle = "#ffffff";
+          pctx.beginPath();
+          pctx.roundRect(28, 730, 1024, (extra1 && extra2) ? 90 : 55, 10);
+          pctx.fill();
+
+          pctx.fillStyle = "#174b2d";
+          pctx.font = "600 24px 'Noto Sans Bengali', sans-serif";
+          pctx.textAlign = "left";
+
+          if (extra1) {
+            pctx.fillText(extra1, 48, 765, 980);
+          }
+          if (extra2) {
+            pctx.fillText(extra2, 48, extra1 ? 805 : 765, 980);
+          }
+
+          brandStartY = (extra1 && extra2) ? 840 : 805;
+        }
 
         // Brand footer
         pctx.fillStyle = "#e1f3e6";
-        pctx.fillRect(0, 730, W, 350);
+        pctx.fillRect(0, brandStartY, W, 1080 - brandStartY);
+
+        const logoY = brandStartY + 30;
+        const textBase = brandStartY + 55;
 
         if (dpLogo.complete && dpLogo.naturalWidth) {
           pctx.save();
           pctx.beginPath();
-          pctx.arc(83, 793, 43, 0, Math.PI * 2);
+          pctx.arc(83, logoY + 43, 43, 0, Math.PI * 2);
           pctx.clip();
-          pctx.drawImage(dpLogo, 40, 750, 86, 86);
+          pctx.drawImage(dpLogo, 40, logoY, 86, 86);
           pctx.restore();
         }
 
         pctx.textAlign = "left";
         pctx.fillStyle = "#07552c";
         pctx.font = "700 34px Arial, sans-serif";
-        pctx.fillText("Farmer Kamol", 145, 782);
+        pctx.fillText("Farmer Kamol", 145, textBase);
 
         pctx.fillStyle = "#df5c17";
         pctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
-        pctx.fillText("খামার থেকে আপনার দরজায়", 145, 823);
+        pctx.fillText("খামার থেকে আপনার দরজায়", 145, textBase + 41);
 
         pctx.fillStyle = "#294c34";
         pctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
-        pctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 145, 858);
-        pctx.fillText("সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।", 145, 886);
+        pctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 145, textBase + 76);
+        pctx.fillText("সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।", 145, textBase + 104);
 
         // Social brand markers
+        const socialY = brandStartY + 195;
         const socials = [
           { x: 100, color: "#1877f2", label: "f" },
           { x: 276, color: "#e60023", label: "▶" },
@@ -9104,24 +9218,24 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         socials.forEach(s => {
           pctx.fillStyle = s.color;
           pctx.beginPath();
-          pctx.arc(s.x, 947, 29, 0, Math.PI * 2);
+          pctx.arc(s.x, socialY, 29, 0, Math.PI * 2);
           pctx.fill();
           pctx.fillStyle = "#ffffff";
           pctx.textAlign = "center";
           pctx.font = "700 23px Arial, sans-serif";
-          pctx.fillText(s.label, s.x, 955);
+          pctx.fillText(s.label, s.x, socialY + 8);
         });
 
         pctx.fillStyle = "#07552c";
         pctx.font = "700 25px Arial, sans-serif";
         pctx.textAlign = "center";
-        pctx.fillText("farmerkamol.com", 540, 1015);
+        pctx.fillText("farmerkamol.com", 540, socialY + 70);
 
         pctx.fillStyle = "#647768";
-        pctx.font = "400 16px 'Noto Sans Bengali', sans-serif";
+        pctx.font = "500 17px 'Noto Sans Bengali', sans-serif";
         pctx.fillText(
-          `${dates.weekday}  •  কৃষি • প্রকৃতি • গ্রামবাংলা`,
-          540, 1050
+          "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ",
+          540, socialY + 105
         );
       }
 
@@ -9148,6 +9262,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           const img = new Image();
           img.onload = () => {
             dpPhoto = img;
+            dpResetImagePos();   // নতুন ছবি এলে জুম রিসেট
             dpRender();
           };
           img.onerror = () => alert("ছবিটি পড়া যায়নি। অন্য ছবি দিন।");
@@ -9208,6 +9323,13 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           season: bn.season,
           weekday
         };
+
+        // ইনপুট বক্সেও অটো ভর্তি করে দাও (ম্যানুয়াল এডিট করা যাবে)
+        if ($("dpWeekday")) $("dpWeekday").value = weekday;
+        if ($("dpBnDate")) $("dpBnDate").value = dpDates.bn;
+        if ($("dpEnDate")) $("dpEnDate").value = english;
+        if ($("dpHijriDate")) $("dpHijriDate").value = hijri;
+
         dpRender();
       }
 
