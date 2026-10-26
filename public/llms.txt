@@ -1,8 +1,8 @@
 # Farmer Kamol – কৃষক কমল
 
-> Farmer Kamol (বাংলায় "কৃষক কমল") হলো সিরাজগঞ্জের রায়গঞ্জ ভিত্তিক একটি কৃষি-পণ্যের ব্র্যান্ড, যা সরাসরি খামার থেকে খাঁটি মধু (Modhu), ঘি (Ghee), সরিষার তেল (Sorisha Tel) ও চীন হাঁসের বাচ্চা (Duck Chicks) সরবরাহ করে — কোনো মধ্যস্থতাকারী ছাড়া।
+> Farmer Kamol (বাংলায় "কৃষক কমল") হলো সিরাজগঞ্জের রায়গঞ্জ ভিত্তিক একটি কৃষি-পণ্যের ব্র্যান্ড, যা সরাসরি খামার থেকে খাঁটি মধু (Modhu), ঘি (Ghee), সরিষার তেল (Sorisha Tel), খেজুরের গুড় (Khejurer Gur) ও চীনা হাঁসের বাচ্চা (Chinese Duck Chicks) সরবরাহ করে — কোনো মধ্যস্থতাকারী ছাড়া।
 >
-> Farmer Kamol (known in Bangla as "কৃষক কমল") is an agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying pure honey, ghee, mustard oil, and Chinese duck chicks directly from the farm — with no middlemen involved.
+> Farmer Kamol (known in Bangla as "কৃষক কমল") is an agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying ppure honey, ghee, mustard oil, date palm jaggery, and Chinese duck chicks directly from the farm — with no middlemen involved.
 
 ## ব্যবসায়িক তথ্য
 - নাম: Farmer Kamol (বাংলায়: কৃষক কমল)
@@ -10,7 +10,7 @@
 - প্রতিষ্ঠার সাল: 2026
 - ঠিকানা: সারইল, রায়গঞ্জ, সিরাজগঞ্জ, বাংলাদেশ
 - ফোন / WhatsApp: +8801737939688
-- ওয়েবসাইট: https://www.farmerkamol.com
+- ওয়েবসাইট: https://farmerkamol.com
 - Facebook: https://www.facebook.com/farmerkamol
 - YouTube: https://youtube.com/@FarmerKamol
 - Instagram: https://www.instagram.com/farmer.kamol
@@ -19,64 +19,84 @@
 - GoogleMaps: https://maps.app.goo.gl/Ty9t1YNfZWtJ6rpN9
 
 ## পণ্য (বাংলা ভার্সন)
-- [সব পণ্য দেখুন](https://www.farmerkamol.com/shop)
+- [সব পণ্য দেখুন](https://farmerkamol.com/shop)
 - খাঁটি মধু (Modhu / Pure Honey) — সরিষা ফুলের মধু (Sorisha Fuler Modhu), কোনো চিনি বা সিরাপ মেশানো নেই
 - দেশি গাওয়া ঘি (Ghee / Pure Ghee) — দেশি গাভীর দুধ থেকে ঐতিহ্যবাহী পদ্ধতিতে তৈরি
 - সরিষার তেল (Sorisha Tel / Mustard Oil) — নিজের জমি ও সিরাজগঞ্জ এলাকার সরিষা থেকে মিলে ভাঙানো, কোনো ভেজাল বা অন্য কিছু মেশানো হয় না
-- চীন হাঁসের বাচ্চা (Duck Chicks) — দাম বয়স/সাইজ অনুযায়ী আলোচনা সাপেক্ষে, হোয়াটসঅ্যাপে যোগাযোগ করে অর্ডার করতে হয়
+- খেজুরের গুড় (Khejurer Gur / Date Palm Jaggery) — ঝোলা ও দানাদার, সিরাজগঞ্জের গাছিদের কাছ থেকে সংগৃহীত রসের, ১ কেজি ও আধা কেজির প্যাক
+- চীনা হাঁসের বাচ্চা (Chinese Duck Chicks) — দাম বয়স/সাইজ অনুযায়ী আলোচনা সাপেক্ষে, হোয়াটসঅ্যাপে যোগাযোগ করে অর্ডার করতে হয়
 
 ## Products (English Version)
-- [Shop all products](https://www.farmerkamol.com/en/shop)
+- [Shop all products](https://farmerkamol.com/en/shop)
 - Pure Honey — raw mustard-flower honey, no added sugar or syrup
 - Pure Ghee — traditionally made from native cow's milk
 - Mustard Oil — mill-pressed from mustard grown on our own land and bought locally in Sirajganj, nothing added or adulterated
+- Date Palm Jaggery (Khejurer Gur) — liquid and granular, made from sap collected from local tappers in Sirajganj, 1 kg and half-kg packs
 - Chinese Duck Chicks — price depends on age/size, order via WhatsApp
 
 ## পণ্যভিত্তিক বিস্তারিত গাইড (বাংলা)
-- [খাঁটি খেজুরের গুড়](https://www.farmerkamol.com/khejurer-gur) — ঝোলা ও দানাদার গুড়, সিরাজগঞ্জের গাছিদের কাছ থেকে সংগৃহীত রসের, ১ কেজি ও আধা কেজির প্যাক
-- [খাঁটি সরিষা ফুলের মধু](https://www.farmerkamol.com/khati-modhu) — নিজস্ব মৌবক্সের মধু, এক্সট্র্যাক্টরে সংগ্রহ, তাপ ছাড়া, কিছু না মিশিয়ে বোতলজাত
-- [খাঁটি সরিষার তেল](https://www.farmerkamol.com/khati-sorisha-tel) — মিলে ভাঙানো, ৫০০ গ্রাম, ১ কেজি ও ৫ কেজির বোতল, কোনো ভেজাল নেই
-- [খাঁটি গরুর ঘি](https://www.farmerkamol.com/khati-ghee) — পাবনা ও সিরাজগঞ্জের খামারের দুধ থেকে তৈরি, ৫০০ গ্রাম, ১ কেজি ও ২ কেজি, ঘি তৈরি ও যাচাইয়ের কারিগরি তথ্যসহ
-- [হাঁসের বাচ্চা](https://www.farmerkamol.com/hasher-bacha) — চিনা হাঁসসহ সব জাত, ১ দিন থেকে ১ মাস বয়সী, ন্যূনতম ৫০টি, ফোনে অর্ডার ও অগ্রিম বুকিং
+- [খাঁটি খেজুরের গুড়](https://farmerkamol.com/khejurer-gur) — ঝোলা ও দানাদার গুড়, সিরাজগঞ্জের গাছিদের কাছ থেকে সংগৃহীত রসের, ১ কেজি ও আধা কেজির প্যাক
+- [খাঁটি সরিষা ফুলের মধু](https://farmerkamol.com/khati-modhu) — নিজস্ব মৌবক্সের মধু, এক্সট্র্যাক্টরে সংগ্রহ, তাপ ছাড়া, কিছু না মিশিয়ে বোতলজাত
+- [খাঁটি সরিষার তেল](https://farmerkamol.com/khati-sorisha-tel) — মিলে ভাঙানো, ৫০০ গ্রাম, ১ কেজি ও ৫ কেজির বোতল, কোনো ভেজাল নেই
+- [খাঁটি গরুর ঘি](https://farmerkamol.com/khati-ghee) — পাবনা ও সিরাজগঞ্জের খামারের দুধ থেকে তৈরি, ৫০০ গ্রাম, ১ কেজি ও ২ কেজি, ঘি তৈরি ও যাচাইয়ের কারিগরি তথ্যসহ
+- [হাঁসের বাচ্চা](https://farmerkamol.com/hasher-bacha) — চীনা হাঁসসহ সব জাত, ১ দিন থেকে ১ মাস বয়সী, ন্যূনতম ৫০টি, ফোনে অর্ডার ও অগ্রিম বুকিং
+
+## কৃষিতে ইনভেস্ট (কৃষি বিনিয়োগ)
+- [কৃষিতে ইনভেস্ট | কৃষি বিনিয়োগ](https://farmerkamol.com/invest) — Farmer Kamol-এর খামারে স্বচ্ছ কৃষি বিনিয়োগ ও অংশীদারিত্ব, প্রকৃত লাভের ভাগে; কোনো নির্দিষ্ট রিটার্নের নিশ্চয়তা নেই; লিখিত চুক্তি
+- [লাইভস্টক বিনিয়োগ](https://farmerkamol.com/invest/livestock) — চিনা হাঁস ও গরু পালন প্রকল্প
+- [ফসল চাষ বিনিয়োগ](https://farmerkamol.com/invest/crop) — আবাদি জমিতে ফসল চাষ প্রকল্প
+- [মাছ চাষ বিনিয়োগ](https://farmerkamol.com/invest/aquaculture) — পুকুরে মাছ চাষ প্রকল্প
+
+## আমাদের সম্পর্কে
+- [আমাদের সম্পর্কে](https://farmerkamol.com/about) — Farmer Kamol – কৃষক কমলের গল্প, মিশন ও ভিশন; সারইল গ্রাম, রায়গঞ্জ, সিরাজগঞ্জ থেকে সমন্বিত কৃষি
 
 ## নীতি ও শর্তাবলী
-- [প্রশ্ন ও উত্তর (FAQ)](https://www.farmerkamol.com/faq)
-- [গোপনীয়তা নীতি](https://www.farmerkamol.com/privacy-policy)
-- [শর্তাবলী](https://www.farmerkamol.com/terms)
-- [রিটার্ন পলিসি](https://www.farmerkamol.com/return-policy)
+- [প্রশ্ন ও উত্তর (FAQ)](https://farmerkamol.com/faq)
+- [গোপনীয়তা নীতি](https://farmerkamol.com/privacy-policy)
+- [শর্তাবলী](https://farmerkamol.com/terms)
+- [রিটার্ন পলিসি](https://farmerkamol.com/return-policy)
 
 ## Detailed Product Guides (English)
-- [Pure Date Palm Jaggery](https://www.farmerkamol.com/en/khejurer-gur) — liquid and granular jaggery from sap collected from tappers in Sirajganj, 1 kg and half-kg packs
-- [Pure Mustard Flower Honey](https://www.farmerkamol.com/en/khati-modhu) — honey from our own beehives, collected with an extractor, no heat, nothing added
-- [Pure Mustard Oil](https://www.farmerkamol.com/en/khati-sorisha-tel) — mill-pressed, 500 g, 1 kg and 5 kg bottles, nothing adulterated
-- [Pure Cow Ghee](https://www.farmerkamol.com/en/khati-ghee) — made from milk of farms in Pabna and Sirajganj, 500 g, 1 kg and 2 kg, with technical details on how ghee is made and judged
-- [Ducklings](https://www.farmerkamol.com/en/hasher-bacha) — all breeds including Chinese ducks, 1 day to 1 month old, minimum 50 pieces, phone orders with advance booking
+- [Pure Date Palm Jaggery](https://farmerkamol.com/en/khejurer-gur) — liquid and granular jaggery from sap collected from tappers in Sirajganj, 1 kg and half-kg packs
+- [Pure Mustard Flower Honey](https://farmerkamol.com/en/khati-modhu) — honey from our own beehives, collected with an extractor, no heat, nothing added
+- [Pure Mustard Oil](https://farmerkamol.com/en/khati-sorisha-tel) — mill-pressed, 500 g, 1 kg and 5 kg bottles, nothing adulterated
+- [Pure Cow Ghee](https://farmerkamol.com/en/khati-ghee) — made from milk of farms in Pabna and Sirajganj, 500 g, 1 kg and 2 kg, with technical details on how ghee is made and judged
+- [Ducklings](https://farmerkamol.com/en/hasher-bacha) — all breeds including Chinese ducks, 1 day to 1 month old, minimum 50 pieces, phone orders with advance booking
+
+## Agricultural Investment (English)
+- [Agriculture Investment & Farm Partnership](https://farmerkamol.com/en/invest) — transparent agricultural investment and partnership in the Farmer Kamol farm, sharing actual profit; no fixed return is guaranteed; written agreement
+- [Livestock Investment](https://farmerkamol.com/en/invest/livestock) — Chinese duck and cattle projects
+- [Crop Farming Investment](https://farmerkamol.com/en/invest/crop) — crop farming on arable land
+- [Fish Farming Investment](https://farmerkamol.com/en/invest/aquaculture) — pond aquaculture projects
+
+## About (English)
+- [About Us](https://farmerkamol.com/en/about) — the story, mission and vision of Farmer Kamol (কৃষক কমল); integrated farming from Sarail village, Raiganj, Sirajganj
 
 ## Policies & Terms (English)
-- [FAQ](https://www.farmerkamol.com/en/faq)
-- [Privacy Policy](https://www.farmerkamol.com/en/privacy-policy)
-- [Terms & Conditions](https://www.farmerkamol.com/en/terms)
-- [Return Policy](https://www.farmerkamol.com/en/return-policy)
+- [FAQ](https://farmerkamol.com/en/faq)
+- [Privacy Policy](https://farmerkamol.com/en/privacy-policy)
+- [Terms & Conditions](https://farmerkamol.com/en/terms)
+- [Return Policy](https://farmerkamol.com/en/return-policy)
 
 ## ব্লগ
-- [কৃষি বিষয়ক ব্লগ](https://www.farmerkamol.com/blog) — পশুপালন, পাখি পালন, ফসল চাষ, খামারের গল্প ও স্বাস্থ্যকর লাইফস্টাইল বিষয়ে নিয়মিত আর্টিকেল প্রকাশিত হয়।
+- [কৃষি বিষয়ক ব্লগ](https://farmerkamol.com/blog) — পশুপালন, পাখি পালন, ফসল চাষ, খামারের গল্প ও স্বাস্থ্যকর লাইফস্টাইল বিষয়ে নিয়মিত আর্টিকেল প্রকাশিত হয়।
 
 ## Blog (English)
-- [Farming Blog](https://www.farmerkamol.com/en/blog) — regular articles on livestock rearing, poultry farming, crop cultivation, farm life stories, and healthy lifestyle.
+- [Farming Blog](https://farmerkamol.com/en/blog) — regular articles on livestock rearing, poultry farming, crop cultivation, farm life stories, and healthy lifestyle.
 
 ## বাংলার ফসল
-- [বাংলার ফসল](https://www.farmerkamol.com/banglar-fosol) — বাংলাদেশের ফসল, ফল, শাকসবজি, গাছ ও ঔষধি গাছ নিয়ে একটি তথ্যভিত্তিক সংকলন, প্রতিটি আইটেমের বৈজ্ঞানিক নাম, মৌসুম, অঞ্চল ও ব্যবহারসহ।
+- [বাংলার ফসল](https://farmerkamol.com/banglar-fosol) — বাংলাদেশের ফসল, ফল, শাকসবজি, গাছ ও ঔষধি গাছ নিয়ে একটি তথ্যভিত্তিক সংকলন, প্রতিটি আইটেমের বৈজ্ঞানিক নাম, মৌসুম, অঞ্চল ও ব্যবহারসহ।
 
 ## Banglar Fosol (English)
-- [Banglar Fosol](https://www.farmerkamol.com/en/banglar-fosol) — An informational collection covering Bangladesh's crops, fruits, vegetables, trees, and medicinal plants, each with scientific name, season, region, and uses.
+- [Banglar Fosol](https://farmerkamol.com/en/banglar-fosol) — An informational collection covering Bangladesh's crops, fruits, vegetables, trees, and medicinal plants, each with scientific name, season, region, and uses.
 
 ## মিডিয়া
-- [ভিডিও গ্যালারি](https://www.farmerkamol.com/media/video)
-- [ছবি গ্যালারি](https://www.farmerkamol.com/media/image)
+- [ভিডিও গ্যালারি](https://farmerkamol.com/media/video)
+- [ছবি গ্যালারি](https://farmerkamol.com/media/image)
 
 ## Media (English)
-- [Video Gallery](https://www.farmerkamol.com/en/media/video)
-- [Photo Gallery](https://www.farmerkamol.com/en/media/image)
+- [Video Gallery](https://farmerkamol.com/en/media/video)
+- [Photo Gallery](https://farmerkamol.com/en/media/image)
 
 ## প্রতিষ্ঠাতার পরিচয়
-- [আমাদের সম্পর্কে](https://www.farmerkamol.com/about) — Kamol Kumar Mahato, প্রতিষ্ঠাতা, সিরাজগঞ্জের রায়গঞ্জে জন্ম ও বেড়ে ওঠা, সমন্�
+- [আমাদের সম্পর্কে](https://farmerkamol.com/about) — Kamol Kumar Mahato, প্রতিষ্ঠাতা, সিরাজগঞ্জের রায়গঞ্জে জন্ম ও বেড়ে ওঠা, সমন্

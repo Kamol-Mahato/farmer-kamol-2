@@ -62,12 +62,21 @@ export default async function LandingPage({
         : undefined,
       url: `${shopBase}/${p.slug}`,
       brand: { "@type": "Brand", name: "Farmer Kamol" },
-      offers: {
-        "@type": "Offer",
-        priceCurrency: "BDT",
-        availability: "https://schema.org/InStock",
-        url: `${shopBase}/${p.slug}`,
-      },
+      ...(p.priceType === "FIXED" && {
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "BDT",
+          price:
+            p.discountPrice && p.discountPrice < p.pricePerUnit
+              ? p.discountPrice
+              : p.pricePerUnit,
+          availability:
+            p.stockQty <= 0
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+          url: `${shopBase}/${p.slug}`,
+        },
+      }),
     };
   });
 

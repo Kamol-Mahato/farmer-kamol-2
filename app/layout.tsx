@@ -20,10 +20,7 @@ const hindSiliguri = Hind_Siliguri({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.domain.url),
-  title: {
-    default: siteConfig.seo.defaultTitle,
-    template: `%s | ${siteConfig.brand.name}`,
-  },
+  title: siteConfig.seo.defaultTitle,
   description: siteConfig.seo.description,
   manifest: "/manifest.webmanifest",
   keywords: [...siteConfig.seo.keywords],

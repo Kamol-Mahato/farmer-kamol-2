@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import LandingPage from "@/app/components/LandingPage";
 import { getLandingEn, seoLandingsEn } from "@/lib/seoLandingsEn";
+import { siteConfig } from "@/lib/siteConfig";
 
 export const revalidate = 3600;
 export const dynamicParams = false;
@@ -34,8 +35,23 @@ export async function generateMetadata({
       title: l.title,
       description: l.description,
       url: `/en/${l.slug}`,
+      siteName: siteConfig.brand.displayName,
       type: "website",
       locale: "en_US",
+      images: [
+        {
+          url: siteConfig.domain.ogImage,
+          width: 1200,
+          height: 630,
+          alt: l.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: l.title,
+      description: l.description,
+      images: [siteConfig.domain.ogImage],
     },
   };
 }

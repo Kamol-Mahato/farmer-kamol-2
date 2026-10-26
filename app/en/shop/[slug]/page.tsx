@@ -112,7 +112,7 @@ export default async function ProductDetailPage({
         availability: isOutOfStock
           ? "https://schema.org/OutOfStock"
           : "https://schema.org/InStock",
-        url: `https://www.farmerkamol.com/en/shop/${product.slug}`,
+          url: `https://farmerkamol.com/en/shop/${product.slug}`,
         hasMerchantReturnPolicy: {
           "@type": "MerchantReturnPolicy",
           applicableCountry: "BD",
@@ -154,19 +154,19 @@ export default async function ProductDetailPage({
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.farmerkamol.com/en",
+        item: "https://farmerkamol.com/en",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Shop",
-        item: "https://www.farmerkamol.com/en/shop",
+        item: "https://farmerkamol.com/en/shop",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: displayName,
-        item: `https://www.farmerkamol.com/en/shop/${product.slug}`,
+        item: `https://farmerkamol.com/en/shop/${product.slug}`,
       },
     ],
   };
