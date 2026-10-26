@@ -1267,11 +1267,16 @@
               max-width: 220px;
             "
           >
-            <optgroup label="⭕ Round Crop">
-              <option value="ROUND|ROUND|Round Crop — Any Size">
-                ⭕ Round Crop — Any Size
-              </option>
-            </optgroup>
+          <optgroup label="✏️ Custom">
+            <option value="custom|custom|Custom Size">
+              ✏️ Custom Size...
+            </option>
+          </optgroup>
+          <optgroup label="⭕ Round Crop">
+            <option value="ROUND|ROUND|Round Crop — Any Size">
+              ⭕ Round Crop — Any Size
+            </option>
+          </optgroup>
             <optgroup label="▶️ YouTube">
               <option value="1280|720|YouTube Thumbnail 16:9" selected>
                 YT Thumbnail — 1280×720
@@ -1367,11 +1372,6 @@
               </option>
               <option value="1080|1920|Threads Video">
                 Threads Video — 1080×1920
-              </option>
-            </optgroup>
-            <optgroup label="✏️ Custom">
-              <option value="custom|custom|Custom Size">
-                ✏️ Custom Size...
               </option>
             </optgroup>
           </select>
@@ -1826,6 +1826,13 @@
                 style="justify-content: center"
               >
                 📐 Template: Person বামে
+              </button>
+              <button
+                class="btn btn-green"
+                onclick="applyTemplate('farmerDaily')"
+                style="justify-content: center; margin-top: 6px"
+              >
+                🌾 ডেইলি কৃষক টেমপ্লেট (তারিখ অটো)
               </button>
               <button
                 class="btn btn-ghost"
@@ -8239,6 +8246,40 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           });
         })();
 
+        function getBanglaDateText() {
+          const now = new Date();
+          const days = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
+          const engMonths = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+          
+          // বাংলা মাস (আনুমানিক)
+          const banglaMonths = ["পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র", "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন", "কার্তিক", "অগ্রহায়ণ"];
+          
+          // হিজরি মাস
+          const hijriMonths = ["মহররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি", "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শাবান", "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ"];
+
+          const dayName = days[now.getDay()];
+          const d = now.getDate();
+          const m = now.getMonth();
+          const y = now.getFullYear();
+
+          // ইংরেজি তারিখ
+          const engDate = `${d}ই ${engMonths[m]} ${y} খ্রিস্টাব্দ`;
+
+          // বাংলা তারিখ (আনুমানিক কনভার্শন)
+          let banglaMonthIndex = (m + 9) % 12;
+          let banglaDate = d;
+          if (d > 15) banglaDate = d - 15;
+          const banglaYear = y - 593;
+          const banglaDateStr = `${banglaDate}ই ${banglaMonths[banglaMonthIndex]} ${banglaYear} বঙ্গাব্দ`;
+
+          // হিজরি (আনুমানিক)
+          const hijriYear = y - 579;
+          const hijriMonth = hijriMonths[m];
+          const hijriDateStr = `${d}ই ${hijriMonth}, ${hijriYear} হিজরি`;
+
+          return `${dayName}\n${banglaDateStr}  |  ${engDate}  |  ${hijriDateStr}`;
+        }
+
         function applyTemplate(name) {
           // Keep logo if locked; clear other elements or guide layout with placeholder texts
           if (!_logoLocked) {
@@ -8246,6 +8287,110 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             elements = elements.filter((e) => e.type === "logo");
           } else {
             elements = elements.filter((e) => e.type === "logo");
+          }
+
+          // ── Farmer Kamol Daily Template (সুন্দর পোস্টার স্টাইল) ──
+          if (name === "farmerDaily") {
+            setCanvasSize("1080|1350|Facebook Post Portrait");
+
+            // সাদা ব্যাকগ্রাউন্ড
+            bgMode = "solid";
+            bgData.solid = "#ffffff";
+            if (typeof syncBgUI === "function") syncBgUI();
+
+            // উপরের ছবির এরিয়া (হালকা ধূসর + বর্ডার ইফেক্টের জন্য)
+            const imgArea = {
+              id: ++idCounter,
+              type: "shape",
+              shape: "rect",
+              x: 30,
+              y: 30,
+              w: 1020,
+              h: 780,
+              color: "#ecf0f1",
+              opacity: 1,
+              rotation: 0,
+            };
+
+            // শিরোনাম
+            const title = {
+              id: ++idCounter,
+              type: "text",
+              text: "এখানে শিরোনাম লিখুন",
+              fontSize: 46,
+              fontFamily: "Hind Siliguri",
+              color: "#1a1a1a",
+              bold: true,
+              italic: false,
+              align: "left",
+              opacity: 1,
+              shadow: false,
+              stroke: false,
+              rotation: 0,
+              curveMode: "none",
+              textBg: "none",
+              wrapText: true,
+              x: 45,
+              y: 850,
+              w: 990,
+              h: 110,
+            };
+
+            // তারিখ (দিন + বাংলা + ইংরেজি + হিজরি)
+            const dateText = {
+              id: ++idCounter,
+              type: "text",
+              text: getBanglaDateText(),
+              fontSize: 22,
+              fontFamily: "Hind Siliguri",
+              color: "#444444",
+              bold: false,
+              italic: false,
+              align: "left",
+              opacity: 1,
+              shadow: false,
+              stroke: false,
+              rotation: 0,
+              curveMode: "none",
+              textBg: "none",
+              wrapText: true,
+              x: 45,
+              y: 980,
+              w: 700,
+              h: 100,
+            };
+
+            // পেজের নাম
+            const pageName = {
+              id: ++idCounter,
+              type: "text",
+              text: "কৃষক কমল",
+              fontSize: 25,
+              fontFamily: "Hind Siliguri",
+              color: "#1877F2",
+              bold: true,
+              italic: false,
+              align: "right",
+              opacity: 1,
+              shadow: false,
+              stroke: false,
+              rotation: 0,
+              curveMode: "none",
+              textBg: "none",
+              wrapText: false,
+              x: 700,
+              y: 1220,
+              w: 340,
+              h: 40,
+            };
+
+            elements = elements.concat([imgArea, title, dateText, pageName]);
+            saveState();
+            updateLayers();
+            selectElement(imgArea.id);
+            render();
+            alert("✅ সুন্দর ডেইলি টেমপ্লেট লোড হয়েছে!\n\n১. উপরের ধূসর বক্সে ছবি অ্যাড করুন\n২. শিরোনাম এডিট করুন\n৩. তারিখ অটো (বাংলা + ইংরেজি + হিজরি) বসে গেছে");
+            return;
           }
           // Soft clear brush
           if (_softBrushCanvas) {
