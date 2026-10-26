@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Kamol — ভিডিও এডিটর</title>
+  <link rel="icon" href="/icon.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+      background: linear-gradient(160deg, #0f2e1a 0%, #1a4d2e 50%, #0d2818 100%);
+      min-height: 100vh;
+      color: #e8f5e9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 560px;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .sub { opacity: 0.75; font-size: 15px; margin-bottom: 28px; line-height: 1.5; }
+    .step {
+      background: rgba(0,0,0,0.25);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      border-left: 4px solid #4caf50;
+    }
+    .step strong { display: block; margin-bottom: 6px; color: #81c784; }
+    code {
+      display: block;
+      background: #111;
+      color: #a5d6a7;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 8px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .note {
+      margin-top: 24px;
+      font-size: 13px;
+      opacity: 0.7;
+      line-height: 1.6;
+    }
+    a.back {
+      display: inline-block;
+      margin-top: 20px;
+      color: #81c784;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎬 ভিডিও এডিটর</h1>
+    <p class="sub">
+      সারাদিনের ২০–৩০টা ক্লিপ → অটো সকাল–সন্ধ্যা সর্ট → স্পিড → সফট ট্রানজিশন → VO → ১৬:৯ + ৯:১৬
+    </p>
+
+    <div class="step">
+      <strong>ধাপ ১ — FFmpeg আছে কিনা চেক করুন</strong>
+      টার্মিনালে লিখুন:
+      <code>ffmpeg -version</code>
+    </div>
+
+    <div class="step">
+      <strong>ধাপ ২ — Streamlit ইনস্টল (একবার)</strong>
+      <code>pip install streamlit</code>
+    </div>
+
+    <div class="step">
+      <strong>ধাপ ৩ — টুল চালান</strong>
+      প্রজেক্ট ফোল্ডারে গিয়ে:
+      <code>streamlit run public/tools/video-edit-tools.py</code>
+    </div>
+
+    <div class="step">
+      <strong>ধাপ ৪ — ব্রাউজারে খুলবে</strong>
+      সাধারণত: <code>http://localhost:8501</code>
+    </div>
+
+    <p class="note">
+      • সব ক্লিপ অটো মিউট থাকবে (একটা চাইলে আনমিউট করতে পারবেন)<br>
+      • স্পিড ১.০ – ১.৫<br>
+      • লোগো: public/uploads/kamol.png (উপরে ডানে)<br>
+      • আউটপুট: public/tools/Output/ তারিখের ফোল্ডারে
+    </p>
+
+    <a class="back" href="/admin">← অ্যাডমিন ড্যাশবোর্ডে ফিরে যান</a>
+  </div>
+</body>
+</html>
