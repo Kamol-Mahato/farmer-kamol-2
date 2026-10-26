@@ -8850,6 +8850,35 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
               placeholder="যেমন: আজ একাদশী • উপবাস রাখুন">
           </label>
 
+          <hr style="border:none;border-top:1px solid #cfe0d3;margin:14px 0">
+
+          <label style="font-size:15px;color:#176b3a">🎬 ভিডিও তৈরি (৯:১৬)</label>
+
+          <label>
+            ভিডিওর সময়
+            <select id="dpVideoDuration">
+              <option value="12">১২ সেকেন্ড</option>
+              <option value="15" selected>১৫ সেকেন্ড</option>
+            </select>
+          </label>
+
+          <label>
+            ব্যাকগ্রাউন্ড মিউজিক (ঐচ্ছিক)
+            <input type="file" id="dpMusicInput" accept="audio/*">
+          </label>
+
+          <label>
+            মিউজিক ভলিউম
+            <input type="range" id="dpMusicVol" min="0" max="1" step="0.05" value="0.6">
+          </label>
+
+          <button class="dp-btn dp-primary" id="dpMakeVideoBtn"
+            onclick="dpGenerateVideo()" style="margin-top:6px">
+            🎬 ভিডিও তৈরি করুন (MP4 / WebM)
+          </button>
+
+          <div id="dpVideoStatus" class="dp-note" style="margin-top:8px"></div>
+
           <div style="display:flex; gap:8px;">
             <button class="dp-btn dp-secondary" style="flex:1"
               onclick="dpOffsetY -= 20; dpRender()">↑ উপরে</button>
@@ -9350,6 +9379,390 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       // Auto-refresh on Bangladesh date/time; no API required.
       dpRefreshDate();
       setInterval(dpRefreshDate, 60000);
+
+      // =====================================================
+      //  Daily Post → 9:16 Video Generator (জমজমাট + Random)
+      // =====================================================
+      let dpMusicBuffer = null;
+      let dpIsRecording = false;
+
+      // মিউজিক লোড
+      const musicInput = $("dpMusicInput");
+      if (musicInput) {
+        musicInput.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) {
+            dpMusicBuffer = null;
+            return;
+          }
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            dpMusicBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            $("dpVideoStatus").textContent = "✅ মিউজিক লোড হয়েছে";
+          } catch (err) {
+            console.error(err);
+            $("dpVideoStatus").textContent = "❌ মিউজিক লোড করা যায়নি";
+            dpMusicBuffer = null;
+          }
+        });
+      }
+
+      // ইজিং ফাংশন
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+      function easeOutBack(t) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      }
+      function clamp(v, a, b) {
+        return Math.max(a, Math.min(b, v));
+      }
+
+      // র‍্যান্ডম হেল্পার
+      function rand(min, max) {
+        return min + Math.random() * (max - min);
+      }
+      function randChoice(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      window.dpGenerateVideo = async function () {
+        if (dpIsRecording) return;
+        if (!dpPhoto) {
+          alert("আগে একটি ছবি অ্যাড করুন।");
+          return;
+        }
+
+        const duration = Number($("dpVideoDuration").value) || 15;
+        const status = $("dpVideoStatus");
+        const btn = $("dpMakeVideoBtn");
+        status.textContent = "⏳ ভিডিও তৈরি হচ্ছে... একটু অপেক্ষা করুন";
+        btn.disabled = true;
+        dpIsRecording = true;
+
+        const W = 1080;
+        const H = 1920;
+        const fps = 30;
+        const totalFrames = duration * fps;
+
+        // অফস্ক্রিন ক্যানভাস
+        const vCanvas = document.createElement("canvas");
+        vCanvas.width = W;
+        vCanvas.height = H;
+        const vctx = vCanvas.getContext("2d");
+
+        // র‍্যান্ডম অ্যানিমেশন প্যারামিটার
+        const imgStartScale = rand(1.15, 1.35);
+        const imgEndScale = rand(1.0, 1.08);
+        const imgPanX = rand(-40, 40);
+        const imgPanY = rand(-30, 30);
+        const titleFrom = randChoice(["left", "bottom", "scale"]);
+        const dateDirection = randChoice(["left", "right", "bottom"]);
+
+        // ডাটা প্রস্তুত
+        const title = ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি";
+        const dates = {
+          weekday: ($("dpWeekday") && $("dpWeekday").value) || (dpDates && dpDates.weekday) || "",
+          bn: ($("dpBnDate") && $("dpBnDate").value) || (dpDates && dpDates.bn) || "",
+          english: ($("dpEnDate") && $("dpEnDate").value) || (dpDates && dpDates.english) || "",
+          hijri: ($("dpHijriDate") && $("dpHijriDate").value) || (dpDates && dpDates.hijri) || ""
+        };
+        const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
+        const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
+
+        // অডিও সেটআপ
+        let audioCtx = null;
+        let audioDest = null;
+        if (dpMusicBuffer) {
+          try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioDest = audioCtx.createMediaStreamDestination();
+            const source = audioCtx.createBufferSource();
+            source.buffer = dpMusicBuffer;
+            const gain = audioCtx.createGain();
+            gain.gain.value = Number($("dpMusicVol").value) || 0.6;
+            source.connect(gain);
+            gain.connect(audioDest);
+            source.start(0);
+          } catch (e) {
+            console.warn("Audio mix failed", e);
+          }
+        }
+
+        // স্ট্রিম + রেকর্ডার
+        const videoStream = vCanvas.captureStream(fps);
+        let combinedStream = videoStream;
+        if (audioDest) {
+          combinedStream = new MediaStream([
+            ...videoStream.getVideoTracks(),
+            ...audioDest.stream.getAudioTracks()
+          ]);
+        }
+
+        // আগে MP4 চেষ্টা, না হলে WebM
+        let mimeType = "video/webm";
+        let fileExt = "webm";
+
+        if (MediaRecorder.isTypeSupported("video/mp4")) {
+          mimeType = "video/mp4";
+          fileExt = "mp4";
+        } else if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1")) {
+          mimeType = "video/mp4;codecs=avc1";
+          fileExt = "mp4";
+        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+          mimeType = "video/webm;codecs=vp9";
+          fileExt = "webm";
+        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+          mimeType = "video/webm;codecs=vp8";
+          fileExt = "webm";
+        }
+
+        const recorder = new MediaRecorder(combinedStream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 6000000   // ভালো কোয়ালিটি
+        });
+
+        const chunks = [];
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        const recorded = new Promise((resolve) => {
+          recorder.onstop = () => resolve();
+        });
+
+        recorder.start();
+
+        // ========== রেন্ডার লুপ ==========
+        for (let frame = 0; frame <= totalFrames; frame++) {
+          const t = frame / totalFrames; // 0 → 1
+
+          // ক্লিয়ার
+          vctx.fillStyle = "#f0fbf3";
+          vctx.fillRect(0, 0, W, H);
+
+          // ----- ১. ছবি (Ken Burns) -----
+          const imgProgress = clamp(t / 0.22, 0, 1);
+          const imgEase = easeOutCubic(imgProgress);
+          const currentScale = imgStartScale + (imgEndScale - imgStartScale) * imgEase;
+          const currentPanX = imgPanX * (1 - imgEase);
+          const currentPanY = imgPanY * (1 - imgEase);
+
+          vctx.save();
+          vctx.beginPath();
+          // উপরের বড় ছবি এরিয়া
+          const imgH = 920;
+          vctx.roundRect(30, 40, W - 60, imgH, 18);
+          vctx.clip();
+
+          if (dpPhoto) {
+            const baseScale = Math.max((W - 60) / dpPhoto.width, imgH / dpPhoto.height) * currentScale;
+            const sw = (W - 60) / baseScale;
+            const sh = imgH / baseScale;
+            const sx = (dpPhoto.width - sw) / 2 + currentPanX;
+            const sy = (dpPhoto.height - sh) / 2 + currentPanY;
+            vctx.drawImage(dpPhoto, sx, sy, sw, sh, 30, 40, W - 60, imgH);
+          }
+          vctx.restore();
+
+          // ----- ২. শিরোনাম -----
+          const titleStart = 0.18;
+          const titleProgress = clamp((t - titleStart) / 0.15, 0, 1);
+          if (titleProgress > 0) {
+            const te = easeOutBack(titleProgress);
+            vctx.save();
+            vctx.globalAlpha = titleProgress;
+
+            let tx = 50;
+            let ty = 1010;
+            let scale = 1;
+
+            if (titleFrom === "left") {
+              tx = 50 - (1 - te) * 180;
+            } else if (titleFrom === "bottom") {
+              ty = 1010 + (1 - te) * 90;
+            } else {
+              scale = 0.7 + te * 0.3;
+            }
+
+            vctx.translate(tx, ty);
+            vctx.scale(scale, scale);
+            vctx.fillStyle = "#174b2d";
+            vctx.font = "700 48px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "left";
+            // র‍্যাপ
+            const words = title.split(" ");
+            let line = "";
+            let ly = 0;
+            words.forEach((w) => {
+              const test = line + w + " ";
+              if (vctx.measureText(test).width > 980 && line) {
+                vctx.fillText(line, 0, ly);
+                line = w + " ";
+                ly += 58;
+              } else line = test;
+            });
+            if (line) vctx.fillText(line, 0, ly);
+            vctx.restore();
+          }
+
+          // ----- ৩. তারিখ কার্ড -----
+          const dateItems = [
+            dates.weekday,
+            dates.bn,
+            dates.english,
+            dates.hijri
+          ].filter(Boolean);
+
+          dateItems.forEach((txt, i) => {
+            const start = 0.32 + i * 0.06;
+            const p = clamp((t - start) / 0.12, 0, 1);
+            if (p <= 0) return;
+
+            const e = easeOutCubic(p);
+            vctx.save();
+            vctx.globalAlpha = p;
+
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            let x = 30 + col * 520;
+            let y = 1180 + row * 85;
+
+            if (dateDirection === "left") x -= (1 - e) * 120;
+            else if (dateDirection === "right") x += (1 - e) * 120;
+            else y += (1 - e) * 60;
+
+            // কার্ড ব্যাকগ্রাউন্ড
+            vctx.fillStyle = "#ffffff";
+            vctx.beginPath();
+            vctx.roundRect(x, y, 500, 72, 12);
+            vctx.fill();
+
+            vctx.fillStyle = "#214c31";
+            vctx.font = "600 26px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "left";
+            vctx.fillText(txt, x + 22, y + 46, 460);
+            vctx.restore();
+          });
+
+          // ----- ৪. অতিরিক্ত নোট -----
+          const extras = [extra1, extra2].filter(Boolean);
+          extras.forEach((txt, i) => {
+            const start = 0.55 + i * 0.07;
+            const p = clamp((t - start) / 0.12, 0, 1);
+            if (p <= 0) return;
+            const e = easeOutCubic(p);
+            vctx.save();
+            vctx.globalAlpha = p;
+            const y = 1360 + i * 55 + (1 - e) * 40;
+            vctx.fillStyle = "#174b2d";
+            vctx.font = "600 28px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "left";
+            vctx.fillText(txt, 50, y, 980);
+            vctx.restore();
+          });
+
+          // ----- ৫. ব্র্যান্ডিং ফুটার -----
+          const brandStart = 0.66;
+          const bp = clamp((t - brandStart) / 0.16, 0, 1);
+          if (bp > 0) {
+            const e = easeOutCubic(bp);
+            vctx.save();
+            vctx.globalAlpha = bp;
+
+            // নিচে জায়গা রেখে পজিশন ঠিক করা হয়েছে
+            const footerY = 1480 + (1 - e) * 100;
+
+            // ব্যাকগ্রাউন্ড
+            vctx.fillStyle = "#e1f3e6";
+            vctx.fillRect(0, footerY, W, H - footerY);
+
+            // লোগো
+            if (dpLogo.complete && dpLogo.naturalWidth) {
+              vctx.save();
+              vctx.beginPath();
+              vctx.arc(90, footerY + 65, 46, 0, Math.PI * 2);
+              vctx.clip();
+              vctx.drawImage(dpLogo, 44, footerY + 19, 92, 92);
+              vctx.restore();
+            }
+
+            vctx.fillStyle = "#07552c";
+            vctx.font = "700 34px Arial, sans-serif";
+            vctx.textAlign = "left";
+            vctx.fillText("Farmer Kamol", 155, footerY + 50);
+
+            vctx.fillStyle = "#df5c17";
+            vctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
+            vctx.fillText("খামার থেকে আপনার দরজায়", 155, footerY + 88);
+
+            vctx.fillStyle = "#294c34";
+            vctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
+            vctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 155, footerY + 122);
+
+            // সোশ্যাল আইকন
+            const socials = [
+              { x: 130, color: "#1877f2", label: "f" },
+              { x: 230, color: "#e60023", label: "▶" },
+              { x: 330, color: "#00a884", label: "WA" },
+              { x: 430, color: "#d90072", label: "◎" },
+              { x: 530, color: "#008f67", label: "✉" }
+            ];
+            socials.forEach((s) => {
+              vctx.fillStyle = s.color;
+              vctx.beginPath();
+              vctx.arc(s.x, footerY + 175, 24, 0, Math.PI * 2);
+              vctx.fill();
+              vctx.fillStyle = "#ffffff";
+              vctx.font = "700 18px Arial, sans-serif";
+              vctx.textAlign = "center";
+              vctx.fillText(s.label, s.x, footerY + 181);
+            });
+
+            // ওয়েবসাইট
+            vctx.fillStyle = "#07552c";
+            vctx.font = "700 26px Arial, sans-serif";
+            vctx.textAlign = "center";
+            vctx.fillText("farmerkamol.com", W / 2, footerY + 240);
+
+            // স্লোগান
+            vctx.fillStyle = "#647768";
+            vctx.font = "400 18px 'Noto Sans Bengali', sans-serif";
+            vctx.fillText("খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ", W / 2, footerY + 275);
+
+            vctx.restore();
+          }
+
+          // ফ্রেম ওয়েট (আনুমানিক রিয়েল-টাইম)
+          await new Promise((r) => setTimeout(r, 1000 / fps));
+        }
+
+        // রেকর্ডিং শেষ
+        recorder.stop();
+        await recorded;
+
+        if (audioCtx) audioCtx.close();
+
+        // ডাউনলোড
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Farmer-Kamol-Daily-${Date.now()}.${fileExt}`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        if (fileExt === "mp4") {
+          status.textContent = "✅ MP4 ভিডিও তৈরি হয়েছে ও ডাউনলোড শুরু হয়েছে! (Facebook এ আপলোড করা যাবে)";
+        } else {
+          status.textContent = "✅ WebM ভিডিও তৈরি হয়েছে। এই ব্রাউজারে MP4 সাপোর্ট নেই। Chrome/Edge এ চেষ্টা করুন অথবা অনলাইন কনভার্টার ব্যবহার করুন।";
+        }
+        btn.disabled = false;
+        dpIsRecording = false;
+      };
     })();
   </script>
   </body>
