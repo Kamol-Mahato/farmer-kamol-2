@@ -9553,8 +9553,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
           vctx.save();
           vctx.beginPath();
-          // উপরের বড় ছবি এরিয়া
-          const imgH = 920;
+          // ছবি একটু ছোট করা হয়েছে যাতে নিচে টেক্সট বড় করা যায়
+          const imgH = 780;
           vctx.roundRect(30, 40, W - 60, imgH, 18);
           vctx.clip();
 
@@ -9568,7 +9568,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           }
           vctx.restore();
 
-          // ----- ২. শিরোনাম -----
+          // ----- ২. শিরোনাম (বড়) -----
           const titleStart = 0.18;
           const titleProgress = clamp((t - titleStart) / 0.15, 0, 1);
           if (titleProgress > 0) {
@@ -9576,14 +9576,14 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             vctx.save();
             vctx.globalAlpha = titleProgress;
 
-            let tx = 50;
-            let ty = 1010;
+            let tx = 45;
+            let ty = 870;
             let scale = 1;
 
             if (titleFrom === "left") {
-              tx = 50 - (1 - te) * 180;
+              tx = 45 - (1 - te) * 180;
             } else if (titleFrom === "bottom") {
-              ty = 1010 + (1 - te) * 90;
+              ty = 870 + (1 - te) * 90;
             } else {
               scale = 0.7 + te * 0.3;
             }
@@ -9591,7 +9591,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             vctx.translate(tx, ty);
             vctx.scale(scale, scale);
             vctx.fillStyle = "#174b2d";
-            vctx.font = "700 48px 'Noto Sans Bengali', sans-serif";
+            vctx.font = "700 56px 'Noto Sans Bengali', sans-serif";
             vctx.textAlign = "left";
             // র‍্যাপ
             const words = title.split(" ");
@@ -9599,17 +9599,17 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             let ly = 0;
             words.forEach((w) => {
               const test = line + w + " ";
-              if (vctx.measureText(test).width > 980 && line) {
+              if (vctx.measureText(test).width > 990 && line) {
                 vctx.fillText(line, 0, ly);
                 line = w + " ";
-                ly += 58;
+                ly += 66;
               } else line = test;
             });
             if (line) vctx.fillText(line, 0, ly);
             vctx.restore();
           }
 
-          // ----- ৩. তারিখ কার্ড -----
+          // ----- ৩. তারিখ কার্ড (বড় ও স্পষ্ট) -----
           const dateItems = [
             dates.weekday,
             dates.bn,
@@ -9629,22 +9629,23 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             const col = i % 2;
             const row = Math.floor(i / 2);
             let x = 30 + col * 520;
-            let y = 1180 + row * 85;
+            let y = 1020 + row * 100;
 
             if (dateDirection === "left") x -= (1 - e) * 120;
             else if (dateDirection === "right") x += (1 - e) * 120;
             else y += (1 - e) * 60;
 
-            // কার্ড ব্যাকগ্রাউন্ড
+            // কার্ড ব্যাকগ্রাউন্ড (উচ্চতা বাড়ানো)
             vctx.fillStyle = "#ffffff";
             vctx.beginPath();
-            vctx.roundRect(x, y, 500, 72, 12);
+            vctx.roundRect(x, y, 500, 88, 14);
             vctx.fill();
 
+            // টেক্সট বড়
             vctx.fillStyle = "#214c31";
-            vctx.font = "600 26px 'Noto Sans Bengali', sans-serif";
+            vctx.font = "700 32px 'Noto Sans Bengali', sans-serif";
             vctx.textAlign = "left";
-            vctx.fillText(txt, x + 22, y + 46, 460);
+            vctx.fillText(txt, x + 24, y + 56, 460);
             vctx.restore();
           });
 
