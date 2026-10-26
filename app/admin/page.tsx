@@ -155,7 +155,7 @@ export default async function AdminDashboard() {
           </p>
         </a>
         <a
-          href="/tools/video-edit.html"
+          href="https://farmer-kamol-video.streamlit.app"
           target="_blank"
           rel="noopener noreferrer"
           className="block bg-indigo-700 text-white rounded-xl p-6 hover:bg-indigo-600 transition"
