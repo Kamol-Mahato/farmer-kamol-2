@@ -1226,6 +1226,14 @@
           🎨 Farmer Kamol <span>Thumbnail Maker</span>
           <span class="badge">Pro</span>
         </div>
+        <button
+          type="button"
+          class="btn btn-green"
+          onclick="openDailyPostStudio()"
+          style="white-space:nowrap"
+        >
+          🌱 Daily Post
+        </button>
         <div class="topbar-sep"></div>
         <div class="undo-redo">
           <button
@@ -8658,5 +8666,570 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       </script>
     </div>
     <!-- /editorPage -->
+
+  <!-- Farmer Kamol Daily Post Studio -->
+  <style>
+    #dailyPostStudio {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #edf5ee;
+      color: #173c27;
+      overflow: auto;
+      padding: 18px;
+      box-sizing: border-box;
+      font-family: "Noto Sans Bengali", sans-serif;
+    }
+    #dailyPostStudio * { box-sizing: border-box; }
+    #dailyPostStudio .dp-shell {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 35px #173c271c;
+    }
+    #dailyPostStudio .dp-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    #dailyPostStudio .dp-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 330px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    #dailyPostStudio .dp-controls {
+      display: grid;
+      gap: 12px;
+    }
+    #dailyPostStudio label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    #dailyPostStudio input,
+    #dailyPostStudio textarea,
+    #dailyPostStudio select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd9ce;
+      border-radius: 8px;
+      background: white;
+      color: #173c27;
+      font: inherit;
+      font-size: 14px;
+    }
+    #dailyPostStudio textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    #dailyPostStudio .dp-btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #dailyPostStudio .dp-primary {
+      background: #176b3a;
+      color: white;
+    }
+    #dailyPostStudio .dp-secondary {
+      background: #e9f2eb;
+      color: #176b3a;
+    }
+    #dailyPostStudio .dp-preview {
+      min-width: 0;
+    }
+    #dailyPostStudio #dailyPostCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 18px #173c2724;
+      background: #effaf2;
+    }
+    #dailyPostStudio .dp-note {
+      color: #647568;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    @media (max-width: 720px) {
+      #dailyPostStudio { padding: 8px; }
+      #dailyPostStudio .dp-shell { padding: 12px; }
+      #dailyPostStudio .dp-grid { grid-template-columns: 1fr; }
+      #dailyPostStudio .dp-preview { grid-row: 1; }
+    }
+  </style>
+
+  <div id="dailyPostStudio">
+    <div class="dp-shell">
+      <div class="dp-head">
+        <div>
+          <h2 style="margin:0;font-size:21px;color:#176b3a">
+            🌱 Farmer Kamol Daily Post
+          </h2>
+          <p class="dp-note" style="margin:5px 0 0">
+            প্রতিদিনের কৃষিবিষয়ক Facebook পোস্ট তৈরি করুন
+          </p>
+        </div>
+        <button class="dp-btn dp-secondary"
+          onclick="closeDailyPostStudio()">✕ বন্ধ করুন</button>
+      </div>
+
+      <div class="dp-grid">
+        <div class="dp-controls">
+          <label>
+            কৃষির ছবি
+            <input type="file" id="dpImageInput"
+              accept="image/*" onchange="dpLoadImage(this)">
+          </label>
+
+          <label>
+            পোস্টের শিরোনাম
+            <textarea id="dpTitle"
+              maxlength="140"
+              placeholder="যেমন: বীজ বপনে ব্যস্ত কৃষক"
+              oninput="dpRender()">আজকের কৃষি ও গ্রামবাংলা</textarea>
+          </label>
+
+          <label>
+            হিজরি তারিখ সংশোধন
+            <select id="dpHijriOffset" onchange="dpRefreshDate()">
+              <option value="-2">২ দিন পিছিয়ে</option>
+              <option value="-1">১ দিন পিছিয়ে</option>
+              <option value="0" selected>স্বয়ংক্রিয় তারিখ</option>
+              <option value="1">১ দিন এগিয়ে</option>
+              <option value="2">২ দিন এগিয়ে</option>
+            </select>
+          </label>
+
+          <div class="dp-note">
+            বাংলা তারিখ ও ঋতু বাংলাদেশের বাংলা ক্যালেন্ডারের নিয়মে
+            হিসাব করা হবে। হিজরি তারিখ ব্রাউজারের ইসলামিক ক্যালেন্ডার
+            থেকে আসবে; বাংলাদেশের চাঁদ দেখার ঘোষণার সঙ্গে পার্থক্য
+            হলে উপরের সংশোধন ব্যবহার করুন।
+          </div>
+
+          <button class="dp-btn dp-primary"
+            onclick="dpDownload()">⬇ PNG ডাউনলোড করুন</button>
+          <button class="dp-btn dp-secondary"
+            onclick="dpRefreshDate()">↻ তারিখ আপডেট করুন</button>
+        </div>
+
+        <div class="dp-preview">
+          <canvas id="dailyPostCanvas" width="1080" height="1080"></canvas>
+          <p class="dp-note">
+            প্রিভিউ 1080 × 1080 px। ডাউনলোড করা ছবিতে পোস্টের
+            সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const pc = $("dailyPostCanvas");
+      const pctx = pc.getContext("2d");
+
+      let dpPhoto = null;
+      let dpLogo = new Image();
+      let dpDates = null;
+
+      dpLogo.onload = () => dpRender();
+      dpLogo.onerror = () => dpRender();
+      dpLogo.src = "/upload/kamol.png";
+
+      const dpBnMonths = [
+        "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র",
+        "আশ্বিন", "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ",
+        "ফাল্গুন", "চৈত্র"
+      ];
+
+      const dpSeasons = [
+        "গ্রীষ্ম", "গ্রীষ্ম", "বর্ষা", "বর্ষা",
+        "শরৎ", "শরৎ", "হেমন্ত", "হেমন্ত",
+        "শীত", "শীত", "বসন্ত", "বসন্ত"
+      ];
+
+      function dpDhakaParts(date = new Date()) {
+        const parts = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Asia/Dhaka",
+          year: "numeric", month: "numeric", day: "numeric"
+        }).formatToParts(date);
+
+        const o = {};
+        parts.forEach(p => {
+          if (p.type !== "literal") o[p.type] = Number(p.value);
+        });
+        return { year: o.year, month: o.month, day: o.day };
+      }
+
+      function dpBanglaDate(g) {
+        const date = new Date(Date.UTC(g.year, g.month - 1, g.day));
+        const isAfterNewYear =
+          g.month > 4 || (g.month === 4 && g.day >= 14);
+
+        const startYear = isAfterNewYear ? g.year : g.year - 1;
+        const start = Date.UTC(startYear, 3, 14);
+        let offset = Math.floor((date.getTime() - start) / 86400000);
+        const banglaYear = startYear - 593;
+
+        // বাংলাদেশের সংশোধিত বাংলা ক্যালেন্ডার:
+        // প্রথম পাঁচ মাস ৩১ দিন, পরের মাসগুলো ৩০ দিন।
+        // ফাল্গুনে সংশ্লিষ্ট বাংলা বছরের ফেব্রুয়ারি লিপ-ডে পড়লে ৩১ দিন।
+        const leapYearInBanglaYear =
+          new Date(Date.UTC(startYear + 1, 1, 29)).getUTCDate() === 29;
+
+        const lengths = [
+          31, 31, 31, 31, 31, 30, 30, 30, 30, 30,
+          leapYearInBanglaYear ? 31 : 30, 30
+        ];
+
+        let monthIndex = 0;
+        while (monthIndex < 11 && offset >= lengths[monthIndex]) {
+          offset -= lengths[monthIndex];
+          monthIndex++;
+        }
+
+        return {
+          day: offset + 1,
+          month: dpBnMonths[monthIndex],
+          year: banglaYear,
+          season: dpSeasons[monthIndex]
+        };
+      }
+
+      function dpRefreshDate() {
+        const g = dpDhakaParts();
+        const bn = dpBanglaDate(g);
+
+        const english = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Asia/Dhaka",
+          day: "numeric", month: "long", year: "numeric"
+        }).format(new Date());
+
+        const weekday = new Intl.DateTimeFormat("bn-BD", {
+          timeZone: "Asia/Dhaka", weekday: "long"
+        }).format(new Date());
+
+        const adjusted = new Date(Date.UTC(
+          g.year, g.month - 1, g.day +
+          Number($("dpHijriOffset").value || 0)
+        ));
+
+        let hijri = "হিজরি তারিখ অনুপলব্ধ";
+        try {
+          hijri = new Intl.DateTimeFormat(
+            "bn-BD-u-ca-islamic-umalqura", {
+              timeZone: "UTC",
+              day: "numeric", month: "long", year: "numeric"
+            }
+          ).format(adjusted);
+        } catch (_) {
+          try {
+            hijri = new Intl.DateTimeFormat(
+              "bn-BD-u-ca-islamic", {
+                timeZone: "UTC",
+                day: "numeric", month: "long", year: "numeric"
+              }
+            ).format(adjusted);
+          } catch (_) {}
+        }
+
+        dpDates = {
+          bn: `${bn.day} ${bn.month} ${bn.year} বঙ্গাব্দ`,
+          english,
+          hijri,
+          season: bn.season,
+          weekday
+        };
+
+        dpRender();
+      }
+
+      function dpCover(img, x, y, w, h) {
+        const scale = Math.max(w / img.width, h / img.height);
+        const sw = w / scale;
+        const sh = h / scale;
+        pctx.drawImage(
+          img,
+          (img.width - sw) / 2,
+          (img.height - sh) / 2,
+          sw, sh, x, y, w, h
+        );
+      }
+
+      function dpWrap(text, x, y, maxWidth, lineHeight, maxLines) {
+        const words = text.trim().split(/\s+/);
+        let line = "";
+        let lines = [];
+
+        words.forEach(word => {
+          const test = line ? line + " " + word : word;
+          if (pctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        });
+        if (line) lines.push(line);
+
+        if (lines.length > maxLines) {
+          lines = lines.slice(0, maxLines);
+          let last = lines[maxLines - 1];
+          while (
+            last.length &&
+            pctx.measureText(last + "…").width > maxWidth
+          ) {
+            last = last.slice(0, -1);
+          }
+          lines[maxLines - 1] = last + "…";
+        }
+
+        lines.forEach((t, i) => pctx.fillText(t, x, y + i * lineHeight));
+      }
+
+      function dpRender() {
+        if (!pc || !pctx) return;
+
+        const W = 1080, H = 1080;
+        pctx.clearRect(0, 0, W, H);
+        pctx.fillStyle = "#f0fbf3";
+        pctx.fillRect(0, 0, W, H);
+
+        // Main photograph
+        pctx.save();
+        pctx.beginPath();
+        pctx.roundRect(28, 28, 1024, 390, 12);
+        pctx.clip();
+
+        if (dpPhoto) {
+          dpCover(dpPhoto, 28, 28, 1024, 390);
+        } else {
+          pctx.fillStyle = "#dcebdd";
+          pctx.fillRect(28, 28, 1024, 390);
+          pctx.fillStyle = "#52745a";
+          pctx.textAlign = "center";
+          pctx.font = "600 30px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText("এখানে কৃষির ছবি যোগ করুন", 540, 225);
+        }
+        pctx.restore();
+
+        // Headline
+        pctx.fillStyle = "#174b2d";
+        pctx.textAlign = "left";
+        pctx.font = "700 37px 'Noto Sans Bengali', sans-serif";
+        dpWrap($("dpTitle").value || "আজকের কৃষি", 38, 475, 1000, 49, 2);
+
+        // Date cards
+        const dates = dpDates || {
+          bn: "তারিখ আপডেট হচ্ছে",
+          english: "",
+          hijri: "",
+          season: "",
+          weekday: ""
+        };
+
+        const cards = [
+          { x: 28, y: 555, label: "বাংলা তারিখ", value: dates.bn },
+          { x: 548, y: 555, label: "ইংরেজি তারিখ", value: dates.english },
+          { x: 28, y: 640, label: "হিজরি তারিখ", value: dates.hijri },
+          { x: 548, y: 640, label: "বাংলার ঋতু", value: dates.season }
+        ];
+
+        cards.forEach(card => {
+          pctx.fillStyle = "#ffffff";
+          pctx.beginPath();
+          pctx.roundRect(card.x, card.y, 504, 70, 9);
+          pctx.fill();
+
+          pctx.fillStyle = "#6b806e";
+          pctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText(card.label, card.x + 16, card.y + 25);
+
+          pctx.fillStyle = "#214c31";
+          pctx.font = "600 23px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText(card.value, card.x + 16, card.y + 55, 470);
+        });
+
+        // Brand footer
+        pctx.fillStyle = "#e1f3e6";
+        pctx.fillRect(0, 730, W, 350);
+
+        if (dpLogo.complete && dpLogo.naturalWidth) {
+          pctx.save();
+          pctx.beginPath();
+          pctx.arc(83, 793, 43, 0, Math.PI * 2);
+          pctx.clip();
+          pctx.drawImage(dpLogo, 40, 750, 86, 86);
+          pctx.restore();
+        }
+
+        pctx.textAlign = "left";
+        pctx.fillStyle = "#07552c";
+        pctx.font = "700 34px Arial, sans-serif";
+        pctx.fillText("Farmer Kamol", 145, 782);
+
+        pctx.fillStyle = "#df5c17";
+        pctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
+        pctx.fillText("খামার থেকে আপনার দরজায়", 145, 823);
+
+        pctx.fillStyle = "#294c34";
+        pctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
+        pctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 145, 858);
+        pctx.fillText("সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।", 145, 886);
+
+        // Social brand markers
+        const socials = [
+          { x: 100, color: "#1877f2", label: "f" },
+          { x: 276, color: "#e60023", label: "▶" },
+          { x: 452, color: "#263445", label: "☎" },
+          { x: 628, color: "#00a884", label: "WA" },
+          { x: 804, color: "#d90072", label: "◎" },
+          { x: 980, color: "#008f67", label: "✉" }
+        ];
+
+        socials.forEach(s => {
+          pctx.fillStyle = s.color;
+          pctx.beginPath();
+          pctx.arc(s.x, 947, 29, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = "#ffffff";
+          pctx.textAlign = "center";
+          pctx.font = "700 23px Arial, sans-serif";
+          pctx.fillText(s.label, s.x, 955);
+        });
+
+        pctx.fillStyle = "#07552c";
+        pctx.font = "700 25px Arial, sans-serif";
+        pctx.textAlign = "center";
+        pctx.fillText("farmerkamol.com", 540, 1015);
+
+        pctx.fillStyle = "#647768";
+        pctx.font = "400 16px 'Noto Sans Bengali', sans-serif";
+        pctx.fillText(
+          `${dates.weekday}  •  কৃষি • প্রকৃতি • গ্রামবাংলা`,
+          540, 1050
+        );
+      }
+
+      window.openDailyPostStudio = function() {
+        $("dailyPostStudio").style.display = "block";
+        dpRefreshDate();
+      };
+
+      window.closeDailyPostStudio = function() {
+        $("dailyPostStudio").style.display = "none";
+      };
+
+      window.dpLoadImage = function(input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+          alert("একটি ছবির ফাইল নির্বাচন করুন।");
+          input.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            dpPhoto = img;
+            dpRender();
+          };
+          img.onerror = () => alert("ছবিটি পড়া যায়নি। অন্য ছবি দিন।");
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      };
+
+      window.dpRefreshDate = function() {
+        try {
+          dpRefreshDateInternal();
+        } catch (err) {
+          console.error("Daily Post date error:", err);
+        }
+      };
+
+      function dpRefreshDateInternal() {
+        const g = dpDhakaParts();
+        const bn = dpBanglaDate(g);
+
+        const english = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Asia/Dhaka",
+          day: "numeric", month: "long", year: "numeric"
+        }).format(new Date());
+
+        const weekday = new Intl.DateTimeFormat("bn-BD", {
+          timeZone: "Asia/Dhaka", weekday: "long"
+        }).format(new Date());
+
+        const adjusted = new Date(Date.UTC(
+          g.year, g.month - 1,
+          g.day + Number($("dpHijriOffset").value || 0)
+        ));
+
+        let hijri = "হিজরি তারিখ অনুপলব্ধ";
+        try {
+          hijri = new Intl.DateTimeFormat(
+            "bn-BD-u-ca-islamic-umalqura", {
+              timeZone: "UTC",
+              day: "numeric", month: "long", year: "numeric"
+            }
+          ).format(adjusted);
+        } catch (_) {
+          try {
+            hijri = new Intl.DateTimeFormat(
+              "bn-BD-u-ca-islamic", {
+                timeZone: "UTC",
+                day: "numeric", month: "long", year: "numeric"
+              }
+            ).format(adjusted);
+          } catch (_) {}
+        }
+
+        dpDates = {
+          bn: `${bn.day} ${bn.month} ${bn.year} বঙ্গাব্দ`,
+          english,
+          hijri,
+          season: bn.season,
+          weekday
+        };
+        dpRender();
+      }
+
+      window.dpRender = dpRender;
+
+      window.dpDownload = function() {
+        dpRender();
+        try {
+          const link = document.createElement("a");
+          link.download = "Farmer-Kamol-Daily-Post.png";
+          link.href = pc.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          alert("PNG তৈরি করা যায়নি। পৃষ্ঠাটি রিফ্রেশ করে আবার চেষ্টা করুন।");
+        }
+      };
+
+      // Auto-refresh on Bangladesh date/time; no API required.
+      dpRefreshDate();
+      setInterval(dpRefreshDate, 60000);
+    })();
+  </script>
   </body>
 </html>
+
