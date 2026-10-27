@@ -20,11 +20,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "Output")
 TEMP_DIR = os.path.join(BASE_DIR, "Temp")
 
-# Logo: public/uploads/kamol.png
+# Logo: public/uploads/logo.png
 _LOGO_CANDIDATES = [
-    os.path.join(BASE_DIR, "..", "uploads", "kamol.png"),
-    os.path.join(BASE_DIR, "uploads", "kamol.png"),
-    os.path.join(BASE_DIR, "..", "..", "public", "uploads", "kamol.png"),
+    os.path.join(BASE_DIR, "..", "uploads", "logo.png"),
+    os.path.join(BASE_DIR, "uploads", "logo.png"),
+    os.path.join(BASE_DIR, "..", "..", "public", "uploads", "logo.png"),
 ]
 LOGO_PATH = next((p for p in _LOGO_CANDIDATES if os.path.exists(p)), None)
 
@@ -392,7 +392,7 @@ def main():
     if LOGO_PATH:
         st.sidebar.success(f"লোগো: `{os.path.basename(LOGO_PATH)}`")
     else:
-        st.sidebar.warning("kamol.png পাওয়া যায়নি — লোগো ছাড়াই চলবে")
+        st.sidebar.warning("logo.png পাওয়া যায়নি — লোগো ছাড়াই চলবে")
 
     st.header("১. ক্লিপ আপলোড")
     ups = st.file_uploader(
@@ -473,7 +473,7 @@ def main():
     with c3:
         st.write("লোগো")
         if LOGO_PATH:
-            st.success("kamol.png · উপরে ডানে ফিক্সড")
+            st.success("logo.png · উপরে ডানে ফিক্সড")
         else:
             st.warning("লোগো নেই")
 
