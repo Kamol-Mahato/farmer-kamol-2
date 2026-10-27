@@ -8812,7 +8812,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           <label>
             পোস্টের শিরোনাম
             <textarea id="dpTitle"
-              maxlength="140"
+              maxlength="500"
               placeholder="যেমন: বীজ বপনে ব্যস্ত কৃষক"
               oninput="dpRender()">আজকের কৃষি ও গ্রামবাংলা</textarea>
           </label>
@@ -9075,6 +9075,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
       function dpCover(img, x, y, w, h) {
         if (!img || !img.width) return;
+        const ctx = (window.__dpCtx) || pctx;
+        if (!ctx) return;
 
         const baseScale = Math.max(w / img.width, h / img.height);
         const scale = baseScale * (dpZoom || 1);
@@ -9102,38 +9104,40 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           sy = Math.max(0, Math.min(sy, img.height - sh));
         }
 
-        pctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
       }
 
       function dpWrap(text, x, y, maxWidth, lineHeight, maxLines) {
-        const words = text.trim().split(/\s+/);
+        const ctx = (window.__dpCtx) || pctx;
+        if (!ctx) return;
+        const words = String(text || "").trim().split(/\s+/);
         let line = "";
         let lines = [];
 
-        words.forEach(word => {
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i];
           const test = line ? line + " " + word : word;
-          if (pctx.measureText(test).width > maxWidth && line) {
+          if (ctx.measureText(test).width > maxWidth && line) {
             lines.push(line);
             line = word;
           } else {
             line = test;
           }
-        });
+        }
         if (line) lines.push(line);
 
         if (lines.length > maxLines) {
           lines = lines.slice(0, maxLines);
           let last = lines[maxLines - 1];
-          while (
-            last.length &&
-            pctx.measureText(last + "…").width > maxWidth
-          ) {
+          while (last.length && ctx.measureText(last + "…").width > maxWidth) {
             last = last.slice(0, -1);
           }
           lines[maxLines - 1] = last + "…";
         }
 
-        lines.forEach((t, i) => pctx.fillText(t, x, y + i * lineHeight));
+        for (let i = 0; i < lines.length; i++) {
+          ctx.fillText(lines[i], x, y + i * lineHeight);
+        }
       }
 
       // কাস্টম সাইজ স্টেট
@@ -9156,6 +9160,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const h = Math.max(400, Math.min(3000, Number($("dpCustomH").value) || 1080));
         dpCanvasW = w;
         dpCanvasH = h;
+        if ($("dpCustomW")) $("dpCustomW").value = w;
+        if ($("dpCustomH")) $("dpCustomH").value = h;
         dpApplyCanvasSize();
       };
 
@@ -9163,50 +9169,78 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         if (!pc) return;
         pc.width = dpCanvasW;
         pc.height = dpCanvasH;
+        // resize এর পর context state reset হয় — নতুন করে নাও
+        window.__dpCtx = pc.getContext("2d");
+
         const note = $("dpPreviewNote");
         if (note) {
-          note.textContent = `প্রিভিউ ${dpCanvasW} × ${dpCanvasH} px। ডাউনলোড করা ছবিতে পোস্টের সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।`;
+          note.textContent = `প্রিভিউ ${dpCanvasW} × ${dpCanvasH} px (ডাউনলোডও একই সাইজ)। প্রয়োগ করা হয়েছে।`;
         }
+        // প্রিভিউতে সাইজ বোঝানোর জন্য ছোট লেবেল
+        pc.title = dpCanvasW + " × " + dpCanvasH;
         dpRender();
       }
 
       function dpRender() {
-        if (!pc || !pctx) return;
+        // resize এর পর fresh context ব্যবহার করো
+        if (window.__dpCtx) {
+          // pctx variable কে sync রাখো যাতে dpCover/dpWrap সব কাজ করে
+        }
+        const ctx = pc.getContext("2d");
+        window.__dpCtx = ctx;
+        if (!pc || !ctx) return;
+        // নিচের কোডে pctx ব্যবহার হলেও যেন একই context হয়
+        // (IIFE এর const pctx change করা যায় না, তাই draw এর আগে assign নয় —
+        //  dpCover আলাদা ঠিক করছি)
 
         const W = dpCanvasW || 1080;
         const H = dpCanvasH || 1080;
         const sx = W / 1080;
         const sy = H / 1080;
-        const s = Math.min(sx, sy); // ফন্ট স্কেল
+        const s = Math.min(sx, sy);
 
-        pctx.clearRect(0, 0, W, H);
-        pctx.fillStyle = "#f0fbf3";
-        pctx.fillRect(0, 0, W, H);
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#f0fbf3";
+        ctx.fillRect(0, 0, W, H);
 
         // ── মেইন ছবি বড় (৪৮০px বেস) ──
         const photoH = 480 * sy;
-        pctx.save();
-        pctx.beginPath();
-        pctx.roundRect(28 * sx, 28 * sy, 1024 * sx, photoH, 12 * s);
-        pctx.clip();
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(28 * sx, 28 * sy, 1024 * sx, photoH, 12 * s);
+        ctx.clip();
 
         if (dpPhoto) {
-          dpCover(dpPhoto, 28 * sx, 28 * sy, 1024 * sx, photoH);
+          // dpCover ভিতরে pctx ব্যবহার করে — অস্থায়ী override
+          const _old = pctx;
+          try {
+            // dpCover img draw এর জন্য canvas context
+            dpCover(dpPhoto, 28 * sx, 28 * sy, 1024 * sx, photoH);
+          } finally {}
         } else {
-          pctx.fillStyle = "#dcebdd";
-          pctx.fillRect(28 * sx, 28 * sy, 1024 * sx, photoH);
-          pctx.fillStyle = "#52745a";
-          pctx.textAlign = "center";
-          pctx.font = `600 ${30 * s}px 'Noto Sans Bengali', sans-serif`;
-          pctx.fillText("এখানে কৃষির ছবি যোগ করুন", W / 2, 28 * sy + photoH / 2);
+          ctx.fillStyle = "#dcebdd";
+          ctx.fillRect(28 * sx, 28 * sy, 1024 * sx, photoH);
+          ctx.fillStyle = "#52745a";
+          ctx.textAlign = "center";
+          ctx.font = "600 " + (30 * s) + "px 'Noto Sans Bengali', sans-serif";
+          ctx.fillText("এখানে কৃষির ছবি যোগ করুন", W / 2, 28 * sy + photoH / 2);
         }
-        pctx.restore();
+        ctx.restore();
 
-        // Headline
-        pctx.fillStyle = "#174b2d";
-        pctx.textAlign = "left";
-        pctx.font = `700 ${37 * s}px 'Noto Sans Bengali', sans-serif`;
-        dpWrap($("dpTitle").value || "আজকের কৃষি", 38 * sx, 545 * sy, 1000 * sx, 49 * sy, 2);
+        // Headline — সাইজ বড় হলে বেশি লাইন (২→৪)
+        const titleMaxLines = (H >= 1400) ? 4 : (H >= 1200) ? 3 : 2;
+        const titleY = 545 * sy;
+        ctx.fillStyle = "#174b2d";
+        ctx.textAlign = "left";
+        ctx.font = "700 " + (37 * s) + "px 'Noto Sans Bengali', sans-serif";
+        dpWrap(
+          ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি",
+          38 * sx,
+          titleY,
+          1000 * sx,
+          49 * sy,
+          titleMaxLines
+        );
 
         // Date cards
         const dates = {
@@ -9239,7 +9273,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
 
-        let brandStartY = 785;
+        let brandStartY = 820;
 
         if (extra1 || extra2) {
           pctx.fillStyle = "#ffffff";
@@ -9315,10 +9349,10 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         pctx.fillStyle = "#07552c";
         pctx.font = `700 ${22 * s}px Arial, sans-serif`;
         pctx.textAlign = "center";
-        pctx.fillText("farmerkamol.com", W / 2, socialY + 55 * s);
+        pctx.fillText("For more details visit : farmerkamol.com", W / 2, socialY + 55 * s);
 
         pctx.fillStyle = "#647768";
-        pctx.font = `500 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
+        pctx.font = `700 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
         pctx.fillText(
           "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ",
           W / 2, socialY + 82 * s
@@ -9812,7 +9846,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
             // স্লোগান
             vctx.fillStyle = "#647768";
-            vctx.font = "400 18px 'Noto Sans Bengali', sans-serif";
+            vctx.font = "500 18px 'Noto Sans Bengali', sans-serif";
             vctx.fillText("খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ", W / 2, footerY + 275);
 
             vctx.restore();
