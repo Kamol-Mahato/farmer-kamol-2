@@ -9022,12 +9022,45 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         };
       }
 
+      function toBnDigits(n) {
+        var map = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+        var s = String(n);
+        var out = "";
+        for (var i = 0; i < s.length; i++) {
+          var ch = s.charAt(i);
+          var code = s.charCodeAt(i);
+          if (code >= 48 && code <= 57) {
+            out += map[code - 48];
+          } else {
+            out += ch;
+          }
+        }
+        return out;
+      }
+
+      function fromBnDigits(str) {
+        var map = "০১২৩৪৫৬৭৮৯";
+        var s = String(str);
+        var out = "";
+        for (var i = 0; i < s.length; i++) {
+          var ch = s.charAt(i);
+          var idx = map.indexOf(ch);
+          if (idx >= 0) {
+            out += String(idx);
+          } else {
+            out += ch;
+          }
+        }
+        return out;
+      }
+
       function dpOrdinal(n) {
-        const s = String(n);
-        if (n === 1) return s + "লা";
-        if (n === 2 || n === 3) return s + "রা";
-        if (n === 4) return s + "ঠা";
-        if (n >= 19 && n <= 31) return s + "শে";
+        var num = Number(n) || 0;
+        var s = toBnDigits(num);
+        if (num === 1) return s + "লা";
+        if (num === 2 || num === 3) return s + "রা";
+        if (num === 4) return s + "ঠা";
+        if (num >= 19 && num <= 31) return s + "শে";
         return s + "ই";
       }
 
@@ -9332,10 +9365,6 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         }
       };
 
-        "জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন",
-        "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"
-  
-
       function dpRefreshDateInternal() {
         const g = dpDhakaParts();
         const bn = dpBanglaDate(g);
@@ -9344,11 +9373,11 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           timeZone: "Asia/Dhaka", weekday: "long"
         }).format(new Date());
 
-        // ২৭শে অক্টোবর, ২০২৬ খ্রিস্টাব্দ
-        const engStr = `${dpOrdinal(g.day)} ${dpEnMonthsBn[g.month - 1]}, ${g.year} খ্রিস্টাব্দ`;
+        // ২৭শে অক্টোবর, ২০২৬ খ্রিস্টাব্দ (সব অঙ্ক বাংলা)
+        const engStr = `${dpOrdinal(g.day)} ${dpEnMonthsBn[g.month - 1]}, ${toBnDigits(g.year)} খ্রিস্টাব্দ`;
 
         // ১১ই কার্তিক, ১৪৩৩ বঙ্গাব্দ-হেমন্তকাল
-        const bnStr = `${dpOrdinal(bn.day)} ${bn.month}, ${bn.year} বঙ্গাব্দ-${bn.season}কাল`;
+        const bnStr = `${dpOrdinal(bn.day)} ${bn.month}, ${toBnDigits(bn.year)} বঙ্গাব্দ-${bn.season}কাল`;
 
         const adjusted = new Date(Date.UTC(
           g.year, g.month - 1,
@@ -9357,6 +9386,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         let hijri = "হিজরি তারিখ অনুপলব্ধ";
         try {
+          // মাসের নাম বাংলায়, দিন/বছর ইংরেজি অঙ্কে নিয়ে পরে convert
           const parts = new Intl.DateTimeFormat(
             "bn-BD-u-ca-islamic-umalqura", {
               timeZone: "UTC",
@@ -9370,16 +9400,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             if (p.type === "month") hMonth = p.value;
             if (p.type === "year") hYear = p.value;
           });
-          const hNum = parseInt(hDay, 10) || 1;
-          hijri = `${dpOrdinal(hNum)} ${hMonth}, ${hYear} হিজরি`;
+
+          // বাংলা অঙ্ক থাকলে ইংরেজিতে নামিয়ে সংখ্যা বের করো
+          const hNum = parseInt(fromBnDigits(hDay), 10) || 1;
+          const hYearNum = parseInt(fromBnDigits(hYear), 10) || 0;
+
+          hijri = `${dpOrdinal(hNum)} ${hMonth}, ${toBnDigits(hYearNum)} হিজরি`;
         } catch (_) {
           try {
-            hijri = new Intl.DateTimeFormat(
+            // fallback — পুরো স্ট্রিং থেকে অঙ্ক বাংলায়
+            const raw = new Intl.DateTimeFormat(
               "bn-BD-u-ca-islamic", {
                 timeZone: "UTC",
                 day: "numeric", month: "long", year: "numeric"
               }
-            ).format(adjusted) + " হিজরি";
+            ).format(adjusted);
+            hijri = toBnDigits(raw) + " হিজরি";
           } catch (_) {}
         }
 
@@ -9391,7 +9427,6 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           weekday
         };
 
-        // value + placeholder দুটোতেই আজকের তারিখ
         const map = {
           dpWeekday: weekday,
           dpBnDate: bnStr,
