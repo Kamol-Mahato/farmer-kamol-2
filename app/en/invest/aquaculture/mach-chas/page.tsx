@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import InvestSubNav from "@/app/en/invest/InvestSubNav";
 
 export const revalidate = 3600;
@@ -100,7 +101,9 @@ export default function MachChasInvestPageEn() {
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-blue-100 shadow-lg aspect-[4/3] bg-blue-50 flex items-center justify-center text-blue-700 font-medium">
-              Fish farming photo coming soon
+              <InvestPhoto name="invest-mach" alt="Fish farming - Farmer Kamol">
+                Fish farming photo coming soon
+              </InvestPhoto>
             </div>
           </Reveal>
         </div>

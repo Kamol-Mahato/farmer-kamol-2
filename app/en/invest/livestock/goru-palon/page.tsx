@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import InvestSubNav from "@/app/en/invest/InvestSubNav";
 
 export const revalidate = 3600;
@@ -101,7 +102,9 @@ export default function GoruPalonInvestPageEn() {
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center text-green-700 font-medium">
-              Cattle photo coming soon
+              <InvestPhoto name="invest-goru" alt="Cattle Rearing Project - Farmer Kamol">
+                Cattle photo coming soon
+              </InvestPhoto>
             </div>
           </Reveal>
         </div>

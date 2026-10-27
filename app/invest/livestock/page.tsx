@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import InvestSubNav from "@/app/invest/InvestSubNav";
 
 export const revalidate = 3600;
@@ -114,7 +115,12 @@ export default function LivestockInvestPage() {
                   className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 h-full"
                 >
                   <div className="h-36 bg-green-100 flex items-center justify-center text-green-800 font-semibold">
-                    {p.title.includes("হাঁস") ? "চিনা হাঁস" : "গরু পালন"}
+                  <InvestPhoto
+                      name={p.title.includes("হাঁস") ? "invest-china-hash" : "invest-goru"}
+                      alt={p.title}
+                    >
+                      {p.title.includes("হাঁস") ? "চিনা হাঁস" : "গরু পালন"}
+                    </InvestPhoto>
                   </div>
                   <div className="p-6">
                     <span

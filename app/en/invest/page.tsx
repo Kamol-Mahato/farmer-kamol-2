@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import InvestCalculator from "./InvestCalculator";
 import { DetailToggle, StepAccordion } from "@/app/invest/InvestAccordion";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import FaqAccordion from "@/app/invest/FaqAccordion";
 import InvestSubNav from "./InvestSubNav";
 
@@ -387,7 +388,9 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
               >
                 <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
-                  Livestock
+                <InvestPhoto name={["invest-china-hash", "invest-goru"]} alt="Livestock">
+                    Livestock
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
@@ -415,7 +418,9 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
               >
                 <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-                  Crop Farming
+                <InvestPhoto name="invest-dhan" alt="Crop Farming">
+                    Crop Farming
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
@@ -442,7 +447,9 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
               >
                 <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-                  Fish Farming
+                <InvestPhoto name="invest-mach" alt="Fish Farming">
+                    Fish Farming
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">

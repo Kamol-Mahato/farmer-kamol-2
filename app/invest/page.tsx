@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import InvestCalculator from "./InvestCalculator";
 import { DetailToggle, StepAccordion } from "./InvestAccordion";
 import Reveal from "./Reveal";
+import InvestPhoto from "./InvestPhoto";
 import FaqAccordion from "./FaqAccordion";
 
 export const revalidate = 3600;
@@ -439,7 +440,9 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
               >
                 <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
-                  পশুপালন / Livestock
+                <InvestPhoto name={["invest-china-hash", "invest-goru"]} alt="পশুপালন / Livestock">
+                    পশুপালন / Livestock
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
@@ -467,7 +470,9 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
               >
                 <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-                  ফসল চাষ / Crop
+                <InvestPhoto name="invest-dhan" alt="ফসল চাষ / Crop">
+                    ফসল চাষ / Crop
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
@@ -494,7 +499,9 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
               >
                 <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-                  মাছ চাষ / Aquaculture
+                <InvestPhoto name="invest-mach" alt="মাছ চাষ / Aquaculture">
+                    মাছ চাষ / Aquaculture
+                  </InvestPhoto>
                 </div>
                 <div className="p-5">
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">

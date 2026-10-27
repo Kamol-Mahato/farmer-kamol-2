@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import InvestSubNav from "@/app/en/invest/InvestSubNav";
 
 export const revalidate = 3600;
@@ -92,7 +93,9 @@ export default function CropInvestPageEn() {
               className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
             >
               <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-                Crop Farming on Arable Land
+              <InvestPhoto name="invest-dhan" alt="Crop Farming on Arable Land">
+                  Crop Farming on Arable Land
+                </InvestPhoto>
               </div>
               <div className="p-6">
                 <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">

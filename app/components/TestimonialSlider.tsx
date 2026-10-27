@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, type TouchEvent } from "react";
 
 import type { TestimonialItem } from "@/lib/placeholderReviews";
 
@@ -15,6 +15,8 @@ export default function TestimonialSlider({
   const isEn = locale === "en";
   const [perView, setPerView] = useState(3);
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     function updatePerView() {
@@ -40,16 +42,43 @@ export default function TestimonialSlider({
     setIndex((i) => (i <= 0 ? maxIndex : i - 1));
   }
 
+  function onTouchStart(e: TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    setPaused(true);
+  }
+
+  function onTouchEnd(e: TouchEvent) {
+    const start = touchStartX.current;
+    touchStartX.current = null;
+    if (start !== null && canSlide) {
+      const dx = e.changedTouches[0].clientX - start;
+      if (dx <= -40) goNext();
+      else if (dx >= 40) goPrev();
+    }
+    setPaused(false);
+  }
+
   useEffect(() => {
-    if (!canSlide) return;
-    const timer = setInterval(goNext, 4500); // প্রতি ৪.৫ সেকেন্ডে অটো স্লাইড
+    if (!canSlide || paused) return;
+    const timer = setInterval(goNext, 7000); // প্রতি ৭ সেকেন্ডে অটো স্লাইড
     return () => clearInterval(timer);
-  }, [canSlide, goNext]);
+  }, [canSlide, paused, goNext]);
 
   if (reviews.length === 0) return null;
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      style={{ touchAction: "pan-y" }}
+      onPointerEnter={(e) => e.pointerType === "mouse" && setPaused(true)}
+      onPointerLeave={(e) => e.pointerType === "mouse" && setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={() => {
+        touchStartX.current = null;
+        setPaused(false);
+      }}
+    >
       <div className="overflow-hidden">
         <div
           className="flex transition-transform duration-700 ease-in-out"
@@ -143,16 +172,6 @@ export default function TestimonialSlider({
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
-          <div className="flex justify-center gap-2 mt-6">
-            {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIndex(i)}
-                aria-label={isEn ? `Review slide ${i + 1}` : `রিভিউ স্লাইড ${i + 1}`}
-                className={`w-2.5 h-2.5 rounded-full transition ${i === index ? "bg-green-700" : "bg-green-200"}`}
-              />
-            ))}
-          </div>
         </>
       )}
     </div>

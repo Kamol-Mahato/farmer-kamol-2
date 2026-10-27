@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import { prisma } from "@/lib/prisma";
 import Reveal from "@/app/invest/Reveal";
+import InvestPhoto from "@/app/invest/InvestPhoto";
 import { DetailToggle, StepAccordion } from "@/app/invest/InvestAccordion";
 import InvestSubNav from "@/app/invest/InvestSubNav";
 
@@ -134,11 +135,13 @@ export default async function ChinaHashInvestPage() {
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center">
-              <img
-                src="/uploads/header-2nd-about.jpg"
-                alt="চিনা হাঁস প্রকল্প - Farmer Kamol"
-                className="w-full h-full object-cover"
-              />
+              <InvestPhoto name="invest-china-hash" alt="চিনা হাঁস প্রকল্প - Farmer Kamol">
+                <img
+                  src="/uploads/header-2nd-about.jpg"
+                  alt="চিনা হাঁস প্রকল্প - Farmer Kamol"
+                  className="w-full h-full object-cover"
+                />
+              </InvestPhoto>
             </div>
           </Reveal>
         </div>
