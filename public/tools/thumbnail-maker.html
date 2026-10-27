@@ -8781,8 +8781,24 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             প্রতিদিনের কৃষিবিষয়ক Facebook পোস্ট তৈরি করুন
           </p>
         </div>
-        <button class="dp-btn dp-secondary"
-          onclick="closeDailyPostStudio()">✕ বন্ধ করুন</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select id="dpSizePreset" onchange="dpOnSizeChange()"
+            style="padding:6px 10px;border-radius:8px;border:1px solid #b7d4c0;font-size:14px">
+            <option value="1080x1080" selected>FB Post 1080×1080</option>
+            <option value="custom">কাস্টম সাইজ</option>
+          </select>
+          <span id="dpCustomSizeWrap" style="display:none;align-items:center;gap:4px">
+            <input type="number" id="dpCustomW" value="1080" min="400" max="3000"
+              style="width:72px;padding:5px;border-radius:6px;border:1px solid #b7d4c0">
+            <span>×</span>
+            <input type="number" id="dpCustomH" value="1080" min="400" max="3000"
+              style="width:72px;padding:5px;border-radius:6px;border:1px solid #b7d4c0">
+            <button class="dp-btn dp-secondary" style="padding:5px 10px"
+              onclick="dpApplyCustomSize()">প্রয়োগ</button>
+          </span>
+          <button class="dp-btn dp-secondary"
+            onclick="closeDailyPostStudio()">✕ বন্ধ করুন</button>
+        </div>
       </div>
 
       <div class="dp-grid">
@@ -8814,22 +8830,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
           <label>
             দিনের নাম (ম্যানুয়াল)
-            <input type="text" id="dpWeekday" oninput="dpRender()" placeholder="যেমন: সোমবার">
+            <input type="text" id="dpWeekday" oninput="dpRender()" placeholder="">
           </label>
 
           <label>
             বাংলা তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpBnDate" oninput="dpRender()" placeholder="যেমন: ১০ই কার্তিক ১৪৩৩ বঙ্গাব্দ">
+            <input type="text" id="dpBnDate" oninput="dpRender()" placeholder="">
           </label>
 
           <label>
             ইংরেজি তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpEnDate" oninput="dpRender()" placeholder="যেমন: ২৬শে অক্টোবর ২০২৬">
+            <input type="text" id="dpEnDate" oninput="dpRender()" placeholder="">
           </label>
 
           <label>
             হিজরি তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpHijriDate" oninput="dpRender()" placeholder="যেমন: ১৪ই জমাদিউল আউয়াল ১৪৪৮">
+            <input type="text" id="dpHijriDate" oninput="dpRender()" placeholder="">
           </label>
 
           <label>
@@ -8907,7 +8923,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         <div class="dp-preview">
           <canvas id="dailyPostCanvas" width="1080" height="1080"></canvas>
-          <p class="dp-note">
+          <p class="dp-note" id="dpPreviewNote">
             প্রিভিউ 1080 × 1080 px। ডাউনলোড করা ছবিতে পোস্টের
             সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।
           </p>
@@ -9006,52 +9022,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         };
       }
 
+      function dpOrdinal(n) {
+        const s = String(n);
+        if (n === 1) return s + "লা";
+        if (n === 2 || n === 3) return s + "রা";
+        if (n === 4) return s + "ঠা";
+        if (n >= 19 && n <= 31) return s + "শে";
+        return s + "ই";
+      }
+
+      const dpEnMonthsBn = [
+        "জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন",
+        "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"
+      ];
+
       function dpRefreshDate() {
-        const g = dpDhakaParts();
-        const bn = dpBanglaDate(g);
-
-        const english = new Intl.DateTimeFormat("en-GB", {
-          timeZone: "Asia/Dhaka",
-          day: "numeric", month: "long", year: "numeric"
-        }).format(new Date());
-
-        const weekday = new Intl.DateTimeFormat("bn-BD", {
-          timeZone: "Asia/Dhaka", weekday: "long"
-        }).format(new Date());
-
-        const adjusted = new Date(Date.UTC(
-          g.year, g.month - 1, g.day +
-          Number($("dpHijriOffset").value || 0)
-        ));
-
-        let hijri = "হিজরি তারিখ অনুপলব্ধ";
-        try {
-          hijri = new Intl.DateTimeFormat(
-            "bn-BD-u-ca-islamic-umalqura", {
-              timeZone: "UTC",
-              day: "numeric", month: "long", year: "numeric"
-            }
-          ).format(adjusted);
-        } catch (_) {
-          try {
-            hijri = new Intl.DateTimeFormat(
-              "bn-BD-u-ca-islamic", {
-                timeZone: "UTC",
-                day: "numeric", month: "long", year: "numeric"
-              }
-            ).format(adjusted);
-          } catch (_) {}
-        }
-
-        dpDates = {
-          bn: `${bn.day} ${bn.month} ${bn.year} বঙ্গাব্দ`,
-          english,
-          hijri,
-          season: bn.season,
-          weekday
-        };
-
-        dpRender();
+        dpRefreshDateInternal();
       }
 
       function dpCover(img, x, y, w, h) {
@@ -9117,39 +9103,79 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         lines.forEach((t, i) => pctx.fillText(t, x, y + i * lineHeight));
       }
 
+      // কাস্টম সাইজ স্টেট
+      let dpCanvasW = 1080;
+      let dpCanvasH = 1080;
+
+      window.dpOnSizeChange = function () {
+        const preset = $("dpSizePreset") && $("dpSizePreset").value;
+        const wrap = $("dpCustomSizeWrap");
+        if (wrap) wrap.style.display = preset === "custom" ? "inline-flex" : "none";
+        if (preset === "1080x1080") {
+          dpCanvasW = 1080;
+          dpCanvasH = 1080;
+          dpApplyCanvasSize();
+        }
+      };
+
+      window.dpApplyCustomSize = function () {
+        const w = Math.max(400, Math.min(3000, Number($("dpCustomW").value) || 1080));
+        const h = Math.max(400, Math.min(3000, Number($("dpCustomH").value) || 1080));
+        dpCanvasW = w;
+        dpCanvasH = h;
+        dpApplyCanvasSize();
+      };
+
+      function dpApplyCanvasSize() {
+        if (!pc) return;
+        pc.width = dpCanvasW;
+        pc.height = dpCanvasH;
+        const note = $("dpPreviewNote");
+        if (note) {
+          note.textContent = `প্রিভিউ ${dpCanvasW} × ${dpCanvasH} px। ডাউনলোড করা ছবিতে পোস্টের সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।`;
+        }
+        dpRender();
+      }
+
       function dpRender() {
         if (!pc || !pctx) return;
 
-        const W = 1080, H = 1080;
+        const W = dpCanvasW || 1080;
+        const H = dpCanvasH || 1080;
+        const sx = W / 1080;
+        const sy = H / 1080;
+        const s = Math.min(sx, sy); // ফন্ট স্কেল
+
         pctx.clearRect(0, 0, W, H);
         pctx.fillStyle = "#f0fbf3";
         pctx.fillRect(0, 0, W, H);
 
-        // Main photograph
+        // ── মেইন ছবি বড় (৪৮০px বেস) ──
+        const photoH = 480 * sy;
         pctx.save();
         pctx.beginPath();
-        pctx.roundRect(28, 28, 1024, 390, 12);
+        pctx.roundRect(28 * sx, 28 * sy, 1024 * sx, photoH, 12 * s);
         pctx.clip();
 
         if (dpPhoto) {
-          dpCover(dpPhoto, 28, 28, 1024, 390);
+          dpCover(dpPhoto, 28 * sx, 28 * sy, 1024 * sx, photoH);
         } else {
           pctx.fillStyle = "#dcebdd";
-          pctx.fillRect(28, 28, 1024, 390);
+          pctx.fillRect(28 * sx, 28 * sy, 1024 * sx, photoH);
           pctx.fillStyle = "#52745a";
           pctx.textAlign = "center";
-          pctx.font = "600 30px 'Noto Sans Bengali', sans-serif";
-          pctx.fillText("এখানে কৃষির ছবি যোগ করুন", 540, 225);
+          pctx.font = `600 ${30 * s}px 'Noto Sans Bengali', sans-serif`;
+          pctx.fillText("এখানে কৃষির ছবি যোগ করুন", W / 2, 28 * sy + photoH / 2);
         }
         pctx.restore();
 
         // Headline
         pctx.fillStyle = "#174b2d";
         pctx.textAlign = "left";
-        pctx.font = "700 37px 'Noto Sans Bengali', sans-serif";
-        dpWrap($("dpTitle").value || "আজকের কৃষি", 38, 475, 1000, 49, 2);
+        pctx.font = `700 ${37 * s}px 'Noto Sans Bengali', sans-serif`;
+        dpWrap($("dpTitle").value || "আজকের কৃষি", 38 * sx, 545 * sy, 1000 * sx, 49 * sy, 2);
 
-        // Date cards — শুধু মান দেখাবে, লেবেল থাকবে না
+        // Date cards
         const dates = {
           bn: ($("dpBnDate") && $("dpBnDate").value) || (dpDates && dpDates.bn) || "",
           english: ($("dpEnDate") && $("dpEnDate").value) || (dpDates && dpDates.english) || "",
@@ -9158,83 +9184,81 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         };
 
         const cards = [
-          { x: 28,  y: 555, value: dates.weekday },
-          { x: 548, y: 555, value: dates.bn },
-          { x: 28,  y: 640, value: dates.english },
-          { x: 548, y: 640, value: dates.hijri }
+          { x: 28,  y: 620, value: dates.weekday },
+          { x: 548, y: 620, value: dates.bn },
+          { x: 28,  y: 700, value: dates.english },
+          { x: 548, y: 700, value: dates.hijri }
         ];
 
         cards.forEach(card => {
           pctx.fillStyle = "#ffffff";
           pctx.beginPath();
-          pctx.roundRect(card.x, card.y, 504, 70, 9);
+          pctx.roundRect(card.x * sx, card.y * sy, 504 * sx, 65 * sy, 9 * s);
           pctx.fill();
 
-          // শুধু মান — মাঝখানে সুন্দর করে
           pctx.fillStyle = "#214c31";
-          pctx.font = "600 26px 'Noto Sans Bengali', sans-serif";
+          pctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
           pctx.textAlign = "left";
-          pctx.fillText(card.value, card.x + 20, card.y + 45, 460);
+          pctx.fillText(card.value, (card.x + 16) * sx, (card.y + 42) * sy, 470 * sx);
         });
 
-        // ── অতিরিক্ত ২টা নোট / সময় ──
+        // অতিরিক্ত নোট
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
 
-        let brandStartY = 730;
+        let brandStartY = 785;
 
         if (extra1 || extra2) {
           pctx.fillStyle = "#ffffff";
           pctx.beginPath();
-          pctx.roundRect(28, 730, 1024, (extra1 && extra2) ? 90 : 55, 10);
+          pctx.roundRect(28 * sx, 785 * sy, 1024 * sx, ((extra1 && extra2) ? 80 : 48) * sy, 10 * s);
           pctx.fill();
 
           pctx.fillStyle = "#174b2d";
-          pctx.font = "600 24px 'Noto Sans Bengali', sans-serif";
+          pctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
           pctx.textAlign = "left";
 
-          if (extra1) {
-            pctx.fillText(extra1, 48, 765, 980);
-          }
-          if (extra2) {
-            pctx.fillText(extra2, 48, extra1 ? 805 : 765, 980);
-          }
+          if (extra1) pctx.fillText(extra1, 48 * sx, 818 * sy, 980 * sx);
+          if (extra2) pctx.fillText(extra2, 48 * sx, (extra1 ? 850 : 818) * sy, 980 * sx);
 
-          brandStartY = (extra1 && extra2) ? 840 : 805;
+          brandStartY = (extra1 && extra2) ? 920 : 890;
         }
 
-        // Brand footer
+        // ── Brand footer (ছোট) ──
         pctx.fillStyle = "#e1f3e6";
-        pctx.fillRect(0, brandStartY, W, 1080 - brandStartY);
+        pctx.fillRect(0, brandStartY * sy, W, H - brandStartY * sy);
 
-        const logoY = brandStartY + 30;
-        const textBase = brandStartY + 55;
+        const logoY = (brandStartY + 18) * sy;
+        const textBase = (brandStartY + 38) * sy;
 
         if (dpLogo.complete && dpLogo.naturalWidth) {
           pctx.save();
           pctx.beginPath();
-          pctx.arc(83, logoY + 43, 43, 0, Math.PI * 2);
+          pctx.arc(78 * sx, logoY + 36 * s, 36 * s, 0, Math.PI * 2);
           pctx.clip();
-          pctx.drawImage(dpLogo, 40, logoY, 86, 86);
+          pctx.drawImage(dpLogo, 42 * sx, logoY, 72 * s, 72 * s);
           pctx.restore();
         }
 
         pctx.textAlign = "left";
         pctx.fillStyle = "#07552c";
-        pctx.font = "700 34px Arial, sans-serif";
-        pctx.fillText("Farmer Kamol", 145, textBase);
+        pctx.font = `700 ${30 * s}px Arial, sans-serif`;
+        pctx.fillText("Farmer Kamol", 130 * sx, textBase);
 
         pctx.fillStyle = "#df5c17";
-        pctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
-        pctx.fillText("খামার থেকে আপনার দরজায়", 145, textBase + 41);
+        pctx.font = `700 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
+        pctx.fillText("খামার থেকে আপনার দরজায়", 130 * sx, textBase + 32 * s);
 
+        // এক লাইনে tagline
         pctx.fillStyle = "#294c34";
-        pctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
-        pctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 145, textBase + 76);
-        pctx.fillText("সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।", 145, textBase + 104);
+        pctx.font = `400 ${16 * s}px 'Noto Sans Bengali', sans-serif`;
+        pctx.fillText(
+          "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।",
+          130 * sx, textBase + 58 * s, 900 * sx
+        );
 
-        // Social brand markers
-        const socialY = brandStartY + 195;
+        // Social icons (কম্প্যাক্ট)
+        const socialY = (brandStartY + 145) * sy;
         const socials = [
           { x: 100, color: "#1877f2", label: "f" },
           { x: 276, color: "#e60023", label: "▶" },
@@ -9244,27 +9268,27 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           { x: 980, color: "#008f67", label: "✉" }
         ];
 
-        socials.forEach(s => {
-          pctx.fillStyle = s.color;
+        socials.forEach(sItem => {
+          pctx.fillStyle = sItem.color;
           pctx.beginPath();
-          pctx.arc(s.x, socialY, 29, 0, Math.PI * 2);
+          pctx.arc(sItem.x * sx, socialY, 26 * s, 0, Math.PI * 2);
           pctx.fill();
           pctx.fillStyle = "#ffffff";
           pctx.textAlign = "center";
-          pctx.font = "700 23px Arial, sans-serif";
-          pctx.fillText(s.label, s.x, socialY + 8);
+          pctx.font = `700 ${20 * s}px Arial, sans-serif`;
+          pctx.fillText(sItem.label, sItem.x * sx, socialY + 7 * s);
         });
 
         pctx.fillStyle = "#07552c";
-        pctx.font = "700 25px Arial, sans-serif";
+        pctx.font = `700 ${22 * s}px Arial, sans-serif`;
         pctx.textAlign = "center";
-        pctx.fillText("farmerkamol.com", 540, socialY + 70);
+        pctx.fillText("farmerkamol.com", W / 2, socialY + 55 * s);
 
         pctx.fillStyle = "#647768";
-        pctx.font = "500 17px 'Noto Sans Bengali', sans-serif";
+        pctx.font = `500 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
         pctx.fillText(
           "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ",
-          540, socialY + 105
+          W / 2, socialY + 82 * s
         );
       }
 
@@ -9308,18 +9332,23 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         }
       };
 
+        "জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন",
+        "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"
+  
+
       function dpRefreshDateInternal() {
         const g = dpDhakaParts();
         const bn = dpBanglaDate(g);
 
-        const english = new Intl.DateTimeFormat("en-GB", {
-          timeZone: "Asia/Dhaka",
-          day: "numeric", month: "long", year: "numeric"
-        }).format(new Date());
-
         const weekday = new Intl.DateTimeFormat("bn-BD", {
           timeZone: "Asia/Dhaka", weekday: "long"
         }).format(new Date());
+
+        // ২৭শে অক্টোবর, ২০২৬ খ্রিস্টাব্দ
+        const engStr = `${dpOrdinal(g.day)} ${dpEnMonthsBn[g.month - 1]}, ${g.year} খ্রিস্টাব্দ`;
+
+        // ১১ই কার্তিক, ১৪৩৩ বঙ্গাব্দ-হেমন্তকাল
+        const bnStr = `${dpOrdinal(bn.day)} ${bn.month}, ${bn.year} বঙ্গাব্দ-${bn.season}কাল`;
 
         const adjusted = new Date(Date.UTC(
           g.year, g.month - 1,
@@ -9328,12 +9357,21 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         let hijri = "হিজরি তারিখ অনুপলব্ধ";
         try {
-          hijri = new Intl.DateTimeFormat(
+          const parts = new Intl.DateTimeFormat(
             "bn-BD-u-ca-islamic-umalqura", {
               timeZone: "UTC",
               day: "numeric", month: "long", year: "numeric"
             }
-          ).format(adjusted);
+          ).formatToParts(adjusted);
+
+          let hDay = "", hMonth = "", hYear = "";
+          parts.forEach(p => {
+            if (p.type === "day") hDay = p.value;
+            if (p.type === "month") hMonth = p.value;
+            if (p.type === "year") hYear = p.value;
+          });
+          const hNum = parseInt(hDay, 10) || 1;
+          hijri = `${dpOrdinal(hNum)} ${hMonth}, ${hYear} হিজরি`;
         } catch (_) {
           try {
             hijri = new Intl.DateTimeFormat(
@@ -9341,23 +9379,31 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
                 timeZone: "UTC",
                 day: "numeric", month: "long", year: "numeric"
               }
-            ).format(adjusted);
+            ).format(adjusted) + " হিজরি";
           } catch (_) {}
         }
 
         dpDates = {
-          bn: `${bn.day} ${bn.month} ${bn.year} বঙ্গাব্দ`,
-          english,
+          bn: bnStr,
+          english: engStr,
           hijri,
           season: bn.season,
           weekday
         };
 
-        // ইনপুট বক্সেও অটো ভর্তি করে দাও (ম্যানুয়াল এডিট করা যাবে)
-        if ($("dpWeekday")) $("dpWeekday").value = weekday;
-        if ($("dpBnDate")) $("dpBnDate").value = dpDates.bn;
-        if ($("dpEnDate")) $("dpEnDate").value = english;
-        if ($("dpHijriDate")) $("dpHijriDate").value = hijri;
+        // value + placeholder দুটোতেই আজকের তারিখ
+        const map = {
+          dpWeekday: weekday,
+          dpBnDate: bnStr,
+          dpEnDate: engStr,
+          dpHijriDate: hijri
+        };
+        Object.keys(map).forEach(id => {
+          const el = $(id);
+          if (!el) return;
+          el.value = map[id];
+          el.placeholder = map[id];
+        });
 
         dpRender();
       }
