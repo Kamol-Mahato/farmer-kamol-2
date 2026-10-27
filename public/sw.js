@@ -50,8 +50,8 @@ self.addEventListener("push", function (event) {
 
   const options = {
     body: data.body,
-    icon: "/uploads/kamol.png",
-    badge: "/uploads/kamol.png",
+    icon: "/uploads/logo.png",
+    badge: "/uploads/logo.png",
     vibrate: [200, 100, 200],
     data: { url: data.url || "/" }, // যে লিংক ব্যাকএন্ড পাঠাবে সেটাই সেভ হবে
     tag: data.tag || "farmer-kamol-notification",

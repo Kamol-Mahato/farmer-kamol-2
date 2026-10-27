@@ -247,7 +247,7 @@ export default function AboutPageEn() {
           <Reveal className="w-full md:w-56 shrink-0 mx-auto md:mx-0">
             <div className="relative w-40 h-40 sm:w-52 sm:h-52 md:w-full md:h-56 mx-auto rounded-full md:rounded-2xl overflow-hidden ring-4 ring-green-100 shadow-lg">
               <Image
-                src="/uploads/kamol.png"
+                src="/uploads/logo.png"
                 alt={`${siteConfig.brand.founderName} - Founder, ${siteConfig.brand.nameEn}`}
                 fill
                 className="object-cover"

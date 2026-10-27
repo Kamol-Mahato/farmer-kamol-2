@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center  px-2 text-center">
       <Image
-        src="/uploads/kamol.png"
+        src="/uploads/logo.png"
         alt={siteConfig.brand.nameEn}
         width={80}
         height={80}

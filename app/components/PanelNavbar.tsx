@@ -45,7 +45,7 @@ export default function PanelNavbar({
           className="flex items-center gap-2 md:gap-3 shrink-0"
         >
           <Image
-            src="/uploads/kamol.png"
+            src="/uploads/logo.png"
             alt="Farmer Kamol"
             width={36}
             height={36}

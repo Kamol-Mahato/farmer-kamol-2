@@ -34,7 +34,7 @@ function A4Invoice({ order, qrUrl }: { order: Order; qrUrl: string }) {
       <div className="flex items-center justify-between border-b-2 border-green-700 pb-4 mb-6">
         <div className="flex items-center gap-3">
           <img
-            src="/uploads/kamol.png"
+            src="/uploads/logo.png"
             alt="Farmer Kamol"
             className="w-16 h-16 rounded-full object-cover border-2 border-green-700"
           />
@@ -148,7 +148,7 @@ function POSInvoice({ order, qrUrl }: { order: Order; qrUrl: string }) {
     >
       <div className="text-center mb-3">
         <img
-          src="/uploads/kamol.png"
+          src="/uploads/logo.png"
           alt="logo"
           className="w-12 h-12 rounded-full mx-auto mb-1 object-cover"
         />
@@ -219,7 +219,7 @@ function StickerInvoice({ order }: { order: Order }) {
     >
       <div className="flex items-center gap-2 pb-1 mb-1 border-b border-dashed border-gray-400">
         <img
-          src="/uploads/kamol.png"
+          src="/uploads/logo.png"
           alt="logo"
           className="w-6 h-6 rounded-full object-cover"
         />

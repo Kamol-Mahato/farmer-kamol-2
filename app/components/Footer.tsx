@@ -139,7 +139,7 @@ export default function Footer() {
           <div className="mb-4 lg:mb-0 lg:col-span-1 flex flex-col items-start">
             <Link href={href("/")} className="flex items-center gap-2 mb-1">
               <Image
-                src="/uploads/kamol.png"
+                src="/uploads/logo.png"
                 alt={siteConfig.brand.name}
                 width={36}
                 height={36}

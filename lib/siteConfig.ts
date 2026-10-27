@@ -34,7 +34,7 @@ export const siteConfig = {
     url: "https://farmerkamol.com",
     host: "farmerkamol.com",
     ogImage: "/uploads/og-image.jpg",
-    logo: "/uploads/kamol.png",
+    logo: "/uploads/logo.png",
   },
 
   // যোগাযোগ তথ্য
