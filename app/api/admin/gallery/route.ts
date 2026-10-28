@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { sendPushToCustomers } from "@/lib/webpush";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function POST(request: Request) {
   const isAuthorized = await verifyAdminOrAgent();
@@ -80,6 +82,10 @@ export async function POST(request: Request) {
 
     revalidatePath("/media/image");
     revalidatePath("/en/media/image");
+    submitUrls(
+      `${siteConfig.domain.url}/media/image`,
+      `${siteConfig.domain.url}/en/media/image`,
+    ).catch((err) => console.error("IndexNow gallery create error:", err));
     return NextResponse.json({ success: true, id: galleryItem.id });
   } catch (error: any) {
     console.error("GALLERY CREATE ERROR ->", error);

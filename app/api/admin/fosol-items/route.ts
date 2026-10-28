@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminOnly } from "@/lib/adminAuth";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { submitUrls } from "@/lib/indexnow";
+import { siteConfig } from "@/lib/siteConfig";
 
 export async function GET() {
   const admin = await verifyAdminOnly();
@@ -56,6 +58,24 @@ export async function POST(req: Request) {
       },
       include: { category: true },
     });
+    if (item.isPublished) {
+      const base = siteConfig.domain.url;
+      const urls = [
+        `${base}/banglar-fosol`,
+        `${base}/en/banglar-fosol`,
+        `${base}/banglar-fosol/${item.category.slug}`,
+        `${base}/en/banglar-fosol/${item.category.slug}`,
+        `${base}/banglar-fosol/${item.category.slug}/${item.slug}`,
+      ];
+      if (item.slugEn) {
+        urls.push(
+          `${base}/en/banglar-fosol/${item.category.slug}/${item.slugEn}`,
+        );
+      }
+      submitUrls(...urls).catch((err) =>
+        console.error("IndexNow fosol create error:", err),
+      );
+    }
     return NextResponse.json(item);
   } catch (e: any) {
     console.error(e);
