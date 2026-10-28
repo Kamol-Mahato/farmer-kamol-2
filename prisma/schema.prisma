@@ -350,6 +350,31 @@ model Blog {
   homeOrder     Int?
 }
 
+model ContestPost {
+  id          Int       @id @default(autoincrement())
+  type        String    @default("CONTEST")
+  title       String
+  titleEn     String?
+  slug        String    @unique
+  slugEn      String?   @unique
+  summary     String?
+  summaryEn   String?
+  content     String
+  contentEn   String?
+  image       String?
+  posterImage String?
+  facebookUrl String?
+  youtubeUrl  String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  winners     String?
+  winnersEn   String?
+  isPinned    Boolean   @default(false)
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 model YoutubeVideo {
   id            Int      @id @default(autoincrement())
   title         String

@@ -313,6 +313,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return pages;
   });
 
+  const contests = await prisma.contestPost.findMany({
+    where: { isPublished: true },
+    select: { slug: true, titleEn: true, contentEn: true, updatedAt: true },
+  });
+
+  const contestPages = [
+    {
+      url: `${BASE_URL}/contests`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/en/contests`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    ...contests.flatMap((c) => {
+      const pages = [
+        {
+          url: `${BASE_URL}/contests/${c.slug}`,
+          lastModified: c.updatedAt,
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        },
+      ];
+      // ইংরেজি লেখা না থাকলে EN URL যোগ হবে না (ব্লগের মতোই)
+      if (c.titleEn && c.contentEn) {
+        pages.push({
+          url: `${BASE_URL}/en/contests/${c.slug}`,
+          lastModified: c.updatedAt,
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        });
+      }
+      return pages;
+    }),
+  ];
+
   const fosolCategories = await prisma.fosolCategory.findMany({
     where: { isVisible: true },
     select: { slug: true, updatedAt: true },
@@ -367,6 +407,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...productPages,
     ...blogPages,
+    ...contestPages,
     ...fosolCategoryPages,
     ...fosolItemPages,
   ];

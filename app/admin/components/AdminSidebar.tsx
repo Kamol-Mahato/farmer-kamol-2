@@ -42,6 +42,7 @@ const navItems = [
   },
   { label: "এজেন্ট ম্যানেজমেন্ট", href: "/admin/agents", agentVisible: false },
   { label: "ব্লগ ম্যানেজমেন্ট", href: "/admin/blog", agentVisible: false },
+  { label: "প্রতিযোগিতা ও অফার", href: "/admin/contests", agentVisible: false },
   { label: "বাংলার ফসল", href: "/admin/banglar-fosol", agentVisible: false },
   { label: "ভিডিও ম্যানেজমেন্ট", href: "/admin/videos", agentVisible: false },
   {
