@@ -6,6 +6,7 @@ Offline · FFmpeg · Streamlit
 
 import os
 import time
+import random
 import shutil
 import logging
 import subprocess
@@ -37,6 +38,26 @@ DEFAULT_SPEED = 1.25
 MIN_SPEED = 1.0
 MAX_SPEED = 1.5
 TRANSITION_SEC = 0.5
+
+# ── ট্রানজিশন ধরন (সবই নরম, চোখে লাগে না) ──────────────────────────────────
+TRANSITIONS = {
+    "সফট ফেড": "fade",
+    "ডিপ-টু-ব্ল্যাক": "fadeblack",
+    "স্মুথ ওয়াইপ": "smoothleft",
+    "সফট জুম": "zoomin",
+    "অটো মিক্স": "mix",
+    "কোনো ট্রানজিশন নেই": "none",
+}
+TRANSITION_HELP = {
+    "সফট ফেড": "এক দৃশ্য মিলিয়ে অন্যটা আসে",
+    "ডিপ-টু-ব্ল্যাক": "হালকা কালো ছুঁয়ে পরের দৃশ্য, সময় বদলের জন্য ভালো",
+    "স্মুথ ওয়াইপ": "নরমভাবে পাশ থেকে সরে পরের দৃশ্য আসে",
+    "সফট জুম": "সামান্য জুম মিশে পরের দৃশ্য আসে",
+    "অটো মিক্স": "উপরের চারটা থেকে প্রতিবার আলাদা ধরন",
+    "কোনো ট্রানজিশন নেই": "সরাসরি কাট, সবচেয়ে দ্রুত, মান একটুও কমে না",
+}
+MIX_POOL = ["fade", "fadeblack", "smoothleft", "zoomin"]
+JOIN_BATCH = 6   # একসাথে কয়টা ক্লিপ এক ধাপে জোড়া হবে (মেমোরি বাঁচাতে)
 REELS_W, REELS_H = 1080, 1920
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -205,15 +226,20 @@ def process_clip(
     if abs(speed - 1.0) > 0.01:
         vf += f",setpts=PTS/{speed}"
 
-    cmd = [FFMPEG, "-y", "-i", src, "-vf", vf]
-    if keep_audio:
+    if keep_audio and probe_has_audio(src):
+        af = "aresample=44100,aformat=channel_layouts=stereo"
         if abs(speed - 1.0) > 0.01:
-            cmd += ["-af", build_atempo_chain(speed), "-c:a", "aac", "-b:a", "192k"]
-        else:
-            cmd += ["-c:a", "aac", "-b:a", "192k"]
+            af = build_atempo_chain(speed) + "," + af
+        cmd = [FFMPEG, "-y", "-i", src, "-vf", vf, "-af", af,
+               "-map", "0:v:0", "-map", "0:a:0"]
     else:
-        cmd += ["-an"]
-    cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20", out]
+        # মিউট ক্লিপেও নীরব অডিও ট্র্যাক বসে, যাতে জোড়ার সময় ছবি-শব্দ মিলে থাকে
+        cmd = [FFMPEG, "-y", "-i", src, "-f", "lavfi",
+               "-i", "anullsrc=r=44100:cl=stereo",
+               "-vf", vf, "-map", "0:v:0", "-map", "1:a", "-shortest"]
+    cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
+            "-ar", "44100", "-ac", "2", out]
 
     ok, err = run_ff(cmd, f"process-clip-{idx}")
     if not ok or not os.path.exists(out):
@@ -263,6 +289,93 @@ def concat_with_fade(paths: List[str], fade_sec: float = TRANSITION_SEC) -> Opti
     return current
 
 
+def probe_has_audio(path: str) -> bool:
+    cmd = [FFPROBE, "-v", "error", "-select_streams", "a:0",
+           "-show_entries", "stream=codec_type", "-of", "csv=p=0", path]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return "audio" in (r.stdout or "")
+    except Exception:
+        return False
+
+
+def concat_copy(paths: List[str]) -> Optional[str]:
+    """ট্রানজিশন ছাড়া সরাসরি জোড়া — এনকোড নেই, মান একটুও কমে না।"""
+    lst = tmp_path("list", ".txt")
+    with open(lst, "w", encoding="utf-8") as f:
+        for p in paths:
+            safe = os.path.abspath(p).replace("\\", "/").replace("'", "'\\''")
+            f.write(f"file '{safe}'\n")
+    out = tmp_path("copyjoin", ".mp4")
+    cmd = [FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", out]
+    ok, _ = run_ff(cmd, "copy-concat")
+    return out if ok and os.path.exists(out) else None
+
+
+def xfade_pass(paths: List[str], names: List[str], fade: float, label: str) -> Optional[str]:
+    """কয়েকটা ক্লিপ এক ধাপে (একবার এনকোডে) ছবি + শব্দসহ ট্রানজিশন দিয়ে জোড়ে।"""
+    durs = [probe_duration(p) for p in paths]
+    if any(d <= 0 for d in durs):
+        return None
+    cmd = [FFMPEG, "-y"]
+    for p in paths:
+        cmd += ["-i", p]
+    parts = [f"[{i}:v]settb=AVTB,fps=30,format=yuv420p,setsar=1[v{i}]" for i in range(len(paths))]
+    cur_v, cur_a, acc = "[v0]", "[0:a]", durs[0]
+    for j in range(1, len(paths)):
+        off = max(0.0, acc - fade)
+        nv, na = f"[xv{j}]", f"[xa{j}]"
+        parts.append(f"{cur_v}[v{j}]xfade=transition={names[j-1]}:duration={fade:.3f}:offset={off:.3f}{nv}")
+        parts.append(f"{cur_a}[{j}:a]acrossfade=d={fade:.3f}:c1=tri:c2=tri{na}")
+        cur_v, cur_a = nv, na
+        acc = acc + durs[j] - fade
+    out = tmp_path(f"xf_{label}", ".mp4")
+    cmd += ["-filter_complex", ";".join(parts), "-map", cur_v, "-map", cur_a,
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k", out]
+    ok, err = run_ff(cmd, f"xfade-{label}")
+    return out if ok and os.path.exists(out) else None
+
+
+def join_clips(paths: List[str], trans_key: str, fade_sec: float, status=None) -> Optional[str]:
+    """সব ক্লিপ জোড়ে। ছোট ব্যাচে এক ধাপে, তারপর ব্যাচ-গুলো জোড়ে (এনকোড সর্বোচ্চ ২ বার)।"""
+    if not paths:
+        return None
+    mode = TRANSITIONS.get(trans_key, "fade")
+    if len(paths) == 1:
+        out = tmp_path("joined", ".mp4")
+        shutil.copy2(paths[0], out)
+        return out
+    if mode == "none":
+        return concat_copy(paths)
+    durs = [probe_duration(p) for p in paths]
+    if any(d <= 0 for d in durs):
+        return concat_copy(paths)
+
+    fade = max(0.1, min(float(fade_sec), min(durs) / 2.2))   # ছোট ক্লিপে ট্রানজিশন ক্লিপের চেয়ে বড় হবে না
+
+    def pick() -> str:
+        return random.choice(MIX_POOL) if mode == "mix" else mode
+
+    groups = [paths[i:i + JOIN_BATCH] for i in range(0, len(paths), JOIN_BATCH)]
+    outs = []
+    for gi, g in enumerate(groups):
+        if status:
+            status.write(f"ট্রানজিশন দিয়ে জোড়া হচ্ছে: ব্যাচ {gi + 1}/{len(groups)}")
+        if len(g) == 1:
+            outs.append(g[0])
+            continue
+        r = xfade_pass(g, [pick() for _ in g[1:]], fade, f"g{gi}")
+        if not r:
+            log.warning("xfade ব্যর্থ — ট্রানজিশন ছাড়া জোড়া হচ্ছে")
+            return concat_copy(paths)
+        outs.append(r)
+    if len(outs) == 1:
+        return outs[0]
+    r = xfade_pass(outs, [pick() for _ in outs[1:]], fade, "final")
+    return r or concat_copy(outs)
+
+
 def concat_hard(paths: List[str]) -> Optional[str]:
     lst = tmp_path("list", ".txt")
     with open(lst, "w", encoding="utf-8") as f:
@@ -289,35 +402,119 @@ def burn_logo(video: str, logo_path: Optional[str]) -> Optional[str]:
         "-i", logo_path,
         "-filter_complex",
         f"[1:v]scale={lw}:-1[lg];[0:v][lg]overlay=W-w-20:20[v]",
-        "-map", "[v]",
-        "-an",
+        "-map", "[v]", "-map", "0:a?",
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+        "-c:a", "copy",
         out,
     ]
     ok, _ = run_ff(cmd, "logo")
     return out if ok and os.path.exists(out) else video
 
 
-def mix_voiceover(video: str, vo_path: Optional[str]) -> Optional[str]:
+# ── ভয়েস ওভার: ক্লিন / স্টুডিও ভাইব ─────────────────────────────────────────
+VO_PRESETS = ["কোনো প্রসেস নয়", "ক্লিন (হিস কমানো)", "স্টুডিও ভাইব"]
+NR_LEVELS = {"হালকা": 12, "মাঝারি": 20, "জোরালো": 30}   # নয়েজ কমানোর ডেসিবেল
+
+
+def estimate_noise_floor(path: str) -> float:
+    """ভয়েসের সবচেয়ে নীরব অংশ মেপে ব্যাকগ্রাউন্ড নয়েজের মাত্রা (dB) বের করে।"""
+    cmd = [FFMPEG, "-v", "error", "-t", "180", "-i", path, "-vn", "-af",
+           "aresample=16000,asetnsamples=n=1600:p=0,astats=metadata=1:reset=1,"
+           "ametadata=print:key=lavfi.astats.Overall.RMS_level:file=-",
+           "-f", "null", "-"]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        vals = []
+        for line in (r.stdout or "").splitlines():
+            if "RMS_level=" in line:
+                try:
+                    v = float(line.split("=")[-1])
+                except ValueError:
+                    continue
+                if v > -100:
+                    vals.append(v)
+        if len(vals) >= 10:
+            vals.sort()
+            floor = vals[max(0, int(len(vals) * 0.10))]
+            return max(-70.0, min(-25.0, floor))
+    except Exception as e:
+        log.warning("noise floor মাপা যায়নি: %s", e)
+    return -45.0
+
+
+def vo_chain(preset: str, nr_level: str, floor: float = -45.0) -> str:
+    """ভয়েসের ফিল্টার তালিকা (ffmpeg -af)। floor = মাপা ব্যাকগ্রাউন্ড নয়েজ (dB)।"""
+    nr = NR_LEVELS.get(nr_level, 20)
+    den = f"afftdn=nr={nr}:nf={floor:.1f}:nt=w"
+    if preset == VO_PRESETS[1]:
+        # নিচের গুম গুম শব্দ কাটা + হিস/ব্যাকগ্রাউন্ড নয়েজ কমানো
+        return f"highpass=f=80,{den},volume=1.2"
+    if preset == VO_PRESETS[2]:
+        gate = min(0.05, max(0.002, 10 ** ((floor + 6) / 20)))
+        return (
+            f"highpass=f=80,{den},"
+            f"agate=threshold={gate:.4f}:ratio=2:attack=10:release=300,"    # বাক্যের ফাঁকে ঘরের শব্দ চাপা
+            "equalizer=f=250:t=q:w=1:g=-1.5,"                                # ঘোলাটে ভাব কমানো
+            "equalizer=f=120:t=q:w=1:g=2,"                                   # গলা ভরাট
+            "equalizer=f=3000:t=q:w=1:g=2.5,"                                # কথা পরিষ্কার
+            "acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3,"  # জোর সমান
+            "loudnorm=I=-16:TP=-1.5:LRA=11"                                  # YouTube/Reels মাপের ভলিউম
+        )
+    return "highpass=f=80,volume=1.2"   # আগের মতোই
+
+
+def make_vo_preview(vo_path: str, preset: str, nr_level: str, secs: int = 15):
+    """ভয়েসের প্রথম কয়েক সেকেন্ড: (আসল, প্রসেস করা) WAV ফাইল ফেরত দেয়।"""
+    orig, proc = tmp_path("vo_orig", ".wav"), tmp_path("vo_proc", ".wav")
+    ok1, _ = run_ff([FFMPEG, "-y", "-t", str(secs), "-i", vo_path, "-ar", "44100", "-ac", "2", orig], "vo-prev-orig")
+    af = vo_chain(preset, nr_level, estimate_noise_floor(vo_path)) + ",aformat=sample_rates=44100:channel_layouts=stereo"
+    ok2, _ = run_ff([FFMPEG, "-y", "-t", str(secs), "-i", vo_path, "-af", af, "-ar", "44100", proc], "vo-prev")
+    if ok1 and ok2 and os.path.exists(orig) and os.path.exists(proc):
+        return orig, proc
+    return None, None
+
+
+def mix_voiceover(video: str, vo_path: Optional[str], cfg: Optional[dict] = None) -> Optional[str]:
+    """ভয়েস ওভার বসায়। ক্লিপের আসল শব্দ (cfg["bg"]) ভয়েসের নিচে নরম থাকে, ভয়েস কথা বললে নিজে আরও কমে।"""
     if not vo_path or not os.path.exists(vo_path):
         return video
-    out = tmp_path("with_vo", ".mp4")
+    cfg = cfg or {}
     vdur = probe_duration(video)
     if vdur <= 0:
         return video
-    cmd = [
-        FFMPEG, "-y",
-        "-i", video,
-        "-i", vo_path,
-        "-filter_complex",
-        "[1:a]highpass=f=80,volume=1.2,aformat=sample_rates=44100:channel_layouts=stereo[a]",
-        "-map", "0:v", "-map", "[a]",
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-        "-t", f"{vdur:.3f}",
-        out,
-    ]
-    ok, _ = run_ff(cmd, "mix-vo")
-    return out if ok and os.path.exists(out) else video
+    chain = vo_chain(cfg.get("preset", VO_PRESETS[0]), cfg.get("nr", "মাঝারি"), estimate_noise_floor(vo_path))
+    chain += ",aformat=sample_rates=44100:channel_layouts=stereo"
+    bg = float(cfg.get("bg", 0.0))
+    has_bg = bg > 0.001 and probe_has_audio(video)
+    out = tmp_path("with_vo", ".mp4")
+
+    def run(fc: str, label: str) -> bool:
+        cmd = [
+            FFMPEG, "-y", "-i", video, "-i", vo_path,
+            "-filter_complex", fc,
+            "-map", "0:v", "-map", "[a]",
+            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+            "-t", f"{vdur:.3f}",
+            out,
+        ]
+        ok, _ = run_ff(cmd, label)
+        return ok and os.path.exists(out)
+
+    if has_bg:
+        bgf = f"[0:a]volume={bg:.2f},aformat=sample_rates=44100:channel_layouts=stereo[bg]"
+        duck = (
+            f"[1:a]{chain}[vo];[vo]asplit=2[va][vb];{bgf};"
+            "[bg][va]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=500[dk];"
+            "[dk][vb]amix=inputs=2:duration=first:normalize=0[a]"
+        )
+        if run(duck, "mix-vo-duck"):
+            return out
+        simple = f"[1:a]{chain}[vo];{bgf};[bg][vo]amix=inputs=2:duration=first,volume=2[a]"
+        if run(simple, "mix-vo-simple"):
+            return out
+    if run(f"[1:a]{chain}[a]", "mix-vo"):
+        return out
+    return video
 
 
 def export_9x16(video_16x9: str) -> Optional[str]:
@@ -448,6 +645,9 @@ def run_pipeline(
     bar_cfg: Optional[dict] = None,
     res_key: str = "১০৮০p (Full HD)",
     stab_level: str = "মাঝারি",
+    trans_key: str = "সফট ফেড",
+    trans_sec: float = TRANSITION_SEC,
+    vo_cfg: Optional[dict] = None,
 ):
     ensure_dirs()
     n = len(clips)
@@ -473,7 +673,7 @@ def run_pipeline(
 
     status.write("ট্রানজিশন দিয়ে জোড়া হচ্ছে...")
     bar.progress(0.75)
-    joined = concat_with_fade(processed, TRANSITION_SEC)
+    joined = join_clips(processed, trans_key, trans_sec, status)
     if not joined:
         st.error("কনক্যাট ব্যর্থ")
         return None, None
@@ -484,7 +684,7 @@ def run_pipeline(
 
     status.write("ভয়েস ওভার মিক্স হচ্ছে...")
     bar.progress(0.90)
-    final = mix_voiceover(branded, vo_path) or branded
+    final = mix_voiceover(branded, vo_path, vo_cfg) or branded
 
     out_16 = None
     out_9 = None
@@ -615,8 +815,12 @@ def main():
         speed = st.slider("স্পিড (সব ক্লিপে)", MIN_SPEED, MAX_SPEED, DEFAULT_SPEED, 0.05)
         st.session_state["speed"] = speed
     with c2:
-        st.write("ট্রানজিশন")
-        st.success(f"Soft Fade · {TRANSITION_SEC}s (চোখে লাগবে না)")
+        trans_key = st.selectbox("ট্রানজিশন", list(TRANSITIONS.keys()), index=0)
+        trans_sec = st.slider(
+            "ট্রানজিশনের সময় (সেকেন্ড)", 0.3, 1.0, TRANSITION_SEC, 0.1,
+            disabled=(TRANSITIONS[trans_key] == "none"),
+        )
+        st.caption(TRANSITION_HELP[trans_key])
     with c3:
         st.write("লোগো")
         if LOGO_PATH:
@@ -632,7 +836,36 @@ def main():
         st.session_state["vo_path"] = vo_path
         st.success(f"VO লোড: {vo_file.name}")
     else:
-        vo_path = st.session_state.get("vo_path")
+        vo_path = None
+        st.session_state.pop("vo_path", None)
+
+    vo_cfg = None
+    if vo_path:
+        v1, v2, v3 = st.columns(3)
+        with v1:
+            vo_preset = st.selectbox("ভয়েস প্রসেস", VO_PRESETS, index=2)
+        with v2:
+            vo_nr = st.selectbox(
+                "নয়েজ কমানোর মাত্রা", list(NR_LEVELS.keys()), index=1,
+                disabled=(vo_preset == VO_PRESETS[0]),
+            )
+        with v3:
+            vo_bg = st.slider(
+                "ক্লিপের আসল শব্দ (%)", 0, 100, 20, 5,
+                help="আনমিউট করা ক্লিপের শব্দ ভয়েসের নিচে কতটা থাকবে। ভয়েস কথা বললে এটা নিজে আরও কমে যাবে।",
+            )
+        if st.button("🎧 ১৫ সেকেন্ডের প্রিভিউ শুনুন"):
+            p_orig, p_proc = make_vo_preview(vo_path, vo_preset, vo_nr)
+            if p_orig and p_proc:
+                st.write("আসল ভয়েস")
+                with open(p_orig, "rb") as f:
+                    st.audio(f.read(), format="audio/wav")
+                st.write("প্রসেস করা ভয়েস")
+                with open(p_proc, "rb") as f:
+                    st.audio(f.read(), format="audio/wav")
+            else:
+                st.error("প্রিভিউ বানানো যায়নি। টার্মিনাল লগ দেখুন।")
+        vo_cfg = {"preset": vo_preset, "nr": vo_nr, "bg": vo_bg / 100.0}
 
     st.header("৪. ডাউন বার (ঐচ্ছিক)")
     bar_file = st.file_uploader("ডাউন বার ভিডিও আপলোড করুন", type=["mp4", "mov", "mkv"], key="downbar")
@@ -689,6 +922,9 @@ def main():
             bar_cfg=bar_cfg,
             res_key=res_key,
             stab_level=stab_level,
+            trans_key=trans_key,
+            trans_sec=trans_sec,
+            vo_cfg=vo_cfg,
         )
         if out16:
             st.success(f"১৬:৯ → `{out16}`")
