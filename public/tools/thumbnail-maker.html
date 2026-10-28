@@ -8763,10 +8763,61 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       line-height: 1.6;
     }
     @media (max-width: 720px) {
-      #dailyPostStudio { padding: 8px; }
-      #dailyPostStudio .dp-shell { padding: 12px; }
-      #dailyPostStudio .dp-grid { grid-template-columns: 1fr; }
-      #dailyPostStudio .dp-preview { grid-row: 1; }
+      #dailyPostStudio {
+        padding: 6px;
+      }
+      #dailyPostStudio .dp-shell {
+        padding: 12px;
+        border-radius: 12px;
+      }
+      #dailyPostStudio .dp-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      #dailyPostStudio .dp-preview {
+        grid-row: 1;
+        position: sticky;
+        top: 6px;
+        z-index: 5;
+        background: white;
+        padding-bottom: 8px;
+      }
+      #dailyPostStudio #dailyPostCanvas {
+        max-height: 42vh;
+        object-fit: contain;
+        margin: 0 auto;
+      }
+      #dailyPostStudio .dp-head {
+        margin-bottom: 10px;
+        gap: 8px;
+      }
+      #dailyPostStudio .dp-head h2 {
+        font-size: 18px !important;
+      }
+      #dailyPostStudio .dp-controls {
+        gap: 10px;
+      }
+      #dailyPostStudio label {
+        font-size: 12.5px;
+      }
+      #dailyPostStudio input,
+      #dailyPostStudio textarea,
+      #dailyPostStudio select {
+        padding: 9px;
+        font-size: 13.5px;
+      }
+      #dailyPostStudio .dp-btn {
+        padding: 11px 12px;
+        font-size: 13.5px;
+      }
+      /* নিচের বাটনগুলো একটু সহজ করতে */
+      #dailyPostStudio .dp-controls > div[style*="display:flex"] {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 6px 0;
+        z-index: 4;
+      }
     }
   </style>
 
@@ -8907,6 +8958,45 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             <button class="dp-btn dp-secondary" style="flex:1"
               onclick="dpOffsetX += 20; dpRender()">→ ডানে</button>
           </div>
+
+          <hr style="border:none;border-top:1px solid #cfe0d3;margin:14px 0">
+
+          <label style="font-size:15px;color:#176b3a">🏷️ ব্র্যান্ডিং / স্পন্সর (এডিটেবল)</label>
+
+          <label>
+            ব্র্যান্ড নাম
+            <input type="text" id="dpBrandName" value="Farmer Kamol" oninput="dpRender()">
+          </label>
+
+          <label>
+            সাব-টাইটেল
+            <input type="text" id="dpBrandSub" value="খামার থেকে আপনার দরজায়" oninput="dpRender()">
+          </label>
+
+          <label>
+            ট্যাগলাইন
+            <textarea id="dpBrandTagline" oninput="dpRender()" rows="2">সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।</textarea>
+          </label>
+
+          <label>
+            ওয়েবসাইট / লিংক টেক্সট
+            <input type="text" id="dpBrandWebsite" value="For more details visit : farmerkamol.com" oninput="dpRender()">
+          </label>
+
+          <label>
+            নিচের ছোট টেক্সট
+            <input type="text" id="dpBrandFooter" value="খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ" oninput="dpRender()">
+          </label>
+
+          <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+            <input type="checkbox" id="dpShowLogo" checked onchange="dpRender()" style="width:auto">
+            লোগো দেখাও
+          </label>
+
+          <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+            <input type="checkbox" id="dpShowSocial" checked onchange="dpRender()" style="width:auto">
+            সোশ্যাল আইকন দেখাও
+          </label>
 
           <div class="dp-note">
             বাংলা তারিখ ও ঋতু বাংলাদেশের বাংলা ক্যালেন্ডারের নিয়মে
@@ -9258,15 +9348,15 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         ];
 
         cards.forEach(card => {
-          pctx.fillStyle = "#ffffff";
-          pctx.beginPath();
-          pctx.roundRect(card.x * sx, card.y * sy, 504 * sx, 65 * sy, 9 * s);
-          pctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(card.x * sx, card.y * sy, 504 * sx, 65 * sy, 9 * s);
+          ctx.fill();
 
-          pctx.fillStyle = "#214c31";
-          pctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
-          pctx.textAlign = "left";
-          pctx.fillText(card.value, (card.x + 16) * sx, (card.y + 42) * sy, 470 * sx);
+          ctx.fillStyle = "#214c31";
+          ctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
+          ctx.textAlign = "left";
+          ctx.fillText(card.value, (card.x + 16) * sx, (card.y + 42) * sy, 470 * sx);
         });
 
         // অতিরিক্ত নোট
@@ -9276,87 +9366,92 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         let brandStartY = 820;
 
         if (extra1 || extra2) {
-          pctx.fillStyle = "#ffffff";
-          pctx.beginPath();
-          pctx.roundRect(28 * sx, 785 * sy, 1024 * sx, ((extra1 && extra2) ? 80 : 48) * sy, 10 * s);
-          pctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(28 * sx, 785 * sy, 1024 * sx, ((extra1 && extra2) ? 80 : 48) * sy, 10 * s);
+          ctx.fill();
 
-          pctx.fillStyle = "#174b2d";
-          pctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
-          pctx.textAlign = "left";
+          ctx.fillStyle = "#174b2d";
+          ctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
+          ctx.textAlign = "left";
 
-          if (extra1) pctx.fillText(extra1, 48 * sx, 818 * sy, 980 * sx);
-          if (extra2) pctx.fillText(extra2, 48 * sx, (extra1 ? 850 : 818) * sy, 980 * sx);
+          if (extra1) ctx.fillText(extra1, 48 * sx, 818 * sy, 980 * sx);
+          if (extra2) ctx.fillText(extra2, 48 * sx, (extra1 ? 850 : 818) * sy, 980 * sx);
 
           brandStartY = (extra1 && extra2) ? 920 : 890;
         }
 
-        // ── Brand footer (ছোট) ──
-        pctx.fillStyle = "#e1f3e6";
-        pctx.fillRect(0, brandStartY * sy, W, H - brandStartY * sy);
+        // ── Brand footer (এডিটেবল) ──
+        const brandName     = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
+        const brandSub      = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
+        const brandTagline  = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।";
+        const brandWebsite  = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "For more details visit : farmerkamol.com";
+        const brandFooter   = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
+        const showLogo      = !$("dpShowLogo") || $("dpShowLogo").checked;
+        const showSocial    = !$("dpShowSocial") || $("dpShowSocial").checked;
+
+        ctx.fillStyle = "#e1f3e6";
+        ctx.fillRect(0, brandStartY * sy, W, H - brandStartY * sy);
 
         const logoY = (brandStartY + 18) * sy;
         const textBase = (brandStartY + 38) * sy;
 
-        if (dpLogo.complete && dpLogo.naturalWidth) {
-          pctx.save();
-          pctx.beginPath();
-          pctx.arc(78 * sx, logoY + 36 * s, 36 * s, 0, Math.PI * 2);
-          pctx.clip();
-          pctx.drawImage(dpLogo, 42 * sx, logoY, 72 * s, 72 * s);
-          pctx.restore();
+        if (showLogo && dpLogo.complete && dpLogo.naturalWidth) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(78 * sx, logoY + 36 * s, 36 * s, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(dpLogo, 42 * sx, logoY, 72 * s, 72 * s);
+          ctx.restore();
         }
 
-        pctx.textAlign = "left";
-        pctx.fillStyle = "#07552c";
-        pctx.font = `700 ${30 * s}px Arial, sans-serif`;
-        pctx.fillText("Farmer Kamol", 130 * sx, textBase);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#07552c";
+        ctx.font = `700 ${30 * s}px Arial, sans-serif`;
+        ctx.fillText(brandName, 130 * sx, textBase);
 
-        pctx.fillStyle = "#df5c17";
-        pctx.font = `700 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
-        pctx.fillText("খামার থেকে আপনার দরজায়", 130 * sx, textBase + 32 * s);
+        ctx.fillStyle = "#df5c17";
+        ctx.font = `700 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
+        ctx.fillText(brandSub, 130 * sx, textBase + 32 * s);
 
         // এক লাইনে tagline
-        pctx.fillStyle = "#294c34";
-        pctx.font = `400 ${16 * s}px 'Noto Sans Bengali', sans-serif`;
-        pctx.fillText(
-          "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।",
-          130 * sx, textBase + 58 * s, 900 * sx
-        );
+        ctx.fillStyle = "#294c34";
+        ctx.font = `400 ${16 * s}px 'Noto Sans Bengali', sans-serif`;
+        ctx.fillText(brandTagline, 130 * sx, textBase + 58 * s, 900 * sx);
 
-        // Social icons (কম্প্যাক্ট)
+        // Social icons
         const socialY = (brandStartY + 145) * sy;
-        const socials = [
-          { x: 100, color: "#1877f2", label: "f" },
-          { x: 276, color: "#e60023", label: "▶" },
-          { x: 452, color: "#263445", label: "☎" },
-          { x: 628, color: "#00a884", label: "WA" },
-          { x: 804, color: "#d90072", label: "◎" },
-          { x: 980, color: "#008f67", label: "✉" }
-        ];
 
-        socials.forEach(sItem => {
-          pctx.fillStyle = sItem.color;
-          pctx.beginPath();
-          pctx.arc(sItem.x * sx, socialY, 26 * s, 0, Math.PI * 2);
-          pctx.fill();
-          pctx.fillStyle = "#ffffff";
-          pctx.textAlign = "center";
-          pctx.font = `700 ${20 * s}px Arial, sans-serif`;
-          pctx.fillText(sItem.label, sItem.x * sx, socialY + 7 * s);
-        });
+        if (showSocial) {
+          const socials = [
+            { x: 100, color: "#1877f2", label: "f" },
+            { x: 276, color: "#e60023", label: "▶" },
+            { x: 452, color: "#263445", label: "☎" },
+            { x: 628, color: "#00a884", label: "WA" },
+            { x: 804, color: "#d90072", label: "◎" },
+            { x: 980, color: "#008f67", label: "✉" }
+          ];
 
-        pctx.fillStyle = "#07552c";
-        pctx.font = `700 ${22 * s}px Arial, sans-serif`;
-        pctx.textAlign = "center";
-        pctx.fillText("For more details visit : farmerkamol.com", W / 2, socialY + 55 * s);
+          socials.forEach(sItem => {
+            ctx.fillStyle = sItem.color;
+            ctx.beginPath();
+            ctx.arc(sItem.x * sx, socialY, 26 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.font = `700 ${20 * s}px Arial, sans-serif`;
+            ctx.fillText(sItem.label, sItem.x * sx, socialY + 7 * s);
+          });
+        }
 
-        pctx.fillStyle = "#647768";
-        pctx.font = `700 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
-        pctx.fillText(
-          "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ",
-          W / 2, socialY + 82 * s
-        );
+        ctx.fillStyle = "#07552c";
+        ctx.font = `700 ${22 * s}px Arial, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText(brandWebsite, W / 2, socialY + 55 * s);
+
+        ctx.fillStyle = "#647768";
+        ctx.font = `700 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
+        ctx.fillText(brandFooter, W / 2, socialY + 82 * s);
       }
 
       window.openDailyPostStudio = function() {
@@ -9554,9 +9649,11 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const duration = Number($("dpVideoDuration").value) || 15;
         const status = $("dpVideoStatus");
         const btn = $("dpMakeVideoBtn");
-        status.textContent = "⏳ ভিডিও তৈরি হচ্ছে... একটু অপেক্ষা করুন";
+        status.textContent = "⏳ ভিডিও তৈরি হচ্ছে... ০%";
         btn.disabled = true;
         dpIsRecording = true;
+
+        try {
 
         const W = 1080;
         const H = 1920;
@@ -9587,6 +9684,15 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         };
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
+
+        // ব্র্যান্ডিং (প্যানেল থেকে)
+        const brandName    = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
+        const brandSub     = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
+        const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য";
+        const brandWebsite = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "farmerkamol.com";
+        const brandFooter  = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
+        const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
+        const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
 
         // অডিও সেটআপ
         let audioCtx = null;
@@ -9797,7 +9903,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             vctx.fillRect(0, footerY, W, H - footerY);
 
             // লোগো
-            if (dpLogo.complete && dpLogo.naturalWidth) {
+            if (showLogo && dpLogo.complete && dpLogo.naturalWidth) {
               vctx.save();
               vctx.beginPath();
               vctx.arc(90, footerY + 65, 46, 0, Math.PI * 2);
@@ -9809,47 +9915,55 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             vctx.fillStyle = "#07552c";
             vctx.font = "700 34px Arial, sans-serif";
             vctx.textAlign = "left";
-            vctx.fillText("Farmer Kamol", 155, footerY + 50);
+            vctx.fillText(brandName, 155, footerY + 50);
 
             vctx.fillStyle = "#df5c17";
             vctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
-            vctx.fillText("খামার থেকে আপনার দরজায়", 155, footerY + 88);
+            vctx.fillText(brandSub, 155, footerY + 88);
 
             vctx.fillStyle = "#294c34";
             vctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
-            vctx.fillText("সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য", 155, footerY + 122);
+            vctx.fillText(brandTagline, 155, footerY + 122, 880);
 
             // সোশ্যাল আইকন
-            const socials = [
-              { x: 130, color: "#1877f2", label: "f" },
-              { x: 230, color: "#e60023", label: "▶" },
-              { x: 330, color: "#00a884", label: "WA" },
-              { x: 430, color: "#d90072", label: "◎" },
-              { x: 530, color: "#008f67", label: "✉" }
-            ];
-            socials.forEach((s) => {
-              vctx.fillStyle = s.color;
-              vctx.beginPath();
-              vctx.arc(s.x, footerY + 175, 24, 0, Math.PI * 2);
-              vctx.fill();
-              vctx.fillStyle = "#ffffff";
-              vctx.font = "700 18px Arial, sans-serif";
-              vctx.textAlign = "center";
-              vctx.fillText(s.label, s.x, footerY + 181);
-            });
+            if (showSocial) {
+              const socials = [
+                { x: 130, color: "#1877f2", label: "f" },
+                { x: 230, color: "#e60023", label: "▶" },
+                { x: 330, color: "#00a884", label: "WA" },
+                { x: 430, color: "#d90072", label: "◎" },
+                { x: 530, color: "#008f67", label: "✉" }
+              ];
+              socials.forEach((s) => {
+                vctx.fillStyle = s.color;
+                vctx.beginPath();
+                vctx.arc(s.x, footerY + 175, 24, 0, Math.PI * 2);
+                vctx.fill();
+                vctx.fillStyle = "#ffffff";
+                vctx.font = "700 18px Arial, sans-serif";
+                vctx.textAlign = "center";
+                vctx.fillText(s.label, s.x, footerY + 181);
+              });
+            }
 
             // ওয়েবসাইট
             vctx.fillStyle = "#07552c";
             vctx.font = "700 26px Arial, sans-serif";
             vctx.textAlign = "center";
-            vctx.fillText("farmerkamol.com", W / 2, footerY + 240);
+            vctx.fillText(brandWebsite, W / 2, footerY + 240);
 
             // স্লোগান
             vctx.fillStyle = "#647768";
             vctx.font = "500 18px 'Noto Sans Bengali', sans-serif";
-            vctx.fillText("খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ", W / 2, footerY + 275);
+            vctx.fillText(brandFooter, W / 2, footerY + 275);
 
             vctx.restore();
+          }
+
+          // প্রগ্রেস আপডেট
+          if (frame % 15 === 0) {
+            const pct = Math.round((frame / totalFrames) * 100);
+            status.textContent = `⏳ ভিডিও তৈরি হচ্ছে... ${pct}%`;
           }
 
           // ফ্রেম ওয়েট (আনুমানিক রিয়েল-টাইম)
@@ -9860,7 +9974,9 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         recorder.stop();
         await recorded;
 
-        if (audioCtx) audioCtx.close();
+        if (audioCtx) {
+          try { audioCtx.close(); } catch (_) {}
+        }
 
         // ডাউনলোড
         const blob = new Blob(chunks, { type: mimeType });
@@ -9876,8 +9992,14 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         } else {
           status.textContent = "✅ WebM ভিডিও তৈরি হয়েছে। এই ব্রাউজারে MP4 সাপোর্ট নেই। Chrome/Edge এ চেষ্টা করুন অথবা অনলাইন কনভার্টার ব্যবহার করুন।";
         }
-        btn.disabled = false;
-        dpIsRecording = false;
+        } catch (err) {
+          console.error("Video generation error:", err);
+          status.textContent = "❌ ভিডিও তৈরি ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+          alert("ভিডিও তৈরি করতে সমস্যা হয়েছে: " + (err.message || err));
+        } finally {
+          btn.disabled = false;
+          dpIsRecording = false;
+        }
       };
     })();
   </script>
