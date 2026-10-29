@@ -8881,22 +8881,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
           <label>
             দিনের নাম (ম্যানুয়াল)
-            <input type="text" id="dpWeekday" oninput="dpRender()" placeholder="">
+            <input type="text" id="dpWeekday" oninput="this.dataset.manual='1'; dpRender()" placeholder="">
           </label>
 
           <label>
             বাংলা তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpBnDate" oninput="dpRender()" placeholder="">
+            <input type="text" id="dpBnDate" oninput="this.dataset.manual='1'; dpRender()" placeholder="">
           </label>
 
           <label>
             ইংরেজি তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpEnDate" oninput="dpRender()" placeholder="">
+            <input type="text" id="dpEnDate" oninput="this.dataset.manual='1'; dpRender()" placeholder="">
           </label>
 
           <label>
             হিজরি তারিখ (ম্যানুয়াল)
-            <input type="text" id="dpHijriDate" oninput="dpRender()" placeholder="">
+            <input type="text" id="dpHijriDate" oninput="this.dataset.manual='1'; dpRender()" placeholder="">
           </label>
 
           <label>
@@ -9007,8 +9007,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
           <button class="dp-btn dp-primary"
             onclick="dpDownload()">⬇ PNG ডাউনলোড করুন</button>
-          <button class="dp-btn dp-secondary"
-            onclick="dpRefreshDate()">↻ তারিখ আপডেট করুন</button>
+            <button class="dp-btn dp-secondary"
+            onclick="['dpWeekday','dpBnDate','dpEnDate','dpHijriDate'].forEach(id=>{const e=document.getElementById(id);if(e)e.dataset.manual='0'}); dpRefreshDate()">↻ তারিখ আপডেট করুন</button>
         </div>
 
         <div class="dp-preview">
@@ -9266,8 +9266,14 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         if (note) {
           note.textContent = `প্রিভিউ ${dpCanvasW} × ${dpCanvasH} px (ডাউনলোডও একই সাইজ)। প্রয়োগ করা হয়েছে।`;
         }
-        // প্রিভিউতে সাইজ বোঝানোর জন্য ছোট লেবেল
         pc.title = dpCanvasW + " × " + dpCanvasH;
+
+        // প্রিভিউতে আসল অ্যাসপেক্ট রেশিও দেখানোর জন্য
+        pc.style.aspectRatio = dpCanvasW + " / " + dpCanvasH;
+        pc.style.width = "100%";
+        pc.style.height = "auto";
+        pc.style.maxHeight = "70vh";
+
         dpRender();
       }
 
@@ -9363,22 +9369,25 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
 
-        let brandStartY = 820;
+        // অতিরিক্ত নোট থাকলে স্পেস সেভ করে ফুটার যাতে কাটা না যায়
+        let brandStartY = 780;
+        const hasExtra = !!(extra1 || extra2);
+        const extraH = hasExtra ? ((extra1 && extra2) ? 70 : 42) : 0;
 
-        if (extra1 || extra2) {
+        if (hasExtra) {
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
-          ctx.roundRect(28 * sx, 785 * sy, 1024 * sx, ((extra1 && extra2) ? 80 : 48) * sy, 10 * s);
+          ctx.roundRect(28 * sx, 760 * sy, 1024 * sx, extraH * sy, 10 * s);
           ctx.fill();
 
           ctx.fillStyle = "#174b2d";
-          ctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
+          ctx.font = `600 ${20 * s}px 'Noto Sans Bengali', sans-serif`;
           ctx.textAlign = "left";
 
-          if (extra1) ctx.fillText(extra1, 48 * sx, 818 * sy, 980 * sx);
-          if (extra2) ctx.fillText(extra2, 48 * sx, (extra1 ? 850 : 818) * sy, 980 * sx);
+          if (extra1) ctx.fillText(extra1, 48 * sx, 788 * sy, 980 * sx);
+          if (extra2) ctx.fillText(extra2, 48 * sx, 818 * sy, 980 * sx);
 
-          brandStartY = (extra1 && extra2) ? 920 : 890;
+          brandStartY = 760 + extraH + 12;
         }
 
         // ── Brand footer (এডিটেবল) ──
@@ -9393,8 +9402,12 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         ctx.fillStyle = "#e1f3e6";
         ctx.fillRect(0, brandStartY * sy, W, H - brandStartY * sy);
 
-        const logoY = (brandStartY + 18) * sy;
-        const textBase = (brandStartY + 38) * sy;
+        // ফুটার যাতে ক্যানভাসের বাইরে না যায়
+        const footerMax = H / sy - 10;
+        if (brandStartY > footerMax - 240) brandStartY = footerMax - 240;
+
+        const logoY = (brandStartY + 12) * sy;
+        const textBase = (brandStartY + 30) * sy;
 
         if (showLogo && dpLogo.complete && dpLogo.naturalWidth) {
           ctx.save();
@@ -9420,7 +9433,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         ctx.fillText(brandTagline, 130 * sx, textBase + 58 * s, 900 * sx);
 
         // Social icons
-        const socialY = (brandStartY + 145) * sy;
+        const socialY = (brandStartY + 125) * sy;
 
         if (showSocial) {
           const socials = [
@@ -9515,35 +9528,53 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         let hijri = "হিজরি তারিখ অনুপলব্ধ";
         try {
-          // মাসের নাম বাংলায়, দিন/বছর ইংরেজি অঙ্কে নিয়ে পরে convert
+          // প্রথমে ইংরেজি লোকেলে islamic নিয়ে নিরাপদ পার্টস নেই
           const parts = new Intl.DateTimeFormat(
-            "bn-BD-u-ca-islamic-umalqura", {
+            "en-u-ca-islamic-umalqura", {
               timeZone: "UTC",
               day: "numeric", month: "long", year: "numeric"
             }
           ).formatToParts(adjusted);
 
-          let hDay = "", hMonth = "", hYear = "";
+          let hDay = "", hMonthEn = "", hYear = "";
           parts.forEach(p => {
             if (p.type === "day") hDay = p.value;
-            if (p.type === "month") hMonth = p.value;
+            if (p.type === "month") hMonthEn = p.value;
             if (p.type === "year") hYear = p.value;
           });
 
-          // বাংলা অঙ্ক থাকলে ইংরেজিতে নামিয়ে সংখ্যা বের করো
-          const hNum = parseInt(fromBnDigits(hDay), 10) || 1;
-          const hYearNum = parseInt(fromBnDigits(hYear), 10) || 0;
+          // ইংরেজি হিজরি মাস → বাংলা
+          const hijriMonthMap = {
+            "Muharram": "মুহাররম", "Safar": "সফর",
+            "Rabiʻ I": "রবিউল আউয়াল", "Rabiʻ al-Awwal": "রবিউল আউয়াল",
+            "Rabiʻ II": "রবিউস সানি", "Rabiʻ al-Thani": "রবিউস সানি",
+            "Jumada I": "জমাদিউল আউয়াল", "Jumada al-Awwal": "জমাদিউল আউয়াল",
+            "Jumada II": "জমাদিউস সানি", "Jumada al-Thani": "জমাদিউস সানি",
+            "Rajab": "রজব", "Shaʻban": "শাবান", "Shaaban": "শাবান",
+            "Ramadan": "রমজান", "Shawwal": "শাওয়াল",
+            "Dhuʻl-Qiʻdah": "জিলকদ", "Dhu al-Qadah": "জিলকদ",
+            "Dhuʻl-Hijjah": "জিলহজ", "Dhu al-Hijjah": "জিলহজ"
+          };
 
+          let hMonth = hijriMonthMap[hMonthEn] || hMonthEn;
+          // যদি মাস নামে ইংরেজি গ্রেগরিয়ান মাস চলে আসে (বাগ), তাহলে ফেলে দাও
+          const gregMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+          if (gregMonths.includes(hMonthEn) || /জানু|ফেব্রু|মার্চ|এপ্রিল|মে|জুন|জুলা|আগস্ট|সেপ্ট|অক্টো|নভে|ডিসে/.test(hMonth)) {
+            throw new Error("Gregorian month leaked into Hijri");
+          }
+
+          const hNum = parseInt(hDay, 10) || 1;
+          const hYearNum = parseInt(hYear, 10) || 0;
           hijri = `${dpOrdinal(hNum)} ${hMonth}, ${toBnDigits(hYearNum)} হিজরি`;
         } catch (_) {
           try {
-            // fallback — পুরো স্ট্রিং থেকে অঙ্ক বাংলায়
             const raw = new Intl.DateTimeFormat(
-              "bn-BD-u-ca-islamic", {
+              "en-u-ca-islamic", {
                 timeZone: "UTC",
                 day: "numeric", month: "long", year: "numeric"
               }
             ).format(adjusted);
+            // সহজ fallback
             hijri = toBnDigits(raw) + " হিজরি";
           } catch (_) {}
         }
@@ -9562,9 +9593,12 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           dpEnDate: engStr,
           dpHijriDate: hijri
         };
+        // শুধু তখনই ভ্যালু সেট করব যখন ইউজার নিজে এডিট করেনি
         Object.keys(map).forEach(id => {
           const el = $(id);
           if (!el) return;
+          // ডেটা-অ্যাট্রিবিউট দিয়ে ম্যানুয়াল এডিট ট্র্যাক করি
+          if (el.dataset.manual === "1") return;
           el.value = map[id];
           el.placeholder = map[id];
         });
@@ -9666,11 +9700,12 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         vCanvas.height = H;
         const vctx = vCanvas.getContext("2d");
 
-        // র‍্যান্ডম অ্যানিমেশন প্যারামিটার
-        const imgStartScale = rand(1.15, 1.35);
-        const imgEndScale = rand(1.0, 1.08);
-        const imgPanX = rand(-40, 40);
-        const imgPanY = rand(-30, 30);
+        // র‍্যান্ডম অ্যানিমেশন প্যারামিটার (স্মুথ Ken Burns)
+        const imgStartScale = rand(1.12, 1.28);
+        const imgEndScale   = rand(1.0, 1.06);
+        // প্যান এখন -0.5 → 0.5 নরমালাইজড (ছবির অতিরিক্ত অংশের অনুপাত)
+        const imgPanX = rand(-0.35, 0.35);
+        const imgPanY = rand(-0.25, 0.25);
         const titleFrom = randChoice(["left", "bottom", "scale"]);
         const dateDirection = randChoice(["left", "right", "bottom"]);
 
@@ -9765,27 +9800,44 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           vctx.fillStyle = "#f0fbf3";
           vctx.fillRect(0, 0, W, H);
 
-          // ----- ১. ছবি (Ken Burns) -----
-          const imgProgress = clamp(t / 0.22, 0, 1);
+          // ----- ১. ছবি (Ken Burns — স্মুথ, ঝাকুনিমুক্ত) -----
+          const imgProgress = clamp(t / 0.28, 0, 1);
           const imgEase = easeOutCubic(imgProgress);
           const currentScale = imgStartScale + (imgEndScale - imgStartScale) * imgEase;
-          const currentPanX = imgPanX * (1 - imgEase);
-          const currentPanY = imgPanY * (1 - imgEase);
+          // প্যান ধীরে ধীরে কমে আসে
+          const panFactor = 1 - imgEase;
 
           vctx.save();
           vctx.beginPath();
-          // ছবি একটু ছোট করা হয়েছে যাতে নিচে টেক্সট বড় করা যায়
           const imgH = 780;
-          vctx.roundRect(30, 40, W - 60, imgH, 18);
+          const destX = 30, destY = 40, destW = W - 60, destH = imgH;
+          vctx.roundRect(destX, destY, destW, destH, 18);
           vctx.clip();
 
-          if (dpPhoto) {
-            const baseScale = Math.max((W - 60) / dpPhoto.width, imgH / dpPhoto.height) * currentScale;
-            const sw = (W - 60) / baseScale;
-            const sh = imgH / baseScale;
-            const sx = (dpPhoto.width - sw) / 2 + currentPanX;
-            const sy = (dpPhoto.height - sh) / 2 + currentPanY;
-            vctx.drawImage(dpPhoto, sx, sy, sw, sh, 30, 40, W - 60, imgH);
+          if (dpPhoto && dpPhoto.width > 0) {
+            // কভার স্কেল
+            const cover = Math.max(destW / dpPhoto.width, destH / dpPhoto.height) * currentScale;
+            let sw = destW / cover;
+            let sh = destH / cover;
+
+            // অতিরিক্ত জায়গা (প্যান করা যায় যতটুকু)
+            const maxPanX = Math.max(0, (dpPhoto.width - sw) / 2);
+            const maxPanY = Math.max(0, (dpPhoto.height - sh) / 2);
+
+            let sx = (dpPhoto.width - sw) / 2 + imgPanX * maxPanX * panFactor;
+            let sy = (dpPhoto.height - sh) / 2 + imgPanY * maxPanY * panFactor;
+
+            // বাউন্ডারি ক্ল্যাম্প — বাইরে যেন না যায়
+            sx = clamp(sx, 0, Math.max(0, dpPhoto.width - sw));
+            sy = clamp(sy, 0, Math.max(0, dpPhoto.height - sh));
+
+            // পিক্সেল-অ্যালাইন (ঝাকুনি/শিমার কমায়)
+            sx = Math.round(sx);
+            sy = Math.round(sy);
+            sw = Math.round(sw);
+            sh = Math.round(sh);
+
+            vctx.drawImage(dpPhoto, sx, sy, sw, sh, destX, destY, destW, destH);
           }
           vctx.restore();
 

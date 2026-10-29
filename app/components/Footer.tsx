@@ -11,14 +11,15 @@ const dict = {
       "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।",
     slogan: "খামার থেকে আপনার দরজায়",
     productsHeading: "পণ্য বিভাগ",
-    products: ["মধু", "ঘি", "সরিষার তেল", "চীনা হাঁসের বাচ্চা"],
+    products: ["খাঁটি মধু", "খাঁটি ঘি", "খাঁটি সরিষার তেল", "খেজুরের গুড়", "চীনা হাঁসের বাচ্চা"],
     serviceHeading: "কাস্টমার সেবা",
     trackOrder: "অর্ডার ট্র্যাক",
     returnPolicy: "রিটার্ন পলিসি",
     faq: "প্রশ্ন ও উত্তর",
     contact: "যোগাযোগ",
+    aboutUs: "আমাদের সম্পর্কে",
     paymentHeading: "পেমেন্ট মেথড",
-    paymentMethods: ["বিকাশ", "নগদ", "রকেট", "কার্ড"],
+    paymentMethods: ["বিকাশ", "নগদ", "রকেট", "কার্ড", "ক্যাশ অন ডেলিভারি (COD)"],
     farmHeading: "আমাদের খামার",
     location: `${siteConfig.address.locality}, ${siteConfig.address.region}`,
     businessContact: "ব্যবসায়িক যোগাযোগ",
@@ -31,14 +32,15 @@ const dict = {
       "Delivering natural, healthy food straight from our integrated farm to your doorstep.",
     slogan: "From Our Farm To Your Door",
     productsHeading: "Products",
-    products: ["Honey", "Ghee", "Mustard Oil", "Duck Chicks"],
+    products: ["Pure Honey", "Pure Ghee", "Pure Mustard Oil", "Date Palm Jaggery", "Duck Chicks"],
     serviceHeading: "Customer Service",
     trackOrder: "Track Order",
     returnPolicy: "Return Policy",
     faq: "FAQ",
     contact: "Contact",
+    aboutUs: "About Us",
     paymentHeading: "Payment Methods",
-    paymentMethods: ["bKash", "Nagad", "Rocket", "Card"],
+    paymentMethods: ["bKash", "Nagad", "Rocket", "Card", "Cash on Delivery (COD)"],
     farmHeading: "Our Farm",
     location: `${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}`,
     businessContact: "Business Inquiries",
@@ -47,6 +49,14 @@ const dict = {
     terms: "Terms & Conditions",
   },
 };
+
+const productSlugs = [
+  "khati-modhu",
+  "khati-ghee",
+  "khati-sorisha-tel",
+  "khejurer-gur",
+  "hasher-bacha",
+];
 
 const paymentIcons = [
   {
@@ -118,6 +128,27 @@ const paymentIcons = [
       >
         <rect x="2" y="5" width="20" height="14" rx="2" />
         <line x1="2" y1="10" x2="22" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    bg: "bg-green-600",
+    svg: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="1" y="3" width="15" height="13" />
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+        <circle cx="5.5" cy="18.5" r="2.5" />
+        <circle cx="18.5" cy="18.5" r="2.5" />
       </svg>
     ),
   },
@@ -292,10 +323,10 @@ export default function Footer() {
                 {t.productsHeading}
               </h3>
               <div className="flex flex-col gap-1 text-xs text-black">
-                {t.products.map((p) => (
+              {t.products.map((p, i) => (
                   <Link
                     key={p}
-                    href={href("/shop")}
+                    href={href(`/${productSlugs[i]}`)}
                     className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
                   >
                     {p}
@@ -334,6 +365,12 @@ export default function Footer() {
                 >
                   {t.contact}
                 </Link>
+                <Link
+                  href={href("/about")}
+                  className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
+                >
+                  {t.aboutUs}
+                </Link>
               </div>
             </div>
 
@@ -355,7 +392,16 @@ export default function Footer() {
                       {p.svg}
                     </div>
                     <span className="text-xs text-black group-hover:text-green-700 font-medium leading-tight whitespace-nowrap transition-colors">
-                      {t.paymentMethods[i]}
+                    {i === 4 ? (
+                        <>
+                          <span className="sm:hidden">COD</span>
+                          <span className="hidden sm:inline">
+                            {t.paymentMethods[i]}
+                          </span>
+                        </>
+                      ) : (
+                        t.paymentMethods[i]
+                      )}
                     </span>
                   </Link>
                 ))}
@@ -401,6 +447,12 @@ export default function Footer() {
               >
                 ✉️ {siteConfig.contact.email}
               </a>
+              <Link
+                href={href("/privacy-policy")}
+                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+              >
+                🔒 {t.privacyPolicy}
+              </Link>
             </div>
           </div>
         </div>
