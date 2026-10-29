@@ -8835,7 +8835,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <select id="dpSizePreset" onchange="dpOnSizeChange()"
             style="padding:6px 10px;border-radius:8px;border:1px solid #b7d4c0;font-size:14px">
-            <option value="1080x1080" selected>FB Post 1080×1080</option>
+            <option value="auto" selected>অটো হাইট (প্রস্থ ১০৮০)</option>
+            <option value="1080x1080">FB Post 1080×1080 (ফিক্সড)</option>
             <option value="custom">কাস্টম সাইজ</option>
           </select>
           <span id="dpCustomSizeWrap" style="display:none;align-items:center;gap:4px">
@@ -8865,7 +8866,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             <textarea id="dpTitle"
               maxlength="500"
               placeholder="যেমন: বীজ বপনে ব্যস্ত কৃষক"
-              oninput="dpRender()">আজকের কৃষি ও গ্রামবাংলা</textarea>
+              oninput="dpRender()">|Farmer Kamol</textarea>
           </label>
 
           <label>
@@ -9197,24 +9198,65 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
       }
 
+      // শুধু লাইন সংখ্যা মাপে (ড্র করে না)
+      function dpMeasureLines(text, maxWidth, maxLines, font) {
+        const ctx = (window.__dpCtx) || (pc && pc.getContext("2d"));
+        if (!ctx) return [String(text || "")];
+        const prevFont = ctx.font;
+        if (font) ctx.font = font;
+
+        const paragraphs = String(text || "").replace(/\r\n/g, "\n").split("\n");
+        let lines = [];
+        paragraphs.forEach((para, pIdx) => {
+          const words = para.trim().split(/\s+/).filter(Boolean);
+          if (!words.length) {
+            if (pIdx > 0) lines.push("");
+            return;
+          }
+          let line = "";
+          words.forEach((word) => {
+            const test = line ? line + " " + word : word;
+            if (ctx.measureText(test).width > maxWidth && line) {
+              lines.push(line);
+              line = word;
+            } else line = test;
+          });
+          if (line) lines.push(line);
+        });
+        if (maxLines && lines.length > maxLines) {
+          lines = lines.slice(0, maxLines);
+        }
+        ctx.font = prevFont;
+        return lines;
+      }
+
       function dpWrap(text, x, y, maxWidth, lineHeight, maxLines) {
         const ctx = (window.__dpCtx) || pctx;
         if (!ctx) return;
-        const words = String(text || "").trim().split(/\s+/);
-        let line = "";
+
+        // Shift+Enter (আসল লাইন ব্রেক) সাপোর্ট
+        const paragraphs = String(text || "").replace(/\r\n/g, "\n").split("\n");
         let lines = [];
 
-        for (let i = 0; i < words.length; i++) {
-          const word = words[i];
-          const test = line ? line + " " + word : word;
-          if (ctx.measureText(test).width > maxWidth && line) {
-            lines.push(line);
-            line = word;
-          } else {
-            line = test;
+        paragraphs.forEach((para, pIdx) => {
+          const words = para.trim().split(/\s+/).filter(Boolean);
+          if (!words.length) {
+            // খালি লাইন (Shift+Enter)
+            if (pIdx > 0) lines.push("");
+            return;
           }
-        }
-        if (line) lines.push(line);
+          let line = "";
+          words.forEach((word) => {
+            const test = line ? line + " " + word : word;
+            if (ctx.measureText(test).width > maxWidth && line) {
+              lines.push(line);
+              line = word;
+            } else {
+              line = test;
+            }
+          });
+          if (line) lines.push(line);
+        });
 
         if (lines.length > maxLines) {
           lines = lines.slice(0, maxLines);
@@ -9234,14 +9276,25 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       let dpCanvasW = 1080;
       let dpCanvasH = 1080;
 
+      let dpAutoHeight = true; // ডিফল্ট অটো-হাইট
+
       window.dpOnSizeChange = function () {
         const preset = $("dpSizePreset") && $("dpSizePreset").value;
         const wrap = $("dpCustomSizeWrap");
         if (wrap) wrap.style.display = preset === "custom" ? "inline-flex" : "none";
-        if (preset === "1080x1080") {
+
+        if (preset === "auto") {
+          dpAutoHeight = true;
+          dpCanvasW = 1080;
+          dpCanvasH = 1080; // রেন্ডারের সময় অটো বাড়বে
+          dpApplyCanvasSize();
+        } else if (preset === "1080x1080") {
+          dpAutoHeight = false;
           dpCanvasW = 1080;
           dpCanvasH = 1080;
           dpApplyCanvasSize();
+        } else {
+          dpAutoHeight = false;
         }
       };
 
@@ -9278,67 +9331,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       }
 
       function dpRender() {
-        // resize এর পর fresh context ব্যবহার করো
-        if (window.__dpCtx) {
-          // pctx variable কে sync রাখো যাতে dpCover/dpWrap সব কাজ করে
-        }
         const ctx = pc.getContext("2d");
         window.__dpCtx = ctx;
         if (!pc || !ctx) return;
-        // নিচের কোডে pctx ব্যবহার হলেও যেন একই context হয়
-        // (IIFE এর const pctx change করা যায় না, তাই draw এর আগে assign নয় —
-        //  dpCover আলাদা ঠিক করছি)
 
         const W = dpCanvasW || 1080;
-        const H = dpCanvasH || 1080;
-        const sx = W / 1080;
-        const sy = H / 1080;
-        const s = Math.min(sx, sy);
+        const u = W / 1080; // স্কেল (প্রস্থ অনুযায়ী)
+        const pad = 28 * u;
 
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#f0fbf3";
-        ctx.fillRect(0, 0, W, H);
+        // ── কন্টেন্ট মাপো (উচ্চতা হিসাব) ──
+        const titleText = ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি";
+        const titleFont = `700 ${37 * u}px 'Noto Sans Bengali', sans-serif`;
+        const titleLineH = 49 * u;
+        const titleMaxLines = dpAutoHeight ? 12 : 3;
+        const titleLines = dpMeasureLines(titleText, W - pad * 2 - 10 * u, titleMaxLines, titleFont);
+        const titleBlockH = Math.max(titleLines.length, 1) * titleLineH;
 
-        // ── মেইন ছবি বড় (৪৮০px বেস) ──
-        const photoH = 480 * sy;
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(28 * sx, 28 * sy, 1024 * sx, photoH, 12 * s);
-        ctx.clip();
-
-        if (dpPhoto) {
-          // dpCover ভিতরে pctx ব্যবহার করে — অস্থায়ী override
-          const _old = pctx;
-          try {
-            // dpCover img draw এর জন্য canvas context
-            dpCover(dpPhoto, 28 * sx, 28 * sy, 1024 * sx, photoH);
-          } finally {}
-        } else {
-          ctx.fillStyle = "#dcebdd";
-          ctx.fillRect(28 * sx, 28 * sy, 1024 * sx, photoH);
-          ctx.fillStyle = "#52745a";
-          ctx.textAlign = "center";
-          ctx.font = "600 " + (30 * s) + "px 'Noto Sans Bengali', sans-serif";
-          ctx.fillText("এখানে কৃষির ছবি যোগ করুন", W / 2, 28 * sy + photoH / 2);
-        }
-        ctx.restore();
-
-        // Headline — সাইজ বড় হলে বেশি লাইন (২→৪)
-        const titleMaxLines = (H >= 1400) ? 4 : (H >= 1200) ? 3 : 2;
-        const titleY = 545 * sy;
-        ctx.fillStyle = "#174b2d";
-        ctx.textAlign = "left";
-        ctx.font = "700 " + (37 * s) + "px 'Noto Sans Bengali', sans-serif";
-        dpWrap(
-          ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি",
-          38 * sx,
-          titleY,
-          1000 * sx,
-          49 * sy,
-          titleMaxLines
-        );
-
-        // Date cards
         const dates = {
           bn: ($("dpBnDate") && $("dpBnDate").value) || (dpDates && dpDates.bn) || "",
           english: ($("dpEnDate") && $("dpEnDate").value) || (dpDates && dpDates.english) || "",
@@ -9346,125 +9354,195 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           weekday: ($("dpWeekday") && $("dpWeekday").value) || (dpDates && dpDates.weekday) || ""
         };
 
-        const cards = [
-          { x: 28,  y: 620, value: dates.weekday },
-          { x: 548, y: 620, value: dates.bn },
-          { x: 28,  y: 700, value: dates.english },
-          { x: 548, y: 700, value: dates.hijri }
-        ];
-
-        cards.forEach(card => {
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.roundRect(card.x * sx, card.y * sy, 504 * sx, 65 * sy, 9 * s);
-          ctx.fill();
-
-          ctx.fillStyle = "#214c31";
-          ctx.font = `600 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
-          ctx.textAlign = "left";
-          ctx.fillText(card.value, (card.x + 16) * sx, (card.y + 42) * sy, 470 * sx);
-        });
-
-        // অতিরিক্ত নোট
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
-
-        // অতিরিক্ত নোট থাকলে স্পেস সেভ করে ফুটার যাতে কাটা না যায়
-        let brandStartY = 780;
         const hasExtra = !!(extra1 || extra2);
-        const extraH = hasExtra ? ((extra1 && extra2) ? 70 : 42) : 0;
+        const extraH = hasExtra ? ((extra1 && extra2) ? 70 * u : 42 * u) : 0;
 
+        const photoH = 480 * u;
+        const gap = 16 * u;
+        const cardH = 65 * u;
+        const cardsBlockH = cardH * 2 + 12 * u;
+        const brandBlockH = 250 * u; // লোগো + আইকন + স্লোগান
+
+        // ফ্লো Y হিসাব
+        let y = pad;
+        y += photoH + gap;           // ছবির পর
+        const titleY = y + 32 * u;   // বেসলাইন
+        y = titleY + titleBlockH + gap;
+        const cardsY = y;
+        y += cardsBlockH + gap;
+        let extraY = 0;
+        if (hasExtra) {
+          extraY = y;
+          y += extraH + gap;
+        }
+        const brandY = y;
+        const totalH = Math.ceil(brandY + brandBlockH + pad);
+
+        // অটো-হাইট হলে ক্যানভাস উচ্চতা আপডেট
+        let H = dpAutoHeight ? Math.max(totalH, 900) : (dpCanvasH || 1080);
+        if (dpAutoHeight && (pc.height !== H || pc.width !== W)) {
+          dpCanvasH = H;
+          pc.width = W;
+          pc.height = H;
+          window.__dpCtx = pc.getContext("2d");
+          // context reset হয়েছে — আবার নাও
+          const ctx2 = window.__dpCtx;
+          // নিচের কোডে ctx ব্যবহার চালিয়ে যাব, তাই re-assign
+          return dpRender(); // একবার রি-রান (সাইজ সেট হওয়ার পর)
+        }
+        H = pc.height;
+        const s = u;
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#f0fbf3";
+        ctx.fillRect(0, 0, W, H);
+
+        // ── ১. ছবি ──
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(pad, pad, W - pad * 2, photoH, 12 * u);
+        ctx.clip();
+        if (dpPhoto) {
+          dpCover(dpPhoto, pad, pad, W - pad * 2, photoH);
+        } else {
+          ctx.fillStyle = "#dcebdd";
+          ctx.fillRect(pad, pad, W - pad * 2, photoH);
+          ctx.fillStyle = "#52745a";
+          ctx.textAlign = "center";
+          ctx.font = `600 ${30 * u}px 'Noto Sans Bengali', sans-serif`;
+          ctx.fillText("এখানে কৃষির ছবি যোগ করুন", W / 2, pad + photoH / 2);
+        }
+        ctx.restore();
+
+        // ── ২. শিরোনাম ──
+        ctx.fillStyle = "#174b2d";
+        ctx.textAlign = "left";
+        ctx.font = titleFont;
+        dpWrap(titleText, pad + 10 * u, titleY, W - pad * 2 - 20 * u, titleLineH, titleMaxLines);
+
+        // ── ৩. তারিখ কার্ড (২×২) ──
+        const cardW = (W - pad * 2 - 12 * u) / 2;
+        const cardItems = [
+          { c: 0, r: 0, value: dates.weekday },
+          { c: 1, r: 0, value: dates.bn },
+          { c: 0, r: 1, value: dates.english },
+          { c: 1, r: 1, value: dates.hijri }
+        ];
+        cardItems.forEach(card => {
+          const cx = pad + card.c * (cardW + 12 * u);
+          const cy = cardsY + card.r * (cardH + 12 * u);
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(cx, cy, cardW, cardH, 9 * u);
+          ctx.fill();
+          ctx.fillStyle = "#000000";
+          ctx.font = `600 ${22 * u}px 'Noto Sans Bengali', sans-serif`;
+          ctx.textAlign = "center";
+          ctx.fillText(card.value, cx + cardW / 2, cy + cardH * 0.62, cardW - 20 * u);
+        });
+
+        // ── ৪. এক্সট্রা নোট ──
         if (hasExtra) {
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
-          ctx.roundRect(28 * sx, 760 * sy, 1024 * sx, extraH * sy, 10 * s);
+          ctx.roundRect(pad, extraY, W - pad * 2, extraH, 10 * u);
           ctx.fill();
-
-          ctx.fillStyle = "#174b2d";
-          ctx.font = `600 ${20 * s}px 'Noto Sans Bengali', sans-serif`;
+          ctx.fillStyle = "#000000";
+          ctx.font = `600 ${20 * u}px 'Noto Sans Bengali', sans-serif`;
           ctx.textAlign = "left";
-
-          if (extra1) ctx.fillText(extra1, 48 * sx, 788 * sy, 980 * sx);
-          if (extra2) ctx.fillText(extra2, 48 * sx, 818 * sy, 980 * sx);
-
-          brandStartY = 760 + extraH + 12;
+          if (extra1) ctx.fillText(extra1, pad + 20 * u, extraY + 28 * u, W - pad * 2 - 40 * u);
+          if (extra2) ctx.fillText(extra2, pad + 20 * u, extraY + 56 * u, W - pad * 2 - 40 * u);
         }
 
-        // ── Brand footer (এডিটেবল) ──
-        const brandName     = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
-        const brandSub      = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
-        const brandTagline  = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।";
-        const brandWebsite  = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "For more details visit : farmerkamol.com";
-        const brandFooter   = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
-        const showLogo      = !$("dpShowLogo") || $("dpShowLogo").checked;
-        const showSocial    = !$("dpShowSocial") || $("dpShowSocial").checked;
+        // ── ৫. ব্র্যান্ড ফুটার ──
+        const brandName    = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
+        const brandSub     = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
+        const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।";
+        const brandFooter  = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
+        const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
+        const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
 
         ctx.fillStyle = "#e1f3e6";
-        ctx.fillRect(0, brandStartY * sy, W, H - brandStartY * sy);
+        ctx.fillRect(0, brandY, W, H - brandY);
 
-        // ফুটার যাতে ক্যানভাসের বাইরে না যায়
-        const footerMax = H / sy - 10;
-        if (brandStartY > footerMax - 240) brandStartY = footerMax - 240;
-
-        const logoY = (brandStartY + 12) * sy;
-        const textBase = (brandStartY + 30) * sy;
+        const logoY = brandY + 14 * u;
+        const textBase = brandY + 32 * u;
 
         if (showLogo && dpLogo.complete && dpLogo.naturalWidth) {
           ctx.save();
           ctx.beginPath();
-          ctx.arc(78 * sx, logoY + 36 * s, 36 * s, 0, Math.PI * 2);
+          ctx.arc(pad + 50 * u, logoY + 36 * u, 36 * u, 0, Math.PI * 2);
           ctx.clip();
-          ctx.drawImage(dpLogo, 42 * sx, logoY, 72 * s, 72 * s);
+          ctx.drawImage(dpLogo, pad + 14 * u, logoY, 72 * u, 72 * u);
           ctx.restore();
         }
 
         ctx.textAlign = "left";
         ctx.fillStyle = "#07552c";
-        ctx.font = `700 ${30 * s}px Arial, sans-serif`;
-        ctx.fillText(brandName, 130 * sx, textBase);
+        ctx.font = `700 ${30 * u}px Arial, sans-serif`;
+        ctx.fillText(brandName, pad + 100 * u, textBase);
 
         ctx.fillStyle = "#df5c17";
-        ctx.font = `700 ${22 * s}px 'Noto Sans Bengali', sans-serif`;
-        ctx.fillText(brandSub, 130 * sx, textBase + 32 * s);
+        ctx.font = `700 ${22 * u}px 'Noto Sans Bengali', sans-serif`;
+        ctx.fillText(brandSub, pad + 100 * u, textBase + 32 * u);
 
-        // এক লাইনে tagline
         ctx.fillStyle = "#294c34";
-        ctx.font = `400 ${16 * s}px 'Noto Sans Bengali', sans-serif`;
-        ctx.fillText(brandTagline, 130 * sx, textBase + 58 * s, 900 * sx);
+        ctx.font = `400 ${16 * u}px 'Noto Sans Bengali', sans-serif`;
+        ctx.fillText(brandTagline, pad + 100 * u, textBase + 58 * u, W - pad * 2 - 120 * u);
 
-        // Social icons
-        const socialY = (brandStartY + 125) * sy;
-
+        // ৩টা ছোট আইকন
+        const socialY = brandY + 130 * u;
         if (showSocial) {
+          const iconR = 22 * u;
           const socials = [
-            { x: 100, color: "#1877f2", label: "f" },
-            { x: 276, color: "#e60023", label: "▶" },
-            { x: 452, color: "#263445", label: "☎" },
-            { x: 628, color: "#00a884", label: "WA" },
-            { x: 804, color: "#d90072", label: "◎" },
-            { x: 980, color: "#008f67", label: "✉" }
+            { x: W * 0.20, color: "#1877f2", kind: "fb",  label: "facebook.com/farmerkamol" },
+            { x: W * 0.50, color: "#2b6cb0", kind: "web", label: "farmerkamol.com" },
+            { x: W * 0.80, color: "#ff0000", kind: "yt",  label: "youtube.com/@Farmerkamol" }
           ];
-
           socials.forEach(sItem => {
+            const cx = sItem.x;
             ctx.fillStyle = sItem.color;
             ctx.beginPath();
-            ctx.arc(sItem.x * sx, socialY, 26 * s, 0, Math.PI * 2);
+            ctx.arc(cx, socialY, iconR, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = "#ffffff";
             ctx.textAlign = "center";
-            ctx.font = `700 ${20 * s}px Arial, sans-serif`;
-            ctx.fillText(sItem.label, sItem.x * sx, socialY + 7 * s);
+            ctx.textBaseline = "middle";
+            if (sItem.kind === "fb") {
+              ctx.font = `700 ${26 * u}px Arial, sans-serif`;
+              ctx.fillText("f", cx, socialY + 1 * u);
+            } else if (sItem.kind === "yt") {
+              ctx.beginPath();
+              ctx.moveTo(cx - 6 * u, socialY - 8 * u);
+              ctx.lineTo(cx - 6 * u, socialY + 8 * u);
+              ctx.lineTo(cx + 10 * u, socialY);
+              ctx.closePath();
+              ctx.fill();
+            } else {
+              ctx.font = `700 ${18 * u}px Arial, sans-serif`;
+              ctx.fillText("🌐", cx, socialY + 1 * u);
+            }
+            ctx.fillStyle = "#1a1a1a";
+            ctx.font = `600 ${14 * u}px Arial, 'Noto Sans Bengali', sans-serif`;
+            ctx.textBaseline = "alphabetic";
+            ctx.fillText(sItem.label, cx, socialY + 40 * u);
           });
         }
 
-        ctx.fillStyle = "#07552c";
-        ctx.font = `700 ${22 * s}px Arial, sans-serif`;
-        ctx.textAlign = "center";
-        ctx.fillText(brandWebsite, W / 2, socialY + 55 * s);
-
         ctx.fillStyle = "#647768";
-        ctx.font = `700 ${15 * s}px 'Noto Sans Bengali', sans-serif`;
-        ctx.fillText(brandFooter, W / 2, socialY + 82 * s);
+        ctx.font = `700 ${15 * u}px 'Noto Sans Bengali', sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText(brandFooter, W / 2, socialY + 68 * u);
+
+        // প্রিভিউ নোট
+        const note = $("dpPreviewNote");
+        if (note) {
+          note.textContent = dpAutoHeight
+            ? `অটো হাইট · ${W} × ${H} px (শিরোনাম ${titleLines.length} লাইন)`
+            : `প্রিভিউ ${W} × ${H} px`;
+        }
       }
 
       window.openDailyPostStudio = function() {
@@ -9511,9 +9589,11 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const g = dpDhakaParts();
         const bn = dpBanglaDate(g);
 
-        const weekday = new Intl.DateTimeFormat("bn-BD", {
+        const weekdayRaw = new Intl.DateTimeFormat("bn-BD", {
           timeZone: "Asia/Dhaka", weekday: "long"
         }).format(new Date());
+        // সবসময় “আজ” যোগ থাকবে
+        const weekday = weekdayRaw.startsWith("আজ") ? weekdayRaw : ("আজ " + weekdayRaw);
 
         // ২৭শে অক্টোবর, ২০২৬ খ্রিস্টাব্দ (সব অঙ্ক বাংলা)
         const engStr = `${dpOrdinal(g.day)} ${dpEnMonthsBn[g.month - 1]}, ${toBnDigits(g.year)} খ্রিস্টাব্দ`;
