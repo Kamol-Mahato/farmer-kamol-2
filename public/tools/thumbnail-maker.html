@@ -8906,6 +8906,14 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
               oninput="window.dpSetZoom(this.value)">
           </label>
 
+          <button type="button" class="dp-btn dp-secondary" onclick="dpFitFrameToImage()"
+            style="width:100%">
+            📐 ফ্রেম ছবিতে মিলিয়ে ছোট/বড় করো
+          </button>
+          <div class="dp-note">
+            জুম আউট করে ছবি ছোট করলে এই বাটনে চাপ দিলে পুরো পোস্টার ফ্রেমও ছবির সাথে মিলিয়ে ছোট হবে।
+          </div>
+
           <label>
             বিশেষ নোট / সময় ১ (ঐচ্ছিক)
             <input type="text" id="dpExtra1" oninput="dpRender()"
@@ -9067,6 +9075,47 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           dpOffsetY = 0;
         }
         dpRender();
+      };
+
+      // জুম করা ছবির সাইজ অনুযায়ী পুরো ক্যানভাস ফ্রেম অ্যাডজাস্ট
+      window.dpFitFrameToImage = function () {
+        if (!dpPhoto || !dpPhoto.width) {
+          alert("আগে একটি ছবি অ্যাড করুন।");
+          return;
+        }
+
+        const z = dpZoom || 1;
+        const MIN_W = 400;
+        const MAX_W = 2000;
+
+        // বর্তমান প্রস্থ × জুম = নতুন প্রস্থ (জুম আউট → ছোট, জুম ইন → বড়)
+        let newW = Math.round((dpCanvasW || 1080) * z);
+        newW = Math.max(MIN_W, Math.min(MAX_W, newW));
+
+        dpCanvasW = newW;
+        dpAutoHeight = true;
+        dpZoom = 1;
+        dpOffsetX = 0;
+        dpOffsetY = 0;
+
+        const zoomSlider = $("dpZoom");
+        if (zoomSlider) zoomSlider.value = 1;
+
+        const preset = $("dpSizePreset");
+        if (preset) preset.value = "auto";
+
+        // ক্যানভাস প্রস্থ অ্যাপ্লাই
+        if (pc) {
+          pc.width = dpCanvasW;
+          // হাইট dpRender অটো মাপবে
+        }
+
+        dpRender();
+
+        const note = $("dpPreviewNote");
+        if (note) {
+          note.textContent = `ফ্রেম অ্যাডজাস্ট · প্রস্থ ${dpCanvasW}px (জুম ১০০%)`;
+        }
       };
 
       // ── ছবি ড্র্যাগ করে সরানো (মাউস + টাচ) ──
