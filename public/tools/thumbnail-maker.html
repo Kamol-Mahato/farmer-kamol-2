@@ -9815,12 +9815,15 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
 
-        // ব্র্যান্ডিং (প্যানেল থেকে)
+        // ব্র্যান্ডিং (প্যানেল থেকে) — ইমেজ ফুটারের সাথে মিল
         const brandName    = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
         const brandSub     = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
         const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য";
         const brandWebsite = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "https://farmerkamol.com";
         const brandFooter  = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
+        const linkFb       = ($("dpLinkFb") && $("dpLinkFb").value.trim()) || "facebook.com/farmerkamol";
+        const linkWeb      = ($("dpLinkWeb") && $("dpLinkWeb").value.trim()) || "farmerkamol.com";
+        const linkYt       = ($("dpLinkYt") && $("dpLinkYt").value.trim()) || "youtube.com/@Farmerkamol";
         const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
         const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
 
@@ -10072,36 +10075,51 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             vctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
             vctx.fillText(brandTagline, 155, footerY + 122, 880);
 
-            // সোশ্যাল আইকন
+            // ৩টা আইকন — ইমেজ ফুটারের মতো (FB / Web / YT)
             if (showSocial) {
+              const iconR = 28;
+              const socialY = footerY + 175;
               const socials = [
-                { x: 130, color: "#1877f2", label: "f" },
-                { x: 230, color: "#e60023", label: "▶" },
-                { x: 330, color: "#00a884", label: "WA" },
-                { x: 430, color: "#d90072", label: "◎" },
-                { x: 530, color: "#008f67", label: "✉" }
+                { x: W * 0.20, color: "#1877f2", kind: "fb",  label: linkFb },
+                { x: W * 0.50, color: "#2b6cb0", kind: "web", label: linkWeb },
+                { x: W * 0.80, color: "#ff0000", kind: "yt",  label: linkYt }
               ];
               socials.forEach((s) => {
+                const cx = s.x;
                 vctx.fillStyle = s.color;
                 vctx.beginPath();
-                vctx.arc(s.x, footerY + 175, 24, 0, Math.PI * 2);
+                vctx.arc(cx, socialY, iconR, 0, Math.PI * 2);
                 vctx.fill();
+
                 vctx.fillStyle = "#ffffff";
-                vctx.font = "700 18px Arial, sans-serif";
                 vctx.textAlign = "center";
-                vctx.fillText(s.label, s.x, footerY + 181);
+                vctx.textBaseline = "middle";
+                if (s.kind === "fb") {
+                  vctx.font = "700 32px Arial, sans-serif";
+                  vctx.fillText("f", cx, socialY + 1);
+                } else if (s.kind === "yt") {
+                  vctx.beginPath();
+                  vctx.moveTo(cx - 8, socialY - 10);
+                  vctx.lineTo(cx - 8, socialY + 10);
+                  vctx.lineTo(cx + 12, socialY);
+                  vctx.closePath();
+                  vctx.fill();
+                } else {
+                  vctx.font = "700 22px Arial, sans-serif";
+                  vctx.fillText("🌐", cx, socialY + 1);
+                }
+
+                vctx.fillStyle = "#1a1a1a";
+                vctx.font = "600 22px Arial, 'Noto Sans Bengali', sans-serif";
+                vctx.textBaseline = "alphabetic";
+                vctx.fillText(s.label, cx, socialY + 52);
               });
             }
 
-            // ওয়েবসাইট
-            vctx.fillStyle = "#07552c";
-            vctx.font = "700 26px Arial, sans-serif";
-            vctx.textAlign = "center";
-            vctx.fillText(brandWebsite, W / 2, footerY + 240);
-
             // স্লোগান
             vctx.fillStyle = "#647768";
-            vctx.font = "500 18px 'Noto Sans Bengali', sans-serif";
+            vctx.font = "500 20px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "center";
             vctx.fillText(brandFooter, W / 2, footerY + 275);
 
             vctx.restore();
