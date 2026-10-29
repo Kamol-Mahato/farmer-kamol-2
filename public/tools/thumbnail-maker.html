@@ -8902,7 +8902,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
           <label>
             ছবি জুম (Zoom)
-            <input type="range" id="dpZoom" min="1" max="3" step="0.05" value="1"
+            <input type="range" id="dpZoom" min="0.5" max="3" step="0.05" value="1"
               oninput="window.dpSetZoom(this.value)">
           </label>
 
@@ -9061,8 +9061,64 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
       window.dpSetZoom = function(val) {
         dpZoom = parseFloat(val) || 1;
+        // জুম কমলে অফসেটও একটু রিসেট
+        if (dpZoom <= 1) {
+          dpOffsetX = 0;
+          dpOffsetY = 0;
+        }
         dpRender();
       };
+
+      // ── ছবি ড্র্যাগ করে সরানো (মাউস + টাচ) ──
+      let dpDragging = false;
+      let dpDragLastX = 0;
+      let dpDragLastY = 0;
+
+      function dpGetPos(e) {
+        const t = e.touches && e.touches[0] ? e.touches[0] : e;
+        const rect = pc.getBoundingClientRect();
+        return {
+          x: (t.clientX - rect.left) * (pc.width / rect.width),
+          y: (t.clientY - rect.top) * (pc.height / rect.height)
+        };
+      }
+
+      function dpOnStart(e) {
+        if (!dpPhoto) return;
+        const p = dpGetPos(e);
+        // শুধু উপরের ছবি এরিয়ায় ড্র্যাগ
+        const pad = 28 * ((dpCanvasW || 1080) / 1080);
+        if (p.y < pad) return;
+        // rough: প্রথম ~৬০% উচ্চতায় ছবি থাকে
+        if (p.y > pc.height * 0.7) return;
+        dpDragging = true;
+        dpDragLastX = p.x;
+        dpDragLastY = p.y;
+        e.preventDefault();
+      }
+      function dpOnMove(e) {
+        if (!dpDragging) return;
+        const p = dpGetPos(e);
+        dpOffsetX += (p.x - dpDragLastX);
+        dpOffsetY += (p.y - dpDragLastY);
+        dpDragLastX = p.x;
+        dpDragLastY = p.y;
+        dpRender();
+        e.preventDefault();
+      }
+      function dpOnEnd() {
+        dpDragging = false;
+      }
+
+      if (pc) {
+        pc.style.touchAction = "none";
+        pc.addEventListener("mousedown", dpOnStart);
+        window.addEventListener("mousemove", dpOnMove);
+        window.addEventListener("mouseup", dpOnEnd);
+        pc.addEventListener("touchstart", dpOnStart, { passive: false });
+        pc.addEventListener("touchmove", dpOnMove, { passive: false });
+        pc.addEventListener("touchend", dpOnEnd);
+      }
 
       dpLogo.onload = () => dpRender();
       dpLogo.onerror = () => dpRender();
@@ -9184,33 +9240,27 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const ctx = (window.__dpCtx) || pctx;
         if (!ctx) return;
 
-        const baseScale = Math.max(w / img.width, h / img.height);
-        const scale = baseScale * (dpZoom || 1);
+        // zoom=1 → পুরো ছবি (contain), zoom>1 → জুম ইন + প্যান
+        const z = dpZoom || 1;
+        const contain = Math.min(w / img.width, h / img.height);
+        const scale = contain * z;
 
-        // সোর্স সাইজ (যতটা কাটব)
-        let sw = w / scale;
-        let sh = h / scale;
+        let dw = img.width * scale;
+        let dh = img.height * scale;
 
-        // সেন্টার থেকে শুরু + ইউজার অফসেট
-        let sx = (img.width - sw) / 2 - (dpOffsetX || 0);
-        let sy = (img.height - sh) / 2 - (dpOffsetY || 0);
+        // সেন্টার + অফসেট (স্ক্রিন পিক্সেলে)
+        let dx = x + (w - dw) / 2 + (dpOffsetX || 0);
+        let dy = y + (h - dh) / 2 + (dpOffsetY || 0);
 
-        // বাউন্ডারি যাতে বাইরে না যায়
-        if (sw > img.width) {
-          sx = 0;
-          sw = img.width;
-        } else {
-          sx = Math.max(0, Math.min(sx, img.width - sw));
+        // জুম > 1 হলে খালি জায়গা না দেখিয়ে ক্লিপের ভিতরে রাখি
+        if (z > 1) {
+          if (dw >= w) dx = Math.min(x, Math.max(x + w - dw, dx));
+          else dx = x + (w - dw) / 2;
+          if (dh >= h) dy = Math.min(y, Math.max(y + h - dh, dy));
+          else dy = y + (h - dh) / 2;
         }
 
-        if (sh > img.height) {
-          sy = 0;
-          sh = img.height;
-        } else {
-          sy = Math.max(0, Math.min(sy, img.height - sh));
-        }
-
-        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        ctx.drawImage(img, dx, dy, dw, dh);
       }
 
       // শুধু লাইন সংখ্যা মাপে (ড্র করে না)
@@ -9374,7 +9424,17 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const hasExtra = !!(extra1 || extra2);
         const extraH = hasExtra ? ((extra1 && extra2) ? 70 * u : 42 * u) : 0;
 
-        const photoH = 480 * u;
+        // ছবি থাকলে তার অ্যাসপেক্ট অনুযায়ী হাইট, নাহলে ডিফল্ট
+        const photoAreaW = W - pad * 2;
+        let photoH;
+        if (dpPhoto && dpPhoto.width > 0) {
+          photoH = photoAreaW * (dpPhoto.height / dpPhoto.width);
+          // অতিরিক্ত লম্বা ছবি লিমিট (পোস্টার যাতে অতিরিক্ত না লম্বা হয়)
+          const maxPhotoH = 2000 * u;
+          if (photoH > maxPhotoH) photoH = maxPhotoH;
+        } else {
+          photoH = 480 * u;
+        }
         const gap = 16 * u;
         const cardH = 65 * u;
         const cardsBlockH = cardH * 2 + 12 * u;
@@ -9583,7 +9643,22 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           const img = new Image();
           img.onload = () => {
             dpPhoto = img;
-            dpResetImagePos();   // নতুন ছবি এলে জুম রিসেট
+            dpResetImagePos();
+
+            // ছবির শেপ ধরে ক্যানভাস (ম্যাক্স সাইড ২০০০px)
+            const MAX = 2000;
+            const iw = img.naturalWidth || img.width;
+            const ih = img.naturalHeight || img.height;
+            const longSide = Math.max(iw, ih);
+            const scale = longSide > MAX ? (MAX / longSide) : 1;
+            // প্রস্থ = স্কেল করা ছবির প্রস্থ (প্যাডিং বাদে পরে রেন্ডারে যোগ হবে)
+            // এখানে বেস প্রস্থ সেট করি — অটো-হাইট রেন্ডার বাকিটা মাপবে
+            dpCanvasW = Math.max(600, Math.round(iw * scale));
+            dpAutoHeight = true;
+            // প্রিসেট UI আপডেট
+            const preset = $("dpSizePreset");
+            if (preset) preset.value = "auto";
+
             dpRender();
           };
           img.onerror = () => alert("ছবিটি পড়া যায়নি। অন্য ছবি দিন।");
