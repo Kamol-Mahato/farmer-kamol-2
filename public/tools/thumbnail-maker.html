@@ -8985,6 +8985,21 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           </label>
 
           <label>
+            Facebook লিংক টেক্সট
+            <input type="text" id="dpLinkFb" value="facebook.com/farmerkamol" oninput="dpRender()">
+          </label>
+
+          <label>
+            Website লিংক টেক্সট
+            <input type="text" id="dpLinkWeb" value="https://farmerkamol.com" oninput="dpRender()">
+          </label>
+
+          <label>
+            YouTube লিংক টেক্সট
+            <input type="text" id="dpLinkYt" value="youtube.com/@Farmerkamol" oninput="dpRender()">
+          </label>
+
+          <label>
             নিচের ছোট টেক্সট
             <input type="text" id="dpBrandFooter" value="খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ" oninput="dpRender()">
           </label>
@@ -9363,7 +9378,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const gap = 16 * u;
         const cardH = 65 * u;
         const cardsBlockH = cardH * 2 + 12 * u;
-        const brandBlockH = 250 * u; // লোগো + আইকন + স্লোগান
+        const brandBlockH = 280 * u; // লোগো + আইকন + স্লোগান
 
         // ফ্লো Y হিসাব
         let y = pad;
@@ -9493,13 +9508,13 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         ctx.fillText(brandTagline, pad + 100 * u, textBase + 58 * u, W - pad * 2 - 120 * u);
 
         // ৩টা ছোট আইকন
-        const socialY = brandY + 130 * u;
+        const socialY = brandY + 170 * u;
         if (showSocial) {
           const iconR = 22 * u;
           const socials = [
-            { x: W * 0.20, color: "#1877f2", kind: "fb",  label: "facebook.com/farmerkamol" },
-            { x: W * 0.50, color: "#2b6cb0", kind: "web", label: "farmerkamol.com" },
-            { x: W * 0.80, color: "#ff0000", kind: "yt",  label: "youtube.com/@Farmerkamol" }
+            { x: W * 0.20, color: "#1877f2", kind: "fb",  label: ($("dpLinkFb") && $("dpLinkFb").value.trim()) || "facebook.com/farmerkamol" },
+            { x: W * 0.50, color: "#2b6cb0", kind: "web", label: ($("dpLinkWeb") && $("dpLinkWeb").value.trim()) || "farmerkamol.com" },
+            { x: W * 0.80, color: "#ff0000", kind: "yt",  label: ($("dpLinkYt") && $("dpLinkYt").value.trim()) || "youtube.com/@Farmerkamol" }
           ];
           socials.forEach(sItem => {
             const cx = sItem.x;
@@ -9525,16 +9540,16 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
               ctx.fillText("🌐", cx, socialY + 1 * u);
             }
             ctx.fillStyle = "#1a1a1a";
-            ctx.font = `600 ${14 * u}px Arial, 'Noto Sans Bengali', sans-serif`;
+            ctx.font = `600 ${20 * u}px Arial, 'Noto Sans Bengali', sans-serif`;
             ctx.textBaseline = "alphabetic";
-            ctx.fillText(sItem.label, cx, socialY + 40 * u);
+            ctx.fillText(sItem.label, cx, socialY + 50 * u);
           });
         }
 
         ctx.fillStyle = "#647768";
         ctx.font = `700 ${15 * u}px 'Noto Sans Bengali', sans-serif`;
         ctx.textAlign = "center";
-        ctx.fillText(brandFooter, W / 2, socialY + 68 * u);
+        ctx.fillText(brandFooter, W / 2, socialY + 80 * u);
 
         // প্রিভিউ নোট
         const note = $("dpPreviewNote");
@@ -9804,7 +9819,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const brandName    = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
         const brandSub     = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
         const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য";
-        const brandWebsite = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "farmerkamol.com";
+        const brandWebsite = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "https://farmerkamol.com";
         const brandFooter  = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
         const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
         const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
