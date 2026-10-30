@@ -9970,343 +9970,58 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         vCanvas.height = H;
         const vctx = vCanvas.getContext("2d");
 
-        // র‍্যান্ডম অ্যানিমেশন প্যারামিটার (স্মুথ Ken Burns)
-        const imgStartScale = rand(1.12, 1.28);
-        const imgEndScale   = rand(1.0, 1.06);
-        // প্যান এখন -0.5 → 0.5 নরমালাইজড (ছবির অতিরিক্ত অংশের অনুপাত)
-        const imgPanX = rand(-0.35, 0.35);
-        const imgPanY = rand(-0.25, 0.25);
-        const titleFrom = randChoice(["left", "bottom", "scale"]);
-        const dateDirection = randChoice(["left", "right", "bottom"]);
+        // আগে পোস্ট একবার রেন্ডার (ইমেজ যা দেখায়, exact সেটা)
+        dpRender();
+        const postW = pc.width;
+        const postH = pc.height;
 
-        // ডাটা প্রস্তুত
-        const title = ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি";
-        const dates = {
-          weekday: ($("dpWeekday") && $("dpWeekday").value) || (dpDates && dpDates.weekday) || "",
-          bn: ($("dpBnDate") && $("dpBnDate").value) || (dpDates && dpDates.bn) || "",
-          english: ($("dpEnDate") && $("dpEnDate").value) || (dpDates && dpDates.english) || "",
-          hijri: ($("dpHijriDate") && $("dpHijriDate").value) || (dpDates && dpDates.hijri) || ""
-        };
-        const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
-        const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
-
-        // ব্র্যান্ডিং (প্যানেল থেকে) — ইমেজ ফুটারের সাথে মিল
-        const brandName    = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
-        const brandSub     = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
-        const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য";
-        const brandWebsite = ($("dpBrandWebsite") && $("dpBrandWebsite").value.trim()) || "https://farmerkamol.com";
-        const brandFooter  = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
-        const linkFb       = ($("dpLinkFb") && $("dpLinkFb").value.trim()) || "facebook.com/farmerkamol";
-        const linkWeb      = ($("dpLinkWeb") && $("dpLinkWeb").value.trim()) || "farmerkamol.com";
-        const linkYt       = ($("dpLinkYt") && $("dpLinkYt").value.trim()) || "youtube.com/@Farmerkamol";
-        const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
-        const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
-
-        // অডিও সেটআপ
-        let audioCtx = null;
-        let audioDest = null;
-        if (dpMusicBuffer) {
-          try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            audioDest = audioCtx.createMediaStreamDestination();
-            const source = audioCtx.createBufferSource();
-            source.buffer = dpMusicBuffer;
-            const gain = audioCtx.createGain();
-            gain.gain.value = Number($("dpMusicVol").value) || 0.6;
-            source.connect(gain);
-            gain.connect(audioDest);
-            source.start(0);
-          } catch (e) {
-            console.warn("Audio mix failed", e);
-          }
-        }
-
-        // স্ট্রিম + রেকর্ডার
-        const videoStream = vCanvas.captureStream(fps);
-        let combinedStream = videoStream;
-        if (audioDest) {
-          combinedStream = new MediaStream([
-            ...videoStream.getVideoTracks(),
-            ...audioDest.stream.getAudioTracks()
-          ]);
-        }
-
-        // আগে MP4 চেষ্টা, না হলে WebM
-        let mimeType = "video/webm";
-        let fileExt = "webm";
-
-        if (MediaRecorder.isTypeSupported("video/mp4")) {
-          mimeType = "video/mp4";
-          fileExt = "mp4";
-        } else if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1")) {
-          mimeType = "video/mp4;codecs=avc1";
-          fileExt = "mp4";
-        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
-          mimeType = "video/webm;codecs=vp9";
-          fileExt = "webm";
-        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
-          mimeType = "video/webm;codecs=vp8";
-          fileExt = "webm";
-        }
-
-        const recorder = new MediaRecorder(combinedStream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 6000000   // ভালো কোয়ালিটি
-        });
-
-        const chunks = [];
-        recorder.ondataavailable = (e) => {
-          if (e.data.size > 0) chunks.push(e.data);
-        };
-
-        const recorded = new Promise((resolve) => {
-          recorder.onstop = () => resolve();
-        });
-
-        recorder.start();
+        // হালকা মোশন — চোখে না লাগে, প্রতিবার র‍্যান্ডম
+        const motionStyle = randChoice(["zoom-in", "zoom-out", "pan-left", "pan-right", "pan-up"]);
+        const zoomAmt = rand(0.03, 0.07);   // খুব হালকা
+        const panAmt  = rand(12, 28);       // পিক্সেল
 
         // ========== রেন্ডার লুপ ==========
         for (let frame = 0; frame <= totalFrames; frame++) {
-          const t = frame / totalFrames; // 0 → 1
+          const t = frame / totalFrames;
+          const e = easeOutCubic(t);
 
-          // ক্লিয়ার
+          // ব্যাকগ্রাউন্ড
           vctx.fillStyle = "#f0fbf3";
           vctx.fillRect(0, 0, W, H);
 
-          // ----- ১. ছবি (Ken Burns — স্মুথ, ঝাকুনিমুক্ত) -----
-          const imgProgress = clamp(t / 0.28, 0, 1);
-          const imgEase = easeOutCubic(imgProgress);
-          const currentScale = imgStartScale + (imgEndScale - imgStartScale) * imgEase;
-          // প্যান ধীরে ধীরে কমে আসে
-          const panFactor = 1 - imgEase;
+          // পোস্টকে ৯:১৬-এর ভিতরে fit (contain)
+          const fit = Math.min(W / postW, H / postH);
+          let baseW = postW * fit;
+          let baseH = postH * fit;
 
-          vctx.save();
-          vctx.beginPath();
-          const imgH = 780;
-          const destX = 30, destY = 40, destW = W - 60, destH = imgH;
-          vctx.roundRect(destX, destY, destW, destH, 18);
-          vctx.clip();
-
-          if (dpPhoto && dpPhoto.width > 0) {
-            // কভার স্কেল
-            const cover = Math.max(destW / dpPhoto.width, destH / dpPhoto.height) * currentScale;
-            let sw = destW / cover;
-            let sh = destH / cover;
-
-            // অতিরিক্ত জায়গা (প্যান করা যায় যতটুকু)
-            const maxPanX = Math.max(0, (dpPhoto.width - sw) / 2);
-            const maxPanY = Math.max(0, (dpPhoto.height - sh) / 2);
-
-            let sx = (dpPhoto.width - sw) / 2 + imgPanX * maxPanX * panFactor;
-            let sy = (dpPhoto.height - sh) / 2 + imgPanY * maxPanY * panFactor;
-
-            // বাউন্ডারি ক্ল্যাম্প — বাইরে যেন না যায়
-            sx = clamp(sx, 0, Math.max(0, dpPhoto.width - sw));
-            sy = clamp(sy, 0, Math.max(0, dpPhoto.height - sh));
-
-            // পিক্সেল-অ্যালাইন (ঝাকুনি/শিমার কমায়)
-            sx = Math.round(sx);
-            sy = Math.round(sy);
-            sw = Math.round(sw);
-            sh = Math.round(sh);
-
-            vctx.drawImage(dpPhoto, sx, sy, sw, sh, destX, destY, destW, destH);
-          }
-          vctx.restore();
-
-          // ----- ২. শিরোনাম (বড়) -----
-          const titleStart = 0.18;
-          const titleProgress = clamp((t - titleStart) / 0.15, 0, 1);
-          if (titleProgress > 0) {
-            const te = easeOutBack(titleProgress);
-            vctx.save();
-            vctx.globalAlpha = titleProgress;
-
-            let tx = 45;
-            let ty = 870;
-            let scale = 1;
-
-            if (titleFrom === "left") {
-              tx = 45 - (1 - te) * 180;
-            } else if (titleFrom === "bottom") {
-              ty = 870 + (1 - te) * 90;
-            } else {
-              scale = 0.7 + te * 0.3;
-            }
-
-            vctx.translate(tx, ty);
-            vctx.scale(scale, scale);
-            vctx.fillStyle = "#174b2d";
-            vctx.font = "700 56px 'Noto Sans Bengali', sans-serif";
-            vctx.textAlign = "left";
-            // র‍্যাপ
-            const words = title.split(" ");
-            let line = "";
-            let ly = 0;
-            words.forEach((w) => {
-              const test = line + w + " ";
-              if (vctx.measureText(test).width > 990 && line) {
-                vctx.fillText(line, 0, ly);
-                line = w + " ";
-                ly += 66;
-              } else line = test;
-            });
-            if (line) vctx.fillText(line, 0, ly);
-            vctx.restore();
+          // মোশন
+          let scale = 1;
+          let ox = 0, oy = 0;
+          if (motionStyle === "zoom-in") {
+            scale = 1 + zoomAmt * e;
+          } else if (motionStyle === "zoom-out") {
+            scale = 1 + zoomAmt * (1 - e);
+          } else if (motionStyle === "pan-left") {
+            ox = -panAmt * e;
+          } else if (motionStyle === "pan-right") {
+            ox = panAmt * e;
+          } else if (motionStyle === "pan-up") {
+            oy = -panAmt * e;
           }
 
-          // ----- ৩. তারিখ কার্ড (বড় ও স্পষ্ট) -----
-          const dateItems = [
-            dates.weekday,
-            dates.bn,
-            dates.english,
-            dates.hijri
-          ].filter(Boolean);
+          const dw = baseW * scale;
+          const dh = baseH * scale;
+          const dx = (W - dw) / 2 + ox;
+          const dy = (H - dh) / 2 + oy;
 
-          dateItems.forEach((txt, i) => {
-            const start = 0.32 + i * 0.06;
-            const p = clamp((t - start) / 0.12, 0, 1);
-            if (p <= 0) return;
+          vctx.drawImage(pc, 0, 0, postW, postH, dx, dy, dw, dh);
 
-            const e = easeOutCubic(p);
-            vctx.save();
-            vctx.globalAlpha = p;
-
-            const col = i % 2;
-            const row = Math.floor(i / 2);
-            let x = 30 + col * 520;
-            let y = 1020 + row * 100;
-
-            if (dateDirection === "left") x -= (1 - e) * 120;
-            else if (dateDirection === "right") x += (1 - e) * 120;
-            else y += (1 - e) * 60;
-
-            // কার্ড ব্যাকগ্রাউন্ড (উচ্চতা বাড়ানো)
-            vctx.fillStyle = "#ffffff";
-            vctx.beginPath();
-            vctx.roundRect(x, y, 500, 88, 14);
-            vctx.fill();
-
-            // টেক্সট বড়
-            vctx.fillStyle = "#214c31";
-            vctx.font = "700 32px 'Noto Sans Bengali', sans-serif";
-            vctx.textAlign = "left";
-            vctx.fillText(txt, x + 24, y + 56, 460);
-            vctx.restore();
-          });
-
-          // ----- ৪. অতিরিক্ত নোট -----
-          const extras = [extra1, extra2].filter(Boolean);
-          extras.forEach((txt, i) => {
-            const start = 0.55 + i * 0.07;
-            const p = clamp((t - start) / 0.12, 0, 1);
-            if (p <= 0) return;
-            const e = easeOutCubic(p);
-            vctx.save();
-            vctx.globalAlpha = p;
-            const y = 1360 + i * 55 + (1 - e) * 40;
-            vctx.fillStyle = "#174b2d";
-            vctx.font = "600 28px 'Noto Sans Bengali', sans-serif";
-            vctx.textAlign = "left";
-            vctx.fillText(txt, 50, y, 980);
-            vctx.restore();
-          });
-
-          // ----- ৫. ব্র্যান্ডিং ফুটার -----
-          const brandStart = 0.66;
-          const bp = clamp((t - brandStart) / 0.16, 0, 1);
-          if (bp > 0) {
-            const e = easeOutCubic(bp);
-            vctx.save();
-            vctx.globalAlpha = bp;
-
-            // নিচে জায়গা রেখে পজিশন ঠিক করা হয়েছে
-            const footerY = 1480 + (1 - e) * 100;
-
-            // ব্যাকগ্রাউন্ড
-            vctx.fillStyle = "#e1f3e6";
-            vctx.fillRect(0, footerY, W, H - footerY);
-
-            // লোগো
-            if (showLogo && dpLogo.complete && dpLogo.naturalWidth) {
-              vctx.save();
-              vctx.beginPath();
-              vctx.arc(90, footerY + 65, 46, 0, Math.PI * 2);
-              vctx.clip();
-              vctx.drawImage(dpLogo, 44, footerY + 19, 92, 92);
-              vctx.restore();
-            }
-
-            vctx.fillStyle = "#07552c";
-            vctx.font = "700 34px Arial, sans-serif";
-            vctx.textAlign = "left";
-            vctx.fillText(brandName, 155, footerY + 50);
-
-            vctx.fillStyle = "#df5c17";
-            vctx.font = "700 25px 'Noto Sans Bengali', sans-serif";
-            vctx.fillText(brandSub, 155, footerY + 88);
-
-            vctx.fillStyle = "#294c34";
-            vctx.font = "400 19px 'Noto Sans Bengali', sans-serif";
-            vctx.fillText(brandTagline, 155, footerY + 122, 880);
-
-            // ৩টা আইকন — ইমেজ ফুটারের মতো (FB / Web / YT)
-            if (showSocial) {
-              const iconR = 28;
-              const socialY = footerY + 175;
-              const socials = [
-                { x: W * 0.20, color: "#1877f2", kind: "fb",  label: linkFb },
-                { x: W * 0.50, color: "#2b6cb0", kind: "web", label: linkWeb },
-                { x: W * 0.80, color: "#ff0000", kind: "yt",  label: linkYt }
-              ];
-              socials.forEach((s) => {
-                const cx = s.x;
-                vctx.fillStyle = s.color;
-                vctx.beginPath();
-                vctx.arc(cx, socialY, iconR, 0, Math.PI * 2);
-                vctx.fill();
-
-                vctx.fillStyle = "#ffffff";
-                vctx.textAlign = "center";
-                vctx.textBaseline = "middle";
-                if (s.kind === "fb") {
-                  vctx.font = "700 32px Arial, sans-serif";
-                  vctx.fillText("f", cx, socialY + 1);
-                } else if (s.kind === "yt") {
-                  vctx.beginPath();
-                  vctx.moveTo(cx - 8, socialY - 10);
-                  vctx.lineTo(cx - 8, socialY + 10);
-                  vctx.lineTo(cx + 12, socialY);
-                  vctx.closePath();
-                  vctx.fill();
-                } else {
-                  vctx.font = "700 22px Arial, sans-serif";
-                  vctx.fillText("🌐", cx, socialY + 1);
-                }
-
-                vctx.fillStyle = "#1a1a1a";
-                vctx.font = "600 22px Arial, 'Noto Sans Bengali', sans-serif";
-                vctx.textBaseline = "alphabetic";
-                vctx.fillText(s.label, cx, socialY + 52);
-              });
-            }
-
-            // স্লোগান
-            vctx.fillStyle = "#647768";
-            vctx.font = "500 20px 'Noto Sans Bengali', sans-serif";
-            vctx.textAlign = "center";
-            vctx.fillText(brandFooter, W / 2, footerY + 275);
-
-            vctx.restore();
-          }
-
-          // প্রগ্রেস আপডেট
+          // প্রগ্রেস
           if (frame % 15 === 0) {
             const pct = Math.round((frame / totalFrames) * 100);
             status.textContent = `⏳ ভিডিও তৈরি হচ্ছে... ${pct}%`;
           }
 
-          // ফ্রেম ওয়েট (আনুমানিক রিয়েল-টাইম)
           await new Promise((r) => setTimeout(r, 1000 / fps));
         }
 
