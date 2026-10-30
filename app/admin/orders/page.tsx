@@ -625,6 +625,7 @@ export default function AdminOrdersPage() {
                 <option value="">সব কুরিয়ার</option>
                 <option value="Pathao">Pathao</option>
                 <option value="Steadfast">Steadfast</option>
+                <option value="Carry Bee">Carry Bee</option>
                 <option value="RedX">RedX</option>
                 <option value="eCourier">eCourier</option>
               </select>
@@ -724,6 +725,7 @@ export default function AdminOrdersPage() {
                 <option value="">কুরিয়ার কোম্পানি বাছুন</option>
                 <option value="Steadfast">Steadfast</option>
                 <option value="Pathao">Pathao</option>
+                <option value="Carry Bee">Carry Bee</option>
                 <option value="RedX">RedX</option>
                 <option value="eCourier">eCourier</option>
               </select>
@@ -897,6 +899,7 @@ export default function AdminOrdersPage() {
                           <option value="">কুরিয়ার বাছুন</option>
                           <option value="Steadfast">Steadfast</option>
                           <option value="Pathao">Pathao</option>
+                          <option value="Carry Bee">Carry Bee</option>
                           <option value="RedX">RedX</option>
                           <option value="eCourier">eCourier</option>
                         </select>

@@ -8848,6 +8848,11 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             <button class="dp-btn dp-secondary" style="padding:5px 10px"
               onclick="dpApplyCustomSize()">প্রয়োগ</button>
           </span>
+          <button class="dp-btn dp-primary" onclick="dpDownload()"
+            style="padding:8px 12px;white-space:nowrap">⬇ PNG</button>
+          <button class="dp-btn dp-primary" id="dpMakeVideoBtnHeader"
+            onclick="dpGenerateVideo()"
+            style="padding:8px 12px;white-space:nowrap;background:#0f766e">🎬 ভিডিও</button>
           <button class="dp-btn dp-secondary"
             onclick="closeDailyPostStudio()">✕ বন্ধ করুন</button>
         </div>
@@ -9471,7 +9476,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
         const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
         const hasExtra = !!(extra1 || extra2);
-        const extraH = hasExtra ? ((extra1 && extra2) ? 70 * u : 42 * u) : 0;
+        const extraH = hasExtra ? ((extra1 && extra2) ? 100 * u : 56 * u) : 0;
 
         // ছবি থাকলে তার অ্যাসপেক্ট অনুযায়ী হাইট, নাহলে ডিফল্ট
         const photoAreaW = W - pad * 2;
@@ -9485,8 +9490,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           photoH = 480 * u;
         }
         const gap = 16 * u;
-        const cardH = 65 * u;
-        const cardsBlockH = cardH * 2 + 12 * u;
+        const cardH = 88 * u;          // ঘরের উচ্চতা (আগে ৬৫)
+        const cardsBlockH = cardH * 2 + 16 * u;  // দুই সারির ফাঁকা
         const brandBlockH = 280 * u; // লোগো + আইকন + স্লোগান
 
         // ফ্লো Y হিসাব
@@ -9555,29 +9560,29 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           { c: 1, r: 1, value: dates.hijri }
         ];
         cardItems.forEach(card => {
-          const cx = pad + card.c * (cardW + 12 * u);
-          const cy = cardsY + card.r * (cardH + 12 * u);
+          const cx = pad + card.c * (cardW + 14 * u);
+          const cy = cardsY + card.r * (cardH + 14 * u);
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
-          ctx.roundRect(cx, cy, cardW, cardH, 9 * u);
+          ctx.roundRect(cx, cy, cardW, cardH, 12 * u);
           ctx.fill();
           ctx.fillStyle = "#000000";
-          ctx.font = `600 ${22 * u}px 'Noto Sans Bengali', sans-serif`;
+          ctx.font = `700 ${30 * u}px 'Noto Sans Bengali', sans-serif`;  // লেখা বড় (আগে ২২)
           ctx.textAlign = "center";
-          ctx.fillText(card.value, cx + cardW / 2, cy + cardH * 0.62, cardW - 20 * u);
+          ctx.fillText(card.value, cx + cardW / 2, cy + cardH * 0.63, cardW - 24 * u);
         });
 
         // ── ৪. এক্সট্রা নোট ──
         if (hasExtra) {
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
-          ctx.roundRect(pad, extraY, W - pad * 2, extraH, 10 * u);
+          ctx.roundRect(pad, extraY, W - pad * 2, extraH, 12 * u);
           ctx.fill();
           ctx.fillStyle = "#000000";
-          ctx.font = `600 ${20 * u}px 'Noto Sans Bengali', sans-serif`;
+          ctx.font = `700 ${28 * u}px 'Noto Sans Bengali', sans-serif`;
           ctx.textAlign = "left";
-          if (extra1) ctx.fillText(extra1, pad + 20 * u, extraY + 28 * u, W - pad * 2 - 40 * u);
-          if (extra2) ctx.fillText(extra2, pad + 20 * u, extraY + 56 * u, W - pad * 2 - 40 * u);
+          if (extra1) ctx.fillText(extra1, pad + 22 * u, extraY + 36 * u, W - pad * 2 - 44 * u);
+          if (extra2) ctx.fillText(extra2, pad + 22 * u, extraY + 72 * u, W - pad * 2 - 44 * u);
         }
 
         // ── ৫. ব্র্যান্ড ফুটার ──
@@ -9830,11 +9835,57 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       window.dpDownload = function() {
         dpRender();
         try {
+          // উপর/নিচের খালি ব্যাকগ্রাউন্ড কেটে কন্টেন্ট মাত্র রাখি
+          const src = pc;
+          const w = src.width;
+          const h = src.height;
+          const ctx = src.getContext("2d");
+          const data = ctx.getImageData(0, 0, w, h).data;
+
+          // ব্যাকগ্রাউন্ড রঙ (#f0fbf3 ≈ 240,251,243)
+          function isEmptyRow(y) {
+            let empty = 0;
+            const step = Math.max(1, Math.floor(w / 80));
+            for (let x = 0; x < w; x += step) {
+              const i = (y * w + x) * 4;
+              const r = data[i], g = data[i + 1], b = data[i + 2];
+              // হালকা সবুজ/সাদা ব্যাকগ্রাউন্ড
+              if (r > 220 && g > 230 && b > 220) empty++;
+              else return false;
+            }
+            return true;
+          }
+
+          let top = 0;
+          let bottom = h - 1;
+          while (top < h && isEmptyRow(top)) top++;
+          while (bottom > top && isEmptyRow(bottom)) bottom--;
+
+          // উপর/নিচে পর্যাপ্ত প্যাডিং রাখি যাতে বর্ডার খারাপ না দেখায়
+          top = Math.max(0, top - 28);
+          bottom = Math.min(h - 1, bottom + 16);
+          const cropH = bottom - top + 1;
+
+          if (cropH < 50 || top === 0 && bottom === h - 1) {
+            // ক্রপের দরকার নেই
+            const link = document.createElement("a");
+            link.download = "Farmer-Kamol-Daily-Post.png";
+            link.href = pc.toDataURL("image/png");
+            link.click();
+            return;
+          }
+
+          const out = document.createElement("canvas");
+          out.width = w;
+          out.height = cropH;
+          out.getContext("2d").drawImage(src, 0, top, w, cropH, 0, 0, w, cropH);
+
           const link = document.createElement("a");
           link.download = "Farmer-Kamol-Daily-Post.png";
-          link.href = pc.toDataURL("image/png");
+          link.href = out.toDataURL("image/png");
           link.click();
         } catch (err) {
+          console.error(err);
           alert("PNG তৈরি করা যায়নি। পৃষ্ঠাটি রিফ্রেশ করে আবার চেষ্টা করুন।");
         }
       };
