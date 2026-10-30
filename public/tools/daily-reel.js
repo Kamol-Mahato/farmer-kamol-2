@@ -26,6 +26,7 @@
       titleText: "", credit: "",
       dateMode: "stack", dateOrder: "after", hijriOffset: "0",
       sw: true, sb: true, se: true, sh: true, sd: true,
+      extra1: "", extra2: "", extra3: "",
       bgVol: 0, loop: true, imgDur: 20, voiceVol: 1, voiceOff: 0, musicVol: 0.3,
       gap: 0.4, startDelay: 0.6,
       font: "Hind Siliguri", weight: "700", size: 72,
@@ -40,7 +41,7 @@
     /* ---------------- স্টেট ---------------- */
     const S = {
       st: Object.assign({}, DEF),
-      dv: { weekday: "", bn: "", en: "", hijri: "", doy: "" },
+      dv: { weekday: "", bn: "", en: "", hijri: "", doy: "", extra1: "", extra2: "", extra3: "" },
       dvManual: {},
       bg: null, voice: null, music: null,
       screens: [], tm: [], tmManual: false, lay: {},
@@ -103,11 +104,35 @@
     function refreshDates(force) {
       try { if (window.dpRefreshDate) window.dpRefreshDate(); } catch (_) {}
       const val = (id) => { const e = $(id); return e ? String(e.value || "").trim() : ""; };
+      const now = new Date();
+
       let wd = val("dpWeekday");
       if (!wd) {
-        try { wd = "আজ " + new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", weekday: "long" }).format(new Date()); } catch (_) {}
+        try { wd = "আজ " + new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", weekday: "long" }).format(now); } catch (_) { wd = "আজ"; }
       }
-      const auto = { weekday: wd, bn: val("dpBnDate"), en: val("dpEnDate"), hijri: val("dpHijriDate"), doy: "আজ বছরের " + bnDigits(dayOfYear()) + " তম দিন" };
+
+      let bn = val("dpBnDate");
+      if (!bn) {
+        try { bn = new Intl.DateTimeFormat("bn-BD-u-ca-beng", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { bn = ""; }
+      }
+
+      let en = val("dpEnDate");
+      if (!en) {
+        try { en = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { en = ""; }
+      }
+
+      let hijri = val("dpHijriDate");
+      if (!hijri) {
+        try {
+          const offset = Number(S.st.hijriOffset || 0);
+          const d = new Date(now.getTime() + offset * 86400000);
+          hijri = new Intl.DateTimeFormat("bn-BD-u-ca-islamic", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(d);
+        } catch (_) { hijri = ""; }
+      }
+
+      const doy = "আজ বছরের " + bnDigits(dayOfYear()) + " তম দিন";
+      const auto = { weekday: wd, bn, en, hijri, doy };
+
       Object.keys(auto).forEach((k) => {
         if (force) S.dvManual[k] = false;
         if (!S.dvManual[k]) S.dv[k] = auto[k];
@@ -126,15 +151,17 @@
       const item = (k, flag, s) => (flag && S.dv[k] ? { t: S.dv[k], s, c: "2" } : null);
       const wd = item("weekday", st.sw, 1.12);
       const rest = [item("bn", st.sb, 0.8), item("en", st.se, 0.8), item("hijri", st.sh, 0.8), item("doy", st.sd, 0.8)].filter(Boolean);
+      const extras = ["extra1", "extra2", "extra3"].map((k) => S.dv[k] ? { t: S.dv[k], s: 0.75, c: "2" } : null).filter(Boolean);
       let dsc = [];
       if (st.dateMode === "stack") {
-        const all = [wd].concat(rest).filter(Boolean);
+        const all = [wd].concat(rest).concat(extras).filter(Boolean);
         if (all.length) dsc.push({ kind: "date", lines: all });
       } else if (st.dateMode === "seq") {
         if (wd) dsc.push({ kind: "date", lines: [wd] });
         if (rest.length) dsc.push({ kind: "date", lines: rest });
+        extras.forEach((x) => dsc.push({ kind: "date", lines: [x] }));
       } else {
-        [wd].concat(rest).filter(Boolean).forEach((x) => dsc.push({ kind: "date", lines: [x] }));
+        [wd].concat(rest).concat(extras).filter(Boolean).forEach((x) => dsc.push({ kind: "date", lines: [x] }));
       }
       return st.dateOrder === "before" ? dsc.concat(out) : out.concat(dsc);
     }
@@ -644,6 +671,18 @@
         const stopped = new Promise((r) => { rec.onstop = r; });
         let wl = null; try { wl = await navigator.wakeLock.request("screen"); } catch (_) {}
         status.textContent = "⏳ ভিডিও তৈরি হচ্ছে… এই ট্যাব সামনে খোলা রাখুন (ঘড়ির সময় ধরে রেকর্ড হয়)।";
+        // শুরুতে ভিডিও হারিয়ে যাওয়া ঠিক করতে
+        if (S.bg && S.bg.type === "video" && S.bg.el) {
+          try {
+            S.bg.el.pause();
+            S.bg.el.currentTime = 0;
+            await new Promise((r) => {
+              if (S.bg.el.readyState >= 2) return r();
+              const t = setTimeout(r, 900);
+              S.bg.el.onloadeddata = () => { clearTimeout(t); r(); };
+            });
+          } catch (_) {}
+        }
         const ended = new Promise((r) => { S.onEnd = r; });
         rec.start(250);
         play(0, "record");
@@ -811,8 +850,10 @@
     #drRoot .drbtn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;background:#fff;color:#176b3a}
     #drRoot .drbtn.p{background:#0f766e;color:#fff}.drbtn.o{background:#df5c17;color:#fff}
     #drRoot .drbtn:disabled{opacity:.5;cursor:not-allowed}
-    #drRoot .drgrid{display:grid;grid-template-columns:minmax(330px,440px) 1fr;gap:16px;padding:14px 16px;align-items:start}
+    #drRoot .drgrid{display:grid;grid-template-columns:minmax(280px,380px) 1fr minmax(220px,260px);gap:14px;padding:14px 16px;align-items:start}
     #drRoot .drctl{display:flex;flex-direction:column;gap:10px}
+    #drRoot .dr-actions{position:sticky;top:70px;display:flex;flex-direction:column;gap:10px}
+    #drRoot .dr-actions .drbtn{width:100%;justify-content:center;padding:13px 12px;font-size:15px}
     #drRoot .drg{background:#fff;border:1px solid #cfe3d5;border-radius:12px}
     #drRoot .drg>summary{cursor:pointer;padding:11px 14px;font-weight:700;color:#176b3a}
     #drRoot .drb{padding:4px 14px 14px;display:flex;flex-direction:column;gap:10px}
@@ -829,7 +870,7 @@
     #drRoot .r input{width:100%;padding:5px;border:1px solid #b7d4c0;border-radius:6px;font:inherit}
     #drRoot .r span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #drRoot .drn{font-size:12.5px;color:#4b6656;font-weight:400}
-    #drRoot .drpv{position:sticky;top:64px;display:flex;flex-direction:column;align-items:center;gap:10px}
+    #drRoot .drpv{position:sticky;top:64px;display:flex;flex-direction:column;align-items:center;gap:8px}
     #drRoot #drCanvas{height:min(76vh,860px);aspect-ratio:9/16;border-radius:16px;background:#000;box-shadow:0 8px 30px rgba(0,0,0,.25)}
     #drRoot .drrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
     #drRoot #drSeek{width:min(100%,460px)}
@@ -837,7 +878,7 @@
     #drRoot #drStatus{width:min(100%,460px);font-size:13.5px;text-align:center;min-height:20px}
     #drCount{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:150px;font-weight:800;color:#fff;text-shadow:0 4px 30px #000;pointer-events:none}
     #drRoot .drcv{position:relative}
-    @media (max-width:860px){#drRoot .drgrid{grid-template-columns:1fr}#drRoot .drpv{position:static;order:-1}#drRoot #drCanvas{height:min(62vh,640px)}}
+    @media (max-width:980px){#drRoot .drgrid{grid-template-columns:1fr}#drRoot .drpv{position:static;order:-1}#drRoot .dr-actions{position:static;order:2}#drRoot #drCanvas{height:min(62vh,640px)}}
     `;
   
     function buildUI() {
@@ -850,6 +891,14 @@
       <div class="drh"><h2>🎞️ Farmer Kamol Daily Reel</h2>
         <div style="display:flex;gap:8px"><button class="drbtn" id="drReset">↺ স্টাইল ডিফল্টে</button><button class="drbtn" id="drClose">✕ বন্ধ করুন</button></div></div>
       <div class="drgrid">
+        <div class="drpv">
+          <div class="drcv"><canvas id="drCanvas" width="540" height="960"></canvas><div id="drCount"></div></div>
+          <input type="range" id="drSeek" min="0" max="1500" value="0">
+          <div class="drrow"><span id="drTime">0.0 / 0.0 সে.</span></div>
+          <div id="drCue"></div>
+          <div id="drInfo" class="drn"></div>
+          <div id="drStatus"></div>
+        </div>
         <div class="drctl">
           ${group("১. ব্যাকগ্রাউন্ড ও শব্দ", true, `
             <label class="drl"><span>ব্যাকগ্রাউন্ড ভিডিও (বা ছবি)</span><input type="file" id="drBg" accept="video/*,image/*"></label>
@@ -862,6 +911,9 @@
             ${fHtml({ k: "dateOrder", l: "কখন আসবে", t: "select", o: OPT.dateOrder })}
             ${fHtml({ k: "hijriOffset", l: "হিজরি তারিখ সংশোধন", t: "select", o: OPT.hijri })}
             ${dateRows}
+            <label class="drl"><span>অতিরিক্ত লাইন-১</span><input type="text" id="drv_extra1" data-dk="extra1" placeholder="অতিরিক্ত লাইন ১"></label>
+            <label class="drl"><span>অতিরিক্ত লাইন-২</span><input type="text" id="drv_extra2" data-dk="extra2" placeholder="অতিরিক্ত লাইন ২"></label>
+            <label class="drl"><span>অতিরিক্ত লাইন-৩</span><input type="text" id="drv_extra3" data-dk="extra3" placeholder="অতিরিক্ত লাইন ৩"></label>
             <button class="drbtn" id="drDates" style="background:#e1f3e6">↻ তারিখ আবার অটো বসাও</button>
             <div class="drn">ঘরে টিক দিলে সেই লাইন দেখাবে। লেখা বদলাতে চাইলে সরাসরি ঘরে লিখুন।</div>`)}
           ${group("৪. সময় (লেখা কখন আসবে)", false, `
@@ -874,19 +926,11 @@
           ${group("৭. শেষের লোগো পর্দা", false, `${FIELDS.g7.map(fHtml).join("")}<div class="drn">লোগো, নাম, স্লোগান ও লিংকের লেখা Daily Post-এর "ব্র্যান্ডিং" ঘর থেকে আসে।</div>`)}
           ${group("৮. আউটপুট", false, FIELDS.g8.map(fHtml).join(""))}
         </div>
-        <div class="drpv">
-          <div class="drcv"><canvas id="drCanvas" width="540" height="960"></canvas><div id="drCount"></div></div>
-          <input type="range" id="drSeek" min="0" max="1500" value="0">
-          <div class="drrow"><span id="drTime">0.0 / 0.0 সে.</span></div>
-          <div class="drrow">
-            <button class="drbtn p" id="drPlay">▶ প্রিভিউ</button>
-            <button class="drbtn" id="drStop">⏹ থামাও</button>
-            <button class="drbtn" id="drCue2">🎙️ ভয়েস রেকর্ডের জন্য (৩-২-১)</button>
-            <button class="drbtn o" id="drMake">🎬 ভিডিও তৈরি ও ডাউনলোড</button>
-          </div>
-          <div id="drCue"></div>
-          <div id="drInfo" class="drn"></div>
-          <div id="drStatus"></div>
+        <div class="dr-actions">
+          <button class="drbtn p" id="drPlay">▶ প্রিভিউ</button>
+          <button class="drbtn" id="drStop">⏹ থামাও</button>
+          <button class="drbtn" id="drCue2">🎙️ ভয়েস রেকর্ডের জন্য (৩-২-১)</button>
+          <button class="drbtn o" id="drMake">🎬 ভিডিও তৈরি ও ডাউনলোড</button>
         </div>
       </div>`;
       document.body.appendChild(root);
