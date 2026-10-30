@@ -8940,6 +8940,10 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             <select id="dpVideoDuration">
               <option value="12">১২ সেকেন্ড</option>
               <option value="15" selected>১৫ সেকেন্ড</option>
+              <option value="30">৩০ সেকেন্ড</option>
+              <option value="60">১ মিনিট</option>
+              <option value="120">2 মিনিট</option>
+              <option value="180">3 মিনিট</option>
             </select>
           </label>
 
@@ -9970,58 +9974,282 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         vCanvas.height = H;
         const vctx = vCanvas.getContext("2d");
 
-        // আগে পোস্ট একবার রেন্ডার (ইমেজ যা দেখায়, exact সেটা)
-        dpRender();
-        const postW = pc.width;
-        const postH = pc.height;
+        // —— অডিও ——
+        let audioCtx = null;
+        let audioDest = null;
+        if (dpMusicBuffer) {
+          try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioDest = audioCtx.createMediaStreamDestination();
+            const source = audioCtx.createBufferSource();
+            source.buffer = dpMusicBuffer;
+            const gain = audioCtx.createGain();
+            gain.gain.value = Number($("dpMusicVol") && $("dpMusicVol").value) || 0.6;
+            source.connect(gain);
+            gain.connect(audioDest);
+            source.start(0);
+          } catch (e) { console.warn("Audio mix failed", e); }
+        }
 
-        // হালকা মোশন — চোখে না লাগে, প্রতিবার র‍্যান্ডম
-        const motionStyle = randChoice(["zoom-in", "zoom-out", "pan-left", "pan-right", "pan-up"]);
-        const zoomAmt = rand(0.03, 0.07);   // খুব হালকা
-        const panAmt  = rand(12, 28);       // পিক্সেল
+        // —— রেকর্ডার ——
+        const videoStream = vCanvas.captureStream(fps);
+        let combinedStream = videoStream;
+        if (audioDest) {
+          combinedStream = new MediaStream([
+            ...videoStream.getVideoTracks(),
+            ...audioDest.stream.getAudioTracks()
+          ]);
+        }
+        let mimeType = "video/webm", fileExt = "webm";
+        if (MediaRecorder.isTypeSupported("video/mp4")) {
+          mimeType = "video/mp4"; fileExt = "mp4";
+        } else if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1")) {
+          mimeType = "video/mp4;codecs=avc1"; fileExt = "mp4";
+        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+          mimeType = "video/webm;codecs=vp9"; fileExt = "webm";
+        } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+          mimeType = "video/webm;codecs=vp8"; fileExt = "webm";
+        }
+        const recorder = new MediaRecorder(combinedStream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 6000000
+        });
+        const chunks = [];
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        const recorded = new Promise((resolve) => { recorder.onstop = () => resolve(); });
+        recorder.start();
+
+        // —— ডাটা (ইমেজ প্যানেল থেকে) ——
+        const title = ($("dpTitle") && $("dpTitle").value) || "আজকের কৃষি";
+        const dates = {
+          weekday: ($("dpWeekday") && $("dpWeekday").value) || "",
+          bn: ($("dpBnDate") && $("dpBnDate").value) || "",
+          english: ($("dpEnDate") && $("dpEnDate").value) || "",
+          hijri: ($("dpHijriDate") && $("dpHijriDate").value) || ""
+        };
+        const extra1 = ($("dpExtra1") && $("dpExtra1").value.trim()) || "";
+        const extra2 = ($("dpExtra2") && $("dpExtra2").value.trim()) || "";
+        const brandName = ($("dpBrandName") && $("dpBrandName").value.trim()) || "Farmer Kamol";
+        const brandSub = ($("dpBrandSub") && $("dpBrandSub").value.trim()) || "খামার থেকে আপনার দরজায়";
+        const brandTagline = ($("dpBrandTagline") && $("dpBrandTagline").value.trim()) || "";
+        const brandFooter = ($("dpBrandFooter") && $("dpBrandFooter").value.trim()) || "খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ";
+        const linkFb = ($("dpLinkFb") && $("dpLinkFb").value.trim()) || "facebook.com/farmerkamol";
+        const linkWeb = ($("dpLinkWeb") && $("dpLinkWeb").value.trim()) || "farmerkamol.com";
+        const linkYt = ($("dpLinkYt") && $("dpLinkYt").value.trim()) || "youtube.com/@Farmerkamol";
+        const showLogo = !$("dpShowLogo") || $("dpShowLogo").checked;
+        const showSocial = !$("dpShowSocial") || $("dpShowSocial").checked;
+
+        // —— র‍্যান্ডম মোশন (হালকা, চোখে কম লাগে) ——
+        const imgZoomFrom = rand(1.0, 1.08);
+        const imgZoomTo = rand(1.08, 1.16);
+        const imgPanX = rand(-0.2, 0.2);
+        const imgPanY = rand(-0.15, 0.15);
+        const titleAnim = randChoice(["fade", "up", "left"]);
+        const cardAnim = randChoice(["fade", "up", "scale"]);
+        const footerAnim = randChoice(["fade", "up"]);
+
+        // লেআউট (৯:১৬)
+        const pad = 36;
+        const photoH = 900;
+        const photoY = 40;
+
+        function wrapLines(ctx, text, maxW, maxLines) {
+          const paragraphs = String(text || "").replace(/\r\n/g, "\n").split("\n");
+          let lines = [];
+          paragraphs.forEach((para) => {
+            const words = para.trim().split(/\s+/).filter(Boolean);
+            if (!words.length) { lines.push(""); return; }
+            let line = "";
+            words.forEach((w) => {
+              const test = line ? line + " " + w : w;
+              if (ctx.measureText(test).width > maxW && line) {
+                lines.push(line); line = w;
+              } else line = test;
+            });
+            if (line) lines.push(line);
+          });
+          if (maxLines && lines.length > maxLines) lines = lines.slice(0, maxLines);
+          return lines;
+        }
 
         // ========== রেন্ডার লুপ ==========
         for (let frame = 0; frame <= totalFrames; frame++) {
           const t = frame / totalFrames;
-          const e = easeOutCubic(t);
 
-          // ব্যাকগ্রাউন্ড
           vctx.fillStyle = "#f0fbf3";
           vctx.fillRect(0, 0, W, H);
 
-          // পোস্টকে ৯:১৬-এর ভিতরে fit (contain)
-          const fit = Math.min(W / postW, H / postH);
-          let baseW = postW * fit;
-          let baseH = postH * fit;
+          // ১) ছবি — স্মুথ Ken Burns
+          const imgE = easeOutCubic(clamp(t / 0.9, 0, 1));
+          const z = imgZoomFrom + (imgZoomTo - imgZoomFrom) * imgE;
+          vctx.save();
+          vctx.beginPath();
+          if (vctx.roundRect) vctx.roundRect(pad, photoY, W - pad * 2, photoH, 18);
+          else vctx.rect(pad, photoY, W - pad * 2, photoH);
+          vctx.clip();
+          if (dpPhoto && dpPhoto.width) {
+            const cw = W - pad * 2, ch = photoH;
+            const cover = Math.max(cw / dpPhoto.width, ch / dpPhoto.height) * z;
+            const dw = dpPhoto.width * cover;
+            const dh = dpPhoto.height * cover;
+            const maxOX = Math.max(0, (dw - cw) / 2);
+            const maxOY = Math.max(0, (dh - ch) / 2);
+            const dx = pad + (cw - dw) / 2 + imgPanX * maxOX * (1 - imgE);
+            const dy = photoY + (ch - dh) / 2 + imgPanY * maxOY * (1 - imgE);
+            vctx.drawImage(dpPhoto, dx, dy, dw, dh);
+          }
+          vctx.restore();
 
-          // মোশন
-          let scale = 1;
-          let ox = 0, oy = 0;
-          if (motionStyle === "zoom-in") {
-            scale = 1 + zoomAmt * e;
-          } else if (motionStyle === "zoom-out") {
-            scale = 1 + zoomAmt * (1 - e);
-          } else if (motionStyle === "pan-left") {
-            ox = -panAmt * e;
-          } else if (motionStyle === "pan-right") {
-            ox = panAmt * e;
-          } else if (motionStyle === "pan-up") {
-            oy = -panAmt * e;
+          // ২) শিরোনাম — ০.১২ থেকে আসা
+          const titleP = clamp((t - 0.12) / 0.18, 0, 1);
+          if (titleP > 0) {
+            const te = easeOutCubic(titleP);
+            vctx.save();
+            vctx.globalAlpha = te;
+            let ty = photoY + photoH + 70;
+            let tx = pad + 8;
+            if (titleAnim === "up") ty += (1 - te) * 40;
+            if (titleAnim === "left") tx -= (1 - te) * 60;
+            vctx.fillStyle = "#174b2d";
+            vctx.font = "700 48px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "left";
+            const tLines = wrapLines(vctx, title, W - pad * 2 - 16, 4);
+            tLines.forEach((ln, i) => vctx.fillText(ln, tx, ty + i * 58));
+            vctx.restore();
           }
 
-          const dw = baseW * scale;
-          const dh = baseH * scale;
-          const dx = (W - dw) / 2 + ox;
-          const dy = (H - dh) / 2 + oy;
+          // ৩) তারিখ কার্ড — ০.২৮ থেকে
+          const cardP = clamp((t - 0.28) / 0.2, 0, 1);
+          if (cardP > 0) {
+            const ce = easeOutCubic(cardP);
+            const cards = [dates.weekday, dates.bn, dates.english, dates.hijri];
+            const cardW = (W - pad * 2 - 16) / 2;
+            const cardH = 78;
+            const cardsY0 = photoY + photoH + 70 + 58 * 2 + 24;
+            cards.forEach((val, i) => {
+              const col = i % 2, row = Math.floor(i / 2);
+              let cx = pad + col * (cardW + 16);
+              let cy = cardsY0 + row * (cardH + 14);
+              vctx.save();
+              vctx.globalAlpha = ce;
+              if (cardAnim === "up") cy += (1 - ce) * 30;
+              if (cardAnim === "scale") {
+                const sc = 0.92 + 0.08 * ce;
+                vctx.translate(cx + cardW / 2, cy + cardH / 2);
+                vctx.scale(sc, sc);
+                vctx.translate(-(cx + cardW / 2), -(cy + cardH / 2));
+              }
+              vctx.fillStyle = "#ffffff";
+              vctx.beginPath();
+              if (vctx.roundRect) vctx.roundRect(cx, cy, cardW, cardH, 12);
+              else vctx.rect(cx, cy, cardW, cardH);
+              vctx.fill();
+              vctx.fillStyle = "#000000";
+              vctx.font = "700 28px 'Noto Sans Bengali', sans-serif";
+              vctx.textAlign = "center";
+              vctx.fillText(val, cx + cardW / 2, cy + cardH * 0.63, cardW - 20);
+              vctx.restore();
+            });
+          }
 
-          vctx.drawImage(pc, 0, 0, postW, postH, dx, dy, dw, dh);
+          // ৪) এক্সট্রা নোট
+          const hasExtra = !!(extra1 || extra2);
+          if (hasExtra) {
+            const ep = clamp((t - 0.48) / 0.15, 0, 1);
+            if (ep > 0) {
+              const ee = easeOutCubic(ep);
+              const ey = photoY + photoH + 70 + 58 * 2 + 24 + 78 * 2 + 40;
+              vctx.save();
+              vctx.globalAlpha = ee;
+              vctx.fillStyle = "#ffffff";
+              vctx.beginPath();
+              const eH = (extra1 && extra2) ? 100 : 56;
+              if (vctx.roundRect) vctx.roundRect(pad, ey + (1 - ee) * 20, W - pad * 2, eH, 12);
+              else vctx.rect(pad, ey + (1 - ee) * 20, W - pad * 2, eH);
+              vctx.fill();
+              vctx.fillStyle = "#000000";
+              vctx.font = "700 26px 'Noto Sans Bengali', sans-serif";
+              vctx.textAlign = "left";
+              if (extra1) vctx.fillText(extra1, pad + 22, ey + (1 - ee) * 20 + 36, W - pad * 2 - 44);
+              if (extra2) vctx.fillText(extra2, pad + 22, ey + (1 - ee) * 20 + 72, W - pad * 2 - 44);
+              vctx.restore();
+            }
+          }
 
-          // প্রগ্রেস
+          // ৫) ফুটার — ০.৫৮ থেকে
+          const fp = clamp((t - 0.58) / 0.22, 0, 1);
+          if (fp > 0) {
+            const fe = easeOutCubic(fp);
+            const footerY = H - 420 + (1 - fe) * (footerAnim === "up" ? 50 : 0);
+            vctx.save();
+            vctx.globalAlpha = fe;
+            vctx.fillStyle = "#e1f3e6";
+            vctx.fillRect(0, footerY, W, H - footerY);
+
+            if (showLogo && dpLogo && dpLogo.complete && dpLogo.naturalWidth) {
+              vctx.save();
+              vctx.beginPath();
+              vctx.arc(pad + 50, footerY + 55, 36, 0, Math.PI * 2);
+              vctx.clip();
+              vctx.drawImage(dpLogo, pad + 14, footerY + 19, 72, 72);
+              vctx.restore();
+            }
+            vctx.fillStyle = "#07552c";
+            vctx.font = "700 32px Arial, sans-serif";
+            vctx.textAlign = "left";
+            vctx.fillText(brandName, pad + 100, footerY + 45);
+            vctx.fillStyle = "#df5c17";
+            vctx.font = "700 24px 'Noto Sans Bengali', sans-serif";
+            vctx.fillText(brandSub, pad + 100, footerY + 78);
+            vctx.fillStyle = "#294c34";
+            vctx.font = "400 18px 'Noto Sans Bengali', sans-serif";
+            vctx.fillText(brandTagline, pad + 100, footerY + 108, W - pad * 2 - 120);
+
+            if (showSocial) {
+              const socials = [
+                { x: W * 0.22, color: "#1877f2", kind: "fb", label: linkFb },
+                { x: W * 0.50, color: "#2b6cb0", kind: "web", label: linkWeb },
+                { x: W * 0.78, color: "#ff0000", kind: "yt", label: linkYt }
+              ];
+              const sy = footerY + 175;
+              socials.forEach((s) => {
+                vctx.fillStyle = s.color;
+                vctx.beginPath();
+                vctx.arc(s.x, sy, 26, 0, Math.PI * 2);
+                vctx.fill();
+                vctx.fillStyle = "#fff";
+                vctx.textAlign = "center";
+                vctx.textBaseline = "middle";
+                if (s.kind === "fb") {
+                  vctx.font = "700 30px Arial";
+                  vctx.fillText("f", s.x, sy + 1);
+                } else if (s.kind === "yt") {
+                  vctx.beginPath();
+                  vctx.moveTo(s.x - 7, sy - 9);
+                  vctx.lineTo(s.x - 7, sy + 9);
+                  vctx.lineTo(s.x + 11, sy);
+                  vctx.closePath();
+                  vctx.fill();
+                } else {
+                  vctx.font = "700 20px Arial";
+                  vctx.fillText("🌐", s.x, sy + 1);
+                }
+                vctx.fillStyle = "#1a1a1a";
+                vctx.font = "600 18px Arial";
+                vctx.textBaseline = "alphabetic";
+                vctx.fillText(s.label, s.x, sy + 48);
+              });
+            }
+            vctx.fillStyle = "#647768";
+            vctx.font = "700 16px 'Noto Sans Bengali', sans-serif";
+            vctx.textAlign = "center";
+            vctx.fillText(brandFooter, W / 2, footerY + 270);
+            vctx.restore();
+          }
+
           if (frame % 15 === 0) {
-            const pct = Math.round((frame / totalFrames) * 100);
-            status.textContent = `⏳ ভিডিও তৈরি হচ্ছে... ${pct}%`;
+            status.textContent = `⏳ ভিডিও তৈরি হচ্ছে... ${Math.round(t * 100)}%`;
           }
-
           await new Promise((r) => setTimeout(r, 1000 / fps));
         }
 
