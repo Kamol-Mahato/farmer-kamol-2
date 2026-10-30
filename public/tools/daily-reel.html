@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Kamol — Daily Reel Studio</title>
+  <link rel="icon" href="/icon.png" />
+  <!-- চাইলে Hind Siliguri ফন্ট যোগ করতে পারো -->
+</head>
+<body>
+  <!-- JS নিজেই UI বানাবে (drRoot ইত্যাদি) -->
+  <script src="/tools/daily-reel.js"></script>
+  <script>
+    // পেজ লোড হওয়ার সাথে সাথে টুল খুলে দাও
+    window.addEventListener("DOMContentLoaded", () => {
+      if (typeof window.openDailyReel === "function") {
+        window.openDailyReel();
+      }
+    });
+  </script>
+</body>
+</html>
