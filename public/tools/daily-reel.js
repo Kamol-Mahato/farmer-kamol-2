@@ -1,13 +1,15 @@
 /* =====================================================================
    Farmer Kamol — Daily Reel Studio
    ফাইল: public/tools/daily-reel.js
-   কাজ: ব্যাকগ্রাউন্ড ভিডিও + লেখা + তারিখ + ভয়েস-ওভার + শেষের লোগো → ৯:১৬ রিল
+   কাজ: ব্যাকগ্রাউন্ড ভিডিও + লেখা + তারিখ + ভয়েস-ওভার + শেষের লোগো → ৯:১৬ বা ১৬:৯ রিল
    সবকিছু ব্রাউজারেই চলে (কোনো সার্ভার লাগে না)।
    ===================================================================== */
    (function () {
     "use strict";
   
-    const W = 1080, H = 1920, FPS = 30;
+    // W/H = ভিডিওর আসল মাপ, PW/PH = প্রিভিউ ক্যানভাসের মাপ (অনুপাত বদলালে এগুলো বদলায়)
+    let W = 1080, H = 1920, PW = 540, PH = 960;
+    const FPS = 30;
     const LS_KEY = "fk_daily_reel_v1";
     const $ = (id) => document.getElementById(id);
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -23,6 +25,7 @@
   
     /* ---------------- ডিফল্ট সেটিংস ---------------- */
     const DEF = {
+      orient: "v",
       titleText: "", credit: "",
       dateMode: "stack", dateOrder: "after", hijriOffset: "0",
       sw: true, sb: true, se: true, sh: true, sd: true,
@@ -51,6 +54,7 @@
       logo: null, brand: null, fxc: null, built: false,
     };
     const mctx = document.createElement("canvas").getContext("2d");
+    const isLand = () => S.st.orient === "h";
   
     /* ---------------- ছোট হেল্পার ---------------- */
     function rr(ctx, x, y, w, h, r) {
@@ -92,6 +96,26 @@
     }
   
     /* ---------------- তারিখ ---------------- */
+    const BN_MONTHS_EN = {
+      January: "জানুয়ারি", February: "ফেব্রুয়ারি", March: "মার্চ", April: "এপ্রিল", May: "মে", June: "জুন",
+      July: "জুলাই", August: "আগস্ট", September: "সেপ্টেম্বর", October: "অক্টোবর", November: "নভেম্বর", December: "ডিসেম্বর",
+    };
+    const BN_DAYS_EN = {
+      Saturday: "শনিবার", Sunday: "রবিবার", Monday: "সোমবার", Tuesday: "মঙ্গলবার",
+      Wednesday: "বুধবার", Thursday: "বৃহস্পতিবার", Friday: "শুক্রবার",
+    };
+    const BN_MONTHS = ["বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন", "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"];
+  
+    // যেকোনো তারিখের লেখা পুরো বাংলায় (সংখ্যা, মাস, বার) বদলে দেয়
+    function bnify(s) {
+      if (!s) return s;
+      let o = String(s);
+      Object.keys(BN_MONTHS_EN).forEach((m) => { o = o.replace(new RegExp(m, "gi"), BN_MONTHS_EN[m]); });
+      Object.keys(BN_DAYS_EN).forEach((d) => { o = o.replace(new RegExp(d, "gi"), BN_DAYS_EN[d]); });
+      o = o.replace(/\d/g, (c) => "০১২৩৪৫৬৭৮৯"[c]);
+      o = o.replace(/\s*এএইচ/g, " হিজরি");
+      return o;
+    }
     function dhakaYMD() {
       const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
       const [y, m, d] = p.split("-").map(Number);
@@ -101,26 +125,38 @@
       const { y, m, d } = dhakaYMD();
       return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
     }
+    // বাংলাদেশের সংশোধিত বাংলা পঞ্জিকা (১৪ এপ্রিল = ১ বৈশাখ)
+    function bnCalendar() {
+      const { y, m, d } = dhakaYMD();
+      const cur = Date.UTC(y, m - 1, d);
+      const startY = (m > 4 || (m === 4 && d >= 14)) ? y : y - 1;
+      const leap = (yy) => (yy % 4 === 0 && yy % 100 !== 0) || yy % 400 === 0;
+      const len = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap(startY + 1) ? 31 : 30, 30];
+      let diff = Math.round((cur - Date.UTC(startY, 3, 14)) / 86400000);
+      let mi = 0;
+      while (mi < 11 && diff >= len[mi]) { diff -= len[mi]; mi++; }
+      return bnDigits(diff + 1) + " " + BN_MONTHS[mi] + " " + bnDigits(startY - 593);
+    }
     function refreshDates(force) {
       try { if (window.dpRefreshDate) window.dpRefreshDate(); } catch (_) {}
       const val = (id) => { const e = $(id); return e ? String(e.value || "").trim() : ""; };
       const now = new Date();
-
+  
       let wd = val("dpWeekday");
       if (!wd) {
         try { wd = "আজ " + new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", weekday: "long" }).format(now); } catch (_) { wd = "আজ"; }
       }
-
+  
       let bn = val("dpBnDate");
       if (!bn) {
-        try { bn = new Intl.DateTimeFormat("bn-BD-u-ca-beng", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { bn = ""; }
+        try { bn = bnCalendar(); } catch (_) { bn = ""; }
       }
-
+  
       let en = val("dpEnDate");
       if (!en) {
-        try { en = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { en = ""; }
+        try { en = new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { en = ""; }
       }
-
+  
       let hijri = val("dpHijriDate");
       if (!hijri) {
         try {
@@ -129,10 +165,10 @@
           hijri = new Intl.DateTimeFormat("bn-BD-u-ca-islamic", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(d);
         } catch (_) { hijri = ""; }
       }
-
+  
       const doy = "আজ বছরের " + bnDigits(dayOfYear()) + " তম দিন";
-      const auto = { weekday: wd, bn, en, hijri, doy };
-
+      const auto = { weekday: bnify(wd), bn: bnify(bn), en: bnify(en), hijri: bnify(hijri), doy };
+  
       Object.keys(auto).forEach((k) => {
         if (force) S.dvManual[k] = false;
         if (!S.dvManual[k]) S.dv[k] = auto[k];
@@ -216,13 +252,14 @@
     }
     function getLayout(i) {
       if (S.lay[i]) return S.lay[i];
-      const sc = S.screens[i], st = S.st, maxW = W - 170, blocks = [];
+      const land = isLand();
+      const sc = S.screens[i], st = S.st, maxW = land ? 1500 : W - 170, k = land ? 0.85 : 1, blocks = [];
       sc.lines.forEach((ln) => {
-        const size = Math.round(st.size * ln.s);
+        const size = Math.round(st.size * ln.s * k);
         blocks.push(makeBlock(ln.t, `${st.weight} ${size}px "${st.font}","Noto Sans Bengali",sans-serif`, size, ln.c === "2" ? st.color2 : st.color, maxW, false));
       });
       if (sc.kind === "title" && String(st.credit).trim()) {
-        const size = Math.round(st.size * 0.5);
+        const size = Math.round(st.size * 0.5 * k);
         blocks.push(makeBlock(String(st.credit).trim(), `400 ${size}px "${st.font}","Noto Sans Bengali",sans-serif`, size, st.creditColor, maxW, true));
       }
       let y = 0, mw = 0;
@@ -230,12 +267,12 @@
       return (S.lay[i] = { blocks, totalH: y, maxW: mw });
     }
     function blockTop(lay, sc) {
-      const st = S.st;
+      const st = S.st, land = isLand();
       const pos = sc.kind === "date" && st.posDate !== "same" ? st.posDate : st.pos;
       let y;
-      if (pos === "top") y = 250;
+      if (pos === "top") y = land ? 110 : 250;
       else if (pos === "middle") y = (H - lay.totalH) / 2;
-      else y = H - 420 - lay.totalH;
+      else y = H - (land ? 130 : 420) - lay.totalH;
       return y + Number(st.offY || 0);
     }
   
@@ -315,7 +352,7 @@
       if (!sc || !tm) return;
       const local = t - tm.start;
       if (local < 0 || local > tm.dur) return;
-      const st = S.st, lay = getLayout(i);
+      const st = S.st, lay = getLayout(i), land = isLand();
       const IN = 0.8, OUT = 0.55;
       const pin = clamp(local / IN, 0, 1), pout = clamp((local - (tm.dur - OUT)) / OUT, 0, 1);
       const ein = ease.out(pin);
@@ -338,10 +375,11 @@
       // স্ক্রিম (পেছনে হালকা অন্ধকার গ্রেডিয়েন্ট) — জায়গায় স্থির
       if (st.band === "scrim") {
         const pos = sc.kind === "date" && st.posDate !== "same" ? st.posDate : st.pos;
+        const sBot = land ? 520 : 1000, sTop = land ? 460 : 900, sMid = land ? 150 : 300;
         let g;
-        if (pos === "bottom") { g = ctx.createLinearGradient(0, H - 1000, 0, H); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.72)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, H - 1000, W, 1000); }
-        else if (pos === "top") { g = ctx.createLinearGradient(0, 0, 0, 900); g.addColorStop(0, "rgba(0,0,0,.72)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, 0, W, 900); }
-        else { const y0 = by - 300; g = ctx.createLinearGradient(0, y0, 0, by + lay.totalH + 300); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, y0, W, lay.totalH + 600); }
+        if (pos === "bottom") { g = ctx.createLinearGradient(0, H - sBot, 0, H); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.72)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, H - sBot, W, sBot); }
+        else if (pos === "top") { g = ctx.createLinearGradient(0, 0, 0, sTop); g.addColorStop(0, "rgba(0,0,0,.72)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, 0, W, sTop); }
+        else { const y0 = by - sMid; g = ctx.createLinearGradient(0, y0, 0, by + lay.totalH + sMid); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.globalAlpha = a; ctx.fillRect(0, y0, W, lay.totalH + sMid * 2); }
       }
       ctx.translate(cx + tx, cy + ty); ctx.scale(sx, sx); ctx.translate(-cx, -cy);
       if (blur > 0.5 && "filter" in ctx) ctx.filter = `blur(${blur * K}px)`;
@@ -436,7 +474,7 @@
       };
     }
     function drawOutro(ctx, local, K) {
-      const st = S.st, B = S.brand || readBrand();
+      const st = S.st, B = S.brand || readBrand(), land = isLand();
       const fade = clamp(local / 0.5, 0, 1);
       ctx.save(); ctx.globalAlpha = fade;
       const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#f6fcf8"); g.addColorStop(1, "#dcefe2");
@@ -451,7 +489,12 @@
         case "pop": { const q = clamp(local / 0.9, 0, 1); sc = q < 1 ? 0.2 + 0.8 * ease.back(q) : 1; break; }
         default: sc = 1;
       }
-      const lx = W / 2, ly = 640, lr = 230;
+      // ৯:১৬ হলে সব ওপর-নিচে; ১৬:৯ হলে লোগো বাঁয়ে, লেখা ডানে
+      const tcx = land ? 1380 : W / 2;
+      const lx = land ? 520 : W / 2, ly = land ? H / 2 : 640, lr = land ? 260 : 230;
+      const Y = land ? { name: 330, sub: 415, tag: 495, soc: 760, foot: 1030 } : { name: 1040, sub: 1125, tag: 1215, soc: 1500, foot: 1740 };
+      const mw = land ? 900 : 960, tagW = land ? 880 : 900, footW = land ? 1700 : 960;
+      const socX = land ? [tcx - 320, tcx, tcx + 320] : [W * 0.2, W * 0.5, W * 0.8];
       ctx.save(); ctx.translate(lx, ly); ctx.scale(sc, sc);
       ctx.shadowColor = "rgba(7,85,44,.25)"; ctx.shadowBlur = 40 * K; ctx.shadowOffsetY = 14 * K;
       ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, lr + 14, 0, Math.PI * 2); ctx.fill();
@@ -464,17 +507,17 @@
       // টেক্সট (একটার পর একটা ভেসে আসে)
       const rise = (delay, fn) => { const q = ease.out(clamp((local - delay) / 0.6, 0, 1)); if (q <= 0) return; ctx.save(); ctx.globalAlpha = fade * q; ctx.translate(0, (1 - q) * 30); fn(); ctx.restore(); };
       ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-      rise(0.7, () => { ctx.fillStyle = "#07552c"; ctx.font = "700 92px Arial, sans-serif"; ctx.fillText(B.name, W / 2, 1040, 960); });
-      rise(0.95, () => { ctx.fillStyle = "#df5c17"; ctx.font = '700 54px "Noto Sans Bengali","Hind Siliguri",sans-serif'; ctx.fillText(B.sub, W / 2, 1125, 960); });
+      rise(0.7, () => { ctx.fillStyle = "#07552c"; ctx.font = "700 92px Arial, sans-serif"; ctx.fillText(B.name, tcx, Y.name, mw); });
+      rise(0.95, () => { ctx.fillStyle = "#df5c17"; ctx.font = '700 54px "Noto Sans Bengali","Hind Siliguri",sans-serif'; ctx.fillText(B.sub, tcx, Y.sub, mw); });
       rise(1.2, () => {
         ctx.fillStyle = "#294c34"; ctx.font = '400 38px "Noto Sans Bengali","Hind Siliguri",sans-serif';
-        const words = B.tag.split(/\s+/).filter(Boolean); let line = "", y = 1215;
-        words.forEach((w) => { const t2 = line ? line + " " + w : w; if (ctx.measureText(t2).width > 900 && line) { ctx.fillText(line, W / 2, y); line = w; y += 54; } else line = t2; });
-        if (line) ctx.fillText(line, W / 2, y);
+        const words = B.tag.split(/\s+/).filter(Boolean); let line = "", y = Y.tag;
+        words.forEach((w) => { const t2 = line ? line + " " + w : w; if (ctx.measureText(t2).width > tagW && line) { ctx.fillText(line, tcx, y); line = w; y += 54; } else line = t2; });
+        if (line) ctx.fillText(line, tcx, y);
       });
-      const socials = [{ x: W * 0.2, c: "#1877f2", k: "fb", l: B.fb }, { x: W * 0.5, c: "#2b6cb0", k: "web", l: B.web }, { x: W * 0.8, c: "#ff0000", k: "yt", l: B.yt }];
+      const socials = [{ x: socX[0], c: "#1877f2", k: "fb", l: B.fb }, { x: socX[1], c: "#2b6cb0", k: "web", l: B.web }, { x: socX[2], c: "#ff0000", k: "yt", l: B.yt }];
       socials.forEach((s, idx) => rise(1.6 + idx * 0.2, () => {
-        const sy = 1500;
+        const sy = Y.soc;
         ctx.fillStyle = s.c; ctx.beginPath(); ctx.arc(s.x, sy, 58, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#fff"; ctx.textBaseline = "middle";
         if (s.k === "fb") { ctx.font = "700 68px Arial"; ctx.fillText("f", s.x, sy + 4); }
@@ -482,7 +525,7 @@
         else { ctx.font = "700 44px Arial"; ctx.fillText("🌐", s.x, sy + 3); }
         ctx.textBaseline = "alphabetic"; ctx.fillStyle = "#1a1a1a"; ctx.font = "600 27px Arial"; ctx.fillText(s.l, s.x, sy + 108, 300);
       }));
-      rise(2.3, () => { ctx.fillStyle = "#647768"; ctx.font = '700 30px "Noto Sans Bengali","Hind Siliguri",sans-serif'; ctx.fillText(B.foot, W / 2, 1740, 960); });
+      rise(2.3, () => { ctx.fillStyle = "#647768"; ctx.font = '700 30px "Noto Sans Bengali","Hind Siliguri",sans-serif'; ctx.fillText(B.foot, W / 2, Y.foot, footW); });
       ctx.restore();
     }
   
@@ -496,7 +539,8 @@
       if (t <= S.main) drawAmbient(ctx, t);
       if (t <= S.main + 0.01) for (let i = 0; i < S.screens.length; i++) drawScreen(ctx, i, t, K);
       if (S.outroDur > 0 && t > S.main) drawOutro(ctx, t - S.main, K);
-      if (guides && S.st.guides) {
+      // ফেসবুক বাটনের এলাকা শুধু ৯:১৬ রিলের জন্য
+      if (guides && S.st.guides && !isLand()) {
         ctx.save(); ctx.fillStyle = "rgba(255,60,60,.18)";
         ctx.fillRect(0, 0, W, 260); ctx.fillRect(0, H - 400, W, 400); ctx.fillRect(W - 150, 260, 150, H - 660);
         ctx.fillStyle = "rgba(255,255,255,.8)"; ctx.font = "600 30px sans-serif"; ctx.textAlign = "left";
@@ -582,7 +626,7 @@
       try {
         await seekVideo(S.t);
         S.brand = readBrand();
-        drawFrame(pctx(), 540, 960, S.t, true);
+        drawFrame(pctx(), PW, PH, S.t, true);
         updateCue(S.t); updateClock(S.t);
       } catch (e) { console.error(e); }
       stillBusy = false;
@@ -632,8 +676,8 @@
         }
         if (rec) {
           drawFrame(recCtx, recCanvas.width, recCanvas.height, t, false);
-          pctx().drawImage(recCanvas, 0, 0, 540, 960);
-        } else drawFrame(pctx(), 540, 960, t, true);
+          pctx().drawImage(recCanvas, 0, 0, PW, PH);
+        } else drawFrame(pctx(), PW, PH, t, true);
         updateCue(t); updateClock(Math.min(t, S.total));
         if (t >= S.total) { stop(false); S.t = 0; if (S.onEnd) S.onEnd(); renderStill(); return; }
         S.raf = requestAnimationFrame(tick);
@@ -657,7 +701,8 @@
       S.recording = true; setBtns();
       const status = $("drStatus");
       try {
-        const res = S.st.res === "720" ? [720, 1280] : [1080, 1920];
+        const land = isLand();
+        const res = S.st.res === "720" ? (land ? [1280, 720] : [720, 1280]) : (land ? [1920, 1080] : [1080, 1920]);
         recCanvas = document.createElement("canvas"); recCanvas.width = res[0]; recCanvas.height = res[1];
         recCtx = recCanvas.getContext("2d");
         const ac = getAC(); if (ac.state === "suspended") await ac.resume();
@@ -671,7 +716,7 @@
         const stopped = new Promise((r) => { rec.onstop = r; });
         let wl = null; try { wl = await navigator.wakeLock.request("screen"); } catch (_) {}
         status.textContent = "⏳ ভিডিও তৈরি হচ্ছে… এই ট্যাব সামনে খোলা রাখুন (ঘড়ির সময় ধরে রেকর্ড হয়)।";
-        // শুরুতে ভিডিও হারিয়ে যাওয়া ঠিক করতে
+        // শুরুতে ভিডিও হারিয়ে যাওয়া ঠিক করতে
         if (S.bg && S.bg.type === "video" && S.bg.el) {
           try {
             S.bg.el.pause();
@@ -694,7 +739,7 @@
         const blob = new Blob(chunks, { type: mime || "video/webm" });
         const url = URL.createObjectURL(blob), a = document.createElement("a");
         const d = new Date(), pad2 = (n) => String(n).padStart(2, "0");
-        a.href = url; a.download = `Farmer-Kamol-Reel-${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}.${ext}`;
+        a.href = url; a.download = `Farmer-Kamol-Reel-${land ? "16x9" : "9x16"}-${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}.${ext}`;
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
         status.textContent = ext === "mp4" ? "✅ MP4 ভিডিও তৈরি হয়েছে, ডাউনলোড শুরু হয়েছে।" : "✅ WebM ভিডিও তৈরি হয়েছে। এই ব্রাউজারে MP4 সাপোর্ট নেই — Chrome/Edge-এর নতুন সংস্করণে MP4 পাবেন।";
       } catch (e) {
@@ -717,7 +762,10 @@
         el.addEventListener("loadedmetadata", () => {
           S.bg = { type: "video", el, url, dur: el.duration, w: el.videoWidth, h: el.videoHeight, name: file.name };
           S.t = 0;
-          const note = (el.videoWidth / el.videoHeight > 0.7) ? " (ভিডিওটি খাড়া নয়, পর্দা ভরাতে দুই পাশ কাটা পড়বে)" : "";
+          const ratio = el.videoWidth / el.videoHeight;
+          let note = "";
+          if (isLand()) { if (ratio < 1.5) note = " (ভিডিওটি আড়াআড়ি নয়, পর্দা ভরাতে ওপর-নিচ কাটা পড়বে)"; }
+          else if (ratio > 0.7) note = " (ভিডিওটি খাড়া নয়, পর্দা ভরাতে দুই পাশ কাটা পড়বে)";
           setStatus(`✅ ভিডিও লোড: ${el.duration.toFixed(1)} সে., ${el.videoWidth}×${el.videoHeight}${note}`);
           if (el.videoWidth > 2200) setStatus($("drStatus").textContent + " — বড় ফাইল, ধীর লাগলে ১০৮০ প্রস্থের ভিডিও ব্যবহার করুন।");
           recalcMain(); renderStill();
@@ -743,13 +791,13 @@
     /* ---------------- অটো রং ---------------- */
     function autoColor() {
       if (!S.bg || !S.bg.w) { alert("আগে ব্যাকগ্রাউন্ড দিন।"); return; }
-      const c = document.createElement("canvas"); c.width = 108; c.height = 192; const x = c.getContext("2d");
-      drawBg(x.canvas.getContext("2d"), 0); // placeholder to keep API uniform
+      const cw = Math.round(W / 10), ch = Math.round(H / 10);
+      const c = document.createElement("canvas"); c.width = cw; c.height = ch; const x = c.getContext("2d");
       x.setTransform(0.1, 0, 0, 0.1, 0, 0); drawBg(x, Math.min(S.t, S.main)); x.setTransform(1, 0, 0, 1, 0, 0);
       const lay = S.screens.length ? getLayout(0) : { totalH: 300 };
       const top = blockTop(lay, S.screens[0] || { kind: "title" });
-      const y0 = clamp(Math.floor(top / 10), 0, 190), y1 = clamp(Math.ceil((top + lay.totalH) / 10), y0 + 1, 192);
-      const d = x.getImageData(0, y0, 108, y1 - y0).data; let sum = 0, n = 0;
+      const y0 = clamp(Math.floor(top / 10), 0, ch - 2), y1 = clamp(Math.ceil((top + lay.totalH) / 10), y0 + 1, ch);
+      const d = x.getImageData(0, y0, cw, y1 - y0).data; let sum = 0, n = 0;
       for (let i = 0; i < d.length; i += 4) { sum += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255; n++; }
       const L = n ? sum / n : 0.3, st = S.st;
       if (L > 0.6) { st.color = "#16221a"; st.color2 = "#7a3b00"; st.outline = "thin"; st.outlineColor = "#ffffff"; }
@@ -768,6 +816,28 @@
     }
     function loadSt() {
       try { const o = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (o) Object.keys(o).forEach((k) => { if (k in DEF && NO_SAVE.indexOf(k) < 0) S.st[k] = o[k]; }); } catch (_) {}
+      if (S.st.orient !== "h") S.st.orient = "v";
+    }
+  
+    /* ---------------- অনুপাত (৯:১৬ / ১৬:৯) ---------------- */
+    function applyOrient() {
+      const land = isLand();
+      W = land ? 1920 : 1080; H = land ? 1080 : 1920;
+      PW = land ? 960 : 540; PH = land ? 540 : 960;
+      const c = $("drCanvas");
+      if (c) { c.width = PW; c.height = PH; }
+      previewCtx = null;
+      const root = $("drRoot"); if (root) root.classList.toggle("land", land);
+      const bv = $("drOv"), bh = $("drOh");
+      if (bv) bv.classList.toggle("sel", !land);
+      if (bh) bh.classList.toggle("sel", land);
+      S.lay = {};
+    }
+    function setOrient(o) {
+      if (S.recording) return;
+      stop(true);
+      S.st.orient = o === "h" ? "h" : "v";
+      applyOrient(); rebuild(); saveSt(); setBtns();
     }
   
     /* ---------------- ইউআই ---------------- */
@@ -785,7 +855,7 @@
       fx: [["sparkle", "✨ ঝিকমিক তারা"], ["shine", "শাইন (আলোর রেখা)"], ["glow", "নরম আলো (গ্লো)"], ["none", "কিছু না"]],
       ambient: [["none", "নেই"], ["dust", "সোনালি ধুলো"], ["firefly", "জোনাকি"], ["leaves", "ঝরা পাতা"], ["petals", "সরষে ফুলের পাপড়ি"], ["bokeh", "নরম আলোর বৃত্ত"]],
       outro: [["zoomin", "জুম ইন"], ["zoomout", "জুম আউট"], ["pulse", "জুম ইন + হালকা স্পন্দন"], ["pop", "পপ"], ["still", "স্থির"], ["off", "শেষের পর্দা চাই না"]],
-      res: [["1080", "১০৮০×১৯২০ (সেরা মান)"], ["720", "৭২০×১২৮০ (ফোন/ধীর পিসির জন্য)"]],
+      res: [["1080", "পূর্ণ মাপ (১০৮০ — সেরা মান)"], ["720", "ছোট মাপ (৭২০ — ফোন/ধীর পিসির জন্য)"]],
     };
     const FIELDS = {
       g1: [
@@ -826,7 +896,7 @@
       ],
       g8: [
         { k: "res", l: "ভিডিওর সাইজ", t: "select", o: OPT.res },
-        { k: "guides", l: "প্রিভিউতে ফেসবুক বাটনের এলাকা দেখাও", t: "check" },
+        { k: "guides", l: "প্রিভিউতে ফেসবুক বাটনের এলাকা দেখাও (শুধু ৯:১৬)", t: "check" },
       ],
     };
     function fHtml(f) {
@@ -838,47 +908,65 @@
       else if (f.t === "color") inner = `<input type="color" id="${id}" data-k="${f.k}">`;
       else if (f.t === "textarea") inner = `<textarea id="${id}" data-k="${f.k}" rows="${f.rows || 4}" placeholder="${(f.p || "").replace(/"/g, "&quot;")}"></textarea>`;
       else inner = `<input type="text" id="${id}" data-k="${f.k}" placeholder="${f.p || ""}">`;
-      return `<label class="drl"><span>${f.l}</span>${inner}</label>`;
+      const row = f.t === "range" || f.t === "color";
+      return `<label class="drl${row ? " rgl" : ""}"><span>${f.l}</span>${inner}</label>`;
     }
     const group = (title, open, body) => `<details class="drg" ${open ? "open" : ""}><summary>${title}</summary><div class="drb">${body}</div></details>`;
   
     const CSS = `
-    #drRoot{position:fixed;inset:0;z-index:100000;background:#eaf5ee;overflow:auto;font-family:"Hind Siliguri","Noto Sans Bengali",sans-serif;color:#1d3a2a;display:none}
+    #drRoot{position:fixed;inset:0;z-index:100000;background:#eaf5ee;overflow:auto;font-family:"Hind Siliguri","Noto Sans Bengali",sans-serif;color:#1d3a2a;display:none;font-size:13px}
     #drRoot *{box-sizing:border-box}
-    #drRoot .drh{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 16px;background:#176b3a;color:#fff}
-    #drRoot .drh h2{margin:0;font-size:19px}
-    #drRoot .drbtn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;background:#fff;color:#176b3a}
-    #drRoot .drbtn.p{background:#0f766e;color:#fff}.drbtn.o{background:#df5c17;color:#fff}
+    #drRoot .drh{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 14px;background:#176b3a;color:#fff}
+    #drRoot .drh h2{margin:0;font-size:17px}
+    #drRoot .drbtn{border:0;border-radius:9px;padding:7px 12px;font:inherit;font-weight:600;cursor:pointer;background:#fff;color:#176b3a}
+    #drRoot .drbtn.p{background:#0f766e;color:#fff}
+    #drRoot .drbtn.o{background:#df5c17;color:#fff}
+    #drRoot .drbtn.sel{background:#176b3a;color:#fff}
     #drRoot .drbtn:disabled{opacity:.5;cursor:not-allowed}
-    #drRoot .drgrid{display:grid;grid-template-columns:minmax(280px,380px) 1fr minmax(220px,260px);gap:14px;padding:14px 16px;align-items:start}
-    #drRoot .drctl{display:flex;flex-direction:column;gap:10px}
-    #drRoot .dr-actions{position:sticky;top:70px;display:flex;flex-direction:column;gap:10px}
-    #drRoot .dr-actions .drbtn{width:100%;justify-content:center;padding:13px 12px;font-size:15px}
-    #drRoot .drg{background:#fff;border:1px solid #cfe3d5;border-radius:12px}
-    #drRoot .drg>summary{cursor:pointer;padding:11px 14px;font-weight:700;color:#176b3a}
-    #drRoot .drb{padding:4px 14px 14px;display:flex;flex-direction:column;gap:10px}
-    #drRoot .drl{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600}
-    #drRoot .drl>span:first-child{font-weight:600}
-    #drRoot .drc{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
-    #drRoot input[type=text],#drRoot textarea,#drRoot select{width:100%;padding:8px 10px;border:1px solid #b7d4c0;border-radius:8px;font:inherit;background:#fbfffc}
+    #drRoot .drgrid{display:grid;grid-template-columns:minmax(250px,320px) minmax(0,1fr) 190px;gap:12px;padding:12px 14px;align-items:start}
+    #drRoot .drctl{display:flex;flex-direction:column;gap:7px}
+    #drRoot .dr-actions{position:sticky;top:60px;display:flex;flex-direction:column;gap:8px}
+    #drRoot .dr-actions .drbtn{width:100%;padding:11px 10px;font-size:14px}
+    #drRoot .drg{background:#fff;border:1px solid #cfe3d5;border-radius:10px}
+    #drRoot .drg>summary{cursor:pointer;padding:8px 12px;font-weight:700;color:#176b3a;font-size:13.5px}
+    #drRoot .drb{padding:2px 12px 12px;display:flex;flex-direction:column;gap:8px}
+    #drRoot .drl{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:600}
+    #drRoot .drl.rgl{flex-direction:row;align-items:center;justify-content:space-between;gap:8px}
+    #drRoot .drl.rgl>span:first-child{flex:1;min-width:0}
+    #drRoot .drc{display:flex;gap:6px;align-items:center;font-size:12.5px;font-weight:600}
+    #drRoot input[type=text],#drRoot textarea,#drRoot select{width:100%;padding:5px 8px;border:1px solid #b7d4c0;border-radius:7px;font:inherit;font-size:12.5px;background:#fbfffc}
     #drRoot textarea{resize:vertical}
-    #drRoot input[type=color]{width:60px;height:34px;padding:0;border:1px solid #b7d4c0;border-radius:8px;background:#fff}
-    #drRoot .rg{display:flex;gap:8px;align-items:center}.rg input{flex:1}.rg output{min-width:42px;text-align:right;font-weight:600;color:#176b3a}
-    #drRoot .dd{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
-    #drRoot .r{display:grid;grid-template-columns:24px 1fr 64px 64px;gap:6px;align-items:center;padding:5px 6px;border-radius:8px;font-size:13px}
+    #drRoot input[type=color]{width:44px;height:26px;padding:0;border:1px solid #b7d4c0;border-radius:7px;background:#fff}
+    #drRoot .rg{display:flex;gap:6px;align-items:center;flex:0 0 140px}
+    #drRoot .rg input{flex:1;min-width:0;width:100px}
+    #drRoot .rg output{min-width:34px;text-align:right;font-weight:600;color:#176b3a;font-size:12px}
+    #drRoot .dd{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center}
+    #drRoot .r{display:grid;grid-template-columns:20px 1fr 54px 54px;gap:5px;align-items:center;padding:4px 5px;border-radius:8px;font-size:12px}
     #drRoot .r.on{background:#d9f3e2;outline:2px solid #176b3a}
-    #drRoot .r input{width:100%;padding:5px;border:1px solid #b7d4c0;border-radius:6px;font:inherit}
+    #drRoot .r input{width:100%;padding:4px;border:1px solid #b7d4c0;border-radius:6px;font:inherit}
     #drRoot .r span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #drRoot .drn{font-size:12.5px;color:#4b6656;font-weight:400}
-    #drRoot .drpv{position:sticky;top:64px;display:flex;flex-direction:column;align-items:center;gap:8px}
-    #drRoot #drCanvas{height:min(76vh,860px);aspect-ratio:9/16;border-radius:16px;background:#000;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+    #drRoot .drn{font-size:12px;color:#4b6656;font-weight:400}
+    #drRoot .drpv{position:sticky;top:60px;display:flex;flex-direction:column;align-items:center;gap:7px}
+    #drRoot .drori{display:flex;gap:6px}
+    #drRoot .drori .drbtn{padding:5px 16px;border:1px solid #176b3a}
+    #drRoot #drCanvas{display:block;height:min(74vh,840px);aspect-ratio:9/16;border-radius:14px;background:#000;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+    #drRoot.land #drCanvas{height:auto;width:min(100%,820px);aspect-ratio:16/9}
     #drRoot .drrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
     #drRoot #drSeek{width:min(100%,460px)}
-    #drRoot #drCue{width:min(100%,460px);min-height:58px;background:#fff;border:1px solid #cfe3d5;border-radius:10px;padding:8px 12px;font-size:17px}
-    #drRoot #drStatus{width:min(100%,460px);font-size:13.5px;text-align:center;min-height:20px}
+    #drRoot #drCue{width:min(100%,460px);min-height:52px;background:#fff;border:1px solid #cfe3d5;border-radius:10px;padding:7px 11px;font-size:16px}
+    #drRoot #drStatus{width:min(100%,460px);font-size:12.5px;text-align:center;min-height:18px}
+    #drRoot.land #drSeek,#drRoot.land #drCue,#drRoot.land #drStatus{width:min(100%,820px)}
     #drCount{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:150px;font-weight:800;color:#fff;text-shadow:0 4px 30px #000;pointer-events:none}
     #drRoot .drcv{position:relative}
-    @media (max-width:980px){#drRoot .drgrid{grid-template-columns:1fr}#drRoot .drpv{position:static;order:-1}#drRoot .dr-actions{position:static;order:2}#drRoot #drCanvas{height:min(62vh,640px)}}
+    @media (max-width:980px){
+      #drRoot .drgrid{grid-template-columns:1fr}
+      #drRoot .drpv{position:static;order:1}
+      #drRoot .dr-actions{position:static;order:2;flex-direction:row;flex-wrap:wrap}
+      #drRoot .dr-actions .drbtn{width:auto;flex:1 1 140px}
+      #drRoot .drctl{order:3}
+      #drRoot #drCanvas{height:min(58vh,600px)}
+      #drRoot.land #drCanvas{height:auto;width:100%}
+    }
     `;
   
     function buildUI() {
@@ -891,22 +979,14 @@
       <div class="drh"><h2>🎞️ Farmer Kamol Daily Reel</h2>
         <div style="display:flex;gap:8px"><button class="drbtn" id="drReset">↺ স্টাইল ডিফল্টে</button><button class="drbtn" id="drClose">✕ বন্ধ করুন</button></div></div>
       <div class="drgrid">
-        <div class="drpv">
-          <div class="drcv"><canvas id="drCanvas" width="540" height="960"></canvas><div id="drCount"></div></div>
-          <input type="range" id="drSeek" min="0" max="1500" value="0">
-          <div class="drrow"><span id="drTime">0.0 / 0.0 সে.</span></div>
-          <div id="drCue"></div>
-          <div id="drInfo" class="drn"></div>
-          <div id="drStatus"></div>
-        </div>
         <div class="drctl">
-          ${group("১. ব্যাকগ্রাউন্ড ও শব্দ", true, `
+          ${group("১. ব্যাকগ্রাউন্ড ও শব্দ", false, `
             <label class="drl"><span>ব্যাকগ্রাউন্ড ভিডিও (বা ছবি)</span><input type="file" id="drBg" accept="video/*,image/*"></label>
             <label class="drl"><span>ভয়েস-ওভার অডিও</span><input type="file" id="drVoice" accept="audio/*"></label>
             <label class="drl"><span>ব্যাকগ্রাউন্ড মিউজিক (ঐচ্ছিক)</span><input type="file" id="drMusic" accept="audio/*"></label>
             ${FIELDS.g1.map(fHtml).join("")}`)}
-          ${group("২. শিরোনাম ও ক্রেডিট", true, FIELDS.g2.map(fHtml).join(""))}
-          ${group("৩. বার ও তারিখ", true, `
+          ${group("২. শিরোনাম ও ক্রেডিট", false, FIELDS.g2.map(fHtml).join(""))}
+          ${group("৩. বার ও তারিখ", false, `
             ${fHtml({ k: "dateMode", l: "দেখানোর ধরন", t: "select", o: OPT.dateMode })}
             ${fHtml({ k: "dateOrder", l: "কখন আসবে", t: "select", o: OPT.dateOrder })}
             ${fHtml({ k: "hijriOffset", l: "হিজরি তারিখ সংশোধন", t: "select", o: OPT.hijri })}
@@ -925,6 +1005,15 @@
           ${group("৬. অ্যানিমেশন ও ইফেক্ট", false, FIELDS.g6.map(fHtml).join(""))}
           ${group("৭. শেষের লোগো পর্দা", false, `${FIELDS.g7.map(fHtml).join("")}<div class="drn">লোগো, নাম, স্লোগান ও লিংকের লেখা Daily Post-এর "ব্র্যান্ডিং" ঘর থেকে আসে।</div>`)}
           ${group("৮. আউটপুট", false, FIELDS.g8.map(fHtml).join(""))}
+        </div>
+        <div class="drpv">
+          <div class="drori"><button class="drbtn sel" id="drOv">৯:১৬</button><button class="drbtn" id="drOh">১৬:৯</button></div>
+          <div class="drcv"><canvas id="drCanvas" width="540" height="960"></canvas><div id="drCount"></div></div>
+          <input type="range" id="drSeek" min="0" max="1500" value="0">
+          <div class="drrow"><span id="drTime">0.0 / 0.0 সে.</span></div>
+          <div id="drCue"></div>
+          <div id="drInfo" class="drn"></div>
+          <div id="drStatus"></div>
         </div>
         <div class="dr-actions">
           <button class="drbtn p" id="drPlay">▶ প্রিভিউ</button>
@@ -972,6 +1061,8 @@
       q("drPlay").textContent = S.playing && S.mode === "preview" ? "⏸ বিরতি" : "▶ প্রিভিউ";
       q("drPlay").disabled = rec; q("drCue2").disabled = rec; q("drMake").disabled = rec; q("drStop").disabled = false;
       q("drStop").textContent = rec ? "⏹ বাতিল" : "⏹ থামাও";
+      if (q("drOv")) q("drOv").disabled = rec;
+      if (q("drOh")) q("drOh").disabled = rec;
     }
   
     function bindUI(root) {
@@ -993,10 +1084,12 @@
       $("drVoice").addEventListener("change", (e) => loadAudio(e.target.files[0], "voice"));
       $("drMusic").addEventListener("change", (e) => loadAudio(e.target.files[0], "music"));
       $("drClose").onclick = closeReel;
-      $("drReset").onclick = () => { const keep = { titleText: S.st.titleText, hijriOffset: S.st.hijriOffset }; S.st = Object.assign({}, DEF, keep); syncUI(); S.lay = {}; rebuild(); saveSt(); ensureFonts(); };
+      $("drReset").onclick = () => { const keep = { titleText: S.st.titleText, hijriOffset: S.st.hijriOffset, orient: S.st.orient }; S.st = Object.assign({}, DEF, keep); syncUI(); S.lay = {}; rebuild(); saveSt(); ensureFonts(); };
       $("drDates").onclick = () => { refreshDates(true); rebuild(); };
       $("drAuto").onclick = () => { S.tmManual = false; rebuild(); };
       $("drAutoCol").onclick = autoColor;
+      $("drOv").onclick = () => setOrient("v");
+      $("drOh").onclick = () => setOrient("h");
       $("drPlay").onclick = () => {
         if (S.recording) return;
         if (S.playing && S.mode === "preview") { stop(false); return; }
@@ -1015,7 +1108,7 @@
     /* ---------------- খোলা/বন্ধ ---------------- */
     async function openReel() {
       if (!S.built) {
-        loadSt(); buildUI();
+        loadSt(); buildUI(); applyOrient();
         S.logo = new Image(); S.logo.crossOrigin = "anonymous"; S.logo.src = "/uploads/logo.png";
         S.logo.onload = () => renderStill();
       }
@@ -1030,5 +1123,5 @@
   
     window.openDailyReel = openReel;
     window.closeDailyReel = closeReel;
-    if (window.__DR_TEST__) window.__DR_TEST__ = { S, DEF, drawFrame, buildScreens, autoTiming, getLayout, rebuild, buildUI, recalcMain, drawOutro, readBrand };
+    if (window.__DR_TEST__) window.__DR_TEST__ = { S, DEF, drawFrame, buildScreens, autoTiming, getLayout, rebuild, buildUI, recalcMain, drawOutro, readBrand, bnify, bnCalendar, applyOrient, setOrient };
   })();
