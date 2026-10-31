@@ -29,7 +29,8 @@
       orient: "v",
       titleText: "", credit: "",
       dateMode: "stack", dateOrder: "after", hijriOffset: "0",
-      sw: true, sb: true, se: true, sh: true, sd: true,
+      sg: true, sw: true, sb: true, se: true, sh: true, sd: true,
+      greeting: "শুভ সকাল",
       extra1: "", extra2: "", extra3: "",
       bgVol: 1, loop: true, imgDur: 20, voiceVol: 1, voiceOff: 0, musicVol: 0.3,
       gap: 0.4, startDelay: 0.6,
@@ -45,7 +46,7 @@
     /* ---------------- স্টেট ---------------- */
     const S = {
       st: Object.assign({}, DEF),
-      dv: { weekday: "", bn: "", en: "", hijri: "", doy: "", extra1: "", extra2: "", extra3: "" },
+      dv: { greeting: "শুভ সকাল", weekday: "", bn: "", en: "", hijri: "", doy: "", extra1: "", extra2: "", extra3: "" },
       dvManual: {},
       bg: null, voice: null, music: null,
       screens: [], tm: [], tmManual: false, lay: {},
@@ -127,16 +128,33 @@
       return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
     }
     // বাংলাদেশের সংশোধিত বাংলা পঞ্জিকা (১৪ এপ্রিল = ১ বৈশাখ)
+    // বাংলা দিনের প্রত্যয় (১লা, ২রা, ৩রা, ৪ঠা, ৫ই…১৮ই, ১৯শে…৩১শে)
+    function getDayOrdinal(day) {
+      const dayBn = bnDigits(day);
+      let suffix = "ই";
+      if (day === 1) suffix = "লা";
+      else if (day === 2 || day === 3) suffix = "রা";
+      else if (day === 4) suffix = "ঠা";
+      else if (day >= 5 && day <= 18) suffix = "ই";
+      else if (day >= 19 && day <= 31) suffix = "শে";
+      return dayBn + suffix;
+    }
+
+    // ২০১৯ সালের সরকারি সংশোধিত বাংলা পঞ্জিকা (১৪ এপ্রিল = ১ বৈশাখ)
     function bnCalendar() {
       const { y, m, d } = dhakaYMD();
       const cur = Date.UTC(y, m - 1, d);
       const startY = (m > 4 || (m === 4 && d >= 14)) ? y : y - 1;
       const leap = (yy) => (yy % 4 === 0 && yy % 100 !== 0) || yy % 400 === 0;
-      const len = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap(startY + 1) ? 31 : 30, 30];
+      // বৈশাখ–আশ্বিন ৩১, কার্তিক–মাঘ ৩০, ফাল্গুন ২৯/৩০, চৈত্র ৩০
+      const falgunLen = leap(startY + 1) ? 30 : 29;
+      const len = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, falgunLen, 30];
       let diff = Math.round((cur - Date.UTC(startY, 3, 14)) / 86400000);
       let mi = 0;
       while (mi < 11 && diff >= len[mi]) { diff -= len[mi]; mi++; }
-      return bnDigits(diff + 1) + " " + BN_MONTHS[mi] + " " + bnDigits(startY - 593);
+      const day = diff + 1;
+      const ritu = ["গ্রীষ্ম", "বর্ষা", "শরৎ", "হেমন্ত", "শীত", "বসন্ত"][Math.floor(mi / 2)];
+      return getDayOrdinal(day) + " " + BN_MONTHS[mi] + ", " + bnDigits(startY - 593) + " বঙ্গাব্দ-" + ritu + "কাল";
     }
     function refreshDates(force) {
       try { if (window.dpRefreshDate) window.dpRefreshDate(); } catch (_) {}
@@ -155,15 +173,25 @@
   
       let en = val("dpEnDate");
       if (!en) {
-        try { en = new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(now); } catch (_) { en = ""; }
+        try {
+          const { y, m, d } = dhakaYMD();
+          const monthBn = new Intl.DateTimeFormat("bn-BD", { timeZone: "Asia/Dhaka", month: "long" }).format(now);
+          en = getDayOrdinal(d) + " " + monthBn + ", " + bnDigits(y) + " খ্রিস্টাব্দ";
+        } catch (_) { en = ""; }
       }
-  
+
       let hijri = val("dpHijriDate");
       if (!hijri) {
         try {
           const offset = Number(S.st.hijriOffset || 0);
           const d = new Date(now.getTime() + offset * 86400000);
-          hijri = new Intl.DateTimeFormat("bn-BD-u-ca-islamic", { timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric" }).format(d);
+          const parts = new Intl.DateTimeFormat("bn-BD-u-ca-islamic", {
+            timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric"
+          }).formatToParts(d);
+          const dayNum = Number((parts.find(p => p.type === "day") || {}).value || 0);
+          const monthName = (parts.find(p => p.type === "month") || {}).value || "";
+          const yearNum = (parts.find(p => p.type === "year") || {}).value || "";
+          hijri = getDayOrdinal(dayNum) + " " + monthName + ", " + bnDigits(yearNum) + " হিজরি";
         } catch (_) { hijri = ""; }
       }
   
@@ -186,12 +214,17 @@
         if (lines.length) out.push({ kind: "title", lines });
       });
       const item = (k, flag, s) => (flag && S.dv[k] ? { t: S.dv[k], s, c: "2" } : null);
+      const gr = item("greeting", st.sg, 1.05);
       const wd = item("weekday", st.sw, 1.12);
       const rest = [item("bn", st.sb, 0.8), item("en", st.se, 0.8), item("hijri", st.sh, 0.8), item("doy", st.sd, 0.8)].filter(Boolean);
-      const extras = ["extra1", "extra2", "extra3"].map((k) => S.dv[k] ? { t: S.dv[k], s: 0.75, c: "2" } : null).filter(Boolean);
+      // অতিরিক্ত লাইন — extra1, extra2, extra3 + যেকোনো extraN
+      const extras = Object.keys(S.dv)
+        .filter((k) => k.startsWith("extra") && S.dv[k])
+        .sort((a, b) => Number(a.replace("extra", "")) - Number(b.replace("extra", "")))
+        .map((k) => ({ t: S.dv[k], s: 0.75, c: "2" }));
       let dsc = [];
       if (st.dateMode === "stack") {
-        const all = [wd].concat(rest).concat(extras).filter(Boolean);
+        const all = [gr, wd].concat(rest).concat(extras).filter(Boolean);
         if (all.length) dsc.push({ kind: "date", lines: all });
       } else if (st.dateMode === "seq") {
         if (wd) dsc.push({ kind: "date", lines: [wd] });
@@ -1151,8 +1184,14 @@
       if (S.built) return;
       const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st);
       const root = document.createElement("div"); root.id = "drRoot";
-      const dateRows = [["weekday", "sw", "বার"], ["bn", "sb", "বাংলা তারিখ"], ["en", "se", "ইংরেজি তারিখ"], ["hijri", "sh", "হিজরি তারিখ"], ["doy", "sd", "বছরের কততম দিন"]]
-        .map((r) => `<div class="dd"><label class="drc"><input type="checkbox" id="dr_${r[1]}" data-k="${r[1]}"> ${r[2]}</label><input type="text" id="drv_${r[0]}" data-dk="${r[0]}"></div>`).join("");
+      const dateRows = [
+        ["greeting", "sg", "শুভ সকাল / শুভেচ্ছা"],
+        ["weekday", "sw", "বার"],
+        ["bn", "sb", "বাংলা তারিখ"],
+        ["en", "se", "ইংরেজি তারিখ"],
+        ["hijri", "sh", "হিজরি তারিখ"],
+        ["doy", "sd", "বছরের কততম দিন"]
+      ].map((r) => `<div class="dd"><label class="drc"><input type="checkbox" id="dr_${r[1]}" data-k="${r[1]}"> ${r[2]}</label><input type="text" id="drv_${r[0]}" data-dk="${r[0]}"></div>`).join("");
       root.innerHTML = `
       <div class="drh"><h2>🎞️ Farmer Kamol Daily Reel</h2>
         <div style="display:flex;gap:8px"><button class="drbtn" id="drReset">↺ স্টাইল ডিফল্টে</button><button class="drbtn" id="drClose">✕ বন্ধ করুন</button></div></div>
@@ -1169,9 +1208,12 @@
             ${fHtml({ k: "dateOrder", l: "কখন আসবে", t: "select", o: OPT.dateOrder })}
             ${fHtml({ k: "hijriOffset", l: "হিজরি তারিখ সংশোধন", t: "select", o: OPT.hijri })}
             ${dateRows}
-            <label class="drl"><span>অতিরিক্ত লাইন-১</span><input type="text" id="drv_extra1" data-dk="extra1" placeholder="অতিরিক্ত লাইন ১"></label>
-            <label class="drl"><span>অতিরিক্ত লাইন-২</span><input type="text" id="drv_extra2" data-dk="extra2" placeholder="অতিরিক্ত লাইন ২"></label>
-            <label class="drl"><span>অতিরিক্ত লাইন-৩</span><input type="text" id="drv_extra3" data-dk="extra3" placeholder="অতিরিক্ত লাইন ৩"></label>
+            <div id="drExtraWrap">
+              <label class="drl"><span>অতিরিক্ত লাইন-১</span><input type="text" id="drv_extra1" data-dk="extra1" placeholder="অতিরিক্ত লাইন ১"></label>
+              <label class="drl"><span>অতিরিক্ত লাইন-২</span><input type="text" id="drv_extra2" data-dk="extra2" placeholder="অতিরিক্ত লাইন ২"></label>
+              <label class="drl"><span>অতিরিক্ত লাইন-৩</span><input type="text" id="drv_extra3" data-dk="extra3" placeholder="অতিরিক্ত লাইন ৩"></label>
+            </div>
+            <button class="drbtn" id="drAddExtra" style="background:#e8f0fe">＋ অতিরিক্ত লাইন যোগ করুন</button>
             <button class="drbtn" id="drDates" style="background:#e1f3e6">↻ তারিখ আবার অটো বসাও</button>
             <div class="drn">ঘরে টিক দিলে সেই লাইন দেখাবে। লেখা বদলাতে চাইলে সরাসরি ঘরে লিখুন।</div>`)}
           ${group("৪. সময় (লেখা কখন আসবে)", false, `
@@ -1264,6 +1306,30 @@
       $("drClose").onclick = closeReel;
       $("drReset").onclick = () => { const keep = { titleText: S.st.titleText, hijriOffset: S.st.hijriOffset, orient: S.st.orient }; S.st = Object.assign({}, DEF, keep); syncUI(); S.lay = {}; rebuild(); saveSt(); ensureFonts(); };
       $("drDates").onclick = () => { refreshDates(true); rebuild(); };
+      // অতিরিক্ত লাইন + বাটন
+      let extraCount = 3;
+      const addExtraBtn = $("drAddExtra");
+      if (addExtraBtn) {
+        addExtraBtn.addEventListener("click", () => {
+          extraCount += 1;
+          const key = "extra" + extraCount;
+          S.dv[key] = S.dv[key] || "";
+          const wrap = $("drExtraWrap");
+          if (!wrap) return;
+          const lab = document.createElement("label");
+          lab.className = "drl";
+          lab.innerHTML = `<span>অতিরিক্ত লাইন-${extraCount}</span><input type="text" id="drv_${key}" data-dk="${key}" placeholder="অতিরিক্ত লাইন ${extraCount}">`;
+          wrap.appendChild(lab);
+          const inp = lab.querySelector("input");
+          if (inp) {
+            inp.addEventListener("input", () => {
+              S.dv[key] = inp.value;
+              S.dvManual[key] = true;
+              rebuild();
+            });
+          }
+        });
+      }
       $("drAuto").onclick = () => { S.tmManual = false; rebuild(); };
       $("drAutoCol").onclick = autoColor;
       $("drOv").onclick = () => setOrient("v");
