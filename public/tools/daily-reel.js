@@ -31,7 +31,7 @@
       dateMode: "stack", dateOrder: "after", hijriOffset: "0",
       sw: true, sb: true, se: true, sh: true, sd: true,
       extra1: "", extra2: "", extra3: "",
-      bgVol: 0, loop: true, imgDur: 20, voiceVol: 1, voiceOff: 0, musicVol: 0.3,
+      bgVol: 1, loop: true, imgDur: 20, voiceVol: 1, voiceOff: 0, musicVol: 0.3,
       gap: 0.4, startDelay: 0.6,
       font: "Hind Siliguri", weight: "700", size: 72,
       color: "#ffffff", color2: "#ffe28a", creditColor: "#d8d8d8",
@@ -799,6 +799,7 @@
     // ভয়েস + মিউজিক (+ চাইলে ভিডিওর নিজের শব্দ) অফলাইনে মিশিয়ে একটি AudioBuffer বানায়
     async function mixAudio(SR, total, say) {
       const st = S.st;
+      S.bgAudioErr = "";
       const oc = new OfflineAudioContext(2, Math.ceil(total * SR), SR);
       const master = oc.createGain(); master.connect(oc.destination);
       if (S.voice) {
@@ -816,12 +817,12 @@
       if (S.bg && S.bg.type === "video" && Number(st.bgVol) > 0) {
         try {
           say("⏳ ভিডিওর নিজের শব্দ পড়া হচ্ছে…");
-          const raw = await (await fetch(S.bg.url)).arrayBuffer();
+          const raw = S.bg.file ? await S.bg.file.arrayBuffer() : await (await fetch(S.bg.url)).arrayBuffer();
           const buf = await oc.decodeAudioData(raw);
           const s = oc.createBufferSource(); s.buffer = buf; s.loop = !!st.loop;
           const g = oc.createGain(); g.gain.value = Number(st.bgVol); s.connect(g); g.connect(master);
           s.start(0); s.stop(Math.min(total, S.main));
-        } catch (e) { console.warn("bg audio skipped", e); }
+        } catch (e) { console.warn("bg audio skipped", e); S.bgAudioErr = (e && e.message) ? e.message : String(e); }
       }
       return oc.startRendering();
     }
@@ -914,7 +915,7 @@
         const d = new Date(), pad2 = (n) => String(n).padStart(2, "0");
         a.href = url; a.download = `Farmer-Kamol-Reel-${land ? "16x9" : "9x16"}-${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}.mp4`;
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-        status.textContent = `✅ MP4 তৈরি হয়েছে (${VW}×${VH}, H.264 + AAC) — সময় লেগেছে ${fmtDur((performance.now() - t0) / 1000)}। ডাউনলোড শুরু হয়েছে।`;
+        status.textContent = `✅ MP4 তৈরি হয়েছে (${VW}×${VH}, H.264 + AAC) — সময় লেগেছে ${fmtDur((performance.now() - t0) / 1000)}। ডাউনলোড শুরু হয়েছে।${S.bgAudioErr ? " ⚠️ ভিডিওর নিজের শব্দ যুক্ত হয়নি: " + S.bgAudioErr : ""}`;
       } catch (e) {
         if (e && e.message === "CANCEL") status.textContent = "⏹ ভিডিও তৈরি বাতিল করা হয়েছে।";
         else { console.error(e); status.textContent = "❌ ভিডিও তৈরি ব্যর্থ: " + (e && e.message ? e.message : e); }
@@ -937,7 +938,7 @@
         const el = document.createElement("video");
         el.playsInline = true; el.preload = "auto"; el.muted = false; el.src = url;
         el.addEventListener("loadedmetadata", () => {
-          S.bg = { type: "video", el, url, dur: el.duration, w: el.videoWidth, h: el.videoHeight, name: file.name };
+          S.bg = { type: "video", el, url, file, dur: el.duration, w: el.videoWidth, h: el.videoHeight, name: file.name };
           S.t = 0;
           const ratio = el.videoWidth / el.videoHeight;
           let note = "";
