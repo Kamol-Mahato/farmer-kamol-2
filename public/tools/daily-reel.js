@@ -40,6 +40,7 @@
       pos: "bottom", posDate: "same", offY: 0,
       anim: "up", fx: "sparkle", fxColor: "#fff3b0", ambient: "none", ambientAmt: 0.5,
       outro: "zoomin", outroSec: 4, res: "1080", guides: true,
+      logoCorner: true,
     };
     const NO_SAVE = ["titleText", "hijriOffset"];
   
@@ -572,6 +573,30 @@
     }
   
     /* ---------------- একটি ফ্রেম আঁকা ---------------- */
+    // পুরো ভিডিও জুড়ে উপরের ডান কোণে ছোট লোগো
+    function drawCornerLogo(ctx) {
+      if (!S.st.logoCorner) return;
+      if (!S.logo || !S.logo.complete || !S.logo.naturalWidth) return;
+      const land = isLand();
+      // ৯:১৬ ও ১৬:৯ দুটোতেই উপরের ডান কোণ
+      const size = land ? 90 : 110;          // লোগোর আকার
+      const pad = land ? 36 : 48;            // কিনারা থেকে ফাঁকা
+      const x = W - pad - size;
+      const y = pad;
+      ctx.save();
+      ctx.globalAlpha = 0.92;
+      // হালকা সাদা গোল ব্যাকগ্রাউন্ড (পড়া যায় যেন)
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2 + 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(S.logo, x, y, size, size);
+      ctx.restore();
+    }
+
     function drawFrame(ctx, w, h, t, guides) {
       const K = w / W;
       ctx.setTransform(K, 0, 0, K, 0, 0);
@@ -580,6 +605,8 @@
       drawBg(ctx, bt);
       if (t <= S.main) drawAmbient(ctx, t);
       if (t <= S.main + 0.01) for (let i = 0; i < S.screens.length; i++) drawScreen(ctx, i, t, K);
+      // মেইন ভিডিওতে কোণার লোগো (আউটরোতে আলাদা বড় লোগো আছে)
+      if (t <= S.main) drawCornerLogo(ctx);
       if (S.outroDur > 0 && t > S.main) drawOutro(ctx, t - S.main, K);
       // ফেসবুক বাটনের এলাকা শুধু ৯:১৬ রিলের জন্য
       if (guides && S.st.guides && !isLand()) {
@@ -1223,7 +1250,12 @@
             <div class="drn">প্রতিটি পর্দার শুরুর সেকেন্ড ও কতক্ষণ থাকবে — হাতে বদলানো যায়। অটো সময় লেখার পরিমাণ দেখে বসে।</div>`)}
           ${group("৫. লেখার স্টাইল (রং, ফন্ট, জায়গা)", false, `${FIELDS.g5.map(fHtml).join("")}<button class="drbtn" id="drAutoCol" style="background:#e1f3e6">🎨 ভিডিও দেখে অটো রং</button>`)}
           ${group("৬. অ্যানিমেশন ও ইফেক্ট", false, FIELDS.g6.map(fHtml).join(""))}
-          ${group("৭. শেষের লোগো পর্দা", false, `${FIELDS.g7.map(fHtml).join("")}<div class="drn">লোগো, নাম, স্লোগান ও লিংকের লেখা Daily Post-এর "ব্র্যান্ডিং" ঘর থেকে আসে।</div>`)}
+          ${group("৭. শেষের লোগো পর্দা", false, `
+            <label class="drc" style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="dr_logoCorner" data-k="logoCorner"> লোগো দেখাও পুরো ভিডিও (উপরের ডান কোণে)
+            </label>
+            ${FIELDS.g7.map(fHtml).join("")}
+            <div class="drn">লোগো, নাম, স্লোগান ও লিংকের লেখা Daily Post-এর "ব্র্যান্ডিং" ঘর থেকে আসে। আনচেক থাকলে লোগো শুধু শেষের পর্দায় থাকবে।</div>`)}
           ${group("৮. আউটপুট", false, FIELDS.g8.map(fHtml).join(""))}
         </div>
         <div class="drpv">
