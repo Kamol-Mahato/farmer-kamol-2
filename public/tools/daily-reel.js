@@ -10,6 +10,7 @@
     // W/H = ভিডিওর আসল মাপ, PW/PH = প্রিভিউ ক্যানভাসের মাপ (অনুপাত বদলালে এগুলো বদলায়)
     let W = 1080, H = 1920, PW = 540, PH = 960;
     const FPS = 30;
+    const BASE = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, "") : "/tools/";
     const LS_KEY = "fk_daily_reel_v1";
     const $ = (id) => document.getElementById(id);
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -286,10 +287,18 @@
         ctx.fillText("ব্যাকগ্রাউন্ড ভিডিও বা ছবি দিন", W / 2, H / 2);
         return;
       }
-      if (b.type === "video" && b.el.readyState < 2) return;
+      if (b.type === "video" && b.el.readyState < 2) {
+        if (S.hold && S.hold.width === Math.round(W / 2)) ctx.drawImage(S.hold, 0, 0, W, H);
+        return;
+      }
       const z = b.type === "image" ? 1 + 0.08 * clamp(t / S.main, 0, 1) : 1;
       const sc = Math.max(W / b.w, H / b.h) * z;
       ctx.drawImage(b.el, (W - b.w * sc) / 2, (H - b.h * sc) / 2, b.w * sc, b.h * sc);
+      if (b.type === "video" && S.mode === "record" && S.playing) {
+        if (!S.hold || S.hold.width !== Math.round(W / 2)) { S.hold = document.createElement("canvas"); S.hold.width = Math.round(W / 2); S.hold.height = Math.round(H / 2); }
+        const hx = S.hold.getContext("2d"); hx.setTransform(0.5, 0, 0, 0.5, 0, 0);
+        hx.drawImage(b.el, (W - b.w * sc) / 2, (H - b.h * sc) / 2, b.w * sc, b.h * sc);
+      }
     }
   
     /* ---------------- আঁকা: চারপাশের ইফেক্ট (ambient) ---------------- */
@@ -671,7 +680,7 @@
           if (t >= b.dur && !S.st.loop) { if (!b.el.paused) b.el.pause(); }
           else if (t - lastSync > 0.7) {
             lastSync = t; const exp = S.st.loop ? t % b.dur : t;
-            if (Math.abs(b.el.currentTime - exp) > 0.3 && b.el.readyState > 1) { try { b.el.currentTime = exp; } catch (_) {} }
+            if (Math.abs(b.el.currentTime - exp) > (rec ? 1.2 : 0.4) && b.el.readyState > 1) { try { b.el.currentTime = exp; } catch (_) {} }
           }
         }
         if (rec) {
@@ -749,6 +758,174 @@
       S.recDest = null; S.recording = false; setBtns(); renderStill();
     }
   
+    /* ---------------- নিখুঁত MP4 (ফ্রেম-বাই-ফ্রেম রেন্ডার — ধীর, কিন্তু ঝাঁকুনি ছাড়া) ---------------- */
+    function loadScriptOnce(src) {
+      return new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = src; s.onload = () => res(); s.onerror = () => rej(new Error("স্ক্রিপ্ট লোড হয়নি: " + src));
+        document.head.appendChild(s);
+      });
+    }
+    async function ensureMuxer() {
+      if (window.Mp4Muxer) return true;
+      const urls = [BASE + "vendor/mp4-muxer.js", "https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.js"];
+      for (const u of urls) { try { await loadScriptOnce(u); if (window.Mp4Muxer) return true; } catch (_) {} }
+      return false;
+    }
+    function hqPossible() {
+      return typeof VideoEncoder === "function" && typeof AudioEncoder === "function" && typeof VideoFrame === "function" && typeof AudioData === "function" && typeof OfflineAudioContext === "function";
+    }
+    const yieldNow = () => new Promise((r) => { const mc = new MessageChannel(); mc.port1.onmessage = () => { mc.port1.close(); r(); }; mc.port2.postMessage(0); });
+    const fmtDur = (sec) => { const n = Math.max(0, Math.round(sec)), m = Math.floor(n / 60), s = n % 60; return m ? `${bnDigits(m)} মি. ${bnDigits(s)} সে.` : `${bnDigits(s)} সে.`; };
+
+    function seekExact(el, target) {
+      return new Promise((resolve) => {
+        if (Math.abs(el.currentTime - target) < 0.0005 && el.readyState >= 2) return resolve();
+        let done = false, to = 0;
+        const fin = () => { if (done) return; done = true; clearTimeout(to); el.removeEventListener("seeked", fin); resolve(); };
+        to = setTimeout(fin, 3000);
+        el.addEventListener("seeked", fin);
+        try { el.currentTime = target; } catch (_) { fin(); }
+      });
+    }
+    async function pickVideoConfig(w, h, bitrate) {
+      const codecs = ["avc1.640028", "avc1.64002A", "avc1.4D0028", "avc1.42E028", "avc1.640033"];
+      for (const codec of codecs) {
+        const cfg = { codec, width: w, height: h, bitrate, framerate: FPS, latencyMode: "quality", avc: { format: "avc" } };
+        try { const r = await VideoEncoder.isConfigSupported(cfg); if (r && r.supported) return cfg; } catch (_) {}
+      }
+      return null;
+    }
+    // ভয়েস + মিউজিক (+ চাইলে ভিডিওর নিজের শব্দ) অফলাইনে মিশিয়ে একটি AudioBuffer বানায়
+    async function mixAudio(SR, total, say) {
+      const st = S.st;
+      const oc = new OfflineAudioContext(2, Math.ceil(total * SR), SR);
+      const master = oc.createGain(); master.connect(oc.destination);
+      if (S.voice) {
+        const s = oc.createBufferSource(); s.buffer = S.voice.buffer;
+        const g = oc.createGain(); g.gain.value = Number(st.voiceVol); s.connect(g); g.connect(master);
+        s.start(Math.max(0, Number(st.voiceOff) || 0));
+      }
+      if (S.music) {
+        const s = oc.createBufferSource(); s.buffer = S.music.buffer; s.loop = true;
+        const g = oc.createGain(); g.gain.value = Number(st.musicVol); s.connect(g); g.connect(master);
+        g.gain.setValueAtTime(Number(st.musicVol), Math.max(0, total - 2.5));
+        g.gain.linearRampToValueAtTime(0, total);
+        s.start(0);
+      }
+      if (S.bg && S.bg.type === "video" && Number(st.bgVol) > 0) {
+        try {
+          say("⏳ ভিডিওর নিজের শব্দ পড়া হচ্ছে…");
+          const raw = await (await fetch(S.bg.url)).arrayBuffer();
+          const buf = await oc.decodeAudioData(raw);
+          const s = oc.createBufferSource(); s.buffer = buf; s.loop = !!st.loop;
+          const g = oc.createGain(); g.gain.value = Number(st.bgVol); s.connect(g); g.connect(master);
+          s.start(0); s.stop(Math.min(total, S.main));
+        } catch (e) { console.warn("bg audio skipped", e); }
+      }
+      return oc.startRendering();
+    }
+
+    async function makeVideoHQ() {
+      if (S.recording) return;
+      if (!S.bg) { alert("আগে ব্যাকগ্রাউন্ড ভিডিও বা ছবি দিন।"); return; }
+      if (!S.screens.length) { if (!confirm("কোনো লেখা নেই। তবুও ভিডিও বানাবেন?")) return; }
+      const status = $("drStatus");
+      const run = (S.hqRun = (S.hqRun || 0) + 1);
+      const alive = () => S.recording && S.hqRun === run;
+      S.recording = true; S.hold = null; stop(true); setBtns();
+      const fallback = (msg) => { S.recording = false; setBtns(); status.textContent = msg; return makeVideo(); };
+
+      if (!hqPossible() || !(await ensureMuxer())) return fallback("ℹ️ এই ব্রাউজারে নিখুঁত পদ্ধতি নেই — সাধারণ পদ্ধতিতে বানানো হচ্ছে (Chrome-এর নতুন সংস্করণ ব্যবহার করুন)।");
+      await ensureFonts();
+      const land = isLand();
+      const [VW, VH] = S.st.res === "720" ? (land ? [1280, 720] : [720, 1280]) : (land ? [1920, 1080] : [1080, 1920]);
+      const vcfg = await pickVideoConfig(VW, VH, S.st.res === "720" ? 5000000 : 10000000);
+      const SR = 48000;
+      const acfg = { codec: "mp4a.40.2", sampleRate: SR, numberOfChannels: 2, bitrate: 160000 };
+      let aOk = false; try { const r = await AudioEncoder.isConfigSupported(acfg); aOk = !!(r && r.supported); } catch (_) {}
+      if (!vcfg || !aOk) return fallback("ℹ️ এই ডিভাইসে H.264/AAC এনকোডার নেই — সাধারণ পদ্ধতিতে বানানো হচ্ছে।");
+
+      let wl = null, venc = null, aenc = null, encErr = null;
+      const t0 = performance.now();
+      try {
+        try { wl = await navigator.wakeLock.request("screen"); } catch (_) {}
+        S.brand = readBrand();
+        const muxer = new Mp4Muxer.Muxer({
+          target: new Mp4Muxer.ArrayBufferTarget(),
+          video: { codec: "avc", width: VW, height: VH, frameRate: FPS },
+          audio: { codec: "aac", numberOfChannels: 2, sampleRate: SR },
+          fastStart: "in-memory",
+        });
+        venc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: (e) => { encErr = e; } });
+        venc.configure(vcfg);
+        aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => { encErr = e; } });
+        aenc.configure(acfg);
+
+        // ধাপ ১: শব্দ
+        status.textContent = "⏳ (১/২) শব্দ তৈরি হচ্ছে…";
+        const mix = await mixAudio(SR, S.total, (m) => { status.textContent = m; });
+        if (!alive()) throw new Error("CANCEL");
+        const ch0 = mix.getChannelData(0), ch1 = mix.numberOfChannels > 1 ? mix.getChannelData(1) : ch0, CH = 4800;
+        for (let off = 0, k = 0; off < mix.length; off += CH, k++) {
+          const n = Math.min(CH, mix.length - off), data = new Float32Array(n * 2);
+          data.set(ch0.subarray(off, off + n), 0); data.set(ch1.subarray(off, off + n), n);
+          const ad = new AudioData({ format: "f32-planar", sampleRate: SR, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((off / SR) * 1e6), data });
+          aenc.encode(ad); ad.close();
+          if (k % 20 === 0) { await yieldNow(); if (encErr) throw encErr; }
+        }
+        await aenc.flush();
+
+        // ধাপ ২: ছবি — প্রতিটি ফ্রেম পুরো তৈরি হয়ে তবেই পরেরটায়
+        const v = S.bg.type === "video" ? S.bg : null;
+        if (v) v.el.pause();
+        const cvs = document.createElement("canvas"); cvs.width = VW; cvs.height = VH;
+        const cx = cvs.getContext("2d");
+        const nF = Math.ceil(S.total * FPS), dt = 1e6 / FPS;
+        for (let i = 0; i < nF; i++) {
+          if (!alive()) throw new Error("CANCEL");
+          if (encErr) throw encErr;
+          const t = i / FPS;
+          if (v) {
+            const bt = Math.min(t + 0.5 / FPS, S.main);
+            const tg = v.dur ? (S.st.loop ? bt % v.dur : Math.min(bt, Math.max(0, v.dur - 0.02))) : 0;
+            await seekExact(v.el, tg);
+            let g = 0; while (v.el.readyState < 2 && g++ < 200) await new Promise((r) => setTimeout(r, 15));
+          } else if (i % 8 === 0) await yieldNow();
+          drawFrame(cx, VW, VH, t, false);
+          const vf = new VideoFrame(cvs, { timestamp: Math.round(i * dt), duration: Math.round(dt) });
+          venc.encode(vf, { keyFrame: i % (FPS * 2) === 0 });
+          vf.close();
+          while (venc.encodeQueueSize > 6) {
+            await new Promise((r) => { venc.addEventListener("dequeue", r, { once: true }); setTimeout(r, 50); });
+            if (encErr) throw encErr; if (!alive()) throw new Error("CANCEL");
+          }
+          if (i % 6 === 0 || i === nF - 1) {
+            const done = i + 1, el = (performance.now() - t0) / 1000, eta = (el / done) * (nF - done);
+            status.textContent = `⏳ (২/২) ছবি তৈরি: ${bnDigits(Math.round((done / nF) * 100))}% — বাকি প্রায় ${fmtDur(eta)} — ট্যাব সামনে খোলা রাখুন`;
+            S.t = Math.min(t, S.total); updateClock(S.t);
+            pctx().drawImage(cvs, 0, 0, PW, PH);
+          }
+        }
+        await venc.flush();
+        muxer.finalize();
+        const blob = new Blob([muxer.target.buffer], { type: "video/mp4" });
+        const url = URL.createObjectURL(blob), a = document.createElement("a");
+        const d = new Date(), pad2 = (n) => String(n).padStart(2, "0");
+        a.href = url; a.download = `Farmer-Kamol-Reel-${land ? "16x9" : "9x16"}-${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}.mp4`;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+        status.textContent = `✅ MP4 তৈরি হয়েছে (${VW}×${VH}, H.264 + AAC) — সময় লেগেছে ${fmtDur((performance.now() - t0) / 1000)}। ডাউনলোড শুরু হয়েছে।`;
+      } catch (e) {
+        if (e && e.message === "CANCEL") status.textContent = "⏹ ভিডিও তৈরি বাতিল করা হয়েছে।";
+        else { console.error(e); status.textContent = "❌ ভিডিও তৈরি ব্যর্থ: " + (e && e.message ? e.message : e); }
+      } finally {
+        try { if (venc && venc.state !== "closed") venc.close(); } catch (_) {}
+        try { if (aenc && aenc.state !== "closed") aenc.close(); } catch (_) {}
+        if (wl) { try { wl.release(); } catch (_) {} }
+        if (S.hqRun === run) { S.recording = false; setBtns(); renderStill(); }
+      }
+    }
+
     /* ---------------- ফাইল ইনপুট ---------------- */
     function setStatus(m) { const e = $("drStatus"); if (e) e.textContent = m; }
     function loadBg(file) {
@@ -1102,7 +1279,7 @@
         const c = $("drCount"); let n = 3; c.style.display = "flex"; c.textContent = n;
         const iv = setInterval(() => { n--; if (n <= 0) { clearInterval(iv); c.style.display = "none"; play(0, "cue"); } else c.textContent = n; }, 1000);
       };
-      $("drMake").onclick = makeVideo;
+      $("drMake").onclick = () => makeVideoHQ();
     }
   
     /* ---------------- খোলা/বন্ধ ---------------- */
