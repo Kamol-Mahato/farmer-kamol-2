@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>সহজ থাম্বনেইল</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atma:wght@700&family=Baloo+Da+2:wght@800&family=Hind+Siliguri:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:500 14px "Hind Siliguri",sans-serif;background:#e9eee9;color:#1c2a22;display:flex;min-height:100vh}
+aside{width:370px;max-width:100%;background:#fff;padding:14px 16px 40px;overflow-y:auto;height:100vh;position:sticky;top:0;border-right:1px solid #cfd8d1}
+h1{font-size:18px;margin:0 0 10px;color:#0b6b3c}
+h2{font-size:13px;margin:18px 0 8px;padding-bottom:4px;border-bottom:2px solid #f2b705}
+label{display:block;margin:7px 0 2px;font-size:12px;color:#44574b}
+input[type=text],textarea,select{width:100%;padding:7px 8px;border:1px solid #b9c6bc;border-radius:6px;font:inherit;background:#fbfdfb}
+textarea{resize:vertical}
+input[type=color]{width:100%;height:32px;border:1px solid #b9c6bc;border-radius:6px;padding:2px}
+input[type=range]{width:100%;margin:0}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.chk{display:flex;gap:6px;align-items:center;margin:8px 0 0;font-size:13px;color:#1c2a22}
+.img{border:1px solid #cfd8d1;border-radius:8px;padding:8px;margin:8px 0;background:#f6f9f6}
+.img b{font-size:12px}
+.img .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;font-size:11px;color:#5a6c60}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px;padding:8px 12px;background:#0b6b3c;color:#fff}
+button.g{background:#e3ebe5;color:#1c2a22}
+button.x{background:#c8102e;padding:2px 8px;float:right}
+main{flex:1;padding:16px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:center}
+figure{margin:0}
+figcaption{font-size:12px;margin-bottom:4px;color:#44574b}
+canvas{background:#ccc;box-shadow:0 2px 10px rgba(0,0,0,.25);display:block}
+#cL{width:min(760px,100%)}
+#cP{height:560px}
+.hint{font-size:11px;color:#6a7b70;margin:3px 0 0}
+@media(max-width:900px){body{flex-direction:column}aside{width:100%;height:auto;position:static}}
+</style>
+</head>
+<body>
+<aside>
+<h1>সহজ থাম্বনেইল</h1>
+<div class="row">
+  <button id="dlBoth">⬇ দুটোই নামান</button>
+  <button class="g" id="dlL">১৬:৯</button>
+  <button class="g" id="dlP">৯:১৬</button>
+</div>
+
+<h2>লেখা</h2>
+<label>শিরোনাম</label><textarea id="tTitle" rows="2"></textarea>
+<label>উপলাইন</label><input type="text" id="tSub">
+<div class="row">
+  <div><label>সিলের লেখা (বাঁকানো)</label><input type="text" id="tSeal"></div>
+  <div><label>সিলের মাঝে (দাম/মাপ)</label><input type="text" id="tCenter"></div>
+</div>
+<p class="hint">খালি রাখলে সিল আসবে না। সিলের লেখা ছোট রাখুন।</p>
+<label class="chk"><input type="checkbox" id="cMarker"> শিরোনামের নিচে মার্কারের দাগ</label>
+<label class="chk"><input type="checkbox" id="cSafe"> নিরাপদ এলাকার দাগ দেখান (ডাউনলোডে আসবে না)</label>
+
+<h2>ধরন</h2>
+<label>লেআউট</label>
+<select id="sLayout">
+  <option value="split">লেখা একপাশে, ছবি অন্যপাশে</option>
+  <option value="full">ছবি পুরো জুড়ে, ওপরে লেখা</option>
+  <option value="ghost">হালকা বড় লেখা ছবির আড়ালে</option>
+  <option value="sides">ছবির দুই পাশে লেখা</option>
+</select>
+<div class="row">
+  <div><label>ছবির ফ্রেম</label>
+  <select id="sFrame"><option value="round">গোল কোণা</option><option value="rect">চৌকো</option><option value="circle">গোল</option><option value="polaroid">পোলারয়েড</option><option value="torn">ছেঁড়া কিনারা</option></select></div>
+  <div><label>ফন্ট</label>
+  <select id="sFont"><option value="baloo">মোটা গোলাকার</option><option value="atma">হাতে লেখা ধাঁচ</option><option value="hind">সোজা মোটা</option></select></div>
+</div>
+<label>ব্যাকগ্রাউন্ড রং</label><input type="color" id="cBg">
+
+<h2>ছবি (১ থেকে ৪টা)</h2>
+<div id="imgs"></div>
+
+<h2>প্রোফাইল (লোগো ও ফুটার)</h2>
+<label>প্রোফাইল</label><select id="pSel"></select>
+<div class="row" style="margin-top:6px"><button class="g" id="pNew">+ নতুন</button><button class="g" id="pDel">মুছুন</button></div>
+<label>নাম (লোগোর পাশে)</label><input type="text" id="pBrand">
+<label>লোগো</label><input type="file" id="pLogo" accept="image/*">
+<label>ওয়েবসাইট</label><input type="text" id="pWeb">
+<label>ফেসবুক</label><input type="text" id="pFb">
+<label>ইউটিউব</label><input type="text" id="pYt">
+<label>ইনস্টাগ্রাম</label><input type="text" id="pIg">
+<label>ফুটারের রং</label><input type="color" id="pAccent">
+<p class="hint">প্রোফাইলের সব বদল নিজে নিজে সেভ হয়। খালি ঘর ফুটারে আসে না।</p>
+</aside>
+
+<main>
+<figure><figcaption>১৬:৯ (১২৮০×৭২০)</figcaption><canvas id="cL" width="1280" height="720"></canvas></figure>
+<figure><figcaption>৯:১৬ (১০৮০×১৯২০)</figcaption><canvas id="cP" width="1080" height="1920"></canvas></figure>
+</main>
+
+<script>
+/*DRAW*/
+const FONTS={baloo:'800 {s}px "Baloo Da 2"',atma:'700 {s}px Atma',hind:'700 {s}px "Hind Siliguri"'};
+const DEFP={brand:"Farmer Kamol",web:"farmerkamol.com",fb:"Farmer Kamol",yt:"Farmer Kamol",ig:"",accent:"#0b6b3c",logo:"/icons/icon-512.png"};
+function ld(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}}
+const P=ld("fk_thumb_profiles",{cur:"Farmer Kamol",list:{"Farmer Kamol":DEFP}});
+const cur=()=>P.list[P.cur]||(P.cur=Object.keys(P.list)[0],P.list[P.cur]);
+const S=Object.assign({title:"খাঁটি সরিষার তেল",sub:"সরাসরি কৃষকের কাছ থেকে",seal:"খাঁটি",center:"৳৮৫০",layout:"split",frame:"round",font:"baloo",bg:"#0f4d2e",marker:true,safe:false},ld("fk_thumb_state",{}));
+S.imgs=[null,null,null,null];S.iz=[1,1,1,1];S.ix=[0,0,0,0];S.iy=[0,0,0,0];
+let LG=null;
+const F=s=>FONTS[S.font].replace("{s}",Math.round(s));
+const seg=t=>(window.Intl&&Intl.Segmenter)?[...new Intl.Segmenter("bn",{granularity:"grapheme"}).segment(t)].map(x=>x.segment):Array.from(t);
+
+function rr(c,x,y,w,h,r){c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function wrap(c,t,mw){const ws=t.split(/\s+/).filter(Boolean),L=[];let q="";for(const w of ws){const z=q?q+" "+w:w;if(!q||c.measureText(z).width<=mw)q=z;else{L.push(q);q=w}}if(q)L.push(q);return L}
+function fit(c,t,w,h,mx,ml){for(let s=mx;s>=14;s-=3){c.font=F(s);const L=wrap(c,t,w);if(L.length<=ml&&L.every(l=>c.measureText(l).width<=w)&&L.length*s*1.2<=h)return{L,s}}c.font=F(14);return{L:wrap(c,t,w).slice(0,ml),s:14}}
+function marker(c,x0,y,w,s){c.save();c.strokeStyle="rgba(242,183,5,.92)";c.lineWidth=s*.2;c.lineCap="round";c.lineJoin="round";c.beginPath();c.moveTo(x0,y+s*.04);for(let k=1;k<=8;k++)c.lineTo(x0+w*k/8,y+s*.04+(k%2?1:-1)*s*.03);c.stroke();c.restore()}
+function tb(c,t,r,o){
+  if(!t||!t.trim())return;
+  const q=fit(c,t,r.w,r.h,o.max,o.lines||3),lh=q.s*1.2,th=q.L.length*lh;
+  const y=r.y+(o.va==="b"?r.h-th:o.va==="m"?(r.h-th)/2:0);
+  const al=o.al||"left",ax=al==="center"?r.x+r.w/2:al==="right"?r.x+r.w:r.x;
+  c.textAlign=al;c.textBaseline="alphabetic";c.lineJoin="round";
+  q.L.forEach((l,i)=>{const by=y+i*lh+q.s*.95;c.font=F(q.s);
+    if(o.marker&&i===q.L.length-1){const w=c.measureText(l).width;marker(c,al==="center"?ax-w/2:al==="right"?ax-w:ax,by,w,q.s)}
+    c.globalAlpha=o.alpha||1;
+    if(o.stroke){c.strokeStyle="#000";c.lineWidth=q.s*.14;c.strokeText(l,ax,by)}
+    c.fillStyle=o.color;c.fillText(l,ax,by)});
+  c.globalAlpha=1}
+function arrange(n,R,g){const{x,y,w,h}=R;if(n<=1)return[R];const land=w>=h;
+  if(n===2)return land?[{x,y,w:(w-g)/2,h},{x:x+(w+g)/2,y,w:(w-g)/2,h}]:[{x,y,w,h:(h-g)/2},{x,y:y+(h+g)/2,w,h:(h-g)/2}];
+  if(n===3){if(land){const a=(w-g)*.58,b=w-g-a;return[{x,y,w:a,h},{x:x+a+g,y,w:b,h:(h-g)/2},{x:x+a+g,y:y+(h+g)/2,w:b,h:(h-g)/2}]}
+    const a=(h-g)*.58,b=h-g-a;return[{x,y,w,h:a},{x,y:y+a+g,w:(w-g)/2,h:b},{x:x+(w+g)/2,y:y+a+g,w:(w-g)/2,h:b}]}
+  const cw=(w-g)/2,ch=(h-g)/2;return[{x,y,w:cw,h:ch},{x:x+cw+g,y,w:cw,h:ch},{x,y:y+ch+g,w:cw,h:ch},{x:x+cw+g,y:y+ch+g,w:cw,h:ch}]}
+function torn(c,x,y,w,h,u,sd){const st=18*u;let k=0;const j=()=>{k++;return(((Math.sin(k*12.9898+sd*78.233)*43758.5453)%1+1)%1)*6*u-3*u};
+  c.moveTo(x,y);for(let t=st;t<w;t+=st)c.lineTo(x+t,y+j());c.lineTo(x+w,y);
+  for(let t=st;t<h;t+=st)c.lineTo(x+w+j(),y+t);c.lineTo(x+w,y+h);
+  for(let t=st;t<w;t+=st)c.lineTo(x+w-t,y+h+j());c.lineTo(x,y+h);
+  for(let t=st;t<h;t+=st)c.lineTo(x+j(),y+h-t);c.closePath()}
+function cover(c,i,x,y,w,h){const im=S.imgs[i];
+  if(!im){c.fillStyle="#c9c3b3";c.fillRect(x,y,w,h);c.fillStyle="#7a7466";c.font=F(Math.min(w,h)*.12);c.textAlign="center";c.textBaseline="middle";c.fillText("ছবি "+(i+1),x+w/2,y+h/2);return}
+  const a=im.naturalWidth||im.width,b=im.naturalHeight||im.height,sc=Math.max(w/a,h/b)*S.iz[i],dw=a*sc,dh=b*sc;
+  const ox=S.ix[i]/100*(dw-w)/2,oy=S.iy[i]/100*(dh-h)/2;
+  c.drawImage(im,x+w/2+ox-dw/2,y+h/2+oy-dh/2,dw,dh)}
+function photo(c,i,r,u,rot){
+  c.save();c.translate(r.x+r.w/2,r.y+r.h/2);c.rotate(rot*Math.PI/180);
+  let w=r.w,h=r.h,pad=0,bot=0;
+  if(S.frame==="polaroid"){pad=12*u;bot=40*u}
+  if(S.frame==="circle")w=h=Math.min(w,h);
+  c.shadowColor="rgba(0,0,0,.4)";c.shadowBlur=20*u;c.shadowOffsetY=8*u;
+  if(S.frame==="polaroid"){c.fillStyle="#fff";c.fillRect(-w/2,-h/2,w,h);c.shadowColor="transparent"}
+  const ix=-w/2+pad,iy=-h/2+pad,iw=w-2*pad,ih=h-2*pad-bot;
+  c.beginPath();
+  if(S.frame==="circle")c.arc(0,0,w/2,0,7);
+  else if(S.frame==="round")rr(c,ix,iy,iw,ih,Math.min(iw,ih)*.07);
+  else if(S.frame==="torn")torn(c,ix,iy,iw,ih,u,i+1);
+  else c.rect(ix,iy,iw,ih);
+  c.fillStyle="#c9c3b3";c.fill();c.shadowColor="transparent";c.clip();
+  cover(c,i,ix,iy,iw,ih);c.restore()}
+function curved(c,t,rad,s){c.font=F(s);c.textBaseline="middle";c.textAlign="center";
+  const ch=seg(t),ws=ch.map(x=>c.measureText(x).width);let tot=ws.reduce((a,b)=>a+b,0)/rad;
+  if(tot>2.6){s*=2.6/tot;c.font=F(s);ws.forEach((_,i)=>ws[i]=c.measureText(ch[i]).width);tot=ws.reduce((a,b)=>a+b,0)/rad}
+  let a=-Math.PI/2-tot/2;
+  ch.forEach((x,i)=>{const h=ws[i]/rad/2;a+=h;c.save();c.rotate(a+Math.PI/2);c.fillText(x,0,-rad);c.restore();a+=h})}
+function seal(c,cx,cy,r,u){
+  if(!S.seal&&!S.center)return;
+  c.save();c.translate(cx,cy);c.rotate(-.12);
+  c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=14*u;c.shadowOffsetY=6*u;
+  c.fillStyle="#c8102e";c.beginPath();c.arc(0,0,r,0,7);c.fill();c.shadowColor="transparent";
+  c.strokeStyle="#f2b705";c.lineWidth=r*.07;c.beginPath();c.arc(0,0,r*.88,0,7);c.stroke();
+  c.fillStyle="#fff";
+  const mid=(t,s)=>{c.font=F(s);const m=c.measureText(t).width;if(m>r*1.5)s*=r*1.5/m;c.font=F(s);c.textAlign="center";c.textBaseline="middle"};
+  if(S.seal&&S.center){curved(c,S.seal,r*.62,r*.27);mid(S.center,r*.5);c.fillText(S.center,0,r*.18)}
+  else{const t=S.seal||S.center;mid(t,r*.6);c.fillText(t,0,0)}
+  c.restore()}
+function icon(c,k,x,y,s,ac){c.save();c.translate(x,y);c.lineWidth=s*.09;c.strokeStyle=c.fillStyle="#fff";
+  if(k==="web"){c.beginPath();c.arc(s/2,s/2,s/2-1,0,7);c.stroke();c.beginPath();c.ellipse(s/2,s/2,s*.2,s/2-1,0,0,7);c.stroke();c.beginPath();c.moveTo(1,s/2);c.lineTo(s-1,s/2);c.stroke()}
+  else if(k==="fb"){c.beginPath();c.arc(s/2,s/2,s/2,0,7);c.fill();c.fillStyle=ac;c.font="700 "+s*.9+"px Arial";c.textAlign="center";c.textBaseline="middle";c.fillText("f",s*.55,s*.56)}
+  else if(k==="yt"){c.fillStyle="#ff0000";c.beginPath();rr(c,0,s*.12,s*1.1,s*.76,s*.2);c.fill();c.fillStyle="#fff";c.beginPath();c.moveTo(s*.42,s*.3);c.lineTo(s*.42,s*.7);c.lineTo(s*.76,s*.5);c.fill()}
+  else{c.beginPath();rr(c,1,1,s-2,s-2,s*.28);c.stroke();c.beginPath();c.arc(s/2,s/2,s*.22,0,7);c.stroke();c.beginPath();c.arc(s*.74,s*.26,s*.05,0,7);c.fill()}
+  c.restore()}
+function footer(c,W,H,u,land,pad,fy,fh){
+  const p=cur(),it=[["web",p.web],["fb",p.fb],["yt",p.yt],["ig",p.ig]].filter(x=>x[1]&&x[1].trim());
+  c.save();c.fillStyle=p.accent;
+  if(land){c.fillRect(0,fy,W,fh);for(let x=0;x<W;x+=48*u){c.fillStyle="#c8102e";c.fillRect(x,fy,24*u,6*u);c.fillStyle="#f2b705";c.fillRect(x+24*u,fy,24*u,6*u)}}
+  else{c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=14*u;c.shadowOffsetY=5*u;c.beginPath();rr(c,pad,fy,W-2*pad,fh,fh/2);c.fill();c.shadowColor="transparent"}
+  const x0=land?pad:pad+20*u,av=(land?W*.84:W-pad)-x0-(land?0:20*u);
+  const meas=sc=>{const fs=28*u*sc;c.font="700 "+fs+"px \"Hind Siliguri\",sans-serif";return it.map(x=>c.measureText(x[1]).width+fs*1.15+10*u*sc)};
+  let ws=meas(1),tot=ws.reduce((a,b)=>a+b,0)+Math.max(0,it.length-1)*36*u;const sc=Math.min(1,av/tot||1);
+  ws=meas(sc);tot=ws.reduce((a,b)=>a+b,0)+Math.max(0,it.length-1)*36*u*sc;
+  let x=x0+(av-tot)/2;const fs=28*u*sc;c.textAlign="left";c.textBaseline="middle";c.fillStyle="#fff";
+  it.forEach((q,i)=>{icon(c,q[0],x,fy+fh/2-fs*.5+(land?3*u:0),fs,p.accent);c.fillStyle="#fff";c.font="700 "+fs+"px \"Hind Siliguri\",sans-serif";c.textAlign="left";c.textBaseline="middle";c.fillText(q[1],x+fs*1.15+10*u*sc,fy+fh/2+(land?3*u:0));x+=ws[i]+36*u*sc});
+  c.restore()}
+
+function draw(c,W,H,prev){
+  const land=W>H,u=land?H/720:W/1080,p=cur();
+  let idx=[0,1,2,3].filter(i=>S.imgs[i]);if(!idx.length)idx=[0];
+  const n=idx.length,ROT=[-2.2,1.8,-1.5,2.4],g=16*u;
+  const pad=(land?44:56)*u,fh=(land?60:74)*u,fy=land?H-fh:H-300*u-fh,bot=fy-18*u,top=land?150*u:214*u;
+  const Cw=W-2*pad,Ch=bot-top,rot=k=>(S.frame==="circle"||(n===1&&S.frame!=="polaroid"))?0:ROT[k];
+  c.clearRect(0,0,W,H);c.fillStyle=S.bg;c.fillRect(0,0,W,H);
+  const T=(t,r,o)=>tb(c,t,r,Object.assign({color:"#fff",stroke:true},o));
+  const cards=(R,list)=>arrange(list.length,R,g).forEach((r,k)=>photo(c,list[k],r,u,rot(k)));
+  const al=land?"left":"center";
+  if(S.layout==="split"){
+    if(land){T(S.title,{x:pad,y:top,w:Cw*.46,h:Ch*.62},{max:150*u,lines:3,va:"b",marker:S.marker});T(S.sub,{x:pad,y:top+Ch*.66,w:Cw*.46,h:Ch*.34},{max:64*u,lines:2,color:"#f2b705"});cards({x:pad+Cw*.5,y:top,w:Cw*.5,h:Ch},idx)}
+    else{cards({x:pad,y:top,w:Cw,h:Ch*.52},idx);T(S.title,{x:pad,y:top+Ch*.56,w:Cw,h:Ch*.28},{max:170*u,lines:2,al,va:"m",marker:S.marker});T(S.sub,{x:pad,y:top+Ch*.86,w:Cw,h:Ch*.14},{max:70*u,lines:1,al,color:"#f2b705"})}
+  }else if(S.layout==="full"){
+    cover(c,idx[0],0,0,W,H);
+    const gr=land?c.createLinearGradient(0,0,W*.7,0):c.createLinearGradient(0,0,0,H*.55);gr.addColorStop(0,"rgba(0,0,0,.72)");gr.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=gr;c.fillRect(0,0,W,H);
+    const rest=idx.slice(1);
+    if(land){T(S.title,{x:pad,y:top,w:Cw*.5,h:Ch*.6},{max:150*u,lines:3,va:"b",marker:S.marker});T(S.sub,{x:pad,y:top+Ch*.65,w:Cw*.5,h:Ch*.3},{max:64*u,lines:2,color:"#f2b705"});if(rest.length)cards({x:W-pad-Cw*.2,y:top,w:Cw*.2,h:Ch},rest)}
+    else{T(S.title,{x:pad,y:top,w:Cw,h:Ch*.26},{max:170*u,lines:2,al,va:"m",marker:S.marker});T(S.sub,{x:pad,y:top+Ch*.27,w:Cw,h:Ch*.1},{max:70*u,lines:1,al,color:"#f2b705"});if(rest.length)cards({x:pad,y:bot-Ch*.22,w:Cw,h:Ch*.22},rest)}
+  }else if(S.layout==="ghost"){
+    T(S.title,{x:W*.03,y:top,w:W*.94,h:Ch*.66},{max:420*u,lines:2,al:"center",va:"m",stroke:false,alpha:.22});
+    cards(land?{x:W*.18,y:top+Ch*.08,w:W*.64,h:Ch*.7}:{x:pad,y:top+Ch*.14,w:Cw,h:Ch*.56},idx);
+    T(S.sub,{x:pad,y:top+Ch*.8,w:Cw,h:Ch*.2},{max:110*u,lines:1,al:"center",va:"m",marker:S.marker});
+  }else{
+    const ws=S.title.trim().split(/\s+/).filter(Boolean),h=Math.ceil(ws.length/2),L=ws.slice(0,h).join(" "),R=ws.slice(h).join(" ");
+    if(land){T(L,{x:pad,y:top,w:Cw*.25,h:Ch*.84},{max:130*u,lines:3,al:"left",va:"m"});T(R,{x:pad+Cw*.75,y:top,w:Cw*.25,h:Ch*.84},{max:130*u,lines:3,al:"right",va:"m"});cards({x:pad+Cw*.28,y:top,w:Cw*.44,h:Ch*.84},idx);T(S.sub,{x:pad,y:top+Ch*.88,w:Cw,h:Ch*.12},{max:54*u,lines:1,al:"center",color:"#f2b705"})}
+    else{T(L,{x:pad,y:top,w:Cw,h:Ch*.2},{max:160*u,lines:2,al:"center",va:"m"});cards({x:pad,y:top+Ch*.22,w:Cw,h:Ch*.46},idx);T(R,{x:pad,y:top+Ch*.7,w:Cw,h:Ch*.2},{max:160*u,lines:2,al:"center",va:"m"});T(S.sub,{x:pad,y:top+Ch*.91,w:Cw,h:Ch*.09},{max:56*u,lines:1,al:"center",color:"#f2b705"})}
+  }
+  const r=(land?62:80)*u;seal(c,W-pad-r,land?80*u:126*u,r,u);
+  const ls=(land?72:84)*u,ly=land?pad:84*u;
+  c.save();c.shadowColor="rgba(0,0,0,.4)";c.shadowBlur=8*u;c.beginPath();c.arc(pad+ls/2,ly+ls/2,ls/2,0,7);c.fillStyle="#fff";c.fill();c.shadowColor="transparent";c.clip();
+  if(LG)c.drawImage(LG,pad,ly,ls,ls);c.restore();
+  T(p.brand,{x:pad+ls+14*u,y:ly,w:W*.5,h:ls},{max:38*u,lines:1,va:"m"});
+  footer(c,W,H,u,land,pad,fy,fh);
+  if(prev&&S.safe){c.fillStyle="rgba(255,0,0,.28)";
+    if(land)c.fillRect(W*.86,H*.88,W*.14,H*.12);
+    else{c.fillRect(0,0,W,H*.09);c.fillRect(0,H*.82,W,H*.18);c.fillRect(W*.86,H*.45,W*.14,H*.37)}}
+}
+/*UI*/
+const $=id=>document.getElementById(id);
+const cL=$("cL"),cP=$("cP");
+function render(){draw(cL.getContext("2d"),1280,720,true);draw(cP.getContext("2d"),1080,1920,true)}
+function saveS(){const o={};["title","sub","seal","center","layout","frame","font","bg","marker","safe"].forEach(k=>o[k]=S[k]);localStorage.setItem("fk_thumb_state",JSON.stringify(o))}
+function saveP(){try{localStorage.setItem("fk_thumb_profiles",JSON.stringify(P))}catch(e){alert("সেভ হয়নি (লোগো বড় হতে পারে)")}}
+function setLogo(){const i=new Image();i.onload=()=>{LG=i;render()};i.onerror=()=>{LG=null;render()};i.src=cur().logo||""}
+const TX={tTitle:"title",tSub:"sub",tSeal:"seal",tCenter:"center",sLayout:"layout",sFrame:"frame",sFont:"font",cBg:"bg"},CK={cMarker:"marker",cSafe:"safe"};
+Object.keys(TX).forEach(id=>{const e=$(id);e.value=S[TX[id]];e.addEventListener("input",()=>{S[TX[id]]=e.value;saveS();render()})});
+Object.keys(CK).forEach(id=>{const e=$(id);e.checked=!!S[CK[id]];e.addEventListener("input",()=>{S[CK[id]]=e.checked;saveS();render()})});
+
+/* ছবির ঘর */
+for(let i=0;i<4;i++){
+  const d=document.createElement("div");d.className="img";
+  d.innerHTML='<b>ছবি '+(i+1)+'</b><button class="x" title="সরান">×</button><input type="file" accept="image/*"><div class="r3"><span>জুম<input type="range" min="1" max="3" step=".05" value="1"></span><span>← →<input type="range" min="-100" max="100" value="0"></span><span>↑ ↓<input type="range" min="-100" max="100" value="0"></span></div>';
+  const f=d.querySelector("input[type=file]"),rs=d.querySelectorAll("input[type=range]");
+  f.onchange=()=>{const x=f.files[0];if(!x)return;const im=new Image();im.onload=()=>{S.imgs[i]=im;render()};im.src=URL.createObjectURL(x)};
+  rs[0].oninput=()=>{S.iz[i]=+rs[0].value;render()};rs[1].oninput=()=>{S.ix[i]=+rs[1].value;render()};rs[2].oninput=()=>{S.iy[i]=+rs[2].value;render()};
+  d.querySelector(".x").onclick=()=>{S.imgs[i]=null;f.value="";S.iz[i]=1;S.ix[i]=0;S.iy[i]=0;rs[0].value=1;rs[1].value=0;rs[2].value=0;render()};
+  $("imgs").appendChild(d)}
+
+/* প্রোফাইল */
+const PF={pBrand:"brand",pWeb:"web",pFb:"fb",pYt:"yt",pIg:"ig",pAccent:"accent"};
+function fillP(){const sel=$("pSel");sel.innerHTML="";Object.keys(P.list).forEach(k=>{const o=document.createElement("option");o.value=o.textContent=k;sel.appendChild(o)});sel.value=P.cur;
+  Object.keys(PF).forEach(id=>$(id).value=cur()[PF[id]]||(id==="pAccent"?"#0b6b3c":""));setLogo()}
+Object.keys(PF).forEach(id=>$(id).addEventListener("input",()=>{cur()[PF[id]]=$(id).value;saveP();render()}));
+$("pSel").onchange=()=>{P.cur=$("pSel").value;saveP();fillP()};
+$("pNew").onclick=()=>{const n=(prompt("নতুন প্রোফাইলের নাম")||"").trim();if(!n||P.list[n])return;P.list[n]=Object.assign({},cur(),{brand:n});P.cur=n;saveP();fillP()};
+$("pDel").onclick=()=>{if(Object.keys(P.list).length<2||!confirm("এই প্রোফাইল মুছবেন?"))return;delete P.list[P.cur];P.cur=Object.keys(P.list)[0];saveP();fillP()};
+$("pLogo").onchange=e=>{const x=e.target.files[0];if(!x)return;const im=new Image();im.onload=()=>{const k=document.createElement("canvas");k.width=k.height=256;const q=k.getContext("2d"),m=Math.min(im.width,im.height);q.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,256,256);cur().logo=k.toDataURL("image/png");saveP();setLogo()};im.src=URL.createObjectURL(x)};
+
+/* ডাউনলোড */
+function exp(W,H,name){return new Promise(ok=>{const k=document.createElement("canvas");k.width=W;k.height=H;draw(k.getContext("2d"),W,H,false);k.toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(ok,400)},"image/png")})}
+$("dlL").onclick=()=>exp(1280,720,"thumbnail-16x9.png");
+$("dlP").onclick=()=>exp(1080,1920,"thumbnail-9x16.png");
+$("dlBoth").onclick=async()=>{await exp(1280,720,"thumbnail-16x9.png");await exp(1080,1920,"thumbnail-9x16.png")};
+
+fillP();render();
+Promise.all(['800 40px "Baloo Da 2"','700 40px Atma','700 40px "Hind Siliguri"'].map(f=>document.fonts.load(f,"আ"))).catch(()=>{}).then(render);
+</script>
+</body>
+</html>
