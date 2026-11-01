@@ -1241,8 +1241,17 @@
           class="btn btn-green"
           style="white-space:nowrap;text-decoration:none;margin-left:8px"
         >
-          🎞️ Daily Reel
-        </a>
+        🎞️ Daily Reel
+      </a>
+      <a
+        href="/tools/thumbnail-simple.html"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-green"
+        style="white-space:nowrap;text-decoration:none;margin-left:8px"
+      >
+        🖼️ Farmer Kamol থাম্বনেইল
+      </a>
         <div class="topbar-sep"></div>
         <div class="undo-redo">
           <button
@@ -1393,6 +1402,14 @@
             </optgroup>
           </select>
         </div>
+        <label
+          class="hide-on-mobile"
+          style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);cursor:pointer;white-space:nowrap;margin:0 6px"
+          title="১৬:৯ ও ৯:১৬ মাপে নিচে অটো ফুটার"
+        >
+          <input type="checkbox" id="autoFooterChk" checked onchange="toggleAutoFooter(this.checked)" />
+          Auto Footer
+        </label>
         <button class="btn btn-ghost hide-on-mobile" onclick="clearCanvas()" title="Clear all">🗑</button>
         <button class="btn btn-ghost hide-on-mobile" onclick="saveProject()" title="Save project (JSON)">💾</button>
         <label class="btn btn-ghost hide-on-mobile" style="cursor: pointer; margin: 0" title="Load project">
@@ -4537,10 +4554,77 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
           c.restore();
         }
 
+        function _afOn() {
+          try { return localStorage.getItem("fk_autofooter") !== "0"; } catch (e) { return true; }
+        }
+        function toggleAutoFooter(on) {
+          try { localStorage.setItem("fk_autofooter", on ? "1" : "0"); } catch (e) {}
+          render();
+        }
+        function _afRR(c,x,y,w,h,r){c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+        function _afIcon(c,k,x,y,s,ac){c.save();c.translate(x,y);c.lineWidth=s*.09;c.strokeStyle=c.fillStyle="#fff";
+          if(k==="web"){c.beginPath();c.arc(s/2,s/2,s/2-1,0,7);c.stroke();c.beginPath();c.ellipse(s/2,s/2,s*.2,s/2-1,0,0,7);c.stroke();c.beginPath();c.moveTo(1,s/2);c.lineTo(s-1,s/2);c.stroke()}
+          else if(k==="fb"){c.beginPath();c.arc(s/2,s/2,s/2,0,7);c.fill();c.fillStyle=ac;c.font="700 "+s*.9+"px Arial";c.textAlign="center";c.textBaseline="middle";c.fillText("f",s*.55,s*.56)}
+          else if(k==="yt"){c.fillStyle="#ff0000";c.beginPath();_afRR(c,0,s*.12,s*1.1,s*.76,s*.2);c.fill();c.fillStyle="#fff";c.beginPath();c.moveTo(s*.42,s*.3);c.lineTo(s*.42,s*.7);c.lineTo(s*.76,s*.5);c.fill()}
+          else{c.beginPath();_afRR(c,1,1,s-2,s-2,s*.28);c.stroke();c.beginPath();c.arc(s/2,s/2,s*.22,0,7);c.stroke();c.beginPath();c.arc(s*.74,s*.26,s*.05,0,7);c.fill()}
+          c.restore()}
+        function _drawAutoFooter(c, W, H) {
+          if (!_afOn() || (typeof roundCropMode !== "undefined" && roundCropMode)) return;
+          const rt = W / H, land = Math.abs(rt - 16 / 9) < 0.02, port = Math.abs(rt - 9 / 16) < 0.02;
+          if (!land && !port) return;
+          let p = { web: "farmerkamol.com", fb: "Farmer Kamol", yt: "Farmer Kamol", ig: "", accent: "#0b6b3c" };
+          try {
+            const PF = JSON.parse(localStorage.getItem("fk_thumb_profiles"));
+            if (PF && PF.list) {
+              const q = PF.list[PF.cur] || PF.list[Object.keys(PF.list)[0]];
+              if (q) p = Object.assign(p, q);
+            }
+          } catch (e) {}
+          const its = [["web", p.web], ["fb", p.fb], ["yt", p.yt], ["ig", p.ig]].filter((x) => x[1] && String(x[1]).trim());
+          if (!its.length) return;
+          const ac = p.accent || "#0b6b3c", u = land ? H / 720 : W / 1080, pad = (land ? 44 : 56) * u, h = (land ? 60 : 74) * u;
+          const w = land ? W : W - 2 * pad, cx = W / 2, cy = land ? H - h / 2 : H - 300 * u - h / 2;
+          c.save();
+          c.filter = "none"; c.globalAlpha = 1; c.shadowColor = "transparent";
+          c.fillStyle = ac;
+          if (land) c.fillRect(0, cy - h / 2, W, h);
+          else {
+            c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 14 * u; c.shadowOffsetY = 5 * u;
+            c.beginPath(); _afRR(c, cx - w / 2, cy - h / 2, w, h, h / 2); c.fill();
+            c.shadowColor = "transparent";
+          }
+          const av = land ? w * 0.84 - 44 * u : w - 60 * u, fam = ' "Hind Siliguri", sans-serif';
+          const meas = (sc) => {
+            const fs = h * 0.46 * sc;
+            c.font = "700 " + fs + "px" + fam;
+            return its.map((x) => c.measureText(String(x[1])).width + fs * 1.15 + 10 * u * sc);
+          };
+          let ws = meas(1), tot = ws.reduce((a, b) => a + b, 0) + Math.max(0, its.length - 1) * 36 * u;
+          const sc = Math.min(1, av / tot || 1);
+          ws = meas(sc);
+          tot = ws.reduce((a, b) => a + b, 0) + Math.max(0, its.length - 1) * 36 * u * sc;
+          const fs = h * 0.46 * sc;
+          let x = (land ? cx - w / 2 + 44 * u : cx - av / 2) + (av - tot) / 2;
+          its.forEach((q, i) => {
+            _afIcon(c, q[0], x, cy - fs / 2, fs, ac);
+            c.fillStyle = "#fff"; c.font = "700 " + fs + "px" + fam;
+            c.textAlign = "left"; c.textBaseline = "middle";
+            c.fillText(String(q[1]), x + fs * 1.15 + 10 * u * sc, cy);
+            x += ws[i] + 36 * u * sc;
+          });
+          c.restore();
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+          const k = document.getElementById("autoFooterChk");
+          if (k) k.checked = _afOn();
+          if (document.fonts) document.fonts.load('700 20px "Hind Siliguri"', "আ").then(() => { try { render(); } catch (e) {} }).catch(() => {});
+        });
+
         function render() {
           ctx.clearRect(0, 0, CW, CH);
           _renderAll(ctx, CW, CH);
           applyGlobalLookOverlay(ctx, CW, CH);
+          _drawAutoFooter(ctx, CW, CH);
           drawGuides(ctx, CW, CH);
           drawZoneOverlay(ctx);
           if (roundCropMode) drawRoundCropOverlay(ctx);
@@ -7343,6 +7427,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           tc.clearRect(0, 0, CW, CH);
           _renderAll(tc, CW, CH);
           applyGlobalLookOverlay(tc, CW, CH);
+          _drawAutoFooter(tc, CW, CH);
           const pt2 = document.getElementById("previewTitle");
           if (pt2)
             pt2.textContent = `👁 Preview — ${currentLabel} (${CW}×${CH})`;
@@ -7559,6 +7644,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           tc.clearRect(0, 0, CW, CH);
           _renderAll(tc, CW, CH);
           applyGlobalLookOverlay(tc, CW, CH);
+          _drawAutoFooter(tc, CW, CH);
           let finalCanvas = temp;
           if (scale > 1) {
             finalCanvas = document.createElement("canvas");
