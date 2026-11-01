@@ -264,10 +264,21 @@ export default function Navbar() {
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center h-8 md:h-9">
           <div className="flex items-center gap-2">
             <button
-              className="lg:hidden text-white text-lg"
+              className="lg:hidden text-white p-1"
               onClick={openSidebar}
+              aria-label="Menu"
             >
-              ☰
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 28 18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                className="w-7 h-[18px]"
+              >
+                <path d="M2 3h24M2 9h24M2 15h24" />
+              </svg>
             </button>
             <Link href={href("/")} className="flex items-center gap-1.5">
               <Image
@@ -285,7 +296,28 @@ export default function Navbar() {
                 <span className="text-yellow-200 text-[8px] font-medium whitespace-nowrap">
                   {t.tagline}
                 </span>
-              </div>
+                </div>
+            </Link>
+            <Link
+              href={href("/")}
+              aria-label={locale === "bn" ? "হোম" : "Home"}
+              title={locale === "bn" ? "হোম" : "Home"}
+              className="flex lg:hidden items-center justify-center text-white hover:text-yellow-400 active:scale-95 transition p-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2.2"
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m2.25 12 8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+                />
+              </svg>
             </Link>
           </div>
 
@@ -462,12 +494,12 @@ export default function Navbar() {
                   </svg>
                 </button>
                 <div
-                  className={`absolute right-0 top-full ${authMenuOpen ? "block" : "hidden"} bg-green-800 rounded-lg shadow-lg min-w-[170px] py-1.5 z-50`}
+                  className={`absolute right-0 top-full mt-2 ${authMenuOpen ? "block" : "hidden"} bg-green-800 rounded-xl shadow-lg min-w-[210px] py-2 z-50`}
                 >
                   <Link
                     href={href("/login")}
                     onClick={() => setAuthMenuOpen(false)}
-                    className="block px-3 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
+                    className="block px-4 py-3 text-sm hover:bg-green-700 hover:text-yellow-400 transition"
                   >
                     🔑 {t.login}
                   </Link>
@@ -475,7 +507,7 @@ export default function Navbar() {
                     href={href("/register")}
                     aria-label="register"
                     onClick={() => setAuthMenuOpen(false)}
-                    className="block px-3 py-1.5 text-xs hover:bg-green-700 hover:text-yellow-400 transition"
+                    className="block px-4 py-3 text-sm border-t border-white/15 hover:bg-green-700 hover:text-yellow-400 transition"
                   >
                     📝 {t.register}
                   </Link>

@@ -21,6 +21,7 @@
     };
     const rnd = (seed) => { const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
     const bnDigits = (n) => String(n).replace(/\d/g, (c) => "০১২৩৪৫৬৭৮৯"[c]);
+    const enDigits = (s) => String(s).replace(/[০-৯]/g, (c) => "০১২৩৪৫৬৭৮৯".indexOf(c));
     const segmenter = (typeof Intl !== "undefined" && Intl.Segmenter) ? new Intl.Segmenter("bn", { granularity: "grapheme" }) : null;
     const graphemes = (s) => (segmenter ? Array.from(segmenter.segment(s), (x) => x.segment) : Array.from(s));
   
@@ -28,17 +29,17 @@
     const DEF = {
       orient: "v",
       titleText: "", credit: "",
-      dateMode: "stack", dateOrder: "after", hijriOffset: "0",
+      dateMode: "each", dateOrder: "after", hijriOffset: "0",
       sg: true, sw: true, sb: true, se: true, sh: true, sd: true,
       greeting: "শুভ সকাল",
       extra1: "", extra2: "", extra3: "",
       bgVol: 1, loop: true, imgDur: 20, voiceVol: 1, voiceOff: 0, musicVol: 0.3,
-      gap: 0.4, startDelay: 0.6,
+      gap: 0.7, startDelay: 0.6, timeMul: 1,
       font: "Hind Siliguri", weight: "700", size: 72,
-      color: "#ffffff", color2: "#ffe28a", creditColor: "#d8d8d8",
-      outline: "none", outlineColor: "#000000", shadow: true, band: "none",
+      color: "#06c650", color2: "#0ac22f", creditColor: "#d8d8d8",
+      outline: "thin", outlineColor: "#000000", shadow: true, band: "none",
       pos: "bottom", posDate: "same", offY: 0,
-      anim: "up", fx: "sparkle", fxColor: "#fff3b0", ambient: "none", ambientAmt: 0.5,
+      anim: "up", fx: "none", fxColor: "#fff3b0", ambient: "none", ambientAmt: 0.5,
       outro: "zoomin", outroSec: 4, res: "1080", guides: true,
       logoCorner: true,
     };
@@ -189,7 +190,7 @@
           const parts = new Intl.DateTimeFormat("bn-BD-u-ca-islamic", {
             timeZone: "Asia/Dhaka", day: "numeric", month: "long", year: "numeric"
           }).formatToParts(d);
-          const dayNum = Number((parts.find(p => p.type === "day") || {}).value || 0);
+          const dayNum = Number(enDigits((parts.find(p => p.type === "day") || {}).value || 0));
           const monthName = (parts.find(p => p.type === "month") || {}).value || "";
           const yearNum = (parts.find(p => p.type === "year") || {}).value || "";
           hijri = getDayOrdinal(dayNum) + " " + monthName + ", " + bnDigits(yearNum) + " হিজরি";
@@ -228,11 +229,11 @@
         const all = [gr, wd].concat(rest).concat(extras).filter(Boolean);
         if (all.length) dsc.push({ kind: "date", lines: all });
       } else if (st.dateMode === "seq") {
-        if (wd) dsc.push({ kind: "date", lines: [wd] });
+        if (gr || wd) dsc.push({ kind: "date", lines: [gr, wd].filter(Boolean) });
         if (rest.length) dsc.push({ kind: "date", lines: rest });
         extras.forEach((x) => dsc.push({ kind: "date", lines: [x] }));
       } else {
-        [wd].concat(rest).concat(extras).filter(Boolean).forEach((x) => dsc.push({ kind: "date", lines: [x] }));
+        [gr, wd].concat(rest).concat(extras).filter(Boolean).forEach((x) => dsc.push({ kind: "date", lines: [x] }));
       }
       return st.dateOrder === "before" ? dsc.concat(out) : out.concat(dsc);
     }
@@ -240,7 +241,7 @@
       const st = S.st; let t = Number(st.startDelay) || 0;
       return S.screens.map((sc) => {
         const chars = sc.lines.reduce((a, l) => a + graphemes(l.t).length, 0);
-        const dur = Math.round(clamp(1.8 + chars * 0.075, 2.4, 9) * 10) / 10;
+        const dur = Math.round(clamp(2.8 + chars * 0.1, 3.5, 11) * (Number(st.timeMul) || 1) * 10) / 10;
         const o = { start: Math.round(t * 10) / 10, dur };
         t += dur + Number(st.gap || 0);
         return o;
@@ -336,9 +337,119 @@
     }
   
     /* ---------------- আঁকা: চারপাশের ইফেক্ট (ambient) ---------------- */
+    /* ---------------- গ্রামের ভাসমান ইফেক্ট (নতুন) ---------------- */
+    const RURAL_MAX = { butterfly: 8, kash: 26, fog: 6, rain: 70, birds: 9, shiuli: 18, grain: 40, rays: 6 };
+    function drawButterfly(ctx, x, y, s, flap, col, rot) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = col;
+      const w = 0.2 + 0.8 * flap;
+      for (const sg of [-1, 1]) {
+        ctx.save(); ctx.scale(sg * w, 1);
+        ctx.beginPath(); ctx.ellipse(s * 0.55, -s * 0.45, s * 0.6, s * 0.8, -0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s * 0.4, s * 0.5, s * 0.4, s * 0.55, 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      ctx.fillStyle = "#3a2a1a"; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.07, s * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    function drawRural(ctx, t, type) {
+      const amt = Number(S.st.ambientAmt);
+      const n = amt > 0 ? Math.max(1, Math.round(RURAL_MAX[type] * amt)) : 0;
+      if (!n) return;
+      const u = Math.min(W, H) / 1080;
+      ctx.save();
+      if (type === "butterfly") {
+        const cols = ["#ffb02e", "#ff7a3d", "#ffe45e", "#7bd7ff", "#ffffff"];
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3), r4 = rnd(k * 7 + 4);
+          const x = ((t * (35 + r3 * 35) + r1 * (W + 200)) % (W + 200)) - 100;
+          const y = H * (0.3 + 0.5 * r2) + Math.sin(t * 0.9 + k * 1.7) * 80 * u;
+          const flap = Math.abs(Math.sin(t * 9 + k * 3));
+          ctx.globalAlpha = 0.95;
+          drawButterfly(ctx, x, y, (24 + r4 * 14) * u, flap, cols[k % cols.length], Math.sin(t * 0.9 + k) * 0.4 + 1.2);
+        }
+      } else if (type === "kash") {
+        ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 1.5 * u;
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3), r4 = rnd(k * 7 + 4);
+          const sp = 22 + r2 * 28, y = H + 40 - ((t * sp + r3 * H) % (H + 80));
+          const x = r1 * W + Math.sin(t * 0.5 + k) * 60 * u + t * 8;
+          const xx = ((x % (W + 100)) + W + 100) % (W + 100) - 50;
+          const r = (9 + r4 * 10) * u, rot = t * 0.4 + k;
+          ctx.globalCompositeOperation = "source-over";
+          glowDot(ctx, xx, y, r * 1.6, "rgba(255,255,255,1)", 0.55);
+          ctx.globalAlpha = 0.8; ctx.beginPath();
+          for (let j = 0; j < 7; j++) { const a = rot + (j * Math.PI * 2) / 7; ctx.moveTo(xx, y); ctx.lineTo(xx + Math.cos(a) * r * 1.5, y + Math.sin(a) * r * 1.5); }
+          ctx.stroke();
+        }
+      } else if (type === "fog") {
+        ctx.globalCompositeOperation = "source-over";
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3), r4 = rnd(k * 7 + 4);
+          const x = ((t * (10 + r2 * 14) + r1 * (W + 800)) % (W + 800)) - 400;
+          const y = H * (0.45 + 0.5 * r3);
+          ctx.save(); ctx.translate(x, y); ctx.scale(1.8, 0.6);
+          glowDot(ctx, 0, 0, (260 + r4 * 220) * u, "rgba(255,255,255,1)", 0.12 + 0.08 * r4);
+          ctx.restore();
+        }
+      } else if (type === "rain") {
+        ctx.strokeStyle = "rgba(225,238,255,0.55)"; ctx.lineWidth = 2.2 * u; ctx.lineCap = "round"; ctx.beginPath();
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3);
+          const sp = (1000 + r2 * 600) * u, y = ((t * sp + r3 * (H + 200)) % (H + 200)) - 100;
+          const len = (34 + r2 * 30) * u, x = r1 * (W + 300) - 150 - y * 0.12;
+          ctx.moveTo(x, y); ctx.lineTo(x - len * 0.12, y + len);
+        }
+        ctx.stroke();
+      } else if (type === "birds") {
+        ctx.strokeStyle = "rgba(25,25,25,0.75)"; ctx.lineWidth = 3 * u; ctx.lineCap = "round"; ctx.lineJoin = "round";
+        const x0 = ((t * 70 * u) % (W + 1200)) - 600, y0 = H * 0.2 + Math.sin(t * 0.3) * 40 * u;
+        for (let k = 0; k < n; k++) {
+          const row = Math.ceil(k / 2), side = k % 2 ? 1 : -1;
+          const bx = x0 - row * 46 * u, by = y0 + side * row * 24 * u + Math.sin(t * 2 + k) * 5 * u;
+          const s = (15 + (k % 3) * 3) * u, f = Math.sin(t * 7 + k * 0.8) * 0.6 * s;
+          ctx.beginPath(); ctx.moveTo(bx - s, by - f); ctx.quadraticCurveTo(bx - s * 0.4, by - f * 0.2 - s * 0.25, bx, by);
+          ctx.quadraticCurveTo(bx + s * 0.4, by - f * 0.2 - s * 0.25, bx + s, by - f); ctx.stroke();
+        }
+      } else if (type === "shiuli") {
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3), r4 = rnd(k * 7 + 4);
+          const sp = 45 + r2 * 45, y = ((t * sp + r3 * (H + 160)) % (H + 160)) - 80;
+          const x = r1 * W + Math.sin(t * 0.8 + k) * 60 * u, rot = t * (0.5 + r4) + k, s = (11 + r4 * 7) * u;
+          ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = 0.95; ctx.fillStyle = "#ffffff";
+          for (let j = 0; j < 5; j++) { ctx.rotate((Math.PI * 2) / 5); ctx.beginPath(); ctx.ellipse(0, -s * 0.8, s * 0.38, s * 0.8, 0, 0, Math.PI * 2); ctx.fill(); }
+          ctx.fillStyle = "#ff8a3d"; ctx.beginPath(); ctx.arc(0, 0, s * 0.42, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        }
+      } else if (type === "grain") {
+        const cols = ["#f2c14e", "#e0a82e", "#fbe08a"];
+        for (let k = 0; k < n; k++) {
+          const r1 = rnd(k * 7 + 1), r2 = rnd(k * 7 + 2), r3 = rnd(k * 7 + 3), r4 = rnd(k * 7 + 4);
+          const sp = 40 + r2 * 40, y = ((t * sp + r3 * (H + 160)) % (H + 160)) - 80;
+          const x = ((r1 * (W + 200) + t * (25 + r2 * 35)) % (W + 200)) - 100 + Math.sin(t + k) * 25 * u;
+          const rot = t * (0.8 + r4) + k * 2;
+          ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = 0.9; ctx.fillStyle = cols[k % 3];
+          ctx.beginPath(); ctx.ellipse(0, 0, (3 + r4 * 2.5) * u, (8 + r3 * 5) * u, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        }
+      } else if (type === "rays") {
+        ctx.globalCompositeOperation = "lighter";
+        const ox = -0.1 * W, oy = -0.1 * H, L = 1.8 * Math.max(W, H);
+        for (let k = 0; k < n; k++) {
+          const a = 0.3 + k * 0.17 + Math.sin(t * 0.3 + k) * 0.03, w = 0.035 + 0.02 * rnd(k * 5 + 1);
+          const pulse = 0.5 + 0.5 * Math.sin(t * 0.7 + k * 1.7);
+          const ex = ox + Math.sin(a) * L, ey = oy + Math.cos(a) * L;
+          const g = ctx.createLinearGradient(ox, oy, ex, ey);
+          g.addColorStop(0, "rgba(255,240,180," + (0.05 + 0.09 * pulse) + ")"); g.addColorStop(1, "rgba(255,240,180,0)");
+          ctx.fillStyle = g; ctx.globalAlpha = 1; ctx.beginPath(); ctx.moveTo(ox, oy);
+          ctx.lineTo(ox + Math.sin(a - w) * L, oy + Math.cos(a - w) * L); ctx.lineTo(ox + Math.sin(a + w) * L, oy + Math.cos(a + w) * L);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
     function drawAmbient(ctx, t) {
       const st = S.st, type = st.ambient;
       if (type === "none") return;
+      if (RURAL_MAX[type]) { drawRural(ctx, t, type); return; }
       const maxN = { dust: 46, firefly: 22, leaves: 16, petals: 22, bokeh: 12 }[type] || 0;
       const n = Math.round(maxN * Number(st.ambientAmt));
       ctx.save();
@@ -1091,7 +1202,7 @@
       posDate: [["same", "শিরোনামের মতোই"], ["bottom", "নিচে"], ["middle", "মাঝে"], ["top", "উপরে"]],
       anim: [["up", "নিচ থেকে উঠে আসা"], ["fade", "ধীরে ফুটে ওঠা"], ["down", "উপর থেকে নামা"], ["left", "বাম থেকে আসা"], ["right", "ডান থেকে আসা"], ["pop", "পপ (ছোট থেকে বড়)"], ["zoom", "বড় থেকে ছোট হয়ে বসা"], ["blur", "ঝাপসা থেকে স্পষ্ট"], ["words", "শব্দ ধরে ধরে"], ["type", "টাইপ হওয়ার মতো"]],
       fx: [["sparkle", "✨ ঝিকমিক তারা"], ["shine", "শাইন (আলোর রেখা)"], ["glow", "নরম আলো (গ্লো)"], ["none", "কিছু না"]],
-      ambient: [["none", "নেই"], ["dust", "সোনালি ধুলো"], ["firefly", "জোনাকি"], ["leaves", "ঝরা পাতা"], ["petals", "সরষে ফুলের পাপড়ি"], ["bokeh", "নরম আলোর বৃত্ত"]],
+      ambient: [["none", "নেই"], ["dust", "সোনালি ধুলো"], ["firefly", "জোনাকি"], ["leaves", "ঝরা পাতা"], ["petals", "সরষে ফুলের পাপড়ি"], ["bokeh", "নরম আলোর বৃত্ত"], ["butterfly", "🦋 প্রজাপতি"], ["kash", "কাশফুলের তুলা"], ["fog", "সকালের কুয়াশা"], ["rain", "বৃষ্টির ফোঁটা"], ["birds", "পাখির ঝাঁক"], ["shiuli", "শিউলি ফুল ঝরা"], ["grain", "ধানের দানা / খড়ের কুটো"], ["rays", "সূর্যের আলোর রেখা"]],
       outro: [["zoomin", "জুম ইন"], ["zoomout", "জুম আউট"], ["pulse", "জুম ইন + হালকা স্পন্দন"], ["pop", "পপ"], ["still", "স্থির"], ["off", "শেষের পর্দা চাই না"]],
       res: [["1080", "পূর্ণ মাপ (১০৮০ — সেরা মান)"], ["720", "ছোট মাপ (৭২০ — ফোন/ধীর পিসির জন্য)"]],
     };
@@ -1111,6 +1222,7 @@
       g4: [
         { k: "startDelay", l: "শুরুতে অপেক্ষা (সেকেন্ড)", t: "range", min: 0, max: 4, step: 0.1 },
         { k: "gap", l: "দুই পর্দার মাঝের বিরতি (সেকেন্ড)", t: "range", min: 0, max: 2, step: 0.1 },
+        { k: "timeMul", l: "লেখা কতক্ষণ থাকবে (গুণক — ১ = স্বাভাবিক)", t: "range", min: 1, max: 2.5, step: 0.1 },
       ],
       g5: [
         { k: "font", l: "ফন্ট", t: "select", o: OPT.font }, { k: "weight", l: "মোটা-পাতলা", t: "select", o: OPT.weight },
@@ -1288,7 +1400,7 @@
     }
     function fmtOut(k, v) { return k === "size" || k === "offY" ? String(v) : (k === "bgVol" || k === "voiceVol" || k === "musicVol" || k === "ambientAmt") ? Math.round(v * 100) + "%" : String(v); }
   
-    const STRUCT = ["titleText", "credit", "dateMode", "dateOrder", "sw", "sb", "se", "sh", "sd", "gap", "startDelay"];
+    const STRUCT = ["titleText", "credit", "dateMode", "dateOrder", "sw", "sb", "se", "sh", "sd", "gap", "startDelay", "timeMul"];
     const TIMING = ["voiceOff", "imgDur", "loop", "outro", "outroSec"];
     function onChange(k) {
       if (STRUCT.indexOf(k) >= 0) rebuild();
