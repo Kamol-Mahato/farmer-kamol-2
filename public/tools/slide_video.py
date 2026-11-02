@@ -378,23 +378,49 @@ def render_scene_preview(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTE
     return out_png
 
 
-def _motion_expr(motion: str, n: int, idx: int):
-    """zoompan-এর (z, x, y) রাশিমালা। n = মোট ফ্রেম।"""
+def _motion_vf(motion: str, dur: float, idx: int) -> str:
+    """
+    zoompan-এর বদলে scale + crop দিয়ে মসৃণ মোশন।
+    প্যান ও জুম দুটোর ফিল রাখে, জাকুনি অনেক কমায়।
+    """
     m = (motion or "auto").lower()
     if m == "auto" or m not in MOTIONS:
         m = MOTION_CYCLE[idx % len(MOTION_CYCLE)]
+
     k = MOTION_ZOOM
-    nn = max(1, n - 1)          # শেষ ফ্রেমে ঠিক ১.০ পৌঁছায় → জাম্প/জাকুনি কমে
-    cx, cy = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
+    # বড় ক্যানভাস (হেডরুম), তারপর অ্যানিমেটেড ক্রপ
+    base = f"scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
+
     if m == "zoom-in":
-        return f"1+{k}*on/{nn}", cx, cy
+        # ধীরে ধীরে কাছাকাছি (কেন্দ্র থেকে)
+        return (
+            base +
+            f"scale=iw*(1+{k}*t/{dur:.4f}):ih*(1+{k}*t/{dur:.4f}):flags=lanczos,"
+            f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
+        )
     if m == "zoom-out":
-        return f"{1 + k}-{k}*on/{nn}", cx, cy
+        # ধীরে ধীরে দূরে
+        return (
+            base +
+            f"scale=iw*(1+{k}*(1-t/{dur:.4f})):ih*(1+{k}*(1-t/{dur:.4f})):flags=lanczos,"
+            f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
+        )
     if m == "pan-right":
-        return f"{1 + k}", f"(iw-iw/zoom)*on/{nn}", "(ih-ih/zoom)/2"
+        # ডান দিকে প্যান (ক্যামেরা ডানে সরছে)
+        return (
+            base +
+            f"scale=iw*(1+{k}):ih*(1+{k}):flags=lanczos,"
+            f"crop={W}:{H}:x='(iw-ow)*t/{dur:.4f}':y=(ih-oh)/2,format=yuv420p"
+        )
     if m == "pan-left":
-        return f"{1 + k}", f"(iw-iw/zoom)*(1-on/{nn})", "(ih-ih/zoom)/2"
-    return "1", "0", "0"
+        # বাম দিকে প্যান
+        return (
+            base +
+            f"scale=iw*(1+{k}):ih*(1+{k}):flags=lanczos,"
+            f"crop={W}:{H}:x='(iw-ow)*(1-t/{dur:.4f})':y=(ih-oh)/2,format=yuv420p"
+        )
+    # none বা অজানা
+    return base + f"scale={W}:{H}:flags=lanczos,format=yuv420p"
 
 
 # ── ভয়েস (edge-tts) ─────────────────────────────────────────────────────────
@@ -528,13 +554,15 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
         fade = (f"fade=t=in:st=0:d={f:.2f}:color={FADE_HEX},"
                 f"fade=t=out:st={dur - f:.3f}:d={f:.2f}:color={FADE_HEX}")
         if scene_path:
-            nfr = int(round(dur * FPS))
-            z, mx, my = _motion_expr(s.motion, nfr, i)
-            # ছবি ও ওপরের স্তর মাত্র একবার পড়া হয়; zoompan একটি ছবি থেকেই সব ফ্রেম বানায় (অনেক দ্রুত)
-            fc = (f"[0:v]scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
-                  f"zoompan=z='{z}':x='{mx}':y='{my}':d={nfr}:s={W}x{H}:fps={FPS},format=yuv420p[bg];"
-                  f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]")
-            cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", scene_path, "-i", png]
+            # নতুন মসৃণ মোশন (scale + crop) — জাকুনি কমাতে zoompan বাদ
+            motion_vf = _motion_vf(s.motion, dur, i)
+            fc = (
+                f"[0:v]{motion_vf}[bg];"
+                f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]"
+            )
+            # -loop 1 দরকার, নাহলে t এক্সপ্রেশন কাজ করে না
+            cmd = [ffmpeg, "-y", "-loglevel", "error",
+                   "-loop", "1", "-i", scene_path, "-i", png]
             aidx = 2
         else:
             vf = f"format=yuv420p,loop=-1:1,trim=duration={dur:.3f},setpts=PTS-STARTPTS,{fade}"
