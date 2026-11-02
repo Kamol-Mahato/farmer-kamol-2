@@ -388,25 +388,25 @@ def _motion_vf(motion: str, dur: float, idx: int) -> str:
         m = MOTION_CYCLE[idx % len(MOTION_CYCLE)]
 
     k = MOTION_ZOOM
-    # বড় ক্যানভাস (হেডরুম), তারপর অ্যানিমেটেড ক্রপ
+    # বড় ক্যানভাস (হেডরুম)
     base = f"scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
 
     if m == "zoom-in":
         # ধীরে ধীরে কাছাকাছি (কেন্দ্র থেকে)
         return (
             base +
-            f"scale=iw*(1+{k}*t/{dur:.4f}):ih*(1+{k}*t/{dur:.4f}):flags=lanczos,"
+            f"scale=w='iw*(1+{k}*t/{dur:.4f})':h='ih*(1+{k}*t/{dur:.4f})':eval=frame:flags=lanczos,"
             f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
         )
     if m == "zoom-out":
         # ধীরে ধীরে দূরে
         return (
             base +
-            f"scale=iw*(1+{k}*(1-t/{dur:.4f})):ih*(1+{k}*(1-t/{dur:.4f})):flags=lanczos,"
+            f"scale=w='iw*(1+{k}*(1-t/{dur:.4f}))':h='ih*(1+{k}*(1-t/{dur:.4f}))':eval=frame:flags=lanczos,"
             f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
         )
     if m == "pan-right":
-        # ডান দিকে প্যান (ক্যামেরা ডানে সরছে)
+        # ডান দিকে প্যান
         return (
             base +
             f"scale=iw*(1+{k}):ih*(1+{k}):flags=lanczos,"
