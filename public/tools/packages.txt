@@ -2,3 +2,7 @@ ffmpeg
 libraqm0
 libfribidi0
 fonts-freefont-ttf
+libraqm0
+libfribidi0
+libharfbuzz0b
+fonts-noto-core
