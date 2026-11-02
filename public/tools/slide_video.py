@@ -41,7 +41,7 @@ FADE = 0.5
 FADE_HEX = "0x1F2A5A"             # স্লাইড বদলের সময় কালোর বদলে ব্র্যান্ডের ইন্ডিগোতে ফেড
 
 # ছবির দৃশ্য (progyadhara_assets) ও মোশন
-MOTION_ZOOM = 0.10                # পুরো স্লাইডে মোট জুম/প্যান (১০%)
+MOTION_ZOOM = 0.08                # পুরো স্লাইডে মোট জুম/প্যান (৮% — জাকুনি কমাতে)
 MOTION_CYCLE = ["zoom-in", "pan-right", "zoom-out", "pan-left"]   # "auto" হলে পালা করে
 MOTIONS = ("auto", "zoom-in", "zoom-out", "pan-left", "pan-right", "none")
 SCENE_FOLDERS = ("scenes", "symbols", "layers/backgrounds")
@@ -383,7 +383,8 @@ def _motion_expr(motion: str, n: int, idx: int):
     m = (motion or "auto").lower()
     if m == "auto" or m not in MOTIONS:
         m = MOTION_CYCLE[idx % len(MOTION_CYCLE)]
-    k, nn = MOTION_ZOOM, max(2, n)
+    k = MOTION_ZOOM
+    nn = max(1, n - 1)          # শেষ ফ্রেমে ঠিক ১.০ পৌঁছায় → জাম্প/জাকুনি কমে
     cx, cy = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
     if m == "zoom-in":
         return f"1+{k}*on/{nn}", cx, cy
@@ -449,6 +450,7 @@ class Options:
     show_footer: bool = True
     show_mark: bool = True
     voice_on: bool = True
+    custom_voice: Optional[str] = None   # আপলোড করা ভয়েস ফাইলের পাথ (থাকলে AI বাদ)
 
 
 @dataclass
@@ -504,7 +506,13 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
         else:
             png = render_slide(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
         mp3, vd = None, 0.0
-        if opts.voice_on and s.voice:
+        if opts.custom_voice:
+            # কাস্টম ভয়েস থাকলে স্লাইডের সময় স্ক্রিপ্ট/আন্দাজ অনুযায়ীই হবে
+            if s.voice:
+                dur = max(MIN_SLIDE, s.secs or (len(s.voice) / 11.0 + 1.0))
+            else:
+                dur = max(MIN_SLIDE, s.secs or SILENT_DEFAULT)
+        elif opts.voice_on and s.voice:
             if synth is None:
                 raise TTSError("ভয়েস ফাংশন দেওয়া হয়নি।")
             mp3 = str(work / f"v{i}.mp3")
@@ -524,7 +532,7 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
             z, mx, my = _motion_expr(s.motion, nfr, i)
             # ছবি ও ওপরের স্তর মাত্র একবার পড়া হয়; zoompan একটি ছবি থেকেই সব ফ্রেম বানায় (অনেক দ্রুত)
             fc = (f"[0:v]scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
-                  f"zoompan=z='{z}':x='{mx}':y='{my}':d={nfr + FPS}:s={W}x{H}:fps={FPS},format=yuv420p[bg];"
+                  f"zoompan=z='{z}':x='{mx}':y='{my}':d={nfr}:s={W}x{H}:fps={FPS},format=yuv420p[bg];"
                   f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]")
             cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", scene_path, "-i", png]
             aidx = 2
@@ -570,7 +578,23 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
 
     srt_text = "".join(f"{k}\n{_srt_time(a)} --> {_srt_time(b)}\n{t}\n\n" for k, (a, b, t) in enumerate(srt, 1))
     voice_mp3 = None
-    if audio_parts:        # শুধু ভয়েসের ট্র্যাক আলাদা ফাইলে (ইউটিউব/ফেসবুকের অন্য কাজে লাগে)
+
+    # কাস্টম ভয়েস থাকলে সেটাই ফাইনাল অডিও হিসেবে বসাও
+    if opts.custom_voice and os.path.isfile(opts.custom_voice):
+        voice_mp3 = str(work / "voice-only.mp3")
+        try:
+            _ff([ffmpeg, "-y", "-loglevel", "error", "-i", opts.custom_voice,
+                 "-c:a", "libmp3lame", "-q:a", "3", voice_mp3], "কাস্টম ভয়েস কপি")
+            # ভিডিওর সাথে কাস্টম অডিও মার্জ
+            mixed = str(work / "final_mixed.mp4")
+            _ff([ffmpeg, "-y", "-loglevel", "error",
+                 "-i", final, "-i", opts.custom_voice,
+                 "-c:v", "copy", "-map", "0:v:0", "-map", "1:a:0",
+                 "-shortest", mixed], "কাস্টম ভয়েস মার্জ")
+            os.replace(mixed, final)
+        except Exception:
+            voice_mp3 = None
+    elif audio_parts:        # শুধু ভয়েসের ট্র্যাক আলাদা ফাইলে (ইউটিউব/ফেসবুকের অন্য কাজে লাগে)
         voice_mp3 = str(work / "voice-only.mp3")
         ins, fl = [], []
         for k, (p, st_) in enumerate(audio_parts):
@@ -716,15 +740,39 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
     if bad:
         st.error("এই ছবিগুলো পাওয়া যায়নি (নাম মিলিয়ে নিন): " + ", ".join(sorted(set(bad))))
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        voice_on = st.checkbox("AI ভয়েস বানাও", value=True, key="sv_voice_on",
-                               help="বন্ধ রাখলে নীরব ভিডিও হবে (কথার দৈর্ঘ্য অনুযায়ী আন্দাজি সময়)।")
-    with c2:
-        voice_label = st.selectbox("কণ্ঠ", list(VOICES.keys()), key="sv_voice")
-    with c3:
-        rate = st.slider("কথার গতি (%)", -30, 15, -5, 5, key="sv_rate",
-                         help="নেগেটিভ মানে ধীরে পড়বে।")
+    st.markdown("#### ভয়েস সোর্স")
+    voice_mode = st.radio(
+        "কীভাবে ভয়েস যোগ করবেন?",
+        ["AI ভয়েস (edge-tts)", "নিজের রেকর্ড করা অডিও আপলোড"],
+        horizontal=True,
+        key="sv_voice_mode",
+        help="প্রথমে AI দিয়ে ভিডিও বানিয়ে শুনুন → তারপর নিজে রেকর্ড করে এখানে আপলোড করুন।"
+    )
+
+    custom_voice_path = None
+    voice_on = False
+    voice_label = list(VOICES.keys())[0]
+    rate = -5
+
+    if voice_mode == "AI ভয়েস (edge-tts)":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            voice_on = st.checkbox("AI ভয়েস বানাও", value=True, key="sv_voice_on",
+                                   help="বন্ধ রাখলে নীরব ভিডিও হবে (কথার দৈর্ঘ্য অনুযায়ী আন্দাজি সময়)।")
+        with c2:
+            voice_label = st.selectbox("কণ্ঠ", list(VOICES.keys()), key="sv_voice")
+        with c3:
+            rate = st.slider("কথার গতি (%)", -30, 15, -5, 5, key="sv_rate",
+                             help="নেগেটিভ মানে ধীরে পড়বে।")
+    else:
+        st.info("আপনার রেকর্ড করা অডিও (MP3 / WAV / M4A) আপলোড করুন। স্লাইডের সময় স্ক্রিপ্ট অনুযায়ীই থাকবে।")
+        up = st.file_uploader("ভয়েস ফাইল আপলোড করুন", type=["mp3", "wav", "m4a", "aac"], key="sv_custom_voice")
+        if up:
+            Path(temp_dir).mkdir(parents=True, exist_ok=True)
+            custom_voice_path = os.path.join(temp_dir, f"custom_voice_{int(time.time())}{Path(up.name).suffix}")
+            with open(custom_voice_path, "wb") as f:
+                f.write(up.getbuffer())
+            st.success(f"আপলোড হয়েছে: {up.name}")
 
     d1, d2 = st.columns([1, 3])
     with d1:
@@ -734,8 +782,14 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
         footer = st.text_input("নিচের বারের লেখা", value=DEFAULT_FOOTER, key="sv_footer")
     name = st.text_input("ফাইলের নাম", value="progyadhara-video", key="sv_name")
 
-    opts = Options(footer=footer, show_footer=show_footer, show_mark=show_mark, voice_on=voice_on)
-    synth = edge_synth(VOICES[voice_label], rate)
+    opts = Options(
+        footer=footer,
+        show_footer=show_footer,
+        show_mark=show_mark,
+        voice_on=voice_on,
+        custom_voice=custom_voice_path,
+    )
+    synth = edge_synth(VOICES[voice_label], rate) if voice_mode == "AI ভয়েস (edge-tts)" else None
 
     b1, b2 = st.columns(2)
     with b1:
