@@ -38,6 +38,13 @@ LEAD, TAIL = 0.35, 0.7          # ভয়েসের আগে ও পরে 
 MIN_SLIDE = 2.5
 SILENT_DEFAULT = 4.0
 FADE = 0.5
+FADE_HEX = "0x1F2A5A"             # স্লাইড বদলের সময় কালোর বদলে ব্র্যান্ডের ইন্ডিগোতে ফেড
+
+# ছবির দৃশ্য (progyadhara_assets) ও মোশন
+MOTION_ZOOM = 0.10                # পুরো স্লাইডে মোট জুম/প্যান (১০%)
+MOTION_CYCLE = ["zoom-in", "pan-right", "zoom-out", "pan-left"]   # "auto" হলে পালা করে
+MOTIONS = ("auto", "zoom-in", "zoom-out", "pan-left", "pan-right", "none")
+SCENE_FOLDERS = ("scenes", "symbols", "layers/backgrounds")
 
 VOICES = {
     "Nabanita (নারী কণ্ঠ)": "bn-BD-NabanitaNeural",
@@ -52,6 +59,7 @@ _REGULAR_FONTS = [
     "/usr/share/fonts/opentype/noto/NotoSansBengali-Regular.ttf",
 ]
 _BOLD_FONTS = [os.path.join(_HERE, "fonts", "HindSiliguri-Bold.ttf")]
+ASSET_DIR = os.path.normpath(os.path.join(_HERE, "..", "..", "progyadhara_assets"))
 HAS_RAQM = features.check("raqm")
 _LAYOUT = ImageFont.Layout.RAQM if HAS_RAQM else ImageFont.Layout.BASIC
 
@@ -89,6 +97,8 @@ class Slide:
     items: list = field(default_factory=list)   # [(kind, text)] kind: h1 h2 p li
     voice: str = ""
     secs: Optional[float] = None
+    scene: str = ""          # ছবির নাম (progyadhara_assets থেকে), যেমন s01_teaching
+    motion: str = "auto"     # zoom-in | zoom-out | pan-left | pan-right | none | auto
 
 
 def parse_script(text: str) -> List[Slide]:
@@ -101,9 +111,14 @@ def parse_script(text: str) -> List[Slide]:
             if not ln or ln.startswith("//"):
                 continue
             if ln.startswith("@"):
-                name = ln[1:].strip().lower()
-                if name in ("logo", "text", "shloka"):
-                    s.layout = name
+                m = re.match(r"@\s*(\w+)\s*[:：]?\s*(.*)$", ln)
+                key, val = (m.group(1).lower(), m.group(2).strip()) if m else ("", "")
+                if key in ("logo", "text", "shloka"):
+                    s.layout = key
+                elif key == "scene":
+                    s.scene = re.sub(r"\.(jpe?g|png)$", "", val, flags=re.I)
+                elif key == "motion":
+                    s.motion = val.lower() or "auto"
             elif ln.startswith("##"):
                 s.items.append(("h2", ln[2:].strip()))
             elif ln.startswith("#"):
@@ -120,7 +135,7 @@ def parse_script(text: str) -> List[Slide]:
             else:
                 s.items.append(("p", ln))
         s.voice = " ".join(v for v in voice if v)
-        if s.items or s.voice or s.layout == "logo":
+        if s.items or s.voice or s.layout == "logo" or s.scene:
             slides.append(s)
     return slides
 
@@ -238,6 +253,149 @@ def render_slide(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_
     return out_png
 
 
+# ── ছবির দৃশ্য (progyadhara_assets) ──────────────────────────────────────────
+class SceneError(Exception):
+    pass
+
+
+def list_scenes() -> dict:
+    """{ফোল্ডার: [ছবির নাম, ...]} — UI-তে তালিকা দেখানোর জন্য।"""
+    out = {}
+    for folder in SCENE_FOLDERS:
+        d = os.path.join(ASSET_DIR, *folder.split("/"))
+        names = sorted(os.path.splitext(f)[0] for f in (os.listdir(d) if os.path.isdir(d) else [])
+                       if f.lower().endswith((".jpg", ".jpeg", ".png")))
+        if names:
+            out[folder] = names
+    return out
+
+
+def find_scene(name: str) -> str:
+    """ছবির নাম → ফাইলের পথ। না পেলে কাছাকাছি নামসহ SceneError।"""
+    import difflib
+    name = (name or "").strip()
+    for folder in SCENE_FOLDERS:
+        for ext in (".jpg", ".jpeg", ".png"):
+            p = os.path.join(ASSET_DIR, *folder.split("/"), name + ext)
+            if name and os.path.isfile(p):
+                return p
+    allnames = [n for v in list_scenes().values() for n in v]
+    near = difflib.get_close_matches(name, allnames, n=3, cutoff=0.5)
+    hint = f" কাছাকাছি নাম: {', '.join(near)}।" if near else ""
+    if not allnames:
+        hint = f" progyadhara_assets ফোল্ডারে কোনো ছবি পাওয়া যায়নি ({ASSET_DIR})।"
+    raise SceneError(f"ছবি পাওয়া যায়নি: '{name}'।{hint}")
+
+
+def missing_scenes(slides) -> List[str]:
+    bad = []
+    for s in slides:
+        if s.scene:
+            try:
+                find_scene(s.scene)
+            except SceneError:
+                bad.append(s.scene)
+    return bad
+
+
+# ছবির ওপরের প্যানেলে লেখার মাপ ও রং (গাঢ় প্যানেল, তাই হালকা রং)
+_LIGHT_GOLD, _PANEL_RGBA = "#F4D58D", (31, 42, 90, 214)
+_SCENE_STYLES = {
+    "text":   {"h1": (92, GOLD, True), "h2": (64, _LIGHT_GOLD, True), "p": (56, CREAM, False), "li": (52, CREAM, False)},
+    "shloka": {"h1": (46, GOLD, True), "h2": (54, _LIGHT_GOLD, False), "p": (72, CREAM, True), "li": (52, CREAM, False)},
+}
+_SCENE_STYLES["logo"] = _SCENE_STYLES["text"]
+
+
+def render_scene_overlay(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
+                         show_mark: bool = True) -> str:
+    """ছবির ওপরে বসার স্বচ্ছ স্তর (RGBA): লেখার প্যানেল + নিচের বার + লোগো।"""
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    base = H - (FOOTER_H + 4 if show_footer else 0)
+
+    if show_footer:
+        d.rectangle([0, H - FOOTER_H, W, H], fill=INDIGO)
+        d.rectangle([0, H - FOOTER_H - 4, W, H - FOOTER_H], fill=GOLD)
+        f, _ = get_font(40, False)
+        d.text((W // 2, H - FOOTER_H // 2), footer, font=f, fill=GOLD, anchor="mm")
+    if show_mark:
+        m = logo_mark(130)
+        img.paste(m, (W - 130 - 50, 40), m)
+
+    style = _SCENE_STYLES.get(slide.layout, _SCENE_STYLES["text"])
+    items = [(k, t, *style[k]) for k, t in slide.items]
+    if items:
+        pad, max_text_w, max_h = 40, 1500, 470
+        rows, total = [], 0
+        for scale in (1.0, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48):
+            rows, total = [], 0
+            for kind, txt, size, color, bold in items:
+                sz = int(size * scale)
+                f, sw = get_font(sz, bold)
+                max_w = max_text_w - (90 if kind == "li" else 0)
+                lines = _wrap(txt, f, max_w)
+                rows.append((kind, lines, f, sw, color, sz, int(sz * 1.4) * len(lines)))
+                total += rows[-1][6]
+            total += sum(int(r[5] * 0.3) for r in rows[:-1])
+            if total <= max_h - 2 * pad:
+                break
+        widths = [f.getlength(ln) + (90 if kind == "li" else 0) for kind, lines, f, *_ in rows for ln in lines]
+        pw = int(min(W - 120, max(widths) + 2 * pad + 40))
+        ph = int(total + 2 * pad)
+        px, py = (W - pw) // 2, base - 34 - ph
+        d.rounded_rectangle([px, py, px + pw, py + ph], radius=30, fill=_PANEL_RGBA, outline=GOLD, width=3)
+        y = py + pad
+        for kind, lines, f, sw, color, sz, h in rows:
+            for ln in lines:
+                if kind == "li":
+                    x0 = px + pad + 10
+                    cy = y + int(sz * 0.62)
+                    d.ellipse([x0, cy - 9, x0 + 18, cy + 9], fill=GOLD)
+                    d.text((x0 + 50, y), ln, font=f, fill=color, anchor="lt", stroke_width=sw, stroke_fill=color)
+                else:
+                    d.text((W // 2, y), ln, font=f, fill=color, anchor="mt", stroke_width=sw, stroke_fill=color)
+                y += int(sz * 1.4)
+            y += int(sz * 0.3)
+    img.save(out_png)
+    return out_png
+
+
+def render_scene_preview(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
+                         show_mark: bool = True) -> str:
+    """UI-তে দেখার জন্য: ছবি + ওপরের স্তর জুড়ে একটি স্থির ফ্রেম।"""
+    src = Image.open(find_scene(slide.scene)).convert("RGB")
+    k = max(W / src.width, H / src.height)
+    src = src.resize((int(src.width * k + 0.5), int(src.height * k + 0.5)), Image.LANCZOS)
+    left, top = (src.width - W) // 2, (src.height - H) // 2
+    bg = src.crop((left, top, left + W, top + H)).convert("RGBA")
+    ov = Image.open(render_scene_overlay(slide, out_png + ".ov.png", footer, show_footer, show_mark))
+    Image.alpha_composite(bg, ov).convert("RGB").save(out_png)
+    try:
+        os.remove(out_png + ".ov.png")
+    except OSError:
+        pass
+    return out_png
+
+
+def _motion_expr(motion: str, n: int, idx: int):
+    """zoompan-এর (z, x, y) রাশিমালা। n = মোট ফ্রেম।"""
+    m = (motion or "auto").lower()
+    if m == "auto" or m not in MOTIONS:
+        m = MOTION_CYCLE[idx % len(MOTION_CYCLE)]
+    k, nn = MOTION_ZOOM, max(2, n)
+    cx, cy = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
+    if m == "zoom-in":
+        return f"1+{k}*on/{nn}", cx, cy
+    if m == "zoom-out":
+        return f"{1 + k}-{k}*on/{nn}", cx, cy
+    if m == "pan-right":
+        return f"{1 + k}", f"(iw-iw/zoom)*on/{nn}", "(ih-ih/zoom)/2"
+    if m == "pan-left":
+        return f"{1 + k}", f"(iw-iw/zoom)*(1-on/{nn})", "(ih-ih/zoom)/2"
+    return "1", "0", "0"
+
+
 # ── ভয়েস (edge-tts) ─────────────────────────────────────────────────────────
 class TTSError(Exception):
     pass
@@ -340,7 +498,11 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
     for i, s in enumerate(slides):
         if progress:
             progress(i / n, f"স্লাইড {i + 1}/{n}")
-        png = render_slide(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
+        scene_path = find_scene(s.scene) if s.scene else None
+        if scene_path:      # ছবির দৃশ্য: ওপরের স্তর আলাদা, ছবি নড়বে (জুম/প্যান)
+            png = render_scene_overlay(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
+        else:
+            png = render_slide(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
         mp3, vd = None, 0.0
         if opts.voice_on and s.voice:
             if synth is None:
@@ -355,15 +517,31 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
             dur = max(MIN_SLIDE, s.secs or SILENT_DEFAULT)
 
         f = min(FADE, dur / 3)
-        vf = (f"format=yuv420p,loop=-1:1,trim=duration={dur:.3f},setpts=PTS-STARTPTS,"
-              f"fade=t=in:st=0:d={f:.2f},fade=t=out:st={dur - f:.3f}:d={f:.2f}")
-        cmd = [ffmpeg, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", png]
+        fade = (f"fade=t=in:st=0:d={f:.2f}:color={FADE_HEX},"
+                f"fade=t=out:st={dur - f:.3f}:d={f:.2f}:color={FADE_HEX}")
+        if scene_path:
+            nfr = int(round(dur * FPS))
+            z, mx, my = _motion_expr(s.motion, nfr, i)
+            # ছবি ও ওপরের স্তর মাত্র একবার পড়া হয়; zoompan একটি ছবি থেকেই সব ফ্রেম বানায় (অনেক দ্রুত)
+            fc = (f"[0:v]scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
+                  f"zoompan=z='{z}':x='{mx}':y='{my}':d={nfr + FPS}:s={W}x{H}:fps={FPS},format=yuv420p[bg];"
+                  f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]")
+            cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", scene_path, "-i", png]
+            aidx = 2
+        else:
+            vf = f"format=yuv420p,loop=-1:1,trim=duration={dur:.3f},setpts=PTS-STARTPTS,{fade}"
+            cmd = [ffmpeg, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", png]
+            aidx = 1
         if mp3:
             cmd += ["-i", mp3, "-af", f"adelay={int(LEAD * 1000)}:all=1,apad"]
         else:
             cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
         tmp, out = str(work / f"tmp{i}.mp4"), str(work / f"p{i}.mp4")
-        cmd += ["-vf", vf, "-t", f"{dur:.3f}", "-r", str(FPS),
+        if scene_path:
+            cmd += ["-filter_complex", fc, "-map", "[v]", "-map", f"{aidx}:a"]
+        else:
+            cmd += ["-vf", vf]
+        cmd += ["-t", f"{dur:.3f}", "-r", str(FPS),
                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
                 "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", tmp]
         _ff(cmd, f"স্লাইড {i + 1}")
@@ -446,6 +624,41 @@ SAMPLE_SCRIPT = """\
 > ভালো লাগলে চ্যানেলটি সাবস্ক্রাইব করুন, ফেসবুক পেজ ফলো করুন, আর আপনার মতামত কমেন্টে জানান।
 """
 
+GITA_SAMPLE = """\
+// গীতা ২.৪৭ — ছবিসহ নমুনা (ছবির নাম "🖼️ ছবির তালিকা" থেকে নিন)
+@scene s01_teaching
+@motion zoom-in
+@shloka
+# শ্রীমদ্ভগবদ্গীতা ২.৪৭
+কর্মণ্যেবাধিকারস্তে মা ফলেষু কদাচন।
+মা কর্মফলহেতুর্ভূর্মা তে সঙ্গোহস্ত্বকর্মণি॥
+> শ্রীমদ্ভগবদ্গীতা, দ্বিতীয় অধ্যায়, সাতচল্লিশ নম্বর শ্লোক। কর্মণ্যেবাধিকারস্তে মা ফলেষু কদাচন। মা কর্মফলহেতুর্ভূর্মা তে সঙ্গোহস্ত্বকর্মণি।
+
+---
+@scene s10_krishna_closeup
+@motion pan-right
+## অর্থ
+কাজ করাতেই তোমার অধিকার, ফলে কখনোই নয়।
+> এর অর্থ: কাজ করাতেই তোমার অধিকার, কাজের ফলে কখনোই নয়। ফলের আশায় কাজ কোরো না, আবার কাজ না করার দিকেও যেয়ো না।
+
+---
+@scene s12_dusk_teaching
+@motion zoom-out
+- কাজ আমাদের হাতে
+- ফল পুরোপুরি আমাদের হাতে নয়
+- তাই মন দিয়ে কাজই আমাদের দায়িত্ব
+> আমরা কাজ করতে পারি, কিন্তু ফল পুরোপুরি আমাদের হাতে থাকে না। তাই মন দিয়ে কাজ করাই আমাদের দায়িত্ব।
+
+---
+@scene s05_victory
+@motion zoom-in
+# প্রজ্ঞাধারা
+## জ্ঞানের ধারায় জীবনের পথ
+> ভালো লাগলে চ্যানেলটি সাবস্ক্রাইব করুন, আর আপনার মতামত কমেন্টে জানান।
+"""
+
+SAMPLES = {"স্বাগতম ভিডিও (সাদা স্লাইড)": SAMPLE_SCRIPT, "গীতা ২.৪৭ (ছবিসহ)": GITA_SAMPLE}
+
 HELP_TEXT = """
 **প্রতিটি স্লাইড `---` দিয়ে আলাদা করুন।**
 
@@ -459,6 +672,8 @@ HELP_TEXT = """
 | `> লেখা` | **ভয়েসে যা বলা হবে** (পর্দায় দেখাবে না)। স্লাইডের সময় ভয়েসের দৈর্ঘ্য থেকে নিজে ঠিক হয় |
 | `~ 6` | ভয়েস না থাকলে স্লাইড কত সেকেন্ড থাকবে |
 | `// লেখা` | মন্তব্য (বাদ যাবে) |
+| `@scene s01_teaching` | **ছবির দৃশ্য** (progyadhara_assets ফোল্ডার থেকে, নামে `.jpg` লাগবে না)। লেখা ছবির ওপর প্যানেলে বসে |
+| `@motion zoom-in` | ছবির নড়াচড়া: `zoom-in`, `zoom-out`, `pan-left`, `pan-right`, `none`। না দিলে পালা করে নিজে বাছে |
 
 ভয়েসে বানান ঠিকমতো না পড়লে `>` লাইনে বানান বদলে লিখুন (পর্দার লেখা অপরিবর্তিত থাকবে)।
 """
@@ -478,10 +693,28 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
     with st.expander("স্ক্রিপ্ট লেখার নিয়ম"):
         st.markdown(HELP_TEXT)
 
-    script = st.text_area("স্ক্রিপ্ট", value=SAMPLE_SCRIPT, height=460, key="sv_script")
+    scenes = list_scenes()
+    with st.expander("🖼️ ছবির তালিকা (@scene-এ এই নামগুলো লিখুন)"):
+        if not scenes:
+            st.warning(f"progyadhara_assets ফোল্ডারে কোনো ছবি পাওয়া যায়নি: {ASSET_DIR}")
+        for folder, names in scenes.items():
+            st.markdown(f"**{folder}/**")
+            st.code("\n".join(names), language=None)
+
+    def _load_sample():
+        st.session_state["sv_script"] = SAMPLES[st.session_state["sv_sample"]]
+
+    st.selectbox("নমুনা স্ক্রিপ্ট (বাছলে নিচের লেখা বদলে যাবে)", list(SAMPLES.keys()), key="sv_sample",
+                 on_change=_load_sample)
+    st.session_state.setdefault("sv_script", SAMPLE_SCRIPT)
+    script = st.text_area("স্ক্রিপ্ট", height=460, key="sv_script")
     slides = parse_script(script)
     n_voice = sum(1 for s in slides if s.voice)
-    st.caption(f"{len(slides)} টি স্লাইড · ভয়েস আছে {n_voice} টিতে")
+    n_scene = sum(1 for s in slides if s.scene)
+    st.caption(f"{len(slides)} টি স্লাইড · ভয়েস আছে {n_voice} টিতে · ছবির দৃশ্য {n_scene} টিতে")
+    bad = missing_scenes(slides)
+    if bad:
+        st.error("এই ছবিগুলো পাওয়া যায়নি (নাম মিলিয়ে নিন): " + ", ".join(sorted(set(bad))))
 
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -513,8 +746,17 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                 pdir = os.path.join(temp_dir, "slide_preview")
                 Path(pdir).mkdir(parents=True, exist_ok=True)
                 for i, s in enumerate(slides):
-                    p = render_slide(s, os.path.join(pdir, f"p{i}.png"), footer, show_footer, show_mark)
-                    st.image(p, caption=f"স্লাইড {i + 1}", use_container_width=True)
+                    out_p = os.path.join(pdir, f"p{i}.png")
+                    try:
+                        if s.scene:
+                            p = render_scene_preview(s, out_p, footer, show_footer, show_mark)
+                        else:
+                            p = render_slide(s, out_p, footer, show_footer, show_mark)
+                    except SceneError as e:
+                        st.error(f"স্লাইড {i + 1}: {e}")
+                        continue
+                    cap = f"স্লাইড {i + 1}" + (f" · ছবি: {s.scene} · মোশন: {s.motion}" if s.scene else "")
+                    st.image(p, caption=cap, use_container_width=True)
     with b2:
         first = next((s.voice for s in slides if s.voice), "")
         if st.button("🎧 প্রথম ভয়েসটা শুনে দেখুন", use_container_width=True, key="sv_hear", disabled=not first):
