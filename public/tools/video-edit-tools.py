@@ -14,7 +14,12 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
 
+import sys
+
 import streamlit as st
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import slide_video  # প্রজ্ঞাধারা স্লাইড ভিডিও ট্যাব
 
 # ── PATHS ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -739,6 +744,15 @@ def main():
     else:
         st.sidebar.warning("logo.png পাওয়া যায়নি — লোগো ছাড়াই চলবে")
 
+    tab_clip, tab_slide = st.tabs(["🎬 ক্লিপ এডিটর", "📖 স্লাইড ভিডিও (প্রজ্ঞাধারা)"])
+    with tab_clip:
+        clip_editor()
+    with tab_slide:
+        slide_video.render_tab(FFMPEG, FFPROBE, TEMP_DIR, OUTPUT_DIR)
+
+
+def clip_editor():
+    """আগের ক্লিপ-এডিটর (সেকশন ১–৫), কোড অপরিবর্তিত।"""
     st.header("১. ক্লিপ আপলোড")
     ups = st.file_uploader(
         "২০–৩০টা ভিডিও ক্লিপ একসাথে সিলেক্ট করুন",

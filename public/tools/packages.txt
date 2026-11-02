@@ -1,1 +1,4 @@
 ffmpeg
+libraqm0
+libfribidi0
+fonts-freefont-ttf
