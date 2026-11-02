@@ -6051,6 +6051,9 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
               startY: pt.y,
               origX: hit.x,
               origY: hit.y,
+              isImagePan: hit.type === "image",
+              origOX: hit.cropOX != null ? hit.cropOX : 0.5,
+              origOY: hit.cropOY != null ? hit.cropOY : 0.5,
             };
           } else {
             selectedId = null;
@@ -6193,8 +6196,41 @@ ${el.shape === "rect" ? `<div class="prop-row"><span class="prop-label">Radius</
           if (dragState) {
             const el = elements.find((e) => e.id === dragState.id);
             if (!el) return;
-            el.x = dragState.origX + (pt.x - dragState.startX);
-            el.y = dragState.origY + (pt.y - dragState.startY);
+
+            if (dragState.isImagePan) {
+              // ইমেজের কনটেন্ট প্যান (ফ্রেম ফিক্সড থাকবে)
+              const iw = el.imgW || (el.img && (el.img.naturalWidth || el.img.width)) || el.w;
+              const ih = el.imgH || (el.img && (el.img.naturalHeight || el.img.height)) || el.h;
+              const zoom = Math.max(1, Math.min(4, el.cropZoom || 1));
+              const imgAspect = iw / ih;
+              const boxAspect = el.w / Math.max(1, el.h);
+
+              let baseW, baseH;
+              if (imgAspect > boxAspect) {
+                baseH = ih;
+                baseW = ih * boxAspect;
+              } else {
+                baseW = iw;
+                baseH = iw / boxAspect;
+              }
+              const srcW = baseW / zoom;
+              const srcH = baseH / zoom;
+              const maxX = Math.max(0, iw - srcW);
+              const maxY = Math.max(0, ih - srcH);
+
+              const dx = pt.x - dragState.startX;
+              const dy = pt.y - dragState.startY;
+
+              const newSx = (dragState.origOX * maxX) - (dx / el.w) * srcW;
+              const newSy = (dragState.origOY * maxY) - (dy / el.h) * srcH;
+
+              el.cropOX = maxX > 0 ? Math.max(0, Math.min(1, newSx / maxX)) : 0.5;
+              el.cropOY = maxY > 0 ? Math.max(0, Math.min(1, newSy / maxY)) : 0.5;
+            } else {
+              el.x = dragState.origX + (pt.x - dragState.startX);
+              el.y = dragState.origY + (pt.y - dragState.startY);
+            }
+
             showZoneTooltip(e, el);
             render();
             return;
