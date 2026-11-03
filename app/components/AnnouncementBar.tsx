@@ -116,13 +116,13 @@ export default function AnnouncementBar() {
         </div>
       )}
       <div className="flex-1 overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap inline-block">
+      <div data-nosnippet className="animate-marquee whitespace-nowrap inline-block">
           {[...Array(3)].map((_, i) => (
             <span key={i}>
               {locale === "en" ? (
                 <>
-                  Nomoskar / Assalamu Alaikum Pure Honey, Pure Ghee, Pure Mustard oil,Pure Date Palm Jaggery &
-                  Duck Chicks — straight from our farm to your door. Welcome
+                   Pure Honey, Pure Ghee, Pure Mustard Oil, Pure Date Palm Jaggery &
+                   Duck Chicks — straight from our farm to your door. Nomoskar / Assalamu Alaikum, Welcome
                   &nbsp;
                   <a
                     href={localizeHref("/", locale)}
@@ -138,13 +138,12 @@ export default function AnnouncementBar() {
                   >
                     {siteConfig.contact.phoneDisplay}
                   </a>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;
                 </>
               ) : (
                 <>
-                  নমস্কার / আসসালামুআলাইকুম, {siteConfig.brand.name}-এ পেয়ে
-                  যাচ্ছেন খাঁটিমধু - খাঁটি ঘি - খাঁটি সরিষার তেল,খেজুরের খাঁটি গুড়  ও হাঁসের বাচ্চা — সরাসরি
-                  খামার থেকে আপনার দরজায়।&nbsp;
+                  খাঁটি মধু - খাঁটি ঘি - খাঁটি সরিষার তেল, খেজুরের খাঁটি গুড় ও হাঁসের বাচ্চা — সরাসরি
+                  খামার থেকে আপনার দরজায়।&nbsp;নমস্কার / আসসালামুআলাইকুম,&nbsp;
                   <a
                     href={localizeHref("/", locale)}
                     className="text-yellow-400 font-bold hover:underline"
@@ -160,7 +159,7 @@ export default function AnnouncementBar() {
                     {siteConfig.contact.phoneDisplay}
                   </a>
                   &nbsp;। ঢাকার মধ্যে হোম ডেলিভারি ২৪ ঘন্টার মধ্যে, ঢাকার বাইরে
-                  ৪৮ ঘন্টায়।&nbsp;
+                  ৪৮ ঘন্টায়।&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;
                 </>
               )}
             </span>

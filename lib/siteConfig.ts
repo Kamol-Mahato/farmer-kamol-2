@@ -71,9 +71,9 @@ export const siteConfig = {
     defaultTitle: "Farmer Kamol – কৃষক কমল | খামার থেকে আপনার দরজায়",
     titleTemplate: "%s | Farmer Kamol",
     description:
-      "সিরাজগঞ্জের রায়গঞ্জ থেকে সরাসরি খাঁটি দেশি পণ্য, ন্যায্য মূল্যে।",
+    "Farmer Kamol – কৃষক কমল: সিরাজগঞ্জের নিজস্ব খামার থেকে সরাসরি খাঁটি মধু, খাঁটি গরুর ঘি, ভেজালমুক্ত সরিষার তেল, খেজুরের গুড় ও হাঁসের বাচ্চা — সারা বাংলাদেশে হোম ডেলিভারি। ঢাকার মধ্যে ২৪ ঘন্টায়, ঢাকার বাইরে ৪৮ ঘন্টায় পৌঁছে দিই। মধ্যস্থতাকারী ছাড়া কৃষকের কাছ থেকে সরাসরি কিনুন, অর্ডার বা যেকোনো জিজ্ঞাসায় WhatsApp অথবা কল করুন।",
     descriptionEn:
-      "Agro-commerce brand based in Raiganj, Sirajganj, Bangladesh, supplying pure honey, ghee, mustard oil, and Chinese duck chicks directly from the farm.",
+    "Farmer Kamol – কৃষক কমল: Pure honey, pure cow ghee, adulteration-free mustard oil, date palm jaggery and duck chicks, straight from our own farm in Sirajganj, with home delivery across Bangladesh. We deliver within 24 hours inside Dhaka and within 48 hours outside Dhaka. Buy directly from the farmer with no middlemen, and for orders or any inquiry, WhatsApp or call us.",
     keywords: [
       "খাঁটি মধু",
       "সরিষার তেল",
