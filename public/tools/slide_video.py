@@ -1,21 +1,26 @@
 """
 প্রজ্ঞাধারা — স্লাইড ভিডিও
-ক্যাপশন/স্ক্রিপ্ট → ব্র্যান্ডেড স্লাইড + AI ভয়েস (edge-tts) + SRT → একটি MP4
+স্ক্রিপ্ট → ব্র্যান্ডেড স্লাইড/ছবির দৃশ্য + নিজের রেকর্ড করা ভয়েস (বা AI ভয়েস) + BG সাউন্ড → একটি MP4
 
-video-edit-tools.py-এর "📖 স্লাইড ভিডিও" ট্যাব থেকে ডাকা হয়।
-ffmpeg ও PIL ছাড়া বাড়তি কিছু লাগে না (ভয়েসের জন্য edge-tts)।
+video-edit-tools.py-এর "📖 স্লাইড ভিডিও" ট্যাব থেকে ডাকা হয়  (slide_video.render_tab)।
+ffmpeg ও PIL ছাড়া বাড়তি কিছু লাগে না (AI ভয়েসের জন্য edge-tts)।
 
 স্ক্রিপ্টের নিয়ম (প্রতিটি স্লাইড `---` দিয়ে আলাদা):
-    @logo | @text | @shloka   স্লাইডের ধরন (না দিলে @text)
-    # লেখা                   বড় শিরোনাম
-    ## লেখা                  সোনালি উপ-শিরোনাম
-    - লেখা                   বুলেট
-    লেখা                     সাধারণ লাইন (মাঝখানে)
-    > লেখা                   ভয়েসে যা বলা হবে (পর্দায় দেখাবে না)
-    ~ 6                      ভয়েস না থাকলে কত সেকেন্ড দেখাবে
+    @logo | @text | @shloka   স্লাইডের ধরন (না দিলে @text; @meaning থাকলে নিজে @shloka)
+    @scene নাম                ছবির দৃশ্য (progyadhara_assets থেকে)
+    @motion zoom-in ...       ছবির নড়াচড়া
+    # লেখা                    বড় শিরোনাম
+    ## লেখা                   সোনালি উপ-শিরোনাম
+    - লেখা                    বুলেট
+    লেখা                      সাধারণ লাইন (মাঝখানে)
+    > লেখা                    ভয়েসের নোট (পর্দায় দেখাবে না)
+    ~ 6                       এই ধাপ কত সেকেন্ড (ভয়েস না থাকলে)
+    @meaning                  এর আগে = শ্লোকের ধাপ, এর পরে = অর্থের ধাপ
 """
 
 import asyncio
+import hashlib
+import math
 import os
 import re
 import shutil
@@ -24,7 +29,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from PIL import Image, ImageDraw, ImageFont, features
 
@@ -40,8 +45,24 @@ SILENT_DEFAULT = 4.0
 FADE = 0.5
 FADE_HEX = "0x1F2A5A"             # স্লাইড বদলের সময় কালোর বদলে ব্র্যান্ডের ইন্ডিগোতে ফেড
 
-# ছবির দৃশ্য (progyadhara_assets) ও মোশন
-MOTION_ZOOM = 0.08                # পুরো স্লাইডে মোট জুম/প্যান (৮% — জাকুনি কমাতে)
+# ── শ্লোক → অর্থ ধাপ বদল ─────────────────────────────────────────────────────
+TRANS = 0.9                       # শ্লোক ওপরে উঠে যেতে কত সেকেন্ড লাগবে
+SHLOKA_END_SCALE = 0.62           # ওপরে গিয়ে শ্লোকের প্যানেল কত ছোট হবে (১.০ = একই)
+SHLOKA_END_OPACITY = 0.55         # ওপরে গিয়ে কতটা দৃশ্যমান থাকবে (১.০ = পুরো, ০.৫ = আধা-স্বচ্ছ)
+SHLOKA_TOP = 36                   # ওপরে গিয়ে ওপরের কিনারা থেকে দূরত্ব (পিক্সেল)
+LINE_SECS = 4.5                   # শ্লোকের প্রতি লাইন পড়তে আন্দাজি সময়
+MEANING_FACTOR = 1.5              # অর্থ বুঝিয়ে বলতে পর্দার লেখার চেয়ে কত গুণ সময় লাগে (আন্দাজ)
+SPLIT_PAUSE = 1.2                 # শ্লোক ও অর্থের মাঝের বিরতির আন্দাজ (সেকেন্ড)
+AI_GAP = 0.6                      # AI ভয়েসে শ্লোক ও অর্থের মাঝের বিরতি
+
+# ── মোশন: ধ্রুব গতি + নরম শুরু/শেষ ───────────────────────────────────────────
+# গতি পিক্সেল/সেকেন্ড (গড়)। স্লাইড ছোট হলে ছবি কম দূরত্ব যায়, তাই কখনো দ্রুত হয় না।
+MOTION_SPEEDS = {"ধীর": 16.0, "মাঝারি": 24.0, "একটু দ্রুত": 36.0}
+DEFAULT_MOTION = "মাঝারি"
+PAN_ZOOM = 1.30                   # প্যানের সময় ছবি কতটা বড় ধরা হয় (দূরত্বের সীমা: (১.৩-১)×১৯২০ পিক্সেল)
+ZOOM_MAX = 0.12                   # জুমে সর্বোচ্চ ১২%
+ZOOM_PER_SEC = 0.004              # মাঝারি গতিতে প্রতি সেকেন্ডে ০.৪%
+SS = 2                            # সুপারস্যাম্পলিং: আধা-পিক্সেলের ধাপে মসৃণ নড়াচড়া
 MOTION_CYCLE = ["zoom-in", "pan-right", "zoom-out", "pan-left"]   # "auto" হলে পালা করে
 MOTIONS = ("auto", "zoom-in", "zoom-out", "pan-left", "pan-right", "none")
 SCENE_FOLDERS = ("scenes", "symbols", "layers/backgrounds")
@@ -60,6 +81,8 @@ _REGULAR_FONTS = [
 ]
 _BOLD_FONTS = [os.path.join(_HERE, "fonts", "HindSiliguri-Bold.ttf")]
 ASSET_DIR = os.path.normpath(os.path.join(_HERE, "..", "..", "progyadhara_assets"))
+MUSIC_DIR = os.path.join(ASSET_DIR, "music")
+MUSIC_EXT = (".mp3", ".wav", ".m4a", ".aac", ".ogg")
 HAS_RAQM = features.check("raqm")
 _LAYOUT = ImageFont.Layout.RAQM if HAS_RAQM else ImageFont.Layout.BASIC
 
@@ -90,22 +113,43 @@ def get_font(size: int, bold: bool):
     return ImageFont.truetype(reg, size, layout_engine=_LAYOUT), (max(1, size // 45) if bold else 0)
 
 
+_BN_DIGITS = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
+
+
+def bn(x) -> str:
+    """সংখ্যা → বাংলা অঙ্ক।"""
+    return str(x).translate(_BN_DIGITS)
+
+
+def fmt_secs(sec: float) -> str:
+    sec = max(0, int(round(sec)))
+    if sec >= 60:
+        return f"{bn(sec // 60)} মিনিট {bn(sec % 60)} সেকেন্ড"
+    return f"{bn(sec)} সেকেন্ড"
+
+
 # ── স্ক্রিপ্ট পার্সার ────────────────────────────────────────────────────────
 @dataclass
 class Slide:
     layout: str = "text"
-    items: list = field(default_factory=list)   # [(kind, text)] kind: h1 h2 p li
-    voice: str = ""
-    secs: Optional[float] = None
+    layout_set: bool = False
+    items: list = field(default_factory=list)     # [(kind, text)] kind: h1 h2 p li   (শ্লোকের/একমাত্র ধাপ)
+    voice: str = ""                               # প্রথম ধাপের ভয়েস নোট
+    secs: Optional[float] = None                  # প্রথম ধাপের সেকেন্ড (~)
     scene: str = ""          # ছবির নাম (progyadhara_assets থেকে), যেমন s01_teaching
     motion: str = "auto"     # zoom-in | zoom-out | pan-left | pan-right | none | auto
+    has_meaning: bool = False                     # @meaning আছে কি
+    m_items: list = field(default_factory=list)   # অর্থের ধাপের লেখা
+    m_voice: str = ""                             # অর্থের ধাপের ভয়েস নোট
+    m_secs: Optional[float] = None                # অর্থের ধাপের সেকেন্ড (~)
 
 
 def parse_script(text: str) -> List[Slide]:
     slides = []
     for block in re.split(r"(?m)^\s*-{3,}\s*$", text or ""):
         s = Slide()
-        voice = []
+        voice1, voice2 = [], []
+        phase = 1
         for raw in block.splitlines():
             ln = raw.strip()
             if not ln or ln.startswith("//"):
@@ -114,30 +158,77 @@ def parse_script(text: str) -> List[Slide]:
                 m = re.match(r"@\s*(\w+)\s*[:：]?\s*(.*)$", ln)
                 key, val = (m.group(1).lower(), m.group(2).strip()) if m else ("", "")
                 if key in ("logo", "text", "shloka"):
-                    s.layout = key
+                    s.layout, s.layout_set = key, True
                 elif key == "scene":
                     s.scene = re.sub(r"\.(jpe?g|png)$", "", val, flags=re.I)
                 elif key == "motion":
                     s.motion = val.lower() or "auto"
-            elif ln.startswith("##"):
-                s.items.append(("h2", ln[2:].strip()))
+                elif key in ("meaning", "artho", "ortho"):
+                    s.has_meaning = True
+                    phase = 2
+                continue
+            target_items = s.m_items if phase == 2 else s.items
+            if ln.startswith("##"):
+                target_items.append(("h2", ln[2:].strip()))
             elif ln.startswith("#"):
-                s.items.append(("h1", ln[1:].strip()))
+                target_items.append(("h1", ln[1:].strip()))
             elif ln.startswith(">"):
-                voice.append(ln[1:].strip())
+                (voice2 if phase == 2 else voice1).append(ln[1:].strip())
             elif ln.startswith("~"):
                 try:
-                    s.secs = float(ln[1:].strip())
+                    val = float(ln[1:].strip())
                 except ValueError:
-                    pass
+                    continue
+                if phase == 2:
+                    s.m_secs = val
+                else:
+                    s.secs = val
             elif ln.startswith("- "):
-                s.items.append(("li", ln[2:].strip()))
+                target_items.append(("li", ln[2:].strip()))
             else:
-                s.items.append(("p", ln))
-        s.voice = " ".join(v for v in voice if v)
-        if s.items or s.voice or s.layout == "logo" or s.scene:
+                target_items.append(("p", ln))
+        s.voice = " ".join(v for v in voice1 if v)
+        s.m_voice = " ".join(v for v in voice2 if v)
+        if s.has_meaning and not s.layout_set:
+            s.layout = "shloka"
+        if s.items or s.voice or s.m_items or s.m_voice or s.layout == "logo" or s.scene:
             slides.append(s)
     return slides
+
+
+# ── সময়ের আন্দাজ (রেকর্ডিংয়ের জন্য) ────────────────────────────────────────
+def _words(txt: str) -> int:
+    return len((txt or "").split())
+
+
+def est_phase1(s: Slide, wpm: int) -> float:
+    if s.secs:
+        return float(s.secs)
+    if s.has_meaning:
+        lines = sum(1 for k, _ in s.items if k == "p")
+        base = max(4.0, lines * LINE_SECS + 1.0)
+        if s.voice:
+            base = max(base, _words(s.voice) / wpm * 60.0)
+        return base
+    if s.voice:
+        return max(MIN_SLIDE, _words(s.voice) / wpm * 60.0 + 1.0)
+    return max(MIN_SLIDE, SILENT_DEFAULT)
+
+
+def est_phase2(s: Slide, wpm: int) -> float:
+    if not s.has_meaning:
+        return 0.0
+    if s.m_secs:
+        return float(s.m_secs)
+    if s.m_voice:
+        return max(3.0, _words(s.m_voice) / wpm * 60.0)
+    text_words = sum(_words(t) for _, t in s.m_items)
+    return max(4.0, text_words / wpm * 60.0 * MEANING_FACTOR)
+
+
+def est_total(s: Slide, wpm: int) -> float:
+    e1, e2 = est_phase1(s, wpm), est_phase2(s, wpm)
+    return e1 + (SPLIT_PAUSE + e2 if s.has_meaning else 0.0)
 
 
 # ── স্লাইড আঁকা ──────────────────────────────────────────────────────────────
@@ -149,7 +240,6 @@ def _mix(c1, c2, a):
 
 def logo_mark(size: int) -> Image.Image:
     """লোগো: ইন্ডিগো বৃত্ত, সোনালি সূর্য, তিন ঢেউ।"""
-    import math
     S = 4
     n = size * S
     k = n / 260.0
@@ -182,7 +272,7 @@ def _wrap(text, font, max_w):
     return lines or [""]
 
 
-# স্লাইডের ধরন অনুযায়ী লেখার মাপ ও রং: kind → (size, color, bold)
+# স্লাইডের ধরন অনুযায়ী লেখার মাপ ও রং (সাদা/ক্রিম স্লাইডে): kind → (size, color, bold)
 _STYLES = {
     "text":   {"h1": (150, INDIGO, True), "h2": (108, GOLD, True), "p": (72, INDIGO, False), "li": (62, INDIGO, False)},
     "logo":   {"h1": (170, INDIGO, True), "h2": (46, GOLD, True), "p": (64, INDIGO, False), "li": (56, INDIGO, False)},
@@ -298,6 +388,13 @@ def missing_scenes(slides) -> List[str]:
     return bad
 
 
+def list_music() -> List[str]:
+    """progyadhara_assets/music/ ফোল্ডারের অডিও ফাইলের নাম।"""
+    if not os.path.isdir(MUSIC_DIR):
+        return []
+    return sorted(f for f in os.listdir(MUSIC_DIR) if f.lower().endswith(MUSIC_EXT))
+
+
 # ছবির ওপরের প্যানেলে লেখার মাপ ও রং (গাঢ় প্যানেল, তাই হালকা রং)
 _LIGHT_GOLD, _PANEL_RGBA = "#F4D58D", (31, 42, 90, 214)
 _SCENE_STYLES = {
@@ -305,15 +402,52 @@ _SCENE_STYLES = {
     "shloka": {"h1": (46, GOLD, True), "h2": (54, _LIGHT_GOLD, False), "p": (72, CREAM, True), "li": (52, CREAM, False)},
 }
 _SCENE_STYLES["logo"] = _SCENE_STYLES["text"]
+_MEANING_STYLE = {"h1": (58, GOLD, True), "h2": (50, _LIGHT_GOLD, True), "p": (52, CREAM, False), "li": (48, CREAM, False)}
 
 
-def render_scene_overlay(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
-                         show_mark: bool = True) -> str:
-    """ছবির ওপরে বসার স্বচ্ছ স্তর (RGBA): লেখার প্যানেল + নিচের বার + লোগো।"""
+def _panel(items, style, pad: int = 40, max_text_w: int = 1500, max_h: int = 470) -> Optional[Image.Image]:
+    """লেখার স্বচ্ছ-পটভূমির প্যানেল (RGBA)। লেখা বেশি হলে ফন্ট নিজে ছোট হয়।"""
+    if not items:
+        return None
+    its = [(k, t, *style[k]) for k, t in items]
+    rows, total = [], 0
+    for scale in (1.0, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48):
+        rows, total = [], 0
+        for kind, txt, size, color, bold in its:
+            sz = int(size * scale)
+            f, sw = get_font(sz, bold)
+            max_w = max_text_w - (90 if kind == "li" else 0)
+            lines = _wrap(txt, f, max_w)
+            rows.append((kind, lines, f, sw, color, sz, int(sz * 1.4) * len(lines)))
+            total += rows[-1][6]
+        total += sum(int(r[5] * 0.3) for r in rows[:-1])
+        if total <= max_h - 2 * pad:
+            break
+    widths = [f.getlength(ln) + (90 if kind == "li" else 0) for kind, lines, f, *_ in rows for ln in lines] or [200]
+    pw = int(min(W - 120, max(widths) + 2 * pad + 40))
+    ph = int(total + 2 * pad)
+    img = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, pw - 1, ph - 1], radius=30, fill=_PANEL_RGBA, outline=GOLD, width=3)
+    y = pad
+    for kind, lines, f, sw, color, sz, h in rows:
+        for ln in lines:
+            if kind == "li":
+                x0 = pad + 10
+                cy = y + int(sz * 0.62)
+                d.ellipse([x0, cy - 9, x0 + 18, cy + 9], fill=GOLD)
+                d.text((x0 + 50, y), ln, font=f, fill=color, anchor="lt", stroke_width=sw, stroke_fill=color)
+            else:
+                d.text((pw // 2, y), ln, font=f, fill=color, anchor="mt", stroke_width=sw, stroke_fill=color)
+            y += int(sz * 1.4)
+        y += int(sz * 0.3)
+    return img
+
+
+def _chrome_layer(footer: str, show_footer: bool, show_mark: bool) -> Image.Image:
+    """নিচের বার + লোগো (স্থির স্তর, RGBA)।"""
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    base = H - (FOOTER_H + 4 if show_footer else 0)
-
     if show_footer:
         d.rectangle([0, H - FOOTER_H, W, H], fill=INDIGO)
         d.rectangle([0, H - FOOTER_H - 4, W, H - FOOTER_H], fill=GOLD)
@@ -322,105 +456,177 @@ def render_scene_overlay(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTE
     if show_mark:
         m = logo_mark(130)
         img.paste(m, (W - 130 - 50, 40), m)
+    return img
 
-    style = _SCENE_STYLES.get(slide.layout, _SCENE_STYLES["text"])
-    items = [(k, t, *style[k]) for k, t in slide.items]
-    if items:
-        pad, max_text_w, max_h = 40, 1500, 470
-        rows, total = [], 0
-        for scale in (1.0, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48):
-            rows, total = [], 0
-            for kind, txt, size, color, bold in items:
-                sz = int(size * scale)
-                f, sw = get_font(sz, bold)
-                max_w = max_text_w - (90 if kind == "li" else 0)
-                lines = _wrap(txt, f, max_w)
-                rows.append((kind, lines, f, sw, color, sz, int(sz * 1.4) * len(lines)))
-                total += rows[-1][6]
-            total += sum(int(r[5] * 0.3) for r in rows[:-1])
-            if total <= max_h - 2 * pad:
-                break
-        widths = [f.getlength(ln) + (90 if kind == "li" else 0) for kind, lines, f, *_ in rows for ln in lines]
-        pw = int(min(W - 120, max(widths) + 2 * pad + 40))
-        ph = int(total + 2 * pad)
-        px, py = (W - pw) // 2, base - 34 - ph
-        d.rounded_rectangle([px, py, px + pw, py + ph], radius=30, fill=_PANEL_RGBA, outline=GOLD, width=3)
-        y = py + pad
-        for kind, lines, f, sw, color, sz, h in rows:
-            for ln in lines:
-                if kind == "li":
-                    x0 = px + pad + 10
-                    cy = y + int(sz * 0.62)
-                    d.ellipse([x0, cy - 9, x0 + 18, cy + 9], fill=GOLD)
-                    d.text((x0 + 50, y), ln, font=f, fill=color, anchor="lt", stroke_width=sw, stroke_fill=color)
-                else:
-                    d.text((W // 2, y), ln, font=f, fill=color, anchor="mt", stroke_width=sw, stroke_fill=color)
-                y += int(sz * 1.4)
-            y += int(sz * 0.3)
-    img.save(out_png)
+
+def _put(canvas: Image.Image, panel: Image.Image, cx: float, cy: float, scale: float = 1.0, opacity: float = 1.0):
+    """প্যানেলটি (cx, cy) কেন্দ্র ধরে বসায়, চাইলে ছোট/আধা-স্বচ্ছ করে।"""
+    p = panel
+    if abs(scale - 1.0) > 1e-3:
+        p = p.resize((max(1, round(p.width * scale)), max(1, round(p.height * scale))), Image.LANCZOS)
+    if opacity < 0.999:
+        p = p.copy()
+        p.putalpha(p.getchannel("A").point(lambda v: int(v * max(0.0, opacity))))
+    x = int(round(cx - p.width / 2))
+    y = int(round(cy - p.height / 2))
+    x, y = max(0, min(W - p.width, x)), max(0, min(H - p.height, y))
+    canvas.alpha_composite(p, (x, y))
+
+
+def _smooth(u: float) -> float:
+    u = max(0.0, min(1.0, u))
+    return u * u * (3 - 2 * u)
+
+
+class SlideOverlays:
+    """একটি স্লাইডের ওপরের স্তরগুলো (লেখার প্যানেল + বার + লোগো)।"""
+
+    def __init__(self, s: Slide, footer: str, show_footer: bool, show_mark: bool):
+        self.s = s
+        self.base_y = H - (FOOTER_H + 4 if show_footer else 0)
+        self.chrome = _chrome_layer(footer, show_footer, show_mark)
+        style = _SCENE_STYLES.get(s.layout, _SCENE_STYLES["text"])
+        if s.has_meaning:
+            self.sh = _panel(s.items, style, max_h=560)
+            self.mp = _panel(s.m_items, _MEANING_STYLE, max_h=400)
+            self.cy_big = self.base_y * 0.47
+            self.cy_small = (SHLOKA_TOP + (self.sh.height * SHLOKA_END_SCALE) / 2) if self.sh else self.cy_big
+            self.cy_m = (self.base_y - 34 - self.mp.height / 2) if self.mp else 0
+        else:
+            self.single = _panel(s.items, style, max_h=470)
+
+    def single_overlay(self) -> Image.Image:
+        c = self.chrome.copy()
+        if self.single:
+            _put(c, self.single, W / 2, self.base_y - 34 - self.single.height / 2)
+        return c
+
+    def frame(self, p: float) -> Image.Image:
+        """p=0 → শ্লোক মাঝখানে বড়; p=1 → শ্লোক ওপরে ছোট ও আধা-স্বচ্ছ + নিচে অর্থ।"""
+        c = self.chrome.copy()
+        e = _smooth(p)
+        if self.sh:
+            sc = 1 + (SHLOKA_END_SCALE - 1) * e
+            op = 1 + (SHLOKA_END_OPACITY - 1) * e
+            cy = self.cy_big + (self.cy_small - self.cy_big) * e
+            _put(c, self.sh, W / 2, cy, sc, op)
+        if self.mp and p > 0.0:
+            me = _smooth((p - 0.3) / 0.7)
+            if me > 0.0:
+                _put(c, self.mp, W / 2, self.cy_m + (1 - me) * 28, 1.0, me)
+        return c
+
+
+def _plain_bg(out_path: str) -> str:
+    """ছবি না থাকলে গাঢ় ইন্ডিগো গ্রেডিয়েন্ট পটভূমি (শ্লোক+অর্থ স্লাইডের জন্য)।"""
+    if os.path.isfile(out_path):
+        return out_path
+    top, bot = _mix(INDIGO, "#000000", 0.0), _mix(INDIGO, "#4A5CA8", 0.55)
+    img = Image.new("RGB", (W, H))
+    d = ImageDraw.Draw(img)
+    for y in range(H):
+        a = y / (H - 1)
+        d.line([(0, y), (W, y)], fill=tuple(int(top[i] * (1 - a) + bot[i] * a) for i in range(3)))
+    img.save(out_path, quality=95)
+    return out_path
+
+
+def _cover_crop(src: Image.Image) -> Image.Image:
+    k = max(W / src.width, H / src.height)
+    src = src.resize((int(src.width * k + 0.5), int(src.height * k + 0.5)), Image.LANCZOS)
+    left, top = (src.width - W) // 2, (src.height - H) // 2
+    return src.crop((left, top, left + W, top + H)).convert("RGBA")
+
+
+def render_scene_overlay(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
+                         show_mark: bool = True) -> str:
+    """একধাপের স্লাইডের জন্য ছবির ওপরে বসার স্বচ্ছ স্তর (RGBA): লেখার প্যানেল + নিচের বার + লোগো।"""
+    SlideOverlays(slide, footer, show_footer, show_mark).single_overlay().save(out_png)
     return out_png
+
+
+def preview_images(slide: Slide, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
+                   show_mark: bool = True) -> List[Tuple[str, Image.Image]]:
+    """UI-র জন্য স্থির ফ্রেম: [(নাম, ছবি)]। দুই ধাপের স্লাইডে দুটো (শ্লোক ধাপ, অর্থ ধাপ)।"""
+    if slide.scene:
+        bg = _cover_crop(Image.open(find_scene(slide.scene)).convert("RGB"))
+    elif slide.has_meaning:
+        bg = _plain_bg_image()
+    else:
+        import tempfile
+        fd, tmp = tempfile.mkstemp(suffix=".png")
+        os.close(fd)
+        try:
+            render_slide(slide, tmp, footer, show_footer, show_mark)
+            with Image.open(tmp) as im:
+                return [("", im.convert("RGB").copy())]
+        finally:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+    ov = SlideOverlays(slide, footer, show_footer, show_mark)
+    if slide.has_meaning:
+        return [("শ্লোকের ধাপ", Image.alpha_composite(bg, ov.frame(0.0)).convert("RGB")),
+                ("অর্থের ধাপ", Image.alpha_composite(bg, ov.frame(1.0)).convert("RGB"))]
+    return [("", Image.alpha_composite(bg, ov.single_overlay()).convert("RGB"))]
+
+
+def _plain_bg_image() -> Image.Image:
+    import tempfile
+    p = os.path.join(tempfile.gettempdir(), "progyadhara_plain_bg.jpg")
+    return Image.open(_plain_bg(p)).convert("RGBA")
 
 
 def render_scene_preview(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
                          show_mark: bool = True) -> str:
-    """UI-তে দেখার জন্য: ছবি + ওপরের স্তর জুড়ে একটি স্থির ফ্রেম।"""
-    src = Image.open(find_scene(slide.scene)).convert("RGB")
-    k = max(W / src.width, H / src.height)
-    src = src.resize((int(src.width * k + 0.5), int(src.height * k + 0.5)), Image.LANCZOS)
-    left, top = (src.width - W) // 2, (src.height - H) // 2
-    bg = src.crop((left, top, left + W, top + H)).convert("RGBA")
-    ov = Image.open(render_scene_overlay(slide, out_png + ".ov.png", footer, show_footer, show_mark))
-    Image.alpha_composite(bg, ov).convert("RGB").save(out_png)
-    try:
-        os.remove(out_png + ".ov.png")
-    except OSError:
-        pass
+    """আগের নামে সুবিধার জন্য: প্রথম ফ্রেমটি ফাইলে সেভ করে।"""
+    preview_images(slide, footer, show_footer, show_mark)[0][1].save(out_png)
     return out_png
 
 
-def _motion_vf(motion: str, dur: float, idx: int) -> str:
+# ── মোশন (ffmpeg ফিল্টার) ─────────────────────────────────────────────────────
+def _motion_vf(motion: str, dur: float, idx: int, speed: float = MOTION_SPEEDS[DEFAULT_MOTION]) -> str:
     """
-    zoompan-এর বদলে scale + crop দিয়ে মসৃণ মোশন।
-    প্যান ও জুম দুটোর ফিল রাখে, জাকুনি অনেক কমায়।
+    ধ্রুব গতির মোশন: ছবি প্রতি সেকেন্ডে গড়ে `speed` পিক্সেল সরে (স্লাইড ছোট হলে কম দূরত্ব যায়),
+    শুরু ও শেষে নরমভাবে (smoothstep) থামে। ছবি আগে ২x বড় করে তারপর ছোট করা হয়,
+    তাই ধীর গতিতেও আধা-পিক্সেলের ধাপে মসৃণ, ঝাঁকুনি নেই।
     """
     m = (motion or "auto").lower()
     if m == "auto" or m not in MOTIONS:
         m = MOTION_CYCLE[idx % len(MOTION_CYCLE)]
+    n = max(1, int(round(dur * FPS)))
+    dur = max(dur, 0.1)
 
-    k = MOTION_ZOOM
-    # বড় ক্যানভাস (হেডরুম)
-    base = f"scale=2880:1620:force_original_aspect_ratio=increase,crop=2880:1620,"
+    if m == "none":
+        return (f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},"
+                f"format=yuv420p,loop=-1:1,trim=end_frame={n},setpts=N/{FPS}/TB")
 
-    if m == "zoom-in":
-        # ধীরে ধীরে কাছাকাছি (কেন্দ্র থেকে)
-        return (
-            base +
-            f"scale=w='iw*(1+{k}*t/{dur:.4f})':h='ih*(1+{k}*t/{dur:.4f})':eval=frame:flags=lanczos,"
-            f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
-        )
-    if m == "zoom-out":
-        # ধীরে ধীরে দূরে
-        return (
-            base +
-            f"scale=w='iw*(1+{k}*(1-t/{dur:.4f}))':h='ih*(1+{k}*(1-t/{dur:.4f}))':eval=frame:flags=lanczos,"
-            f"crop={W}:{H}:(iw-ow)/2:(ih-oh)/2,format=yuv420p"
-        )
-    if m == "pan-right":
-        # ডান দিকে প্যান
-        return (
-            base +
-            f"scale=iw*(1+{k}):ih*(1+{k}):flags=lanczos,"
-            f"crop={W}:{H}:x='(iw-ow)*t/{dur:.4f}':y=(ih-oh)/2,format=yuv420p"
-        )
-    if m == "pan-left":
-        # বাম দিকে প্যান
-        return (
-            base +
-            f"scale=iw*(1+{k}):ih*(1+{k}):flags=lanczos,"
-            f"crop={W}:{H}:x='(iw-ow)*(1-t/{dur:.4f})':y=(ih-oh)/2,format=yuv420p"
-        )
-    # none বা অজানা
-    return base + f"scale={W}:{H}:flags=lanczos,format=yuv420p"
+    if m in ("pan-left", "pan-right"):
+        cw, ch = int(round(W * PAN_ZOOM * SS / 2)) * 2, int(round(H * PAN_ZOOM * SS / 2)) * 2
+        ow, oh = W * SS, H * SS
+        max_travel = cw - ow
+        travel = min(float(max_travel), speed * dur * SS)
+        x_start = (max_travel - travel) / 2.0
+        u = f"st(0,min(t/{dur:.4f},1));ld(0)*ld(0)*(3-2*ld(0))"
+        if m == "pan-right":
+            xexpr = f"{x_start:.3f}+{travel:.3f}*({u})"
+        else:
+            xexpr = f"{x_start:.3f}+{travel:.3f}*(1-({u}))"
+        return (f"scale={cw}:{ch}:force_original_aspect_ratio=increase:flags=lanczos,crop={cw}:{ch},format=gbrp,"
+                f"loop=-1:1,trim=end_frame={n},setpts=N/{FPS}/TB,"
+                f"crop={ow}:{oh}:x='{xexpr}':y='(ih-oh)/2',"
+                f"scale={W}:{H}:flags=bilinear,format=yuv420p")
+
+    # zoom-in / zoom-out
+    zw, zh = W * SS, H * SS
+    rate = ZOOM_PER_SEC * (speed / MOTION_SPEEDS[DEFAULT_MOTION])
+    amp = min(ZOOM_MAX, rate * dur)
+    u = f"st(0,min(on/{n},1));ld(0)*ld(0)*(3-2*ld(0))"
+    z = f"1+{amp:.5f}*({u})" if m == "zoom-in" else f"1+{amp:.5f}*(1-({u}))"
+    return (f"scale={zw}:{zh}:force_original_aspect_ratio=increase:flags=lanczos,crop={zw}:{zh},format=gbrp,"
+            f"loop=-1:1,trim=end_frame={n},setpts=N/{FPS}/TB,"
+            f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s={W}x{H}:fps={FPS},format=yuv420p")
 
 
 # ── ভয়েস (edge-tts) ─────────────────────────────────────────────────────────
@@ -469,24 +675,7 @@ def edge_synth(voice: str, rate_pct: int) -> Callable[[str, str], None]:
     return synth
 
 
-# ── ভিডিও তৈরি ───────────────────────────────────────────────────────────────
-@dataclass
-class Options:
-    footer: str = DEFAULT_FOOTER
-    show_footer: bool = True
-    show_mark: bool = True
-    voice_on: bool = True
-    custom_voice: Optional[str] = None   # আপলোড করা ভয়েস ফাইলের পাথ (থাকলে AI বাদ)
-
-
-@dataclass
-class Result:
-    mp4: str
-    srt: str
-    voice_mp3: Optional[str]
-    seconds: float
-
-
+# ── অডিও বিশ্লেষণ ───────────────────────────────────────────────────────────
 def _ff(cmd, what):
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
     if r.returncode != 0:
@@ -503,15 +692,240 @@ def _probe(ffprobe, path) -> float:
         return 0.0
 
 
+def detect_split(ffmpeg: str, audio_path: str, total: float) -> Optional[float]:
+    """
+    রেকর্ডিংয়ের সবচেয়ে লম্বা নীরবতার মাঝখান (অডিও শুরু থেকে সেকেন্ড) — শ্লোক শেষ, অর্থ শুরুর মাঝের বিরতি।
+    শ্লোকের পর ১ সেকেন্ডের বেশি চুপ থাকলে নির্ভরযোগ্য। না পেলে None।
+    """
+    try:
+        r = subprocess.run([ffmpeg, "-hide_banner", "-i", audio_path, "-af", "volumedetect", "-vn", "-f", "null", "-"],
+                           capture_output=True, text=True, timeout=120)
+        m = re.search(r"max_volume:\s*(-?[\d.]+)\s*dB", r.stderr)
+        peak = float(m.group(1)) if m else -3.0
+        noise = max(-45.0, min(-25.0, peak - 30.0))
+        r = subprocess.run([ffmpeg, "-hide_banner", "-i", audio_path, "-af",
+                            f"silencedetect=noise={noise:.1f}dB:d=0.5", "-vn", "-f", "null", "-"],
+                           capture_output=True, text=True, timeout=120)
+    except Exception:
+        return None
+    starts = [float(x) for x in re.findall(r"silence_start:\s*(-?[\d.]+)", r.stderr)]
+    ends = [(float(a), float(b)) for a, b in re.findall(r"silence_end:\s*(-?[\d.]+)\s*\|\s*silence_duration:\s*([\d.]+)", r.stderr)]
+    spans = []
+    for k, st in enumerate(starts):
+        if k < len(ends):
+            en, dr = ends[k]
+            spans.append((max(0.0, st), en, dr))
+        else:                                   # শেষ পর্যন্ত নীরবতা — ধাপ-বদলের জন্য ধরা হয় না
+            continue
+    spans = [(a, b, d) for a, b, d in spans if a >= 1.0 and b <= total - 0.8]
+    if not spans:
+        return None
+    a, b, _ = max(spans, key=lambda x: x[2])
+    return (a + b) / 2.0
+
+
+# ── ভিডিও তৈরি ───────────────────────────────────────────────────────────────
+@dataclass
+class Options:
+    footer: str = DEFAULT_FOOTER
+    show_footer: bool = True
+    show_mark: bool = True
+    voice_mode: str = "own"                                   # own = নিজের রেকর্ড, ai = AI ভয়েস, none = নীরব
+    slide_audio: Dict[int, str] = field(default_factory=dict)       # স্লাইড নম্বর (০ থেকে) → ভয়েস ফাইল
+    split_override: Dict[int, float] = field(default_factory=dict)  # স্লাইড নম্বর → শ্লোক শেষের সময় (সেকেন্ড)
+    motion_speed: float = MOTION_SPEEDS[DEFAULT_MOTION]
+    wpm: int = 115                                            # আন্দাজের জন্য কথা বলার গতি
+    music_path: Optional[str] = None                          # BG সাউন্ড ফাইল
+    music_vol: float = 0.12                                   # ০.০–১.০
+    duck: bool = True                                         # ভয়েসের সময় BG নিজে আরও কমবে
+
+
+@dataclass
+class Result:
+    mp4: str
+    srt: str
+    voice_mp3: Optional[str]
+    seconds: float
+
+
+@dataclass
+class Plan:
+    dur: float
+    ts: Optional[float] = None                                # ট্রানজিশন শুরুর সময় (দুই ধাপের স্লাইডে)
+    audio: List[Tuple[str, float]] = field(default_factory=list)    # (ফাইল, শুরুর দেরি)
+    srt: List[Tuple[float, float, str]] = field(default_factory=list)
+
+
+def _sentences(text: str) -> List[str]:
+    parts = [p.strip() for p in re.findall(r"[^।.?!]+[।.?!]?", text) if p.strip()]
+    return parts or [text]
+
+
 def _srt_time(t: float) -> str:
     t = max(0.0, t)
     ms = int(round(t * 1000))
     return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
 
 
-def _sentences(text: str) -> List[str]:
-    parts = [p.strip() for p in re.findall(r"[^।.?!]+[।.?!]?", text) if p.strip()]
-    return parts or [text]
+def _clamp_ts(ts: float, dur: float) -> float:
+    return max(0.5, min(ts, dur - TRANS - 0.5))
+
+
+def plan_slide(i: int, s: Slide, opts: Options, ffmpeg: str, ffprobe: str, work: Path,
+               synth: Optional[Callable[[str, str], None]]) -> Plan:
+    """স্লাইডের মোট সময়, ধাপ বদলের সময় আর অডিও ঠিক করে।"""
+    wpm = opts.wpm
+    own = opts.slide_audio.get(i)
+
+    # ১) নিজের রেকর্ড করা ভয়েস — আসল দৈর্ঘ্যই সময় ঠিক করে
+    if opts.voice_mode == "own" and own and os.path.isfile(own):
+        ad = _probe(ffprobe, own)
+        dur = max(MIN_SLIDE, LEAD + ad + TAIL)
+        p = Plan(dur=dur, audio=[(own, LEAD)])
+        if s.has_meaning:
+            sp = opts.split_override.get(i) or detect_split(ffmpeg, own, ad)
+            if not sp:
+                e1, e2 = est_phase1(s, wpm), est_phase2(s, wpm)
+                sp = ad * e1 / max(0.1, e1 + e2)
+            p.ts = _clamp_ts(LEAD + sp - TRANS / 2, dur)
+        return p
+
+    # ২) AI ভয়েস
+    if opts.voice_mode == "ai" and (s.voice or s.m_voice):
+        if synth is None:
+            raise TTSError("ভয়েস ফাংশন দেওয়া হয়নি।")
+        p = Plan(dur=MIN_SLIDE)
+        if s.has_meaning:
+            t_end1 = LEAD + est_phase1(s, wpm)
+            if s.voice:
+                a = str(work / f"v{i}a.mp3")
+                synth(s.voice, a)
+                vd = _probe(ffprobe, a)
+                p.audio.append((a, LEAD))
+                p.srt += _spread(s.voice, LEAD, vd)
+                t_end1 = LEAD + vd
+            t_m = t_end1 + AI_GAP
+            end = t_m + est_phase2(s, wpm)
+            if s.m_voice:
+                b = str(work / f"v{i}b.mp3")
+                synth(s.m_voice, b)
+                vd2 = _probe(ffprobe, b)
+                p.audio.append((b, t_m))
+                p.srt += _spread(s.m_voice, t_m, vd2)
+                end = t_m + vd2
+            p.dur = max(MIN_SLIDE, end + TAIL)
+            p.ts = _clamp_ts(t_m - TRANS / 2, p.dur)
+        else:
+            a = str(work / f"v{i}.mp3")
+            synth(s.voice, a)
+            vd = _probe(ffprobe, a)
+            p.audio.append((a, LEAD))
+            p.srt += _spread(s.voice, LEAD, vd)
+            p.dur = max(MIN_SLIDE, LEAD + vd + TAIL)
+        return p
+
+    # ৩) নীরব — `~` বা আন্দাজি সময়
+    e1 = est_phase1(s, wpm)
+    if s.has_meaning:
+        e2 = est_phase2(s, wpm)
+        dur = max(MIN_SLIDE, e1 + e2)
+        return Plan(dur=dur, ts=_clamp_ts(e1 - TRANS / 2, dur))
+    return Plan(dur=max(MIN_SLIDE, e1))
+
+
+def _spread(text: str, start: float, vd: float) -> List[Tuple[float, float, str]]:
+    out, sents = [], _sentences(text)
+    total_chars = sum(len(x) for x in sents) or 1
+    cur = start
+    for sent in sents:
+        seg = vd * len(sent) / total_chars
+        out.append((cur, cur + seg, sent))
+        cur += seg
+    return out
+
+
+def _encode_slide(i: int, s: Slide, plan: Plan, opts: Options, ffmpeg: str, work: Path,
+                  scene_path: Optional[str]) -> str:
+    dur = plan.dur
+    f = min(FADE, dur / 3)
+    fade = (f"fade=t=in:st=0:d={f:.2f}:color={FADE_HEX},"
+            f"fade=t=out:st={dur - f:.3f}:d={f:.2f}:color={FADE_HEX}")
+    cmd = [ffmpeg, "-y", "-loglevel", "error"]
+    fcs: List[str] = []
+
+    if s.has_meaning:
+        # দুই ধাপ: ছবি/পটভূমি + (শ্লোক মাঝখানে) → ট্রানজিশন → (শ্লোক ওপরে + অর্থ নিচে)
+        bg = scene_path or _plain_bg(str(work / "plain_bg.jpg"))
+        motion = s.motion if scene_path else "none"
+        ov = SlideOverlays(s, opts.footer, opts.show_footer, opts.show_mark)
+        pa, pc = str(work / f"s{i}_a.png"), str(work / f"s{i}_c.png")
+        ov.frame(0.0).save(pa)
+        ov.frame(1.0).save(pc)
+        nfr = max(2, int(round(TRANS * FPS)))
+        for k in range(nfr):
+            ov.frame((k + 1) / (nfr + 1)).save(str(work / f"s{i}_t{k:03d}.png"), compress_level=1)
+        ts = plan.ts if plan.ts is not None else max(0.5, dur / 2)
+        te = ts + nfr / FPS
+        cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png"), "-i", pc]
+        nv = 4
+        fcs.append(f"[0:v]{_motion_vf(motion, dur, i, opts.motion_speed)}[bg]")
+        fcs.append(f"[bg][1:v]overlay=0:0:format=auto:enable='lt(t,{ts:.3f})'[o1]")
+        fcs.append(f"[2:v]setpts=PTS-STARTPTS+{ts:.3f}/TB[tr]")
+        fcs.append(f"[o1][tr]overlay=0:0:format=auto:enable='between(t,{ts:.3f},{te:.3f})'[o2]")
+        fcs.append(f"[o2][3:v]overlay=0:0:format=auto:enable='gte(t,{te:.3f})',format=yuv420p,{fade}[v]")
+    elif scene_path:
+        png = render_scene_overlay(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
+        cmd += ["-i", scene_path, "-i", png]
+        nv = 2
+        fcs.append(f"[0:v]{_motion_vf(s.motion, dur, i, opts.motion_speed)}[bg]")
+        fcs.append(f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]")
+    else:
+        png = render_slide(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
+        cmd += ["-framerate", str(FPS), "-i", png]
+        nv = 1
+        fcs.append(f"[0:v]format=yuv420p,loop=-1:1,trim=duration={dur:.3f},setpts=PTS-STARTPTS,{fade}[v]")
+
+    # অডিও
+    if plan.audio:
+        labels = []
+        for k, (path, delay) in enumerate(plan.audio):
+            cmd += ["-i", path]
+            fcs.append(f"[{nv + k}:a]aresample=44100,aformat=sample_fmts=fltp:channel_layouts=stereo,"
+                       f"adelay={int(delay * 1000)}:all=1[a{k}]")
+            labels.append(f"[a{k}]")
+        if len(labels) > 1:
+            fcs.append(f"{''.join(labels)}amix=inputs={len(labels)}:normalize=0:duration=longest,apad[aout]")
+        else:
+            fcs.append(f"{labels[0]}apad[aout]")
+        amap = "[aout]"
+    else:
+        cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+        amap = f"{nv}:a"
+
+    tmp, out = str(work / f"tmp{i}.mp4"), str(work / f"p{i}.mp4")
+    cmd += ["-filter_complex", ";".join(fcs), "-map", "[v]", "-map", amap,
+            "-t", f"{dur:.3f}", "-r", str(FPS),
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", tmp]
+    _ff(cmd, f"স্লাইড {i + 1}")
+    os.replace(tmp, out)
+    return out
+
+
+def _mix_music(ffmpeg: str, video: str, music: str, total: float, vol: float, duck: bool, out: str):
+    """ভয়েসের ওপর BG সাউন্ড মেশায়: লুপ করে পুরো ভিডিও ভরে, শুরু/শেষে ফেড, চাইলে ভয়েসের সময় নিজে কমে।"""
+    fo = max(0.0, total - 2.5)
+    m = (f"[1:a]aresample=44100,aformat=sample_fmts=fltp:channel_layouts=stereo,volume={vol:.3f},"
+         f"afade=t=in:st=0:d=2,afade=t=out:st={fo:.2f}:d=2.5[m]")
+    if duck:
+        fc = (m + ";[0:a]asplit=2[v1][v2];"
+              "[m][v2]sidechaincompress=threshold=0.05:ratio=3:attack=40:release=900:makeup=1[md];"
+              "[v1][md]amix=inputs=2:normalize=0:duration=first:dropout_transition=0[a]")
+    else:
+        fc = m + ";[0:a][m]amix=inputs=2:normalize=0:duration=first:dropout_transition=0[a]"
+    _ff([ffmpeg, "-y", "-loglevel", "error", "-i", video, "-stream_loop", "-1", "-i", music,
+         "-filter_complex", fc, "-map", "0:v:0", "-map", "[a]", "-c:v", "copy",
+         "-c:a", "aac", "-b:a", "192k", "-t", f"{total:.3f}", "-movflags", "+faststart", out], "BG সাউন্ড মেশানো")
 
 
 def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, work_dir: str,
@@ -525,104 +939,35 @@ def build_video(slides: List[Slide], opts: Options, ffmpeg: str, ffprobe: str, w
 
     for i, s in enumerate(slides):
         if progress:
-            progress(i / n, f"স্লাইড {i + 1}/{n}")
+            progress(i / n * 0.9, f"স্লাইড {i + 1}/{n}")
         scene_path = find_scene(s.scene) if s.scene else None
-        if scene_path:      # ছবির দৃশ্য: ওপরের স্তর আলাদা, ছবি নড়বে (জুম/প্যান)
-            png = render_scene_overlay(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
-        else:
-            png = render_slide(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
-        mp3, vd = None, 0.0
-        if opts.custom_voice:
-            # কাস্টম ভয়েস থাকলে স্লাইডের সময় স্ক্রিপ্ট/আন্দাজ অনুযায়ীই হবে
-            if s.voice:
-                dur = max(MIN_SLIDE, s.secs or (len(s.voice) / 11.0 + 1.0))
-            else:
-                dur = max(MIN_SLIDE, s.secs or SILENT_DEFAULT)
-        elif opts.voice_on and s.voice:
-            if synth is None:
-                raise TTSError("ভয়েস ফাংশন দেওয়া হয়নি।")
-            mp3 = str(work / f"v{i}.mp3")
-            synth(s.voice, mp3)
-            vd = _probe(ffprobe, mp3)
-            dur = max(MIN_SLIDE, LEAD + vd + TAIL)
-        elif s.voice:
-            dur = max(MIN_SLIDE, s.secs or (len(s.voice) / 11.0 + 1.0))   # নীরব: কথার দৈর্ঘ্যের আন্দাজ
-        else:
-            dur = max(MIN_SLIDE, s.secs or SILENT_DEFAULT)
-
-        f = min(FADE, dur / 3)
-        fade = (f"fade=t=in:st=0:d={f:.2f}:color={FADE_HEX},"
-                f"fade=t=out:st={dur - f:.3f}:d={f:.2f}:color={FADE_HEX}")
-        if scene_path:
-            # নতুন মসৃণ মোশন (scale + crop) — জাকুনি কমাতে zoompan বাদ
-            motion_vf = _motion_vf(s.motion, dur, i)
-            fc = (
-                f"[0:v]{motion_vf}[bg];"
-                f"[bg][1:v]overlay=0:0:format=auto,format=yuv420p,{fade}[v]"
-            )
-            # -loop 1 দরকার, নাহলে t এক্সপ্রেশন কাজ করে না
-            cmd = [ffmpeg, "-y", "-loglevel", "error",
-                   "-loop", "1", "-i", scene_path, "-i", png]
-            aidx = 2
-        else:
-            vf = f"format=yuv420p,loop=-1:1,trim=duration={dur:.3f},setpts=PTS-STARTPTS,{fade}"
-            cmd = [ffmpeg, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", png]
-            aidx = 1
-        if mp3:
-            cmd += ["-i", mp3, "-af", f"adelay={int(LEAD * 1000)}:all=1,apad"]
-        else:
-            cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
-        tmp, out = str(work / f"tmp{i}.mp4"), str(work / f"p{i}.mp4")
-        if scene_path:
-            cmd += ["-filter_complex", fc, "-map", "[v]", "-map", f"{aidx}:a"]
-        else:
-            cmd += ["-vf", vf]
-        cmd += ["-t", f"{dur:.3f}", "-r", str(FPS),
-                "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
-                "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", tmp]
-        _ff(cmd, f"স্লাইড {i + 1}")
-        os.replace(tmp, out)
-        parts.append(out)
-
-        if mp3 and vd > 0:
-            sents = _sentences(s.voice)
-            total_chars = sum(len(x) for x in sents) or 1
-            cur = t0 + LEAD
-            for sent in sents:
-                seg = vd * len(sent) / total_chars
-                srt.append((cur, cur + seg, sent))
-                cur += seg
-            audio_parts.append((mp3, t0 + LEAD))
-        t0 += dur
+        plan = plan_slide(i, s, opts, ffmpeg, ffprobe, work, synth)
+        parts.append(_encode_slide(i, s, plan, opts, ffmpeg, work, scene_path))
+        for a, b, text in plan.srt:
+            srt.append((t0 + a, t0 + b, text))
+        if opts.voice_mode == "ai":
+            audio_parts += [(p, t0 + d) for p, d in plan.audio]
+        t0 += plan.dur
 
     if progress:
-        progress(0.95, "জোড়া লাগানো হচ্ছে")
+        progress(0.92, "জোড়া লাগানো হচ্ছে")
     lst = work / "list.txt"
-    lst.write_text("".join(f"file '{Path(p).as_posix()}'\n" for p in parts), encoding="utf-8")
+    lst.write_text("".join(f"file '{Path(p).resolve().as_posix()}'\n" for p in parts), encoding="utf-8")
     final = str(work / "final.mp4")
     _ff([ffmpeg, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst),
          "-c", "copy", "-movflags", "+faststart", final + ".tmp.mp4"], "জোড়া")
     os.replace(final + ".tmp.mp4", final)
 
+    if opts.music_path and os.path.isfile(opts.music_path) and opts.music_vol > 0:
+        if progress:
+            progress(0.96, "BG সাউন্ড মেশানো হচ্ছে")
+        mixed = str(work / "final_music.mp4")
+        _mix_music(ffmpeg, final, opts.music_path, t0, opts.music_vol, opts.duck, mixed)
+        os.replace(mixed, final)
+
     srt_text = "".join(f"{k}\n{_srt_time(a)} --> {_srt_time(b)}\n{t}\n\n" for k, (a, b, t) in enumerate(srt, 1))
     voice_mp3 = None
-
-    # কাস্টম ভয়েস থাকলে সেটাই ফাইনাল অডিও হিসেবে বসাও
-    if opts.custom_voice and os.path.isfile(opts.custom_voice):
-        voice_mp3 = str(work / "voice-only.mp3")
-        try:
-            _ff([ffmpeg, "-y", "-loglevel", "error", "-i", opts.custom_voice,
-                 "-c:a", "libmp3lame", "-q:a", "3", voice_mp3], "কাস্টম ভয়েস কপি")
-            # ভিডিওর সাথে কাস্টম অডিও মার্জ
-            mixed = str(work / "final_mixed.mp4")
-            _ff([ffmpeg, "-y", "-loglevel", "error",
-                 "-i", final, "-i", opts.custom_voice,
-                 "-c:v", "copy", "-map", "0:v:0", "-map", "1:a:0",
-                 "-shortest", mixed], "কাস্টম ভয়েস মার্জ")
-            os.replace(mixed, final)
-        except Exception:
-            voice_mp3 = None
-    elif audio_parts:        # শুধু ভয়েসের ট্র্যাক আলাদা ফাইলে (ইউটিউব/ফেসবুকের অন্য কাজে লাগে)
+    if audio_parts:        # শুধু AI ভয়েসের ট্র্যাক আলাদা ফাইলে
         voice_mp3 = str(work / "voice-only.mp3")
         ins, fl = [], []
         for k, (p, st_) in enumerate(audio_parts):
@@ -709,33 +1054,79 @@ GITA_SAMPLE = """\
 > ভালো লাগলে চ্যানেলটি সাবস্ক্রাইব করুন, আর আপনার মতামত কমেন্টে জানান।
 """
 
-SAMPLES = {"স্বাগতম ভিডিও (সাদা স্লাইড)": SAMPLE_SCRIPT, "গীতা ২.৪৭ (ছবিসহ)": GITA_SAMPLE}
+GITA_MEANING_SAMPLE = """\
+// গীতা ১ম অধ্যায় — শ্লোক + অর্থ (প্রতি শ্লোক = একটি স্লাইড)
+// @meaning-এর আগে শ্লোক (মাঝখানে বড়), পরে অর্থ (শ্লোক ওপরে উঠে যাবে, অর্থ নিচে আসবে)
+// > লাইন = আপনার বলার নোট (পর্দায় আসবে না), ~ সংখ্যা = সেকেন্ড (ভয়েস না থাকলে)
+@scene s02_chariot_armies
+@motion pan-right
+# শ্লোক ১.৬
+যুধামন্যুশ্চ বিক্রান্ত উত্তমৌজাশ্চ বীর্যবান্।
+সৌভদ্রো দ্রৌপদেয়াশ্চ সর্ব এব মহারথাঃ॥
+~ 8
+@meaning
+## অর্থ
+বিক্রমী যুধামন্যু, বীর্যবান উত্তমৌজা, সুভদ্রার পুত্র অভিমন্যু এবং দ্রৌপদীর পাঁচ পুত্র — এঁরা সবাই মহারথী।
+> দুর্যোধন নিজের সেনাপতি দ্রোণাচার্যকে পাণ্ডবপক্ষের বীরদের তালিকা শোনাচ্ছেন, এঁদের ক্ষমতা সম্পর্কে সাবধান করছেন।
+~ 18
+
+---
+@scene s10_krishna_closeup
+@motion zoom-in
+# শ্লোক ১.৭
+অস্মাকং তু বিশিষ্টা যে তান্ নিবোধ দ্বিজোত্তম।
+নায়কা মম সৈন্যস্য সংজ্ঞার্থং তান্ ব্রবীমি তে॥
+~ 8
+@meaning
+## অর্থ
+হে দ্বিজশ্রেষ্ঠ, আমাদের পক্ষের যাঁরা বিশেষ গুণসম্পন্ন সেনানায়ক, তাঁদের কথাও জেনে নিন। আপনার জানার জন্য আমি তাঁদের নাম বলছি।
+~ 16
+"""
+
+SAMPLES = {
+    "গীতা — শ্লোক + অর্থ (দুই ধাপ, নতুন)": GITA_MEANING_SAMPLE,
+    "স্বাগতম ভিডিও (সাদা স্লাইড)": SAMPLE_SCRIPT,
+    "গীতা ২.৪৭ (ছবিসহ)": GITA_SAMPLE,
+}
 
 HELP_TEXT = """
-**প্রতিটি স্লাইড `---` দিয়ে আলাদা করুন।**
+**প্রতিটি স্লাইড `---` দিয়ে আলাদা করুন।** গীতার জন্য: একটি শ্লোক = একটি স্লাইড।
 
 | লিখুন | মানে |
 |---|---|
-| `@logo` / `@text` / `@shloka` | স্লাইডের ধরন (না দিলে `@text`)। `@shloka` শ্লোক দেখানোর জন্য বড় হরফ |
-| `# লেখা` | বড় শিরোনাম |
-| `## লেখা` | সোনালি উপ-শিরোনাম |
-| `- লেখা` | বুলেট |
-| `লেখা` | সাধারণ লাইন (মাঝখানে) |
-| `> লেখা` | **ভয়েসে যা বলা হবে** (পর্দায় দেখাবে না)। স্লাইডের সময় ভয়েসের দৈর্ঘ্য থেকে নিজে ঠিক হয় |
-| `~ 6` | ভয়েস না থাকলে স্লাইড কত সেকেন্ড থাকবে |
-| `// লেখা` | মন্তব্য (বাদ যাবে) |
-| `@scene s01_teaching` | **ছবির দৃশ্য** (progyadhara_assets ফোল্ডার থেকে, নামে `.jpg` লাগবে না)। লেখা ছবির ওপর প্যানেলে বসে |
+| `@scene s01_teaching` | **ছবির দৃশ্য** (progyadhara_assets ফোল্ডার থেকে, নামে `.jpg` লাগবে না) |
 | `@motion zoom-in` | ছবির নড়াচড়া: `zoom-in`, `zoom-out`, `pan-left`, `pan-right`, `none`। না দিলে পালা করে নিজে বাছে |
+| `# লেখা` | বড় শিরোনাম (শ্লোকের ধাপে শ্লোকের নম্বর/নাম, যেমন `# শ্লোক ১.৬`) |
+| `## লেখা` | সোনালি উপ-শিরোনাম (অর্থের ধাপে `## অর্থ`) |
+| `লেখা` | সাধারণ লাইন। শ্লোকের প্রতিটি লাইন আলাদা লাইনে লিখুন |
+| `- লেখা` | বুলেট |
+| `@meaning` | **এর আগে = শ্লোক** (পর্দার মাঝখানে বড়), **এর পরে = অর্থ**। শ্লোক বলা শেষ হলে শ্লোক ওপরে উঠে ছোট ও আধা-স্বচ্ছ হয়ে যায়, নিচে অর্থ আসে |
+| `> লেখা` | **আপনার বলার নোট** (পর্দায় আসবে না)। প্রিভিউয়ের বক্সে রেকর্ড করার সময় দেখা যাবে |
+| `~ 8` | ওই ধাপ কত সেকেন্ড (শ্লোকের `~` @meaning-এর আগে, অর্থের `~` @meaning-এর পরে লিখুন)। প্রিভিউয়ের সময়ের আন্দাজ ঠিক করতে কাজে লাগে |
+| `@logo` / `@text` / `@shloka` | সাদা স্লাইডের ধরন (ছবি ছাড়া) |
+| `// লেখা` | মন্তব্য (বাদ যাবে) |
 
-ভয়েসে বানান ঠিকমতো না পড়লে `>` লাইনে বানান বদলে লিখুন (পর্দার লেখা অপরিবর্তিত থাকবে)।
+**ভয়েস রেকর্ডিংয়ের নিয়ম (নিজের ভয়েস):** প্রতি স্লাইডের জন্য একটি ফাইল। শ্লোক পড়ার পর **প্রায় ১.৫ সেকেন্ড চুপ থাকুন**, তারপর অর্থ বলুন। ওই নীরবতা দেখেই কোড ঠিক করে কখন শ্লোক ওপরে উঠবে। ঠিক না ধরলে প্রিভিউয়ের বক্সে সময় নিজে লিখে দিতে পারবেন।
 """
+
+
+def _wide(fn, *a, **kw):
+    """Streamlit-এর নতুন/পুরোনো সংস্করণে একই কাজ করে (পুরো প্রস্থ)।"""
+    try:
+        return fn(*a, width="stretch", **kw)
+    except Exception:
+        return fn(*a, use_container_width=True, **kw)
+
+
+def _slide_key(s: Slide, footer: str, sf: bool, sm: bool) -> str:
+    return hashlib.md5(repr((s, footer, sf, sm)).encode("utf-8")).hexdigest()[:16]
 
 
 def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
     import streamlit as st
 
-    st.header("📖 স্লাইড ভিডিও (লেখা + AI ভয়েস)")
-    st.caption("স্ক্রিপ্ট লিখুন → ব্র্যান্ডেড স্লাইড, ভয়েস ও সাবটাইটেলসহ একটি ভিডিও।")
+    st.header("📖 স্লাইড ভিডিও (শ্লোক + অর্থ + আপনার ভয়েস)")
+    st.caption("স্ক্রিপ্ট লিখুন → প্রিভিউয়ে প্রতি স্লাইডের সময় দেখে ভয়েস রেকর্ড করুন → প্রতি স্লাইডে ভয়েস দিন → BG সাউন্ডসহ ভিডিও।")
     warn = font_status()
     if warn:
         st.warning(warn)
@@ -758,49 +1149,77 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
 
     st.selectbox("নমুনা স্ক্রিপ্ট (বাছলে নিচের লেখা বদলে যাবে)", list(SAMPLES.keys()), key="sv_sample",
                  on_change=_load_sample)
-    st.session_state.setdefault("sv_script", SAMPLE_SCRIPT)
-    script = st.text_area("স্ক্রিপ্ট", height=460, key="sv_script")
+    st.session_state.setdefault("sv_script", GITA_MEANING_SAMPLE)
+    script = st.text_area("স্ক্রিপ্ট", height=420, key="sv_script")
     slides = parse_script(script)
-    n_voice = sum(1 for s in slides if s.voice)
     n_scene = sum(1 for s in slides if s.scene)
-    st.caption(f"{len(slides)} টি স্লাইড · ভয়েস আছে {n_voice} টিতে · ছবির দৃশ্য {n_scene} টিতে")
+    n_two = sum(1 for s in slides if s.has_meaning)
+    st.caption(f"{len(slides)} টি স্লাইড · শ্লোক+অর্থ (দুই ধাপ) {n_two} টি · ছবির দৃশ্য {n_scene} টিতে")
     bad = missing_scenes(slides)
     if bad:
         st.error("এই ছবিগুলো পাওয়া যায়নি (নাম মিলিয়ে নিন): " + ", ".join(sorted(set(bad))))
 
-    st.markdown("#### ভয়েস সোর্স")
-    voice_mode = st.radio(
-        "কীভাবে ভয়েস যোগ করবেন?",
-        ["AI ভয়েস (edge-tts)", "নিজের রেকর্ড করা অডিও আপলোড"],
-        horizontal=True,
-        key="sv_voice_mode",
-        help="প্রথমে AI দিয়ে ভিডিও বানিয়ে শুনুন → তারপর নিজে রেকর্ড করে এখানে আপলোড করুন।"
-    )
-
-    custom_voice_path = None
-    voice_on = False
+    # ── ভয়েস ──
+    st.markdown("#### ভয়েস")
+    mode_map = {
+        "নিজের রেকর্ড করা (প্রতি স্লাইডে আলাদা ফাইল)": "own",
+        "AI ভয়েস (edge-tts)": "ai",
+        "নীরব (শুধু দেখার জন্য)": "none",
+    }
+    mode_label = st.radio(
+        "ভয়েস কোথা থেকে আসবে?", list(mode_map.keys()),
+        horizontal=True, key="sv_voice_mode",
+        help="নিজের ভয়েসে: নিচের প্রিভিউয়ে প্রতি স্লাইডের পাশে ফাইল দিন। ফাইলের আসল দৈর্ঘ্যই স্লাইডের সময় ঠিক করবে।")
+    voice_mode = mode_map[mode_label]
     voice_label = list(VOICES.keys())[0]
     rate = -5
-
-    if voice_mode == "AI ভয়েস (edge-tts)":
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            voice_on = st.checkbox("AI ভয়েস বানাও", value=True, key="sv_voice_on",
-                                   help="বন্ধ রাখলে নীরব ভিডিও হবে (কথার দৈর্ঘ্য অনুযায়ী আন্দাজি সময়)।")
-        with c2:
+    c1, c2 = st.columns(2)
+    with c1:
+        wpm = st.slider("আমার কথা বলার গতি (শব্দ/মিনিট) — শুধু সময়ের আন্দাজের জন্য", 70, 170, 115, 5, key="sv_wpm",
+                        help="ধীরে বললে কম, দ্রুত বললে বেশি। প্রিভিউর বক্সের আন্দাজি সময় এর ওপর নির্ভর করে।")
+    with c2:
+        speed_label = st.select_slider("ছবির মোশনের গতি", list(MOTION_SPEEDS.keys()), value=DEFAULT_MOTION,
+                                       key="sv_motion_speed",
+                                       help="ছবি কত ধীরে সরবে। স্লাইড ছোট হলে ছবি কম দূরত্ব যায়, তাই কখনো হঠাৎ দ্রুত হয় না।")
+    if voice_mode == "ai":
+        a1, a2 = st.columns(2)
+        with a1:
             voice_label = st.selectbox("কণ্ঠ", list(VOICES.keys()), key="sv_voice")
-        with c3:
-            rate = st.slider("কথার গতি (%)", -30, 15, -5, 5, key="sv_rate",
-                             help="নেগেটিভ মানে ধীরে পড়বে।")
-    else:
-        st.info("আপনার রেকর্ড করা অডিও (MP3 / WAV / M4A) আপলোড করুন। স্লাইডের সময় স্ক্রিপ্ট অনুযায়ীই থাকবে।")
-        up = st.file_uploader("ভয়েস ফাইল আপলোড করুন", type=["mp3", "wav", "m4a", "aac"], key="sv_custom_voice")
-        if up:
+        with a2:
+            rate = st.slider("কথার গতি (%)", -30, 15, -5, 5, key="sv_rate", help="নেগেটিভ মানে ধীরে পড়বে।")
+    synth = edge_synth(VOICES[voice_label], rate) if voice_mode == "ai" else None
+
+    # ── BG সাউন্ড ──
+    st.markdown("#### 🎵 ব্যাকগ্রাউন্ড সাউন্ড")
+    music_files = list_music()
+    opts_music = ["কোনো BG সাউন্ড নয়"] + music_files + ["অন্য ফাইল আপলোড করব"]
+    pick = st.selectbox(f"BG সাউন্ড বাছুন (ফোল্ডার: progyadhara_assets/music/ — {len(music_files)} টি ফাইল)",
+                        opts_music, index=1 if music_files else 0, key="sv_music_pick")
+    music_path = None
+    if pick == "অন্য ফাইল আপলোড করব":
+        mup = st.file_uploader("BG সাউন্ড ফাইল (MP3 / WAV / M4A)", type=["mp3", "wav", "m4a", "aac", "ogg"], key="sv_music_up")
+        if mup:
             Path(temp_dir).mkdir(parents=True, exist_ok=True)
-            custom_voice_path = os.path.join(temp_dir, f"custom_voice_{int(time.time())}{Path(up.name).suffix}")
-            with open(custom_voice_path, "wb") as f:
-                f.write(up.getbuffer())
-            st.success(f"আপলোড হয়েছে: {up.name}")
+            music_path = os.path.join(
+                temp_dir, f"bg_{hashlib.md5(mup.name.encode('utf-8')).hexdigest()[:8]}{Path(mup.name).suffix}")
+            with open(music_path, "wb") as fh:
+                fh.write(mup.getbuffer())
+    elif pick != "কোনো BG সাউন্ড নয়":
+        music_path = os.path.join(MUSIC_DIR, pick)
+    if music_path:
+        m1, m2 = st.columns([2, 1])
+        with m1:
+            vol_pct = st.slider("BG সাউন্ডের আওয়াজ (%) — কম = ভয়েস পরিষ্কার", 1, 60, 12, 1, key="sv_music_vol")
+        with m2:
+            duck = st.checkbox("ভয়েসের সময় BG নিজে আরও কমবে", value=True, key="sv_duck",
+                               help="আপনি যখন কথা বলবেন BG ধীরে নেমে যাবে, থামলে আবার উঠবে।")
+        try:
+            with open(music_path, "rb") as fh:
+                st.audio(fh.read())
+        except OSError:
+            pass
+    else:
+        vol_pct, duck = 12, True
 
     d1, d2 = st.columns([1, 3])
     with d1:
@@ -810,48 +1229,119 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
         footer = st.text_input("নিচের বারের লেখা", value=DEFAULT_FOOTER, key="sv_footer")
     name = st.text_input("ফাইলের নাম", value="progyadhara-video", key="sv_name")
 
-    opts = Options(
-        footer=footer,
-        show_footer=show_footer,
-        show_mark=show_mark,
-        voice_on=voice_on,
-        custom_voice=custom_voice_path,
-    )
-    synth = edge_synth(VOICES[voice_label], rate) if voice_mode == "AI ভয়েস (edge-tts)" else None
-
+    # ── প্রিভিউ + প্রতি স্লাইডের ভয়েস ──
+    st.markdown("#### 👀 প্রিভিউ ও ভয়েস")
     b1, b2 = st.columns(2)
     with b1:
-        if st.button("👀 স্লাইডগুলো দেখুন (ভয়েস ছাড়া, দ্রুত)", use_container_width=True, key="sv_prev"):
-            if not slides:
-                st.error("স্ক্রিপ্ট খালি।")
-            else:
-                pdir = os.path.join(temp_dir, "slide_preview")
-                Path(pdir).mkdir(parents=True, exist_ok=True)
-                for i, s in enumerate(slides):
-                    out_p = os.path.join(pdir, f"p{i}.png")
-                    try:
-                        if s.scene:
-                            p = render_scene_preview(s, out_p, footer, show_footer, show_mark)
-                        else:
-                            p = render_slide(s, out_p, footer, show_footer, show_mark)
-                    except SceneError as e:
-                        st.error(f"স্লাইড {i + 1}: {e}")
-                        continue
-                    cap = f"স্লাইড {i + 1}" + (f" · ছবি: {s.scene} · মোশন: {s.motion}" if s.scene else "")
-                    st.image(p, caption=cap, use_container_width=True)
+        if _wide(st.button, "👀 স্লাইডগুলো দেখুন (ভয়েস ছাড়া, দ্রুত)", key="sv_prev"):
+            st.session_state["sv_prev_on"] = True
     with b2:
-        first = next((s.voice for s in slides if s.voice), "")
-        if st.button("🎧 প্রথম ভয়েসটা শুনে দেখুন", use_container_width=True, key="sv_hear", disabled=not first):
-            try:
-                Path(temp_dir).mkdir(parents=True, exist_ok=True)
-                p = os.path.join(temp_dir, "voice_preview.mp3")
-                synth(first, p)
-                with open(p, "rb") as fh:
-                    st.audio(fh.read(), format="audio/mp3")
-            except TTSError as e:
-                st.error(str(e))
+        if voice_mode == "ai":
+            first = next((s.voice or s.m_voice for s in slides if s.voice or s.m_voice), "")
+            if _wide(st.button, "🎧 প্রথম ভয়েসটা শুনে দেখুন", key="sv_hear", disabled=not first):
+                try:
+                    Path(temp_dir).mkdir(parents=True, exist_ok=True)
+                    p = os.path.join(temp_dir, "voice_preview.mp3")
+                    synth(first, p)
+                    with open(p, "rb") as fh:
+                        st.audio(fh.read(), format="audio/mp3")
+                except TTSError as e:
+                    st.error(str(e))
 
-    if st.button("🎬 ভিডিও তৈরি করুন", type="primary", use_container_width=True, key="sv_build"):
+    audio_store = st.session_state.setdefault("sv_audio", {})
+    split_override: Dict[int, float] = {}
+    if st.session_state.get("sv_prev_on") and slides:
+        pdir = os.path.join(temp_dir, "slide_preview")
+        Path(pdir).mkdir(parents=True, exist_ok=True)
+        if voice_mode == "own":
+            st.info("প্রতিটি স্লাইডের ডানের বক্সে লেখা সময় ধরে অন্য ডিভাইসে রেকর্ড করুন, তারপর ওই স্লাইডের বক্সে ফাইল দিন। "
+                    "শ্লোকের পর প্রায় ১.৫ সেকেন্ড চুপ থাকবেন। স্লাইডের ক্রম বদলালে বা ভয়েসের ধরন বদলালে ভয়েস আবার দিতে হবে। "
+                    "ভিডিও তৈরির সময় পাতা বন্ধ করবেন না।")
+        total_est = 0.0
+        for i, s in enumerate(slides):
+            st.divider()
+            left, right = st.columns([3, 2])
+            with left:
+                try:
+                    key = _slide_key(s, footer, show_footer, show_mark)
+                    paths = []
+                    probe_p = os.path.join(pdir, f"{key}_0.png")
+                    if not os.path.isfile(probe_p):
+                        for k, (label, im) in enumerate(preview_images(s, footer, show_footer, show_mark)):
+                            im.save(os.path.join(pdir, f"{key}_{k}.png"))
+                    k = 0
+                    while os.path.isfile(os.path.join(pdir, f"{key}_{k}.png")):
+                        paths.append(os.path.join(pdir, f"{key}_{k}.png"))
+                        k += 1
+                    cap = f"স্লাইড {bn(i + 1)}" + (f" · ছবি: {s.scene} · মোশন: {s.motion}" if s.scene else "")
+                    if len(paths) > 1:
+                        tabs = st.tabs(["শ্লোকের ধাপ", "অর্থের ধাপ"])
+                        for tb, pth in zip(tabs, paths):
+                            with tb:
+                                _wide(st.image, pth)
+                    else:
+                        _wide(st.image, paths[0])
+                    st.caption(cap)
+                except SceneError as e:
+                    st.error(f"স্লাইড {i + 1}: {e}")
+            with right:
+                with st.container(border=True):
+                    e1, e2 = est_phase1(s, wpm), est_phase2(s, wpm)
+                    est = est_total(s, wpm)
+                    st.markdown(f"**স্লাইড {bn(i + 1)}**")
+                    st.markdown(f"### ⏱ ~{bn(int(round(est)))} সেকেন্ড")
+                    if s.has_meaning:
+                        st.caption(f"শ্লোক ≈ {bn(int(round(e1)))} সে.  +  বিরতি ≈ {bn(SPLIT_PAUSE)} সে.  +  অর্থ ≈ {bn(int(round(e2)))} সে.")
+                    else:
+                        st.caption("একধাপের স্লাইড")
+                    st.caption("এটা আন্দাজ। রেকর্ডিংয়ের আসল দৈর্ঘ্যই ভিডিওতে ধরা হবে।")
+                    if s.voice:
+                        st.markdown("**বলার নোট (শ্লোক):** " + s.voice)
+                    if s.m_voice:
+                        st.markdown("**বলার নোট (অর্থ):** " + s.m_voice)
+                    if voice_mode == "own":
+                        up = st.file_uploader("এই স্লাইডের ভয়েস", type=["mp3", "wav", "m4a", "aac", "ogg"],
+                                              key=f"sv_up_{i}")
+                        info = _handle_upload(i, up, temp_dir, ffmpeg, ffprobe, s.has_meaning)
+                        if info:
+                            with open(info["path"], "rb") as fh:
+                                st.audio(fh.read())
+                            line = f"আসল দৈর্ঘ্য: **{bn(round(info['dur'], 1))} সে.**"
+                            if s.has_meaning:
+                                if info.get("split"):
+                                    line += f" · শ্লোক শেষ ≈ **{bn(round(info['split'], 1))} সে.** (নীরবতা দেখে ধরা)"
+                                else:
+                                    line += " · ⚠️ মাঝে নীরবতা পাওয়া যায়নি, সময়ের অনুপাতে ধরা হবে"
+                            st.markdown(line)
+                            if s.has_meaning:
+                                ov = st.number_input("শ্লোক শেষ হওয়ার সময় নিজে দিন (সে.) — ০ মানে নিজে ধরবে",
+                                                     min_value=0.0, max_value=float(max(1.0, info["dur"])),
+                                                     value=0.0, step=0.1, key=f"sv_split_{i}")
+                                if ov > 0:
+                                    split_override[i] = float(ov)
+                            total_est += info["dur"] + LEAD + TAIL
+                            continue
+                    total_est += est
+        st.success(f"সব স্লাইড মিলিয়ে মোট প্রায় {fmt_secs(total_est)} "
+                   "(যে স্লাইডে ভয়েস দেওয়া হয়েছে তার আসল দৈর্ঘ্য, বাকিগুলোর আন্দাজ)")
+
+    slide_audio = {i: v["path"] for i, v in audio_store.items() if i < len(slides) and os.path.isfile(v["path"])}
+    if voice_mode == "own" and slides:
+        missing = [i + 1 for i in range(len(slides)) if i not in slide_audio]
+        if slide_audio and missing:
+            st.warning("এই স্লাইডগুলোতে ভয়েস দেওয়া হয়নি, ওগুলো নীরব থাকবে: " + ", ".join(bn(x) for x in missing))
+
+    opts = Options(
+        footer=footer, show_footer=show_footer, show_mark=show_mark,
+        voice_mode=voice_mode,
+        slide_audio=slide_audio if voice_mode == "own" else {},
+        split_override=split_override,
+        motion_speed=MOTION_SPEEDS[speed_label],
+        wpm=wpm,
+        music_path=music_path, music_vol=vol_pct / 100.0, duck=duck,
+    )
+
+    if _wide(st.button, "🎬 ভিডিও তৈরি করুন", type="primary", key="sv_build"):
         if not slides:
             st.error("স্ক্রিপ্ট খালি।")
         else:
@@ -866,22 +1356,19 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                 safe = re.sub(r"[^\w\-]+", "_", name).strip("_") or "progyadhara-video"
                 final = os.path.join(output_dir, f"{safe}_{stamp}.mp4")
                 shutil.copy(res.mp4, final)
-                with open(final, "rb") as fh:
-                    mp4_bytes = fh.read()
                 mp3_bytes = None
                 if res.voice_mp3:
                     with open(res.voice_mp3, "rb") as fh:
                         mp3_bytes = fh.read()
                 st.session_state["sv_result"] = {
-                    "mp4": mp4_bytes, "srt": res.srt, "mp3": mp3_bytes,
+                    "path": final, "srt": res.srt, "mp3": mp3_bytes,
                     "name": safe, "secs": res.seconds,
                 }
                 status.write("✅ শেষ")
             except TTSError as e:
                 bar.empty()
                 st.error(f"ভয়েস বানানো যায়নি: {e}")
-                st.info("উপায়: ওপরে \"AI ভয়েস বানাও\" বন্ধ করে নীরব ভিডিও বানিয়ে নিন, "
-                        "অথবা টুলটা নিজের মেশিন/Codespaces-এ চালিয়ে দেখুন।")
+                st.info("উপায়: নিজের রেকর্ড করা ভয়েস ব্যবহার করুন, অথবা \"নীরব\" বেছে ভিডিও বানিয়ে নিন।")
             except Exception as e:
                 bar.empty()
                 st.error(f"ভিডিও বানাতে সমস্যা: {e}")
@@ -889,14 +1376,37 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                 shutil.rmtree(work, ignore_errors=True)
 
     r = st.session_state.get("sv_result")
-    if r:
-        st.success(f"তৈরি: প্রায় {r['secs']:.0f} সেকেন্ড")
-        st.video(r["mp4"])
+    if r and os.path.isfile(r["path"]):
+        st.success(f"তৈরি: প্রায় {fmt_secs(r['secs'])}")
+        st.video(r["path"])
         k1, k2, k3 = st.columns(3)
-        k1.download_button("⬇️ ভিডিও (MP4)", r["mp4"], file_name=f"{r['name']}.mp4", mime="video/mp4", key="sv_dl1")
+        with open(r["path"], "rb") as fh:
+            k1.download_button("⬇️ ভিডিও (MP4)", fh.read(), file_name=f"{r['name']}.mp4", mime="video/mp4", key="sv_dl1")
         if r["srt"]:
             k2.download_button("⬇️ সাবটাইটেল (SRT)", r["srt"].encode("utf-8"), file_name=f"{r['name']}.srt",
                                mime="text/plain", key="sv_dl2")
         if r["mp3"]:
             k3.download_button("⬇️ শুধু ভয়েস (MP3)", r["mp3"], file_name=f"{r['name']}-voice.mp3",
                                mime="audio/mpeg", key="sv_dl3")
+
+
+def _handle_upload(i: int, up, temp_dir: str, ffmpeg: str, ffprobe: str, need_split: bool) -> Optional[dict]:
+    """স্লাইডের আপলোড করা ভয়েস ডিস্কে রাখে, দৈর্ঘ্য ও শ্লোক-শেষের সময় বের করে (session-এ মনে রাখে)।"""
+    import streamlit as st
+    store = st.session_state.setdefault("sv_audio", {})
+    if up is None:
+        store.pop(i, None)
+        return None
+    fid = getattr(up, "file_id", None) or (up.name, up.size)
+    cur = store.get(i)
+    if cur and cur["id"] == fid and os.path.isfile(cur["path"]):
+        return cur
+    adir = os.path.join(temp_dir, "sv_audio")
+    Path(adir).mkdir(parents=True, exist_ok=True)
+    path = os.path.join(adir, f"slide_{i}_{int(time.time() * 1000)}{Path(up.name).suffix}")
+    with open(path, "wb") as fh:
+        fh.write(up.getbuffer())
+    dur = _probe(ffprobe, path)
+    split = detect_split(ffmpeg, path, dur) if need_split else None
+    store[i] = {"id": fid, "path": path, "dur": dur, "split": split, "name": up.name}
+    return store[i]
