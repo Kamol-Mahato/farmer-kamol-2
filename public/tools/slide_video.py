@@ -121,6 +121,18 @@ def bn(x) -> str:
     return str(x).translate(_BN_DIGITS)
 
 
+_EN = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
+
+
+def _num(txt):
+    """ঘরে লেখা সংখ্যা (বাংলা/ইংরেজি অঙ্ক) → float; ফাঁকা বা ভুল হলে None।"""
+    try:
+        v = float((txt or "").strip().translate(_EN))
+        return v if v > 0 else None
+    except ValueError:
+        return None
+
+
 def fmt_secs(sec: float) -> str:
     sec = max(0, int(round(sec)))
     if sec >= 60:
@@ -140,6 +152,10 @@ class Slide:
     motion: str = "auto"     # zoom-in | zoom-out | pan-left | pan-right | none | auto
     has_meaning: bool = False                     # @meaning আছে কি
     m_items: list = field(default_factory=list)   # অর্থের ধাপের লেখা
+    has_bakkha: bool = False
+    b_items: list = field(default_factory=list)
+    b_voice: str = ""
+    b_secs: Optional[float] = None
     m_voice: str = ""                             # অর্থের ধাপের ভয়েস নোট
     m_secs: Optional[float] = None                # অর্থের ধাপের সেকেন্ড (~)
 
@@ -148,7 +164,7 @@ def parse_script(text: str) -> List[Slide]:
     slides = []
     for block in re.split(r"(?m)^\s*-{3,}\s*$", text or ""):
         s = Slide()
-        voice1, voice2 = [], []
+        voice1, voice2, voice3 = [], [], []
         phase = 1
         for raw in block.splitlines():
             ln = raw.strip()
@@ -166,20 +182,26 @@ def parse_script(text: str) -> List[Slide]:
                 elif key in ("meaning", "artho", "ortho"):
                     s.has_meaning = True
                     phase = 2
+                elif key in ("bakkha", "bakkhoa", "bakkhya", "byakkha", "vyakkha"):
+                    s.has_meaning = True
+                    s.has_bakkha = True
+                    phase = 3
                 continue
-            target_items = s.m_items if phase == 2 else s.items
+            target_items = {1: s.items, 2: s.m_items, 3: s.b_items}[phase]
             if ln.startswith("##"):
                 target_items.append(("h2", ln[2:].strip()))
             elif ln.startswith("#"):
                 target_items.append(("h1", ln[1:].strip()))
             elif ln.startswith(">"):
-                (voice2 if phase == 2 else voice1).append(ln[1:].strip())
+                {1: voice1, 2: voice2, 3: voice3}[phase].append(ln[1:].strip())
             elif ln.startswith("~"):
                 try:
                     val = float(ln[1:].strip())
                 except ValueError:
                     continue
-                if phase == 2:
+                if phase == 3:
+                    s.b_secs = val
+                elif phase == 2:
                     s.m_secs = val
                 else:
                     s.secs = val
@@ -189,9 +211,10 @@ def parse_script(text: str) -> List[Slide]:
                 target_items.append(("p", ln))
         s.voice = " ".join(v for v in voice1 if v)
         s.m_voice = " ".join(v for v in voice2 if v)
+        s.b_voice = " ".join(v for v in voice3 if v)
         if s.has_meaning and not s.layout_set:
             s.layout = "shloka"
-        if s.items or s.voice or s.m_items or s.m_voice or s.layout == "logo" or s.scene:
+        if s.items or s.voice or s.m_items or s.m_voice or s.b_items or s.layout == "logo" or s.scene:
             slides.append(s)
     return slides
 
@@ -216,7 +239,7 @@ def est_phase1(s: Slide, wpm: int) -> float:
 
 
 def est_phase2(s: Slide, wpm: int) -> float:
-    if not s.has_meaning:
+    if not s.has_meaning or not (s.m_items or s.m_voice or s.m_secs):
         return 0.0
     if s.m_secs:
         return float(s.m_secs)
@@ -226,9 +249,20 @@ def est_phase2(s: Slide, wpm: int) -> float:
     return max(4.0, text_words / wpm * 60.0 * MEANING_FACTOR)
 
 
+def est_phase3(s: Slide, wpm: int) -> float:
+    if not s.has_bakkha:
+        return 0.0
+    if s.b_secs:
+        return float(s.b_secs)
+    if s.b_voice:
+        return max(3.0, _words(s.b_voice) / wpm * 60.0)
+    words = sum(_words(t) for _, t in s.b_items)
+    return max(4.0, words / wpm * 60.0 * MEANING_FACTOR)
+
+
 def est_total(s: Slide, wpm: int) -> float:
-    e1, e2 = est_phase1(s, wpm), est_phase2(s, wpm)
-    return e1 + (SPLIT_PAUSE + e2 if s.has_meaning else 0.0)
+    e1, e2, e3 = est_phase1(s, wpm), est_phase2(s, wpm), est_phase3(s, wpm)
+    return e1 + (SPLIT_PAUSE + e2 + e3 if s.has_meaning else 0.0)
 
 
 # ── স্লাইড আঁকা ──────────────────────────────────────────────────────────────
@@ -489,6 +523,10 @@ class SlideOverlays:
         if s.has_meaning:
             self.sh = _panel(s.items, style, max_h=560)
             self.mp = _panel(s.m_items, _MEANING_STYLE, max_h=400)
+            heads = [(k, t) for k, t in s.b_items if k in ("h1", "h2")]
+            self.bk_texts = [t for k, t in s.b_items if k in ("p", "li")]
+            self.bk = [_panel(heads + [(k, t)], _MEANING_STYLE, max_h=400)
+                       for k, t in s.b_items if k in ("p", "li")]
             self.cy_big = self.base_y * 0.47
             self.cy_small = (SHLOKA_TOP + (self.sh.height * SHLOKA_END_SCALE) / 2) if self.sh else self.cy_big
             self.cy_m = (self.base_y - 34 - self.mp.height / 2) if self.mp else 0
@@ -501,7 +539,7 @@ class SlideOverlays:
             _put(c, self.single, W / 2, self.base_y - 34 - self.single.height / 2)
         return c
 
-    def frame(self, p: float) -> Image.Image:
+    def frame(self, p: float, lower=None) -> Image.Image:
         """p=0 → শ্লোক মাঝখানে বড়; p=1 → শ্লোক ওপরে ছোট ও আধা-স্বচ্ছ + নিচে অর্থ।"""
         c = self.chrome.copy()
         e = _smooth(p)
@@ -510,10 +548,12 @@ class SlideOverlays:
             op = 1 + (SHLOKA_END_OPACITY - 1) * e
             cy = self.cy_big + (self.cy_small - self.cy_big) * e
             _put(c, self.sh, W / 2, cy, sc, op)
-        if self.mp and p > 0.0:
+        mpanel = lower if lower is not None else self.mp
+        if mpanel is not None and p > 0.0:
             me = _smooth((p - 0.3) / 0.7)
             if me > 0.0:
-                _put(c, self.mp, W / 2, self.cy_m + (1 - me) * 28, 1.0, me)
+                cy_m = self.base_y - 34 - mpanel.height / 2
+                _put(c, mpanel, W / 2, cy_m + (1 - me) * 28, 1.0, me)
         return c
 
 
@@ -567,8 +607,11 @@ def preview_images(slide: Slide, footer: str = DEFAULT_FOOTER, show_footer: bool
                 pass
     ov = SlideOverlays(slide, footer, show_footer, show_mark)
     if slide.has_meaning:
-        return [("শ্লোকের ধাপ", Image.alpha_composite(bg, ov.frame(0.0)).convert("RGB")),
-                ("অর্থের ধাপ", Image.alpha_composite(bg, ov.frame(1.0)).convert("RGB"))]
+        out = [("শ্লোকের ধাপ", Image.alpha_composite(bg, ov.frame(0.0)).convert("RGB")),
+               ("অর্থের ধাপ", Image.alpha_composite(bg, ov.frame(1.0)).convert("RGB"))]
+        if slide.has_bakkha and ov.bk:
+            out.append(("ব্যাখ্যার ধাপ", Image.alpha_composite(bg, ov.frame(1.0, lower=ov.bk[0])).convert("RGB")))
+        return out
     return [("", Image.alpha_composite(bg, ov.single_overlay()).convert("RGB"))]
 
 
@@ -733,6 +776,7 @@ class Options:
     voice_mode: str = "own"                                   # own = নিজের রেকর্ড, ai = AI ভয়েস, none = নীরব
     slide_audio: Dict[int, str] = field(default_factory=dict)       # স্লাইড নম্বর (০ থেকে) → ভয়েস ফাইল
     split_override: Dict[int, float] = field(default_factory=dict)  # স্লাইড নম্বর → শ্লোক শেষের সময় (সেকেন্ড)
+    manual: Dict[int, tuple] = field(default_factory=dict)   # স্লাইড নম্বর → (শ্লোক, অর্থ, ব্যাখ্যা) সেকেন্ড
     motion_speed: float = MOTION_SPEEDS[DEFAULT_MOTION]
     wpm: int = 115                                            # আন্দাজের জন্য কথা বলার গতি
     music_path: Optional[str] = None                          # BG সাউন্ড ফাইল
@@ -751,6 +795,7 @@ class Result:
 @dataclass
 class Plan:
     dur: float
+    tb: Optional[float] = None        # ব্যাখ্যা শুরুর সময়
     ts: Optional[float] = None                                # ট্রানজিশন শুরুর সময় (দুই ধাপের স্লাইডে)
     audio: List[Tuple[str, float]] = field(default_factory=list)    # (ফাইল, শুরুর দেরি)
     srt: List[Tuple[float, float, str]] = field(default_factory=list)
@@ -772,6 +817,41 @@ def _clamp_ts(ts: float, dur: float) -> float:
 
 
 def plan_slide(i: int, s: Slide, opts: Options, ffmpeg: str, ffprobe: str, work: Path,
+               synth: Optional[Callable[[str, str], None]]) -> Plan:
+    plan = _plan_base(i, s, opts, ffmpeg, ffprobe, work, synth)
+    if not s.has_meaning:
+        return plan
+    wpm = opts.wpm
+    has_m = bool(s.m_items or s.m_voice or s.m_secs)
+    man = opts.manual.get(i)
+    if man:
+        t1 = float(man[0])
+        t2 = float(man[1]) if has_m else 0.0
+        t3 = float(man[2]) if s.has_bakkha else 0.0
+        need = max((d + _probe(ffprobe, p) for p, d in plan.audio), default=0.0)
+        need = need + TAIL if need else 0.0
+        total = t1 + t2 + t3
+        dur = max(MIN_SLIDE, total, need)
+        extra = dur - total                      # রেকর্ডিং বেশি লম্বা হলে শেষ ধাপ বাড়বে
+        if s.has_bakkha:
+            t3 += extra
+        elif has_m:
+            t2 += extra
+        else:
+            t1 += extra
+        plan.dur = dur
+        plan.ts = _clamp_ts(t1 - TRANS / 2, dur)
+        if s.has_bakkha:
+            plan.tb = t1 + t2
+    elif s.has_bakkha:
+        t1 = (plan.ts + TRANS / 2) if plan.ts is not None else est_phase1(s, wpm)
+        e2, e3 = est_phase2(s, wpm), est_phase3(s, wpm)
+        rest = max(1.0, plan.dur - t1)
+        plan.tb = t1 + rest * (e2 / (e2 + e3) if (e2 + e3) > 0 else 0.0)
+    return plan
+
+
+def _plan_base(i: int, s: Slide, opts: Options, ffmpeg: str, ffprobe: str, work: Path,
                synth: Optional[Callable[[str, str], None]]) -> Plan:
     """স্লাইডের মোট সময়, ধাপ বদলের সময় আর অডিও ঠিক করে।"""
     wpm = opts.wpm
@@ -813,7 +893,7 @@ def plan_slide(i: int, s: Slide, opts: Options, ffmpeg: str, ffprobe: str, work:
                 p.audio.append((b, t_m))
                 p.srt += _spread(s.m_voice, t_m, vd2)
                 end = t_m + vd2
-            p.dur = max(MIN_SLIDE, end + TAIL)
+            p.dur = max(MIN_SLIDE, end + TAIL + est_phase3(s, wpm))
             p.ts = _clamp_ts(t_m - TRANS / 2, p.dur)
         else:
             a = str(work / f"v{i}.mp3")
@@ -828,7 +908,7 @@ def plan_slide(i: int, s: Slide, opts: Options, ffmpeg: str, ffprobe: str, work:
     e1 = est_phase1(s, wpm)
     if s.has_meaning:
         e2 = est_phase2(s, wpm)
-        dur = max(MIN_SLIDE, e1 + e2)
+        dur = max(MIN_SLIDE, e1 + e2 + est_phase3(s, wpm))
         return Plan(dur=dur, ts=_clamp_ts(e1 - TRANS / 2, dur))
     return Plan(dur=max(MIN_SLIDE, e1))
 
@@ -866,13 +946,32 @@ def _encode_slide(i: int, s: Slide, plan: Plan, opts: Options, ffmpeg: str, work
             ov.frame((k + 1) / (nfr + 1)).save(str(work / f"s{i}_t{k:03d}.png"), compress_level=1)
         ts = plan.ts if plan.ts is not None else max(0.5, dur / 2)
         te = ts + nfr / FPS
-        cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png"), "-i", pc]
-        nv = 4
+        tb = plan.tb if (s.has_bakkha and plan.tb is not None) else dur
+        tb = min(dur, max(tb, te + 0.5))
+        states = [(te, tb, pc)]                      # (শুরু, শেষ, ছবি): আগে অর্থ, তারপর ব্যাখ্যার এক-এক লাইন
+        if s.has_bakkha and ov.bk:
+            wts = [max(1, len(t)) for t in ov.bk_texts]
+            cur, span = tb, max(0.5, dur - tb)
+            for k, (panel, wt) in enumerate(zip(ov.bk, wts)):
+                nxt = dur if k == len(ov.bk) - 1 else cur + span * wt / sum(wts)
+                pk = str(work / f"s{i}_b{k}.png")
+                ov.frame(1.0, lower=panel).save(pk)
+                states.append((cur, nxt, pk))
+                cur = nxt
+        cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png")]
+        for _, _, pth in states:
+            cmd += ["-i", pth]
+        nv = 3 + len(states)4
         fcs.append(f"[0:v]{_motion_vf(motion, dur, i, opts.motion_speed)}[bg]")
         fcs.append(f"[bg][1:v]overlay=0:0:format=auto:enable='lt(t,{ts:.3f})'[o1]")
         fcs.append(f"[2:v]setpts=PTS-STARTPTS+{ts:.3f}/TB[tr]")
         fcs.append(f"[o1][tr]overlay=0:0:format=auto:enable='between(t,{ts:.3f},{te:.3f})'[o2]")
-        fcs.append(f"[o2][3:v]overlay=0:0:format=auto:enable='gte(t,{te:.3f})',format=yuv420p,{fade}[v]")
+        prev = "o2"
+        for k, (a, b, _) in enumerate(states):
+            cond = f"gte(t,{a:.3f})" if k == len(states) - 1 else f"between(t,{a:.3f},{b:.3f})"
+            fcs.append(f"[{prev}][{3 + k}:v]overlay=0:0:format=auto:enable='{cond}'[st{k}]")
+            prev = f"st{k}"
+        fcs.append(f"[{prev}]format=yuv420p,{fade}[v]")
     elif scene_path:
         png = render_scene_overlay(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
         cmd += ["-i", scene_path, "-i", png]
@@ -1104,6 +1203,7 @@ HELP_TEXT = """
 | `> লেখা` | **আপনার বলার নোট** (পর্দায় আসবে না)। প্রিভিউয়ের বক্সে রেকর্ড করার সময় দেখা যাবে |
 | `~ 8` | ওই ধাপ কত সেকেন্ড (শ্লোকের `~` @meaning-এর আগে, অর্থের `~` @meaning-এর পরে লিখুন)। প্রিভিউয়ের সময়ের আন্দাজ ঠিক করতে কাজে লাগে |
 | `@logo` / `@text` / `@shloka` | সাদা স্লাইডের ধরন (ছবি ছাড়া) |
+| `@bakkha` | **ব্যাখ্যার ধাপ** (`@meaning`-এর পরে লিখুন)। প্রতিটি সাধারণ লাইন অর্থের বক্সের জায়গায় একটার পর একটা আসবে |
 | `// লেখা` | মন্তব্য (বাদ যাবে) |
 
 **ভয়েস রেকর্ডিংয়ের নিয়ম (নিজের ভয়েস):** প্রতি স্লাইডের জন্য একটি ফাইল। শ্লোক পড়ার পর **প্রায় ১.৫ সেকেন্ড চুপ থাকুন**, তারপর অর্থ বলুন। ওই নীরবতা দেখেই কোড ঠিক করে কখন শ্লোক ওপরে উঠবে। ঠিক না ধরলে প্রিভিউয়ের বক্সে সময় নিজে লিখে দিতে পারবেন।
@@ -1250,6 +1350,7 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
 
     audio_store = st.session_state.setdefault("sv_audio", {})
     split_override: Dict[int, float] = {}
+    manual: Dict[int, tuple] = {}
     if st.session_state.get("sv_prev_on") and slides:
         pdir = os.path.join(temp_dir, "slide_preview")
         Path(pdir).mkdir(parents=True, exist_ok=True)
@@ -1258,6 +1359,7 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                     "শ্লোকের পর প্রায় ১.৫ সেকেন্ড চুপ থাকবেন। স্লাইডের ক্রম বদলালে বা ভয়েসের ধরন বদলালে ভয়েস আবার দিতে হবে। "
                     "ভিডিও তৈরির সময় পাতা বন্ধ করবেন না।")
         total_est = 0.0
+        prev_eff = [None, None, None]        # আগের স্লাইডের শ্লোক/অর্থ/ব্যাখ্যার সময় (পরেরটা এখান থেকে নেবে)
         for i, s in enumerate(slides):
             st.divider()
             left, right = st.columns([3, 2])
@@ -1275,7 +1377,7 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                         k += 1
                     cap = f"স্লাইড {bn(i + 1)}" + (f" · ছবি: {s.scene} · মোশন: {s.motion}" if s.scene else "")
                     if len(paths) > 1:
-                        tabs = st.tabs(["শ্লোকের ধাপ", "অর্থের ধাপ"])
+                        tabs = st.tabs(["শ্লোকের ধাপ", "অর্থের ধাপ", "ব্যাখ্যার ধাপ"][:len(paths)])
                         for tb, pth in zip(tabs, paths):
                             with tb:
                                 _wide(st.image, pth)
@@ -1295,6 +1397,34 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                     else:
                         st.caption("একধাপের স্লাইড")
                     st.caption("এটা আন্দাজ। রেকর্ডিংয়ের আসল দৈর্ঘ্যই ভিডিওতে ধরা হবে।")
+                    mlen = None
+                    st.caption(f"▶ ভিডিওতে এই স্লাইড শুরু হবে: {fmt_secs(total_est)}-এ")
+                    if s.has_meaning:
+                        has_m = bool(s.m_items or s.m_voice or s.m_secs)
+                        est_k = [e1, e2, est_phase3(s, wpm)]
+                        present = [True, has_m, s.has_bakkha]
+                        names = ["শ্লোক (সে.)", "অর্থ (সে.)", "ব্যাখ্যা (সে.)"]
+                        tcols = st.columns(3)
+                        eff, active = [], False
+                        for k in range(3):
+                            if not present[k]:
+                                eff.append(0.0)
+                                continue
+                            dflt = prev_eff[k] if prev_eff[k] is not None else round(est_k[k])
+                            with tcols[k]:
+                                raw = st.text_input(names[k], value="", placeholder=bn(int(dflt)),
+                                                    key=f"sv_t{k}_{i}",
+                                                    help="ফাঁকা রাখলে আগের স্লাইডের সময়ই বসবে। বদলালে পরের স্লাইডগুলোও এটাই নেবে।")
+                            typed = _num(raw)
+                            v = typed if typed is not None else dflt
+                            if typed is not None or prev_eff[k] is not None:
+                                active = True
+                                prev_eff[k] = v
+                            eff.append(v)
+                        if active:
+                            manual[i] = tuple(eff)
+                            mlen = sum(eff)
+                            st.caption(f"আপনার সময়ে এই স্লাইড: **{fmt_secs(mlen)}**")
                     if s.voice:
                         st.markdown("**বলার নোট (শ্লোক):** " + s.voice)
                     if s.m_voice:
@@ -1319,9 +1449,9 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                                                      value=0.0, step=0.1, key=f"sv_split_{i}")
                                 if ov > 0:
                                     split_override[i] = float(ov)
-                            total_est += info["dur"] + LEAD + TAIL
+                            total_est += max(info["dur"] + LEAD + TAIL, mlen or 0.0)
                             continue
-                    total_est += est
+                    total_est += mlen if mlen else est
         st.success(f"সব স্লাইড মিলিয়ে মোট প্রায় {fmt_secs(total_est)} "
                    "(যে স্লাইডে ভয়েস দেওয়া হয়েছে তার আসল দৈর্ঘ্য, বাকিগুলোর আন্দাজ)")
 
@@ -1336,6 +1466,7 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
         voice_mode=voice_mode,
         slide_audio=slide_audio if voice_mode == "own" else {},
         split_override=split_override,
+        manual=manual,
         motion_speed=MOTION_SPEEDS[speed_label],
         wpm=wpm,
         music_path=music_path, music_vol=vol_pct / 100.0, duck=duck,
