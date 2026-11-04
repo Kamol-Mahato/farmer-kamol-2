@@ -961,7 +961,7 @@ def _encode_slide(i: int, s: Slide, plan: Plan, opts: Options, ffmpeg: str, work
         cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png")]
         for _, _, pth in states:
             cmd += ["-i", pth]
-        nv = 3 + len(states)4
+        nv = 3 + len(states)
         fcs.append(f"[0:v]{_motion_vf(motion, dur, i, opts.motion_speed)}[bg]")
         fcs.append(f"[bg][1:v]overlay=0:0:format=auto:enable='lt(t,{ts:.3f})'[o1]")
         fcs.append(f"[2:v]setpts=PTS-STARTPTS+{ts:.3f}/TB[tr]")
