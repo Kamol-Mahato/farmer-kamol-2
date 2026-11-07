@@ -1,15 +1,16 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 
-// মোবাইল স্লাইড: বদলের সময় পুরনো কনটেন্ট নিচে থেকে যায়, নতুনটা ওপর দিয়ে ফুটে ওঠে।
+// মোবাইল স্লাইড: নতুন কনটেন্ট পুরনোটার ওপর দিয়ে ধীরে ফুটে ওঠে (dissolve)।
 // skipPrev = true হলে (ভিডিও চলছে) পুরনোটা আর দেখানো হয় না, যাতে iframe দ্বিতীয়বার চালু না হয়।
 export default function CrossfadeSwap({
   itemKey,
   children,
   skipPrev = false,
-  fadeMs = 700,
+  fadeMs = 1000,
 }: {
   itemKey: string | number;
+  count?: number;
   children: ReactNode;
   skipPrev?: boolean;
   fadeMs?: number;

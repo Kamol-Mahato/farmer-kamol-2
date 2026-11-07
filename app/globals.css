@@ -276,27 +276,34 @@ div.overflow-x-auto > table {
 }
 
 /* ===== Hero slider motion ===== */
-.hero-slide img {
-  transform: scale(1.08);
-  transition: transform 4000ms ease-out;
-}
-.hero-slide.is-active img {
-  transform: scale(1);
-}
-.hero-slide .hero-panel {
+/* PC: ছবি মিশে যাওয়ার পর দাম-বক্সের লেখা একটার পর একটা উঠে আসে */
+.hero-slide .hero-panel > * {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(8px);
   transition:
-    opacity 500ms ease 350ms,
-    transform 500ms ease 350ms;
+    opacity 450ms ease,
+    transform 450ms ease;
 }
-.hero-slide.is-active .hero-panel,
-.hero-slide.is-prev .hero-panel {
+.hero-slide.is-active .hero-panel > *,
+.hero-slide.is-prev .hero-panel > * {
   opacity: 1;
   transform: none;
 }
+.hero-slide.is-active .hero-panel > *:nth-child(1) {
+  transition-delay: 500ms;
+}
+.hero-slide.is-active .hero-panel > *:nth-child(2) {
+  transition-delay: 600ms;
+}
+.hero-slide.is-active .hero-panel > *:nth-child(3) {
+  transition-delay: 700ms;
+}
+.hero-slide.is-active .hero-panel > *:nth-child(4) {
+  transition-delay: 800ms;
+}
 
-@keyframes heroSwapIn {
+/* মোবাইল: নতুন কনটেন্ট ধীরে মিশে আসে */
+@keyframes heroFadeIn {
   from {
     opacity: 0;
   }
@@ -304,50 +311,46 @@ div.overflow-x-auto > table {
     opacity: 1;
   }
 }
-@keyframes heroPanelUp {
+@keyframes heroItemUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-@keyframes heroZoomOut {
-  from {
-    transform: scale(1.08);
-  }
-  to {
-    transform: scale(1);
-  }
-}
 .hero-swap-in {
-  animation: heroSwapIn 700ms ease-in-out both;
+  animation: heroFadeIn 1000ms ease-in-out both;
 }
-.hero-swap-in .hero-panel {
-  animation: heroPanelUp 500ms ease 350ms both;
+.hero-swap-in .hero-panel > * {
+  animation: heroItemUp 450ms ease both;
 }
-.hero-swap-in img {
-  animation: heroZoomOut 4000ms ease-out both;
+.hero-swap-in .hero-panel > *:nth-child(1) {
+  animation-delay: 500ms;
+}
+.hero-swap-in .hero-panel > *:nth-child(2) {
+  animation-delay: 600ms;
+}
+.hero-swap-in .hero-panel > *:nth-child(3) {
+  animation-delay: 700ms;
+}
+.hero-swap-in .hero-panel > *:nth-child(4) {
+  animation-delay: 800ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-slide,
-  .hero-slide img,
-  .hero-slide .hero-panel {
+  .hero-slide .hero-panel > * {
     transition: none !important;
   }
-  .hero-slide img {
-    transform: none !important;
-  }
-  .hero-slide .hero-panel {
+  .hero-slide .hero-panel > * {
     opacity: 1 !important;
     transform: none !important;
   }
   .hero-swap-in,
-  .hero-swap-in img,
-  .hero-swap-in .hero-panel {
+  .hero-swap-in .hero-panel > * {
     animation: none !important;
   }
 }

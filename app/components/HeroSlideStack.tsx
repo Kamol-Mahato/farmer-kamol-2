@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 
-// PC-র প্রোডাক্ট স্লাইড: সব স্লাইড একটার ওপর একটা সাজানো থাকে,
-// নতুনটা পুরনোটার ওপর দিয়ে ধীরে ফুটে ওঠে (মাঝখানে ফাঁকা সবুজ দেখায় না)।
+// PC-র প্রোডাক্ট স্লাইড: নতুন ছবি পুরনোটার ওপর দিয়ে ধীরে ফুটে ওঠে (dissolve)।
+// পুরনোটা নিচে পুরো দেখা যায়, তাই মাঝখানে ফাঁকা সবুজ আসে না।
 // আশপাশের স্লাইডের ছবি আগে থেকে লোড হয়ে থাকে।
 export default function HeroSlideStack({
   count,
   index,
   renderSlide,
-  fadeMs = 800,
+  fadeMs = 1000,
 }: {
   count: number;
   index: number;
@@ -19,7 +19,6 @@ export default function HeroSlideStack({
   const [tracked, setTracked] = useState(index);
   const [prev, setPrev] = useState<number | null>(null);
 
-  // index বদলালে আগেরটাকে "prev" হিসেবে ধরে রাখা (fade শেষ হওয়া পর্যন্ত নিচে থাকবে)
   if (tracked !== index) {
     setPrev(tracked);
     setTracked(index);
@@ -45,7 +44,7 @@ export default function HeroSlideStack({
   }
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 overflow-hidden">
       {Array.from(visible)
         .sort((a, b) => a - b)
         .map((i) => {
@@ -54,11 +53,11 @@ export default function HeroSlideStack({
           return (
             <div
               key={i}
-              className={`hero-slide absolute inset-0 transition-opacity ease-in-out${isActive ? " is-active" : ""}${isPrev ? " is-prev" : ""}`}
+              className={`hero-slide absolute inset-0${isActive ? " is-active" : ""}${isPrev ? " is-prev" : ""}`}
               style={{
                 opacity: isActive || isPrev ? 1 : 0,
+                transition: isActive ? `opacity ${fadeMs}ms ease-in-out` : "none",
                 zIndex: isActive ? 2 : isPrev ? 1 : 0,
-                transitionDuration: `${fadeMs}ms`,
               }}
               aria-hidden={!isActive}
               inert={!isActive}

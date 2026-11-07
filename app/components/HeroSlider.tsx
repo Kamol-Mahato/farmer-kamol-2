@@ -193,6 +193,9 @@ export default function HeroSlider({
     setMobileQueueIndex((p) => (p + 1) % mobileTotal);
   }
 
+  // মোবাইলে আঙুল দিয়ে বাঁ-ডানে টানলে স্লাইড বদলায়
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
   const currentPcVideo = hasVideos
     ? heroVideos[pcVideoIndex % heroVideos.length]
     : null;
@@ -455,8 +458,31 @@ export default function HeroSlider({
 
       {/* ── MOBILE LAYOUT — ভিডিও ও প্রোডাক্ট একই queue-তে, ‹ › দিয়ে পুরো queue-তে ঘোরা যাবে ── */}
       <div className="md:hidden">
-        <div className="relative" style={{ paddingTop: "56.25%" }}>
-        <CrossfadeSwap itemKey={safeMobileIndex} skipPrev={mobilePlaying}>
+      <div
+          className="relative overflow-hidden"
+          style={{ paddingTop: "56.25%" }}
+          onTouchStart={(e) => {
+            touchStart.current = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY,
+            };
+          }}
+          onTouchEnd={(e) => {
+            const s = touchStart.current;
+            touchStart.current = null;
+            if (!s) return;
+            const dx = e.changedTouches[0].clientX - s.x;
+            const dy = e.changedTouches[0].clientY - s.y;
+            if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+            if (dx < 0) mobileNext();
+            else mobilePrev();
+          }}
+        >
+        <CrossfadeSwap
+          itemKey={safeMobileIndex}
+          count={mobileTotal}
+          skipPrev={mobilePlaying}
+        >
         {currentMobileItem?.kind === "video" &&
           currentMobileVideo &&
           !mobileYtId ? (
