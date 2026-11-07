@@ -39,6 +39,10 @@ DEFAULT_FOOTER = "ফেসবুক: প্রজ্ঞাধারা - Progya
 
 W, H, FPS = 1920, 1080, 30
 FOOTER_H = 110
+FOOTER_GAP = 0                    # নিচের বার তলা থেকে কত ওপরে (রিলসে ফেসবুকের বোতামের জায়গা ছাড়তে)
+LOGO_TOP = 40                     # লোগো ওপরের কিনারা থেকে কত নিচে
+TEXT_MAX_W = 1500                 # লেখা সর্বোচ্চ কত চওড়া হবে (পিক্সেল)
+PANEL_H_SCALE = 1.0               # প্যানেলের সর্বোচ্চ উচ্চতার গুণক (রিলসের লম্বা পর্দায় বড়)
 LEAD, TAIL = 0.35, 0.7          # ভয়েসের আগে ও পরে নীরবতা (সেকেন্ড)
 MIN_SLIDE = 2.5
 SILENT_DEFAULT = 4.0
@@ -316,26 +320,50 @@ _STYLES = {
 }
 
 
+def _draw_footer(d, footer: str):
+    """নিচের বার। লেখা এক লাইনে না ধরলে `|` ধরে ভেঙে দুই/তিন লাইনে বসে (রিলসের সরু পর্দায়)।"""
+    top = H - FOOTER_GAP - FOOTER_H
+    d.rectangle([0, top, W, top + FOOTER_H], fill=INDIGO)
+    d.rectangle([0, top - 4, W, top], fill=GOLD)
+    f, _ = get_font(40, False)
+    if f.getlength(footer) <= W - 80:           # এক লাইনে ধরলে আগের মতোই হুবহু
+        lines = [footer]
+    else:
+        lines, cur = [], ""
+        for part in [p.strip() for p in footer.split("|") if p.strip()]:
+            t = (cur + " | " + part) if cur else part
+            if cur and f.getlength(t) > W - 80:
+                lines.append(cur)
+                cur = part
+            else:
+                cur = t
+        if cur:
+            lines.append(cur)
+        lines = [x for ln in lines for x in _wrap(ln, f, W - 80)] or [""]
+    lh = 52
+    y0 = top + FOOTER_H / 2 - lh * (len(lines) - 1) / 2
+    for k, ln in enumerate(lines):
+        d.text((W // 2, y0 + k * lh), ln, font=f, fill=GOLD, anchor="mm")
+
+
 def render_slide(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_footer: bool = True,
                  show_mark: bool = True) -> str:
     img = Image.new("RGB", (W, H), CREAM)
     d = ImageDraw.Draw(img)
-    bottom_limit = H - (FOOTER_H + 4 if show_footer else 0) - 60
-    top = 170
+    bottom_limit = H - FOOTER_GAP - (FOOTER_H + 4 if show_footer else 0) - 60
+    dy = LOGO_TOP - 40                   # রিলসে লোগো/লেখা ওপর থেকে একটু নিচে নামে
+    top = 170 + dy
 
     if show_footer:
-        d.rectangle([0, H - FOOTER_H, W, H], fill=INDIGO)
-        d.rectangle([0, H - FOOTER_H - 4, W, H - FOOTER_H], fill=GOLD)
-        f, _ = get_font(40, False)
-        d.text((W // 2, H - FOOTER_H // 2), footer, font=f, fill=GOLD, anchor="mm")
+        _draw_footer(d, footer)
 
     if slide.layout == "logo":
         m = logo_mark(360)
-        img.paste(m, (W // 2 - 180, 90), m)
-        top = 480
+        img.paste(m, (W // 2 - 180, 90 + dy), m)
+        top = 480 + dy
     elif show_mark:
         m = logo_mark(130)
-        img.paste(m, (W - 130 - 50, 40), m)
+        img.paste(m, (W - 130 - 50, LOGO_TOP), m)
 
     style = _STYLES.get(slide.layout, _STYLES["text"])
     items = []
@@ -351,7 +379,7 @@ def render_slide(slide: Slide, out_png: str, footer: str = DEFAULT_FOOTER, show_
         for kind, txt, size, color, bold in items:
             sz = int(size * scale)
             f, sw = get_font(sz, bold)
-            max_w = 1500 - (90 if kind == "li" else 0)
+            max_w = TEXT_MAX_W - (90 if kind == "li" else 0)
             lines = _wrap(txt, f, max_w)
             h = int(sz * 1.4) * len(lines)
             rows.append((kind, lines, f, sw, color, sz, h))
@@ -441,11 +469,13 @@ _SCENE_STYLES["logo"] = _SCENE_STYLES["text"]
 _MEANING_STYLE = {"h1": (58, GOLD, True), "h2": (50, _LIGHT_GOLD, True), "p": (52, CREAM, False), "li": (48, CREAM, False)}
 
 
-def _panel(items, style, pad: int = 40, max_text_w: int = 1500, max_h: int = 470,
+def _panel(items, style, pad: int = 40, max_text_w: Optional[int] = None, max_h: int = 470,
            box: Optional[Tuple[int, int]] = None, part: str = "both") -> Optional[Image.Image]:
     """লেখার স্বচ্ছ-পটভূমির প্যানেল (RGBA)। লেখা বেশি হলে ফন্ট নিজে ছোট হয়।"""
     if not items:
         return None
+    max_text_w = max_text_w or TEXT_MAX_W
+    max_h = int(max_h * PANEL_H_SCALE)
     its = [(k, t, *style[k]) for k, t in items]
     rows, total = [], 0
     for scale in (1.0, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48):
@@ -492,13 +522,10 @@ def _chrome_layer(footer: str, show_footer: bool, show_mark: bool) -> Image.Imag
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     if show_footer:
-        d.rectangle([0, H - FOOTER_H, W, H], fill=INDIGO)
-        d.rectangle([0, H - FOOTER_H - 4, W, H - FOOTER_H], fill=GOLD)
-        f, _ = get_font(40, False)
-        d.text((W // 2, H - FOOTER_H // 2), footer, font=f, fill=GOLD, anchor="mm")
+        _draw_footer(d, footer)
     if show_mark:
         m = logo_mark(130)
-        img.paste(m, (W - 130 - 50, 40), m)
+        img.paste(m, (W - 130 - 50, LOGO_TOP), m)
     return img
 
 
@@ -526,7 +553,7 @@ class SlideOverlays:
 
     def __init__(self, s: Slide, footer: str, show_footer: bool, show_mark: bool):
         self.s = s
-        self.base_y = H - (FOOTER_H + 4 if show_footer else 0)
+        self.base_y = H - FOOTER_GAP - (FOOTER_H + 4 if show_footer else 0)
         self.chrome = _chrome_layer(footer, show_footer, show_mark)
         style = _SCENE_STYLES.get(s.layout, _SCENE_STYLES["text"])
         if s.has_meaning:
@@ -1287,10 +1314,25 @@ def _slide_key(s: Slide, footer: str, sf: bool, sm: bool) -> str:
     return hashlib.md5(repr((s, footer, sf, sm)).encode("utf-8")).hexdigest()[:16]
 
 
+class portrait_layout:
+    """9:16 (১০৮০×১৯২০) রিলসের জন্য মাপ সাময়িক বদলায়; `with` ব্লক শেষে আগের মাপ ফিরে আসে।"""
+    _NAMES = ("W", "H", "FOOTER_H", "FOOTER_GAP", "LOGO_TOP", "SHLOKA_TOP", "TEXT_MAX_W", "PANEL_H_SCALE")
+    _VALUES = (1080, 1920, 150, 260, 210, 370, 840, 1.9)
+
+    def __enter__(self):
+        g = globals()
+        self._old = {k: g[k] for k in self._NAMES}
+        g.update(dict(zip(self._NAMES, self._VALUES)))
+
+    def __exit__(self, *exc):
+        globals().update(self._old)
+
+
 def build_play_video(s: Slide, footer: str, show_footer: bool, show_mark: bool, voice_mode: str,
                      manual_t: Optional[tuple], audio_path: Optional[str], split: Optional[float],
                      motion_speed: float, wpm: int, ffmpeg: str, ffprobe: str, temp_dir: str,
-                     synth, idx: int) -> Tuple[str, float]:
+                     synth, idx: int, portrait: bool = False, music_path: Optional[str] = None,
+                     music_vol: float = 0.12, duck: bool = True) -> Tuple[str, float]:
     """একটি স্লাইড আপনার দেওয়া সময় (ভয়েস দেওয়া থাকলে ভয়েসের দৈর্ঘ্য) ধরে ছোট ভিডিও করে — আসল সময়ের প্রিভিউ।"""
     one = Options(
         footer=footer, show_footer=show_footer, show_mark=show_mark, voice_mode=voice_mode,
@@ -1298,12 +1340,17 @@ def build_play_video(s: Slide, footer: str, show_footer: bool, show_mark: bool, 
         split_override={0: float(split)} if split else {},
         manual={0: tuple(manual_t)} if manual_t else {},
         motion_speed=motion_speed, wpm=wpm,
+        music_path=music_path, music_vol=music_vol, duck=duck,
     )
     wdir = os.path.join(temp_dir, f"play_{idx}_{int(time.time())}")
     try:
-        res = build_video([s], one, ffmpeg, ffprobe, wdir, synth)
+        if portrait:                          # রিল: 9:16 (১০৮০×১৯২০)
+            with portrait_layout():
+                res = build_video([s], one, ffmpeg, ffprobe, wdir, synth)
+        else:
+            res = build_video([s], one, ffmpeg, ffprobe, wdir, synth)
         Path(temp_dir).mkdir(parents=True, exist_ok=True)
-        out = os.path.join(temp_dir, f"play_{idx}.mp4")
+        out = os.path.join(temp_dir, f"{'reel' if portrait else 'play'}_{idx}.mp4")
         shutil.copy(res.mp4, out)
         return out, res.seconds
     finally:
@@ -1537,6 +1584,28 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                     if pl and pl["key"] == pkey and os.path.isfile(pl["path"]):
                         st.video(pl["path"])
                         st.caption(f"এই স্লাইড ভিডিওতে চলবে: {fmt_secs(pl['secs'])}")
+                    # 📱 এই স্লাইড আলাদা রিল (9:16) হিসেবে
+                    if _wide(st.button, "📱 রিল (9:16) বানান", key=f"sv_reel_{i}",
+                             help="এই স্লাইডটা 9:16 মাপে (ফেসবুক রিলসের জন্য) আলাদা ভিডিও করবে।"):
+                        with st.spinner("রিল বানানো হচ্ছে... স্লাইডের দৈর্ঘ্যের কাছাকাছি সময় লাগতে পারে।"):
+                            try:
+                                routp, rsecs = build_play_video(
+                                    s, footer, show_footer, show_mark, voice_mode, pm, pa_path, p_split,
+                                    MOTION_SPEEDS[speed_label], wpm, ffmpeg, ffprobe, temp_dir, synth, i,
+                                    portrait=True, music_path=music_path, music_vol=vol_pct / 100.0, duck=duck)
+                                st.session_state.setdefault("sv_reel", {})[i] = {
+                                    "key": pkey + repr((music_path, vol_pct, duck)), "path": routp, "secs": rsecs}
+                            except TTSError as e:
+                                st.error(f"ভয়েস বানানো যায়নি: {e}")
+                            except Exception as e:
+                                st.error(f"রিল বানাতে সমস্যা: {e}")
+                    rl = st.session_state.get("sv_reel", {}).get(i)
+                    if rl and rl["key"] == pkey + repr((music_path, vol_pct, duck)) and os.path.isfile(rl["path"]):
+                        st.video(rl["path"])
+                        with open(rl["path"], "rb") as fh:
+                            _wide(st.download_button, "⬇️ রিল ডাউনলোড (MP4)", fh.read(),
+                                  file_name=f"progyadhara-reel-{i + 1:02d}.mp4", mime="video/mp4",
+                                  key=f"sv_reeldl_{i}")
                     if s.voice:
                         st.markdown("**বলার নোট (শ্লোক):** " + s.voice)
                     if s.m_voice:
