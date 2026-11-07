@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Hind_Siliguri } from "next/font/google";
 import ConditionalLayout from "./components/ConditionalLayout";
-import OrganizationSchema from "./components/OrganizationSchema";
+import RootOrgSchema from "./components/RootOrgSchema";
 import EnterKeyNav from "./components/EnterKeyNav";
 import TopLoadingBar from "./components/TopLoadingBar";
 import "./globals.css";
-import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -48,17 +47,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-  const lang = pathname.startsWith("/en") ? "en" : "bn";
-
   return (
-    <html lang={lang}>
+    <html lang="bn" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://images.weserv.nl" />
         <link rel="dns-prefetch" href="https://images.weserv.nl" />
@@ -75,7 +70,7 @@ export default async function RootLayout({
       <body
         className={`${hindSiliguri.variable} ${hindSiliguri.className} antialiased bg-gray-50 flex flex-col min-h-screen`}
       >
-        <OrganizationSchema lang={lang} />
+        <RootOrgSchema />
         <Suspense fallback={null}>
           <TopLoadingBar />
         </Suspense>
