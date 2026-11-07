@@ -47,6 +47,8 @@ FADE_HEX = "0x1F2A5A"             # স্লাইড বদলের সময
 
 # ── শ্লোক → অর্থ ধাপ বদল ─────────────────────────────────────────────────────
 TRANS = 0.9                       # শ্লোক ওপরে উঠে যেতে কত সেকেন্ড লাগবে
+FADE_OUT_TEXT = 0.22              # অর্থ → ব্যাখ্যা (ও ব্যাখ্যার লাইন বদলে): পুরোনো লেখা মিলাতে কত সেকেন্ড
+FADE_IN_TEXT = 0.30               # নতুন লেখা আসতে কত সেকেন্ড (বক্স একই জায়গায় স্থির থাকে)
 SHLOKA_END_SCALE = 0.62           # ওপরে গিয়ে শ্লোকের প্যানেল কত ছোট হবে (১.০ = একই)
 SHLOKA_END_OPACITY = 0.55         # ওপরে গিয়ে কতটা দৃশ্যমান থাকবে (১.০ = পুরো, ০.৫ = আধা-স্বচ্ছ)
 SHLOKA_TOP = 36                   # ওপরে গিয়ে ওপরের কিনারা থেকে দূরত্ব (পিক্সেল)
@@ -439,7 +441,8 @@ _SCENE_STYLES["logo"] = _SCENE_STYLES["text"]
 _MEANING_STYLE = {"h1": (58, GOLD, True), "h2": (50, _LIGHT_GOLD, True), "p": (52, CREAM, False), "li": (48, CREAM, False)}
 
 
-def _panel(items, style, pad: int = 40, max_text_w: int = 1500, max_h: int = 470) -> Optional[Image.Image]:
+def _panel(items, style, pad: int = 40, max_text_w: int = 1500, max_h: int = 470,
+           box: Optional[Tuple[int, int]] = None, part: str = "both") -> Optional[Image.Image]:
     """লেখার স্বচ্ছ-পটভূমির প্যানেল (RGBA)। লেখা বেশি হলে ফন্ট নিজে ছোট হয়।"""
     if not items:
         return None
@@ -460,10 +463,16 @@ def _panel(items, style, pad: int = 40, max_text_w: int = 1500, max_h: int = 470
     widths = [f.getlength(ln) + (90 if kind == "li" else 0) for kind, lines, f, *_ in rows for ln in lines] or [200]
     pw = int(min(W - 120, max(widths) + 2 * pad + 40))
     ph = int(total + 2 * pad)
+    text_h = ph
+    if box:                                    # সব প্যানেল একই মাপের বক্সে, তাই বক্স লাফায় না
+        pw, ph = max(pw, box[0]), max(ph, box[1])
     img = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle([0, 0, pw - 1, ph - 1], radius=30, fill=_PANEL_RGBA, outline=GOLD, width=3)
-    y = pad
+    if part != "text":
+        d.rounded_rectangle([0, 0, pw - 1, ph - 1], radius=30, fill=_PANEL_RGBA, outline=GOLD, width=3)
+    if part == "box":                          # শুধু বক্স (লেখা ছাড়া)
+        return img
+    y = pad + (ph - text_h) // 2               # লেখা বক্সের মাঝখানে
     for kind, lines, f, sw, color, sz, h in rows:
         for ln in lines:
             if kind == "li":
@@ -522,11 +531,15 @@ class SlideOverlays:
         style = _SCENE_STYLES.get(s.layout, _SCENE_STYLES["text"])
         if s.has_meaning:
             self.sh = _panel(s.items, style, max_h=560)
-            self.mp = _panel(s.m_items, _MEANING_STYLE, max_h=400)
             heads = [(k, t) for k, t in s.b_items if k in ("h1", "h2")]
             self.bk_texts = [t for k, t in s.b_items if k in ("p", "li")]
-            self.bk = [_panel(heads + [(k, t)], _MEANING_STYLE, max_h=400)
-                       for k, t in s.b_items if k in ("p", "li")]
+            self.bk_items = [heads + [(k, t)] for k, t in s.b_items if k in ("p", "li")]
+            first = [_panel(s.m_items, _MEANING_STYLE, max_h=400)] + \
+                    [_panel(it, _MEANING_STYLE, max_h=400) for it in self.bk_items]
+            sizes = [(p.width, p.height) for p in first if p is not None]
+            self.box = (max(w for w, _ in sizes), max(h for _, h in sizes)) if sizes else None
+            self.mp = _panel(s.m_items, _MEANING_STYLE, max_h=400, box=self.box)
+            self.bk = [_panel(it, _MEANING_STYLE, max_h=400, box=self.box) for it in self.bk_items]
             self.cy_big = self.base_y * 0.47
             self.cy_small = (SHLOKA_TOP + (self.sh.height * SHLOKA_END_SCALE) / 2) if self.sh else self.cy_big
             self.cy_m = (self.base_y - 34 - self.mp.height / 2) if self.mp else 0
@@ -539,7 +552,15 @@ class SlideOverlays:
             _put(c, self.single, W / 2, self.base_y - 34 - self.single.height / 2)
         return c
 
-    def frame(self, p: float, lower=None) -> Image.Image:
+    def lower_layer(self, items, part: str = "both") -> Image.Image:
+        """নিচের লেখা/বক্সের স্বচ্ছ স্তর। part: both | box (শুধু বক্স) | text (শুধু লেখা)।"""
+        c = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        panel = _panel(items, _MEANING_STYLE, max_h=400, box=self.box, part=part)
+        if panel is not None:
+            _put(c, panel, W / 2, self.base_y - 34 - panel.height / 2)
+        return c
+
+    def frame(self, p: float, lower=None, show_lower: bool = True) -> Image.Image:
         """p=0 → শ্লোক মাঝখানে বড়; p=1 → শ্লোক ওপরে ছোট ও আধা-স্বচ্ছ + নিচে অর্থ।"""
         c = self.chrome.copy()
         e = _smooth(p)
@@ -549,7 +570,7 @@ class SlideOverlays:
             cy = self.cy_big + (self.cy_small - self.cy_big) * e
             _put(c, self.sh, W / 2, cy, sc, op)
         mpanel = lower if lower is not None else self.mp
-        if mpanel is not None and p > 0.0:
+        if show_lower and mpanel is not None and p > 0.0:
             me = _smooth((p - 0.3) / 0.7)
             if me > 0.0:
                 cy_m = self.base_y - 34 - mpanel.height / 2
@@ -940,7 +961,7 @@ def _encode_slide(i: int, s: Slide, plan: Plan, opts: Options, ffmpeg: str, work
         ov = SlideOverlays(s, opts.footer, opts.show_footer, opts.show_mark)
         pa, pc = str(work / f"s{i}_a.png"), str(work / f"s{i}_c.png")
         ov.frame(0.0).save(pa)
-        ov.frame(1.0).save(pc)
+        ov.frame(1.0, show_lower=False).save(pc)     # শ্লোক ওপরে + বার/লোগো (নিচের বক্স ছাড়া, স্থির)
         nfr = max(2, int(round(TRANS * FPS)))
         for k in range(nfr):
             ov.frame((k + 1) / (nfr + 1)).save(str(work / f"s{i}_t{k:03d}.png"), compress_level=1)
@@ -948,29 +969,62 @@ def _encode_slide(i: int, s: Slide, plan: Plan, opts: Options, ffmpeg: str, work
         te = ts + nfr / FPS
         tb = plan.tb if (s.has_bakkha and plan.tb is not None) else dur
         tb = min(dur, max(tb, te + 0.5))
-        states = [(te, tb, pc)]                      # (শুরু, শেষ, ছবি): আগে অর্থ, তারপর ব্যাখ্যার এক-এক লাইন
+
+        # নিচের বক্স একবার বসে স্থির থাকে; ভেতরের লেখা (অর্থ → ব্যাখ্যার লাইন) বদলের সময় ক্রস-ফেড হয়
+        tl = []                                      # (শুরুর সময়, লেখার তালিকা)
+        if s.m_items:
+            tl.append((te, s.m_items))
         if s.has_bakkha and ov.bk:
             wts = [max(1, len(t)) for t in ov.bk_texts]
             cur, span = tb, max(0.5, dur - tb)
-            for k, (panel, wt) in enumerate(zip(ov.bk, wts)):
-                nxt = dur if k == len(ov.bk) - 1 else cur + span * wt / sum(wts)
-                pk = str(work / f"s{i}_b{k}.png")
-                ov.frame(1.0, lower=panel).save(pk)
-                states.append((cur, nxt, pk))
-                cur = nxt
-        cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png")]
-        for _, _, pth in states:
-            cmd += ["-i", pth]
-        nv = 3 + len(states)
+            for it, wt in zip(ov.bk_items, wts):
+                tl.append((cur, it))
+                cur = cur + span * wt / sum(wts)
+
+        cmd += ["-i", bg, "-i", pa, "-framerate", str(FPS), "-i", str(work / f"s{i}_t%03d.png"), "-i", pc]
         fcs.append(f"[0:v]{_motion_vf(motion, dur, i, opts.motion_speed)}[bg]")
         fcs.append(f"[bg][1:v]overlay=0:0:format=auto:enable='lt(t,{ts:.3f})'[o1]")
         fcs.append(f"[2:v]setpts=PTS-STARTPTS+{ts:.3f}/TB[tr]")
         fcs.append(f"[o1][tr]overlay=0:0:format=auto:enable='between(t,{ts:.3f},{te:.3f})'[o2]")
-        prev = "o2"
-        for k, (a, b, _) in enumerate(states):
-            cond = f"gte(t,{a:.3f})" if k == len(states) - 1 else f"between(t,{a:.3f},{b:.3f})"
-            fcs.append(f"[{prev}][{3 + k}:v]overlay=0:0:format=auto:enable='{cond}'[st{k}]")
-            prev = f"st{k}"
+        fcs.append(f"[o2][3:v]overlay=0:0:format=auto:enable='gte(t,{te:.3f})'[o3]")
+        prev, nv = "o3", 4
+        if tl:
+            t0b = tl[0][0]
+            pbox = str(work / f"s{i}_box.png")
+            ov.lower_layer(tl[0][1], "box").save(pbox)
+            if t0b > te + 0.01:                      # অর্থ না থাকলে বক্সও ধীরে আসবে
+                cmd += ["-loop", "1", "-framerate", str(FPS), "-t", f"{dur - t0b + 0.5:.3f}", "-i", pbox]
+                fcs.append(f"[{nv}:v]format=rgba,fade=t=in:st=0:d={FADE_IN_TEXT:.3f}:alpha=1,"
+                           f"setpts=PTS-STARTPTS+{t0b:.3f}/TB[bx]")
+            else:
+                cmd += ["-i", pbox]
+                fcs.append(f"[{nv}:v]format=rgba[bx]")
+            fcs.append(f"[{prev}][bx]overlay=0:0:format=auto:enable='gte(t,{t0b:.3f})'[ob]")
+            prev, nv = "ob", nv + 1
+            lag = 0.0                                # আগের লেখা মিলানো শুরু হলে নতুন লেখা একটু পরে আসে
+            for k, (a, items) in enumerate(tl):
+                last = k == len(tl) - 1
+                nxt = dur if last else tl[k + 1][0]
+                fi = max(0.1, min(FADE_IN_TEXT, (nxt - a) * 0.4))
+                ptxt = str(work / f"s{i}_x{k}.png")
+                ov.lower_layer(items, "text").save(ptxt)
+                chain = ["format=rgba"]
+                if k > 0 or a > te + 0.01:
+                    chain.append(f"fade=t=in:st={lag:.3f}:d={fi:.3f}:alpha=1")
+                if last:
+                    end, length = dur, dur - a + 0.5
+                else:
+                    gap = nxt - a
+                    xo = max(0.05, min(FADE_OUT_TEXT, gap * 0.4))
+                    end, length = nxt + xo + 0.05, gap + xo + 0.2
+                    chain.append(f"fade=t=out:st={gap:.3f}:d={xo:.3f}:alpha=1")
+                    lag = xo * 0.8
+                chain.append(f"setpts=PTS-STARTPTS+{a:.3f}/TB")
+                cmd += ["-loop", "1", "-framerate", str(FPS), "-t", f"{length:.3f}", "-i", ptxt]
+                fcs.append(f"[{nv}:v]{','.join(chain)}[L{k}]")
+                cond = f"gte(t,{a:.3f})" if last else f"between(t,{a:.3f},{end:.3f})"
+                fcs.append(f"[{prev}][L{k}]overlay=0:0:format=auto:enable='{cond}'[st{k}]")
+                prev, nv = f"st{k}", nv + 1
         fcs.append(f"[{prev}]format=yuv420p,{fade}[v]")
     elif scene_path:
         png = render_scene_overlay(s, str(work / f"s{i}.png"), opts.footer, opts.show_footer, opts.show_mark)
@@ -1233,6 +1287,29 @@ def _slide_key(s: Slide, footer: str, sf: bool, sm: bool) -> str:
     return hashlib.md5(repr((s, footer, sf, sm)).encode("utf-8")).hexdigest()[:16]
 
 
+def build_play_video(s: Slide, footer: str, show_footer: bool, show_mark: bool, voice_mode: str,
+                     manual_t: Optional[tuple], audio_path: Optional[str], split: Optional[float],
+                     motion_speed: float, wpm: int, ffmpeg: str, ffprobe: str, temp_dir: str,
+                     synth, idx: int) -> Tuple[str, float]:
+    """একটি স্লাইড আপনার দেওয়া সময় (ভয়েস দেওয়া থাকলে ভয়েসের দৈর্ঘ্য) ধরে ছোট ভিডিও করে — আসল সময়ের প্রিভিউ।"""
+    one = Options(
+        footer=footer, show_footer=show_footer, show_mark=show_mark, voice_mode=voice_mode,
+        slide_audio={0: audio_path} if audio_path else {},
+        split_override={0: float(split)} if split else {},
+        manual={0: tuple(manual_t)} if manual_t else {},
+        motion_speed=motion_speed, wpm=wpm,
+    )
+    wdir = os.path.join(temp_dir, f"play_{idx}_{int(time.time())}")
+    try:
+        res = build_video([s], one, ffmpeg, ffprobe, wdir, synth)
+        Path(temp_dir).mkdir(parents=True, exist_ok=True)
+        out = os.path.join(temp_dir, f"play_{idx}.mp4")
+        shutil.copy(res.mp4, out)
+        return out, res.seconds
+    finally:
+        shutil.rmtree(wdir, ignore_errors=True)
+
+
 def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
     import streamlit as st
 
@@ -1436,6 +1513,30 @@ def render_tab(ffmpeg: str, ffprobe: str, temp_dir: str, output_dir: str):
                             manual[i] = tuple(eff)
                             mlen = sum(eff)
                             st.caption(f"আপনার সময়ে এই স্লাইড: **{fmt_secs(mlen)}**")
+                    # ▶ এই স্লাইড আসল সময়ে (আপনার দেওয়া সময়/ভয়েস ধরে) চালিয়ে দেখা
+                    pm = manual.get(i)
+                    pa_ = audio_store.get(i) if voice_mode == "own" else None
+                    pa_path = pa_["path"] if (pa_ and os.path.isfile(pa_["path"])) else None
+                    p_split = st.session_state.get(f"sv_split_{i}") or None
+                    pkey = repr((_slide_key(s, footer, show_footer, show_mark), pm, pa_path, p_split,
+                                 speed_label, wpm, voice_mode))
+                    if _wide(st.button, "▶ আসল সময়ে দেখুন", key=f"sv_play_{i}",
+                             help="এই স্লাইডটা আপনার দেওয়া সময় ধরে ছোট ভিডিও করে চালাবে (ভয়েস দেওয়া থাকলে ভয়েসসহ)।"):
+                        with st.spinner("এই স্লাইডের ভিডিও বানানো হচ্ছে... স্লাইডের দৈর্ঘ্যের কাছাকাছি সময় লাগতে পারে।"):
+                            try:
+                                outp, psecs = build_play_video(
+                                    s, footer, show_footer, show_mark, voice_mode, pm, pa_path, p_split,
+                                    MOTION_SPEEDS[speed_label], wpm, ffmpeg, ffprobe, temp_dir, synth, i)
+                                st.session_state.setdefault("sv_play", {})[i] = {
+                                    "key": pkey, "path": outp, "secs": psecs}
+                            except TTSError as e:
+                                st.error(f"ভয়েস বানানো যায়নি: {e}")
+                            except Exception as e:
+                                st.error(f"প্রিভিউ বানাতে সমস্যা: {e}")
+                    pl = st.session_state.get("sv_play", {}).get(i)
+                    if pl and pl["key"] == pkey and os.path.isfile(pl["path"]):
+                        st.video(pl["path"])
+                        st.caption(f"এই স্লাইড ভিডিওতে চলবে: {fmt_secs(pl['secs'])}")
                     if s.voice:
                         st.markdown("**বলার নোট (শ্লোক):** " + s.voice)
                     if s.m_voice:
