@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import AnnouncementBar from "./AnnouncementBar";
 import FlagRibbonBackground from "./FlagRibbonBackground";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import NewOrderNotifier from "../admin/components/NewOrderNotifier";
 import { useMobileMenu } from "./MobileMenuContext";
 import { getLocaleFromPath, localizeHref, switchLocalePath } from "@/lib/i18n";
@@ -43,10 +43,22 @@ const uiDict = {
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const locale = getLocaleFromPath(pathname);
   const t = uiDict[locale];
   const href = (path: string) => localizeHref(path, locale);
+
+  // ভাষা বদলের সময় বর্তমান query সাথে নেওয়া (useSearchParams ছাড়া, যাতে পেজ স্ট্যাটিক থাকে)
+  const goSwitchLang = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    router.push(
+      switchLocalePath(
+        pathname,
+        locale === "bn" ? "en" : "bn",
+        window.location.search.replace(/^\?/, ""),
+      ),
+    );
+  };
 
   const [user, setUser] = useState<{
     name: string;
@@ -376,11 +388,8 @@ export default function Navbar() {
 
           <div className="flex items-center gap-1.5 shrink-0">
             <Link
-              href={switchLocalePath(
-                pathname,
-                locale === "bn" ? "en" : "bn",
-                searchParams.toString(),
-              )}
+              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", "")}
+              onClick={goSwitchLang}
               className="flex lg:hidden items-center justify-center px-2 py-0.5 text-[11px] font-semibold text-white border border-white/20 rounded bg-white/10 backdrop-blur-sm active:scale-95 hover:bg-white/20 transition shrink-0"
               aria-label="Language Switch"
               title={t.langSwitch}
@@ -389,11 +398,8 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href={switchLocalePath(
-                pathname,
-                locale === "bn" ? "en" : "bn",
-                searchParams.toString(),
-              )}
+              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", "")}
+              onClick={goSwitchLang}
               className="hidden lg:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-6 text-[11px] font-bold shrink-0 transition hover:border-yellow-400 group ml-2"
               aria-label="Language Switch"
               title={t.langSwitch}
