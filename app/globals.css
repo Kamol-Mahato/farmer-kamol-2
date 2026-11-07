@@ -274,3 +274,80 @@ div.overflow-x-auto > table {
   width: max-content;
   min-width: 100%;
 }
+
+/* ===== Hero slider motion ===== */
+.hero-slide img {
+  transform: scale(1.08);
+  transition: transform 4000ms ease-out;
+}
+.hero-slide.is-active img {
+  transform: scale(1);
+}
+.hero-slide .hero-panel {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 500ms ease 350ms,
+    transform 500ms ease 350ms;
+}
+.hero-slide.is-active .hero-panel,
+.hero-slide.is-prev .hero-panel {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes heroSwapIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes heroPanelUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes heroZoomOut {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.hero-swap-in {
+  animation: heroSwapIn 700ms ease-in-out both;
+}
+.hero-swap-in .hero-panel {
+  animation: heroPanelUp 500ms ease 350ms both;
+}
+.hero-swap-in img {
+  animation: heroZoomOut 4000ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide,
+  .hero-slide img,
+  .hero-slide .hero-panel {
+    transition: none !important;
+  }
+  .hero-slide img {
+    transform: none !important;
+  }
+  .hero-slide .hero-panel {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hero-swap-in,
+  .hero-swap-in img,
+  .hero-swap-in .hero-panel {
+    animation: none !important;
+  }
+}

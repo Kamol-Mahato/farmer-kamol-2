@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { getSavePercent } from "@/lib/pricing";
+import HeroSlideStack from "@/app/components/HeroSlideStack";
+import CrossfadeSwap from "@/app/components/CrossfadeSwap";
 import { translateUnit } from "@/lib/unitTranslate";
 
 type Product = {
@@ -101,7 +103,7 @@ export default function HeroSlider({
     if (featuredProducts.length === 0) return;
     const timer = setInterval(() => {
       setPcProductIndex((prev) => (prev + 1) % featuredProducts.length);
-    }, 2500);
+    }, 3500);
     return () => clearInterval(timer);
   }, [featuredProducts.length]);
 
@@ -126,7 +128,7 @@ export default function HeroSlider({
     if (currentMobileKind === "product") {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
-      }, 2000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
     if (currentMobileKind === "video" && !mobilePlaying) {
@@ -236,7 +238,7 @@ export default function HeroSlider({
             {savePercent}% Save
           </span>
         )}
-        <div className="absolute bottom-0 right-0 bg-white/60 backdrop-blur-sm px-1.5 py-0.5 md:px-2 md:py-1 rounded-tl-2xl flex flex-col items-end gap-0.5 md:gap-1 text-right">
+        <div className="hero-panel absolute bottom-0 right-0 bg-white/60 backdrop-blur-sm px-1.5 py-0.5 md:px-2 md:py-1 rounded-tl-2xl flex flex-col items-end gap-0.5 md:gap-1 text-right">
           <p className="text-xs md:text-base font-bold text-green-900">
             {displayName}
           </p>
@@ -406,12 +408,18 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">No featured products</p>
             </div>
           ) : (
-            renderProductSlide(
-              featuredProducts[pcProductIndex],
-              featuredProducts[pcProductIndex].id,
-              "opacity-100 animate-fadeIn",
-              pcProductIndex === 0,
-            )
+            <HeroSlideStack
+              count={featuredProducts.length}
+              index={pcProductIndex}
+              renderSlide={(i) =>
+                renderProductSlide(
+                  featuredProducts[i],
+                  featuredProducts[i].id,
+                  "",
+                  i === 0,
+                )
+              }
+            />
           )}
           {featuredProducts.length > 1 && (
             <>
@@ -435,6 +443,7 @@ export default function HeroSlider({
       {/* MOBILE LAYOUT */}
       <div className="md:hidden">
         <div className="relative" style={{ paddingTop: "56.25%" }}>
+        <CrossfadeSwap itemKey={safeMobileIndex} skipPrev={mobilePlaying}>
         {currentMobileItem?.kind === "video" &&
           currentMobileVideo &&
           !mobileYtId ? (
@@ -481,7 +490,8 @@ export default function HeroSlider({
               <p className="text-green-300 text-sm">No content available</p>
             </div>
           )}
-          {mobileTotal > 1 && (
+          </CrossfadeSwap>
+            {mobileTotal > 1 && (
             <>
               <button
                 onClick={mobilePrev}
