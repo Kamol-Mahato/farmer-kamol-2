@@ -163,7 +163,19 @@ export default async function AdminDashboard() {
           <p className="text-2xl mb-2">🎬</p>
           <p className="text-lg font-bold">ভিডিও এডিট করুন</p>
           <p className="text-indigo-100 text-sm mt-1">
-            সারাদিনের ক্লিপ → ১৬:৯ + ৯:১৬
+          সারাদিনের ক্লিপ → ১৬:৯ + ৯:১৬
+          </p>
+        </a>
+        <a
+          href="https://farmer-kamol-audio.streamlit.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block bg-rose-700 text-white rounded-xl p-6 hover:bg-rose-600 transition"
+        >
+          <p className="text-2xl mb-2">🎙️</p>
+          <p className="text-lg font-bold">অডিও এডিট করুন</p>
+          <p className="text-rose-100 text-sm mt-1">
+            ভয়েস রেকর্ড → হিস কমানো + স্টুডিও ভাইব
           </p>
         </a>
       </div>
