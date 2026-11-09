@@ -20,6 +20,7 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import slide_video  # প্রজ্ঞাধারা স্লাইড ভিডিও ট্যাব
+import audio_edit  # অডিও এডিট ট্যাব
 import voice_clean  # স/শ নরম করা ও ফাঁকের হিস কমানো
 
 # ── PATHS ────────────────────────────────────────────────────────────────────
@@ -747,11 +748,13 @@ def main():
     else:
         st.sidebar.warning("logo.png পাওয়া যায়নি — লোগো ছাড়াই চলবে")
 
-    tab_clip, tab_slide = st.tabs(["🎬 ক্লিপ এডিটর", "📖 স্লাইড ভিডিও (প্রজ্ঞাধারা)"])
+    tab_clip, tab_slide, tab_audio = st.tabs(["🎬 ক্লিপ এডিটর", "📖 স্লাইড ভিডিও (প্রজ্ঞাধারা)", "🎙️ অডিও এডিট"])
     with tab_clip:
         clip_editor()
     with tab_slide:
         slide_video.render_tab(FFMPEG, FFPROBE, TEMP_DIR, OUTPUT_DIR)
+    with tab_audio:
+        audio_edit.render_tab()
 
 
 def clip_editor():

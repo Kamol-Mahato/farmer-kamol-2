@@ -1,5 +1,6 @@
-"""অডিও এডিট টুল — নিজের রেকর্ড করা ভয়েস পরিষ্কার করার আলাদা Streamlit অ্যাপ।
+"""অডিও এডিট ট্যাব — নিজের রেকর্ড করা ভয়েস পরিষ্কার করার অংশ।
 
+video-edit-tools.py-এর "🎙️ অডিও এডিট" ট্যাব থেকে ডাকা হয়  (audio_edit.render_tab)।
 আপলোড → ট্রিম (ঐচ্ছিক) → ভয়েস ক্লিনআপ → লম্বা ফাঁক ছোট করা (ঐচ্ছিক) → WAV/MP3 ডাউনলোড।
 ফিল্টারগুলো voice_clean.py-তে আছে। ffmpeg ছাড়া বাড়তি কিছু লাগে না।
 """
@@ -31,7 +32,6 @@ os.makedirs(WORK_DIR, exist_ok=True)
 AUDIO_TYPES = ["wav", "mp3", "m4a", "aac", "ogg", "opus", "flac", "wma", "mp4", "mov", "mkv", "webm"]
 FORMATS = ["WAV (সেরা মান)", "MP3 (ছোট ফাইল)"]
 
-logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("audio-edit")
 
 
@@ -150,80 +150,73 @@ def process_audio(src: str, start: float, end: float, af: str, silence: str, fmt
 
 
 # ── UI ───────────────────────────────────────────────────────────────────────
-def main():
-    st.set_page_config(page_title="অডিও এডিট", page_icon="🎙️", layout="centered")
-    st.markdown(
-        "<style>@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');"
-        "html, body, [class*='css'] {font-family: 'Hind Siliguri', sans-serif;}</style>",
-        unsafe_allow_html=True,
-    )
-    st.title("🎙️ অডিও এডিট")
+def render_tab():
     st.caption("নিজের রেকর্ড করা ভয়েস পরিষ্কার করুন: হিস কমানো, স/শ নরম করা, ফাঁকের শব্দ চাপা, ভলিউম সমান করা।")
 
     if not check_ffmpeg():
         st.error("FFmpeg পাওয়া যায়নি। সিস্টেমে ffmpeg ইনস্টল করুন অথবা `ffmpeg/bin/` ফোল্ডারে রাখুন।")
-        st.stop()
+        return
     cleanup_old()
 
-    up = st.file_uploader("অডিও (বা ভিডিও) ফাইল আপলোড করুন", type=AUDIO_TYPES)
+    up = st.file_uploader("অডিও (বা ভিডিও) ফাইল আপলোড করুন", type=AUDIO_TYPES, key="ae_upload")
     if up is None:
         st.info("৫-১০ মিনিটের রেকর্ডিং আপলোড করুন। ভিডিও দিলে শুধু তার ভয়েসটুকু নেওয়া হবে।")
         return
 
     key = f"{up.name}:{up.size}"
-    if st.session_state.get("src_key") != key:
+    if st.session_state.get("ae_src_key") != key:
         ext = Path(up.name).suffix.lower() or ".wav"
         p = tmp_path("in", ext)
         with open(p, "wb") as f:
             f.write(up.getbuffer())
-        st.session_state.update(src_key=key, src_path=p, src_dur=probe_duration(p))
-        for k in ("result", "preview"):
+        st.session_state.update(ae_src_key=key, ae_src_path=p, ae_src_dur=probe_duration(p))
+        for k in ("ae_result", "ae_preview"):
             st.session_state.pop(k, None)
-    src = st.session_state["src_path"]
-    dur = float(st.session_state.get("src_dur", 0.0))
+    src = st.session_state["ae_src_path"]
+    dur = float(st.session_state.get("ae_src_dur", 0.0))
     max_s = dur if dur > 0 else 36000.0
     st.success(f"{up.name} — দৈর্ঘ্য: {fmt_time(dur)}" if dur > 0 else f"{up.name} লোড হয়েছে")
 
     # ১. ট্রিম
     st.header("১. ট্রিম (ঐচ্ছিক)")
     c1, c2 = st.columns(2)
-    t_start = c1.number_input("শুরু (সেকেন্ড)", 0.0, max_s, 0.0, 0.5)
-    t_end = c2.number_input("শেষ (সেকেন্ড, ০ = শেষ পর্যন্ত)", 0.0, max_s, 0.0, 0.5)
+    t_start = c1.number_input("শুরু (সেকেন্ড)", 0.0, max_s, 0.0, 0.5, key="ae_start")
+    t_end = c2.number_input("শেষ (সেকেন্ড, ০ = শেষ পর্যন্ত)", 0.0, max_s, 0.0, 0.5, key="ae_end")
     if t_end and t_end <= t_start:
         st.error("শেষের সময় শুরুর চেয়ে বেশি হতে হবে।")
-        st.stop()
+        return
 
     # ২. ক্লিনআপ
     st.header("২. ভয়েস ক্লিনআপ")
-    preset = st.selectbox("ভয়েস প্রসেস", vc.VO_PRESETS, index=2)
+    preset = st.selectbox("ভয়েস প্রসেস", vc.VO_PRESETS, index=2, key="ae_preset")
     off = preset == vc.VO_PRESETS[0]
     a, b, c = st.columns(3)
-    nr = a.selectbox("নয়েজ কমানোর মাত্রা", list(vc.NR_LEVELS.keys()), index=0, disabled=off,
+    nr = a.selectbox("নয়েজ কমানোর মাত্রা", list(vc.NR_LEVELS.keys()), index=0, disabled=off, key="ae_nr",
                      help="পরিষ্কার জায়গায় রেকর্ড করলে 'হালকা'ই ভালো। বেশি দিলে গলা রোবটিক শোনাতে পারে।")
-    deess = b.selectbox("স/শ নরম করা", list(vc.DEESS_LEVELS.keys()), index=2, disabled=off,
+    deess = b.selectbox("স/শ নরম করা", list(vc.DEESS_LEVELS.keys()), index=2, disabled=off, key="ae_deess",
                         help="স, শ, ছ-এর তীক্ষ্ণ শব্দ কমায়। বেশি দিলে কিছু উচ্চারণ জড়িয়ে শোনাতে পারে।")
-    gap = c.selectbox("বাক্যের ফাঁকে হিস", list(vc.GAP_LEVELS.keys()), index=2, disabled=off,
+    gap = c.selectbox("বাক্যের ফাঁকে হিস", list(vc.GAP_LEVELS.keys()), index=2, disabled=off, key="ae_gap",
                       help="কথার ফাঁকে হিস কতটা চাপা পড়বে। পুরো নীরব হয় না, তাই স্বাভাবিক শোনায়।")
-    loud = st.checkbox("ভলিউম YouTube মাপে আনা (স্টুডিও ভাইবে আগে থেকেই থাকে)", value=True)
+    loud = st.checkbox("ভলিউম YouTube মাপে আনা (স্টুডিও ভাইবে আগে থেকেই থাকে)", value=True, key="ae_loud")
 
     # ৩. ফাঁক
     st.header("৩. লম্বা ফাঁক ছোট করা (ঐচ্ছিক)")
-    sil = st.selectbox("লম্বা ফাঁক ছোট করা", list(vc.SILENCE_LEVELS.keys()), index=0,
+    sil = st.selectbox("লম্বা ফাঁক ছোট করা", list(vc.SILENCE_LEVELS.keys()), index=0, key="ae_sil",
                        help="হালকা = ১ সেকেন্ডের বেশি ফাঁক, মাঝারি = ০.৭, বেশি = ০.৫ সেকেন্ডের বেশি। ফাঁক ০.৩৫ সেকেন্ডে নামে।")
 
-    if st.session_state.get("floor_key") != key:      # নয়েজ একবারই মাপা হয়, বারবার নয়
-        st.session_state["floor"] = vc.estimate_noise_floor(FFMPEG, src)
-        st.session_state["floor_key"] = key
-    af = build_af(preset, nr, st.session_state["floor"], deess, gap, loud)
+    if st.session_state.get("ae_floor_key") != key:      # নয়েজ একবারই মাপা হয়, বারবার নয়
+        st.session_state["ae_floor"] = vc.estimate_noise_floor(FFMPEG, src)
+        st.session_state["ae_floor_key"] = key
+    af = build_af(preset, nr, st.session_state["ae_floor"], deess, gap, loud)
 
     # প্রিভিউ
     st.header("৪. প্রিভিউ ও তৈরি")
-    prev_off = st.number_input("প্রিভিউ শুরু (সেকেন্ড)", 0.0, max_s, min(t_start, max_s), 1.0,
+    prev_off = st.number_input("প্রিভিউ শুরু (সেকেন্ড)", 0.0, max_s, min(t_start, max_s), 1.0, key="ae_prev_off",
                                help="যে জায়গার স/শ বা হিস পরীক্ষা করতে চান সেখান থেকে ১৫ সেকেন্ড শোনা যাবে।")
-    if st.button("🎧 ১৫ সেকেন্ডের প্রিভিউ শুনুন"):
+    if st.button("🎧 ১৫ সেকেন্ডের প্রিভিউ শুনুন", key="ae_prev_btn"):
         with st.spinner("প্রিভিউ বানানো হচ্ছে..."):
-            st.session_state["preview"] = make_preview(src, prev_off, af)
-    pv = st.session_state.get("preview")
+            st.session_state["ae_preview"] = make_preview(src, prev_off, af)
+    pv = st.session_state.get("ae_preview")
     if pv:
         p_orig, p_proc = pv
         if p_orig and p_proc and os.path.exists(p_orig) and os.path.exists(p_proc):
@@ -236,23 +229,23 @@ def main():
         else:
             st.error("প্রিভিউ বানানো যায়নি। টার্মিনাল লগ দেখুন।")
 
-    fmt = st.radio("আউটপুট ফরম্যাট", FORMATS, horizontal=True)
+    fmt = st.radio("আউটপুট ফরম্যাট", FORMATS, horizontal=True, key="ae_fmt")
 
-    if st.button("✅ পুরো অডিও প্রসেস করুন", type="primary"):
+    if st.button("✅ পুরো অডিও প্রসেস করুন", type="primary", key="ae_run"):
         with st.spinner("প্রসেস হচ্ছে... ১০ মিনিটের অডিওতে কিছুটা সময় লাগতে পারে।"):
             t0 = time.time()
             out, msg = process_audio(src, t_start, t_end, af, sil, fmt)
         if out:
-            st.session_state["result"] = {
+            st.session_state["ae_result"] = {
                 "path": out, "fmt": fmt, "stem": Path(up.name).stem,
                 "secs": time.time() - t0, "dur": probe_duration(out), "note": msg,
             }
         else:
-            st.session_state.pop("result", None)
+            st.session_state.pop("ae_result", None)
             st.error(msg)
 
     # ফলাফল (ডাউনলোডের পরেও থাকে)
-    res = st.session_state.get("result")
+    res = st.session_state.get("ae_result")
     if res and os.path.exists(res["path"]):
         is_mp3 = res["fmt"] == FORMATS[1]
         st.success(f"তৈরি হয়েছে — দৈর্ঘ্য: {fmt_time(res['dur'])} ({res['secs']:.0f} সেকেন্ডে)")
@@ -264,9 +257,5 @@ def main():
         st.download_button(
             "⬇️ ডাউনলোড করুন", data,
             file_name=f"{res['stem']}_clean{'.mp3' if is_mp3 else '.wav'}",
-            mime="audio/mpeg" if is_mp3 else "audio/wav",
+            mime="audio/mpeg" if is_mp3 else "audio/wav", key="ae_download",
         )
-
-
-if __name__ == "__main__":
-    main()

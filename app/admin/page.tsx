@@ -163,7 +163,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl mb-2">🎬</p>
           <p className="text-lg font-bold">ভিডিও এডিট করুন</p>
           <p className="text-indigo-100 text-sm mt-1">
-          সারাদিনের ক্লিপ → ১৬:৯ + ৯:১৬
+            সারাদিনের ক্লিপ → ১৬:৯ + ৯:১৬
           </p>
         </a>
         <a
