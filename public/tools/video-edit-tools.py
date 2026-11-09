@@ -20,6 +20,7 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import slide_video  # প্রজ্ঞাধারা স্লাইড ভিডিও ট্যাব
+import voice_clean  # স/শ নরম করা ও ফাঁকের হিস কমানো
 
 # ── PATHS ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -447,32 +448,33 @@ def estimate_noise_floor(path: str) -> float:
     return -45.0
 
 
-def vo_chain(preset: str, nr_level: str, floor: float = -45.0) -> str:
+def vo_chain(preset: str, nr_level: str, floor: float = -45.0, deess: str = "বন্ধ", gap: str = "মাঝারি") -> str:
     """ভয়েসের ফিল্টার তালিকা (ffmpeg -af)। floor = মাপা ব্যাকগ্রাউন্ড নয়েজ (dB)।"""
     nr = NR_LEVELS.get(nr_level, 20)
     den = f"afftdn=nr={nr}:nf={floor:.1f}:nt=w"
+    vc = voice_clean
     if preset == VO_PRESETS[1]:
         # নিচের গুম গুম শব্দ কাটা + হিস/ব্যাকগ্রাউন্ড নয়েজ কমানো
-        return f"highpass=f=80,{den},volume=1.2"
+        return vc.join("highpass=f=80", den, vc.gap_filter(gap, floor), vc.deess_filter(deess), "volume=1.2")
     if preset == VO_PRESETS[2]:
-        gate = min(0.05, max(0.002, 10 ** ((floor + 6) / 20)))
-        return (
-            f"highpass=f=80,{den},"
-            f"agate=threshold={gate:.4f}:ratio=2:attack=10:release=300,"    # বাক্যের ফাঁকে ঘরের শব্দ চাপা
-            "equalizer=f=250:t=q:w=1:g=-1.5,"                                # ঘোলাটে ভাব কমানো
-            "equalizer=f=120:t=q:w=1:g=2,"                                   # গলা ভরাট
-            "equalizer=f=3000:t=q:w=1:g=2.5,"                                # কথা পরিষ্কার
-            "acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3,"  # জোর সমান
-            "loudnorm=I=-16:TP=-1.5:LRA=11"                                  # YouTube/Reels মাপের ভলিউম
+        return vc.join(
+            "highpass=f=80", den,
+            vc.gap_filter(gap, floor),                                       # বাক্যের ফাঁকে হিস চাপা
+            "equalizer=f=250:t=q:w=1:g=-1.5",                                # ঘোলাটে ভাব কমানো
+            "equalizer=f=120:t=q:w=1:g=2",                                   # গলা ভরাট
+            "equalizer=f=3000:t=q:w=1:g=2.5",                                # কথা পরিষ্কার
+            vc.deess_filter(deess),                                          # EQ-এর পরে স/শ নরম করা
+            "acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3",  # জোর সমান
+            "loudnorm=I=-16:TP=-1.5:LRA=11",                                 # YouTube/Reels মাপের ভলিউম
         )
     return "highpass=f=80,volume=1.2"   # আগের মতোই
 
 
-def make_vo_preview(vo_path: str, preset: str, nr_level: str, secs: int = 15):
+def make_vo_preview(vo_path: str, preset: str, nr_level: str, secs: int = 15, deess: str = "বন্ধ", gap: str = "মাঝারি"):
     """ভয়েসের প্রথম কয়েক সেকেন্ড: (আসল, প্রসেস করা) WAV ফাইল ফেরত দেয়।"""
     orig, proc = tmp_path("vo_orig", ".wav"), tmp_path("vo_proc", ".wav")
     ok1, _ = run_ff([FFMPEG, "-y", "-t", str(secs), "-i", vo_path, "-ar", "44100", "-ac", "2", orig], "vo-prev-orig")
-    af = vo_chain(preset, nr_level, estimate_noise_floor(vo_path)) + ",aformat=sample_rates=44100:channel_layouts=stereo"
+    af = vo_chain(preset, nr_level, estimate_noise_floor(vo_path), deess, gap) + ",aformat=sample_rates=44100:channel_layouts=stereo"
     ok2, _ = run_ff([FFMPEG, "-y", "-t", str(secs), "-i", vo_path, "-af", af, "-ar", "44100", proc], "vo-prev")
     if ok1 and ok2 and os.path.exists(orig) and os.path.exists(proc):
         return orig, proc
@@ -487,7 +489,8 @@ def mix_voiceover(video: str, vo_path: Optional[str], cfg: Optional[dict] = None
     vdur = probe_duration(video)
     if vdur <= 0:
         return video
-    chain = vo_chain(cfg.get("preset", VO_PRESETS[0]), cfg.get("nr", "মাঝারি"), estimate_noise_floor(vo_path))
+    chain = vo_chain(cfg.get("preset", VO_PRESETS[0]), cfg.get("nr", "মাঝারি"), estimate_noise_floor(vo_path),
+                     cfg.get("deess", "বন্ধ"), cfg.get("gap", "মাঝারি"))
     chain += ",aformat=sample_rates=44100:channel_layouts=stereo"
     bg = float(cfg.get("bg", 0.0))
     has_bg = bg > 0.001 and probe_has_audio(video)
@@ -868,8 +871,21 @@ def clip_editor():
                 "ক্লিপের আসল শব্দ (%)", 0, 100, 20, 5,
                 help="আনমিউট করা ক্লিপের শব্দ ভয়েসের নিচে কতটা থাকবে। ভয়েস কথা বললে এটা নিজে আরও কমে যাবে।",
             )
+        v4, v5 = st.columns(2)
+        with v4:
+            vo_deess = st.selectbox(
+                "স/শ নরম করা", list(voice_clean.DEESS_LEVELS.keys()), index=2,
+                disabled=(vo_preset == VO_PRESETS[0]),
+                help="স, শ, ছ-এর তীক্ষ্ণ শব্দ কমায়। বেশি দিলে কিছু উচ্চারণ জড়িয়ে শোনাতে পারে।",
+            )
+        with v5:
+            vo_gap = st.selectbox(
+                "বাক্যের ফাঁকে হিস", list(voice_clean.GAP_LEVELS.keys()), index=2,
+                disabled=(vo_preset == VO_PRESETS[0]),
+                help="কথার ফাঁকে হিস কতটা চাপা পড়বে। পুরো নীরব হয় না, তাই স্বাভাবিক শোনায়।",
+            )
         if st.button("🎧 ১৫ সেকেন্ডের প্রিভিউ শুনুন"):
-            p_orig, p_proc = make_vo_preview(vo_path, vo_preset, vo_nr)
+            p_orig, p_proc = make_vo_preview(vo_path, vo_preset, vo_nr, deess=vo_deess, gap=vo_gap)
             if p_orig and p_proc:
                 st.write("আসল ভয়েস")
                 with open(p_orig, "rb") as f:
@@ -879,7 +895,7 @@ def clip_editor():
                     st.audio(f.read(), format="audio/wav")
             else:
                 st.error("প্রিভিউ বানানো যায়নি। টার্মিনাল লগ দেখুন।")
-        vo_cfg = {"preset": vo_preset, "nr": vo_nr, "bg": vo_bg / 100.0}
+        vo_cfg = {"preset": vo_preset, "nr": vo_nr, "bg": vo_bg / 100.0, "deess": vo_deess, "gap": vo_gap}
 
     st.header("৪. ডাউন বার (ঐচ্ছিক)")
     bar_file = st.file_uploader("ডাউন বার ভিডিও আপলোড করুন", type=["mp4", "mov", "mkv"], key="downbar")
