@@ -46,6 +46,12 @@
 - [লাইভস্টক বিনিয়োগ](https://farmerkamol.com/invest/livestock) — চিনা হাঁস ও গরু পালন প্রকল্প
 - [ফসল চাষ বিনিয়োগ](https://farmerkamol.com/invest/crop) — আবাদি জমিতে ফসল চাষ প্রকল্প
 - [মাছ চাষ বিনিয়োগ](https://farmerkamol.com/invest/aquaculture) — পুকুরে মাছ চাষ প্রকল্প
+- [চিনা হাঁস প্রজনন বিনিয়োগ](https://farmerkamol.com/invest/livestock/china-hash) — চিনা হাঁস সম্প্রসারণ প্রকল্প, আবেদন চলছে
+- [গরু পালন বিনিয়োগ](https://farmerkamol.com/invest/livestock/goru-palon) — গরু পালন প্রকল্প, আগ্রহ জানানো যায়
+- [আবাদি জমিতে ফসল চাষ বিনিয়োগ](https://farmerkamol.com/invest/crop/fosol-chas) — ফসল চাষ প্রকল্প, আগ্রহ জানানো যায়
+- [পুকুরে মাছ চাষ বিনিয়োগ](https://farmerkamol.com/invest/aquaculture/mach-chas) — মাছ চাষ প্রকল্প, আগ্রহ জানানো যায়
+- [কৃষিতে বিনিয়োগ কীভাবে করবেন](https://farmerkamol.com/krishite-biniyog) — krishite biniyog গাইড: অংশীদার হওয়ার ধাপ, কী কী লাগবে, টাকা জমা ও চুক্তির নিয়ম
+- [কৃষিতে বিনিয়োগ: লাভ-লোকসান ও ঝুঁকি](https://farmerkamol.com/agriculture-investment-bangladesh) — নিট লাভের ৬৫% খামারি ও ৩৫% অংশীদার; ঝুঁকি, লোকসানে কী হয়; কোনো নির্দিষ্ট রিটার্নের নিশ্চয়তা নেই
 
 ## আমাদের সম্পর্কে
 - [আমাদের সম্পর্কে](https://farmerkamol.com/about) — Farmer Kamol – কৃষক কমলের গল্প, মিশন ও ভিশন; সারইল গ্রাম, রায়গঞ্জ, সিরাজগঞ্জ থেকে সমন্বিত কৃষি
@@ -68,6 +74,12 @@
 - [Livestock Investment](https://farmerkamol.com/en/invest/livestock) — Chinese duck and cattle projects
 - [Crop Farming Investment](https://farmerkamol.com/en/invest/crop) — crop farming on arable land
 - [Fish Farming Investment](https://farmerkamol.com/en/invest/aquaculture) — pond aquaculture projects
+- [Chinese Duck Investment](https://farmerkamol.com/en/invest/livestock/china-hash) — Chinese duck expansion project, applications open
+- [Cattle Rearing Investment](https://farmerkamol.com/en/invest/livestock/goru-palon) — cattle rearing project, interest can be registered
+- [Crop Farming on Arable Land](https://farmerkamol.com/en/invest/crop/fosol-chas) — crop farming project, interest can be registered
+- [Pond Fish Farming Investment](https://farmerkamol.com/en/invest/aquaculture/mach-chas) — fish farming project, interest can be registered
+- [How to Invest in Agriculture (Krishi Biniyog)](https://farmerkamol.com/en/krishite-biniyog) — guide to becoming a farm partner: steps, requirements, payment and agreement
+- [Agriculture Investment: Profit, Risk and Loss](https://farmerkamol.com/en/agriculture-investment-bangladesh) — 65% of net profit to the farm operator and 35% to the partner; risks and what happens in a loss; no guaranteed return
 
 ## About (English)
 - [About Us](https://farmerkamol.com/en/about) — the story, mission and vision of Farmer Kamol (কৃষক কমল); integrated farming from Sarail village, Raiganj, Sirajganj

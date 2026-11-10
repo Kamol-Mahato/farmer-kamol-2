@@ -4,8 +4,10 @@
 // related-এর href বাংলা পাথেই লেখা (যেমন /shop); EN পেজে সেটা আপনা-আপনি /en/shop হয়ে যাবে।
 
 import type { SeoLanding } from "@/lib/seoLandings";
+import { investLandingsEn } from "@/lib/seoLandingsInvest";
 
 export const seoLandingsEn: SeoLanding[] = [
+  ...investLandingsEn,
   {
     slug: "khejurer-gur",
     updatedAt: "2026-10-19",

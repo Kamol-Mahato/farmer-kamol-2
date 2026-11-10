@@ -69,6 +69,12 @@ export default function Navbar() {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null);
+  const [mobileOpenMenus, setMobileOpenMenus] = useState<number[]>([]);
+  const isInvestMenu = (m: Menu) => /^\/(en\/)?invest/.test(m.url);
+  const toggleMobileMenu = (id: number) =>
+    setMobileOpenMenus((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   const { mobileOpen, openSidebar, closeSidebar, closeSidebarForNav } =
     useMobileMenu();
   const [cartCount, setCartCount] = useState<number>(0);
@@ -244,7 +250,7 @@ export default function Navbar() {
           </Link>
 
           {menus.map((menu) => (
-            <div key={menu.id}>
+            <div key={menu.id} className="relative">
               <Link
                 href={menu.url}
                 onClick={() => closeSidebarForNav()}
@@ -252,7 +258,25 @@ export default function Navbar() {
               >
                 {translateTitle(menu)} {menu.subMenus.length > 0 && "▾"}
               </Link>
-              {menu.subMenus.length > 0 && (
+              {isInvestMenu(menu) && menu.subMenus.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => toggleMobileMenu(menu.id)}
+                  aria-expanded={mobileOpenMenus.includes(menu.id)}
+                  aria-label={locale === "bn" ? "সাব-মেনু খুলুন" : "Toggle submenu"}
+                  className="absolute right-1 top-0.5 w-7 h-7 flex items-center justify-center rounded-full bg-green-900 text-white text-xs"
+                >
+                  <span
+                    className={`transition-transform ${
+                      mobileOpenMenus.includes(menu.id) ? "rotate-180" : ""
+                    }`}
+                  >
+                    ▾
+                  </span>
+                </button>
+              )}
+              {menu.subMenus.length > 0 &&
+                (!isInvestMenu(menu) || mobileOpenMenus.includes(menu.id)) && (
                 <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
                   {menu.subMenus.map((sub) => (
                     <Link

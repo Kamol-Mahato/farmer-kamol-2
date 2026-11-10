@@ -21,6 +21,10 @@ const dict = {
     paymentHeading: "পেমেন্ট মেথড",
     paymentMethods: ["বিকাশ", "নগদ", "রকেট", "কার্ড", "ক্যাশ অন ডেলিভারি (COD)"],
     farmHeading: "আমাদের খামার",
+    investHeading: "কৃষিতে বিনিয়োগ",
+    investInfoHeading: "বিনিয়োগ সম্পর্কে",
+    investInfo: ["লাইভস্টক খাত", "ফসল চাষের খাত", "মাছ চাষের খাত", "কৃষিতে বিনিয়োগ গাইড", "যোগাযোগ"],
+    invest: ["কৃষিতে ইনভেস্ট", "চিনা হাঁস বিনিয়োগ", "গরু পালন বিনিয়োগ", "ফসল চাষ বিনিয়োগ", "মাছ চাষ বিনিয়োগ"],
     location: `${siteConfig.address.locality}, ${siteConfig.address.region}`,
     businessContact: "ব্যবসায়িক যোগাযোগ",
     copyright: `© ২০২৬ ${siteConfig.brand.name}. সর্বস্বত্ব সংরক্ষিত।`,
@@ -42,6 +46,10 @@ const dict = {
     paymentHeading: "Payment Methods",
     paymentMethods: ["bKash", "Nagad", "Rocket", "Card", "Cash on Delivery (COD)"],
     farmHeading: "Our Farm",
+    investHeading: "Agriculture Investment",
+    investInfoHeading: "About Investing",
+    investInfo: ["Livestock Sector", "Crop Sector", "Fish Farming Sector", "Investment Guide", "Contact"],
+    invest: ["Agriculture Invest", "Chinese Duck Farming", "Cattle Rearing", "Crop Farming", "Fish Farming"],
     location: `${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}`,
     businessContact: "Business Inquiries",
     copyright: `© 2026 ${siteConfig.brand.name}. All rights reserved.`,
@@ -49,6 +57,22 @@ const dict = {
     terms: "Terms & Conditions",
   },
 };
+
+const investPaths = [
+  "/invest",
+  "/invest/livestock/china-hash",
+  "/invest/livestock/goru-palon",
+  "/invest/crop/fosol-chas",
+  "/invest/aquaculture/mach-chas",
+];
+
+const investInfoPaths = [
+  "/invest/livestock",
+  "/invest/crop",
+  "/invest/aquaculture",
+  "/krishite-biniyog",
+  "/contact",
+];
 
 const productSlugs = [
   "khati-modhu",
@@ -333,6 +357,24 @@ export default function Footer() {
                   </Link>
                 ))}
               </div>
+
+              {/* কৃষিতে বিনিয়োগ — ডেস্কটপে পণ্য বিভাগের নিচে */}
+              <div className="hidden lg:block mt-4">
+                <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+                  {t.investHeading}
+                </h3>
+                <div className="flex flex-col gap-1 text-xs text-black">
+                  {t.invest.map((label, i) => (
+                    <Link
+                      key={label}
+                      href={href(investPaths[i])}
+                      className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* কাস্টমার সেবা */}
@@ -371,6 +413,24 @@ export default function Footer() {
                 >
                   {t.aboutUs}
                 </Link>
+              </div>
+
+              {/* বিনিয়োগ সম্পর্কে — শুধু ডেস্কটপে, কাস্টমার সেবার নিচে */}
+              <div className="hidden lg:block mt-4">
+                <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+                  {t.investInfoHeading}
+                </h3>
+                <div className="flex flex-col gap-1 text-xs text-black">
+                  {t.investInfo.map((label, i) => (
+                    <Link
+                      key={label}
+                      href={href(investInfoPaths[i])}
+                      className="relative flex items-center min-h-6 hover:text-green-700 transition leading-tight whitespace-nowrap before:absolute before:-inset-y-1.5 before:-inset-x-1 before:content-['']"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -412,7 +472,8 @@ export default function Footer() {
           {/* ========================================== */}
           {/* ৩. আমাদের খামার সেকশন (মোবাইলে নিচে, পিসিতে ৫ম কলাম হিসেবে) */}
           {/* ========================================== */}
-          <div className="mt-5 pt-4 border-t border-green-100 lg:mt-0 lg:pt-0 lg:border-t-0 lg:col-span-1">
+          <div className="mt-5 pt-4 border-t border-green-100 flex gap-8 lg:block lg:mt-0 lg:pt-0 lg:border-t-0 lg:col-span-1">
+            <div>
             <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
               {t.farmHeading}
             </h3>
@@ -453,6 +514,25 @@ export default function Footer() {
               >
                 🔒 {t.privacyPolicy}
               </Link>
+            </div>
+            </div>
+
+            {/* কৃষিতে বিনিয়োগ — মোবাইলে আমাদের খামারের ডানে */}
+            <div className="lg:hidden">
+              <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+                {t.investHeading}
+              </h3>
+              <div className="flex flex-col gap-1.5 text-xs text-black">
+                {t.invest.map((label, i) => (
+                  <Link
+                    key={label}
+                    href={href(investPaths[i])}
+                    className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -72,6 +72,8 @@ export async function GET(req: Request) {
       `${BASE_URL}/en/khati-sorisha-tel`,
       `${BASE_URL}/en/khati-ghee`,
       `${BASE_URL}/en/hasher-bacha`,
+      `${BASE_URL}/en/krishite-biniyog`,
+      `${BASE_URL}/en/agriculture-investment-bangladesh`,
     ];
 
     // ---------- Products ----------

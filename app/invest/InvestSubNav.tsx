@@ -1,4 +1,5 @@
 import Link from "next/link";
+import InvestBreadcrumbLd from "./InvestBreadcrumbLd";
 
 export default function InvestSubNav() {
   const links = [
@@ -8,11 +9,13 @@ export default function InvestSubNav() {
     { href: "/invest/aquaculture", label: "মাছ চাষ" },
     { href: "/invest#calculator", label: "লাভ বণ্টন" },
     { href: "/invest#how-to", label: "কীভাবে অংশীদার হবেন" },
+    { href: "/krishite-biniyog", label: "বিনিয়োগ গাইড" },
     { href: "/contact", label: "যোগাযোগ" },
   ];
 
   return (
     <div className="sticky top-[76px] z-40 px-2 md:px-4 py-1.5 bg-transparent">
+      <InvestBreadcrumbLd />
       <div
         className="
           max-w-5xl mx-auto

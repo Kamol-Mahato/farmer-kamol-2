@@ -195,7 +195,7 @@ export default async function LandingPage({
             rel="noopener noreferrer"
             className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
           >
-            {isEn ? "Order on WhatsApp" : "WhatsApp-এ অর্ডার করুন"}
+            {landing.whatsappLabel ?? (isEn ? "Order on WhatsApp" : "WhatsApp-এ অর্ডার করুন")}
           </a>
           <a
             href={`tel:${siteConfig.contact.phone}`}

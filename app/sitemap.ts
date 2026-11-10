@@ -6,6 +6,22 @@ import { seoLandingsEn } from "@/lib/seoLandingsEn";
 
 const BASE_URL = siteConfig.domain.url;
 
+// স্ট্যাটিক পেজের আসল আপডেটের তারিখ। পেজের কনটেন্ট বড়ভাবে বদলালে তারিখটা বদলে দেবেন।
+const SITE_STATIC_LAST_MOD = new Date("2026-11-10");
+const INVEST_LAST_MOD = new Date("2026-11-10");
+
+function fixLastMod(
+  p: MetadataRoute.Sitemap[number],
+): MetadataRoute.Sitemap[number] {
+  if (p.url.includes("/invest/") || p.url.endsWith("/invest")) {
+    return { ...p, lastModified: INVEST_LAST_MOD };
+  }
+  if (p.changeFrequency === "monthly" || p.changeFrequency === "yearly") {
+    return { ...p, lastModified: SITE_STATIC_LAST_MOD };
+  }
+  return p;
+}
+
 export const revalidate = 3600; // ১ ঘণ্টা caching — প্রতিটা crawler hit-এ DB query হবে না, SEO-তে প্রভাব পড়বে না
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -404,7 +420,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   return [
-    ...staticPages,
+    ...staticPages.map(fixLastMod),
     ...productPages,
     ...blogPages,
     ...contestPages,

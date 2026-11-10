@@ -250,7 +250,7 @@ export default async function InvestPage() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
                 কৃষক কমলের খামারে
                 <br />
-                <span className="text-green-700">কৃষি বিনিয়োগ ও অংশীদারিত্ব</span>
+                <span className="text-green-700">কৃষিতে বিনিয়োগ ও অংশীদারিত্ব</span>
               </h1>
 
               <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mb-8">
@@ -829,6 +829,10 @@ export default async function InvestPage() {
                 {
                   q: "এটা কি ব্যাংকের মতো নির্ধারিত সুদ বা লাভের স্কিম?",
                   a: "না। কোনো নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্ন নেই। প্রকল্পে প্রকৃত যে লাভ হবে, শুধু তারই নির্ধারিত অংশ আপনি পাবেন। কোনো পর্যায়ে লাভ না হলে সেই পর্যায়ে লাভ ভাগ হবে না।",
+                },
+                {
+                  q: "Krishite Biniyog (কৃষিতে বিনিয়োগ) কীভাবে শুরু করব?",
+                  a: "Krishite Biniyog বা Krishi Invest মানে কৃষি প্রকল্পে অংশীদার হওয়া। প্রথমে এই পেজের প্রকল্প ও ঝুঁকির অংশ পড়ুন। এরপর অ্যাকাউন্টে ঢুকে প্রোফাইল সম্পূর্ণ করে আবেদন করুন। বিনিয়োগ গ্রহণের সময় ও শর্ত এই পেজেই জানানো হয়।",
                 },
                 {
                   q: "লাভ কীভাবে ভাগ হয়?",

@@ -2,14 +2,29 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 type Faq = { q: string; a: string };
 
 export default function FaqAccordion({ items }: { items: Faq[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <div className="space-y-3">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
+      />
       {items.map((item, i) => {
         const isOpen = openIndex === i;
         return (

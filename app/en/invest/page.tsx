@@ -776,6 +776,10 @@ export default async function InvestPageEn() {
                   a: "No. There is no fixed interest or guaranteed return. You receive only the agreed share of whatever profit the project actually makes. If there is no profit in a period, no profit is shared for that period.",
                 },
                 {
+                  q: "How do I start agriculture investment (krishi invest) with Farmer Kamol?",
+                  a: "Agriculture investment, also called krishi invest or krishite biniyog in Bangla, means becoming a partner in a real farm project. First read the projects and the risks on this page. Then log in, complete your profile and apply. The time and terms for accepting investment are announced on this page.",
+                },
+                {
                   q: "How is profit shared?",
                   a: "After calculating actual income and expenses, 65% of the net profit goes to the farm operator (Farmer Kamol) and 35% to the partner. Even if the profit is small, it is shared at this same rate.",
                 },

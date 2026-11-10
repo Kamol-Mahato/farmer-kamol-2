@@ -1,6 +1,8 @@
 // lib/seoLandings.ts
 // কীওয়ার্ড-ল্যান্ডিং পেজের সব কনটেন্ট এখানে। নতুন পণ্যের পেজ চাইলে শুধু একটা এন্ট্রি যোগ করলেই হবে।
 
+import { investLandings } from "@/lib/seoLandingsInvest";
+
 export type LandingFaq = { q: string; a: string };
 export type LandingSection = { heading: string; body: string[] };
 
@@ -16,9 +18,11 @@ export type SeoLanding = {
   sections: LandingSection[];
   faqs: LandingFaq[];
   related: { label: string; href: string }[];
+  whatsappLabel?: string; // ঐচ্ছিক: ডিফল্ট "অর্ডার করুন" বোতামের লেখা বদলাতে
 };
 
 export const seoLandings: SeoLanding[] = [
+  ...investLandings,
   {
     slug: "khejurer-gur",
     updatedAt: "2026-10-18",
