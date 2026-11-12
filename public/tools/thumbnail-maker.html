@@ -9177,6 +9177,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         <div class="dp-preview">
           <canvas id="dailyPostCanvas" width="1080" height="1080"></canvas>
+          <script src="/tools/daily-post-overlay.js?v=1"></script>
           <p class="dp-note" id="dpPreviewNote">
             প্রিভিউ 1080 × 1080 px। ডাউনলোড করা ছবিতে পোস্টের
             সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।
@@ -9277,9 +9278,9 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const p = dpGetPos(e);
         // শুধু উপরের ছবি এরিয়ায় ড্র্যাগ
         const pad = 28 * ((dpCanvasW || 1080) / 1080);
-        if (p.y < pad) return;
+        if (!(window.DPOverlay && window.DPOverlay.active()) && p.y < pad) return;
         // rough: প্রথম ~৬০% উচ্চতায় ছবি থাকে
-        if (p.y > pc.height * 0.7) return;
+        if (!(window.DPOverlay && window.DPOverlay.active()) && p.y > pc.height * 0.7) return;
         dpDragging = true;
         dpDragLastX = p.x;
         dpDragLastY = p.y;
@@ -9588,6 +9589,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const ctx = pc.getContext("2d");
         window.__dpCtx = ctx;
         if (!pc || !ctx) return;
+        // ছবির উপরে লেখা মোড (daily-post-overlay.js) — চালু থাকলে এখানেই শেষ
+        if (window.DPOverlay && window.DPOverlay.render({ canvas: pc, photo: dpPhoto, logo: dpLogo, zoom: dpZoom, ox: dpOffsetX, oy: dpOffsetY, dates: dpDates })) return;
 
         const W = dpCanvasW || 1080;
         const u = W / 1080; // স্কেল (প্রস্থ অনুযায়ী)
@@ -9968,6 +9971,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       window.dpRender = dpRender;
 
       window.dpDownload = function() {
+        if (window.DPOverlay && window.DPOverlay.download()) return;
         dpRender();
         try {
           // উপর/নিচের খালি ব্যাকগ্রাউন্ড কেটে কন্টেন্ট মাত্র রাখি
