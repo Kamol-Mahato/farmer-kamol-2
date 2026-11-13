@@ -18,7 +18,7 @@
   
     // সেটিং ভার্সন: নিচের DEF এর কাঠামো বদলালে এই সংখ্যা বাড়ান।
     // তাহলে ব্রাউজারে জমে থাকা পুরনো সেটিং নিজে থেকেই বাদ পড়বে।
-    var VER = 1;
+    var VER = 2;
     var KEY = "fk_dp_overlay";
   
     var $ = function (id) { return document.getElementById(id); };
@@ -29,6 +29,7 @@
       cream:  { b: 62, r: 14, main: "#fbf5e5" },
       green:  { b: 56, r: 22, main: "#104a26" },
       nokshi: { b: 78, r: 0,  main: "#125428" },
+      soft:   { b: 46, r: 0,  main: "#ffffff" },
       pages:  { b: 66, r: 12, main: "#faf4e4" }
     };
   
@@ -50,7 +51,7 @@
       showWd: true, showEn: true, showBn: true, showHj: true, showExtra: true,
       logoOn: true, logoPos: "tr", logoSize: 130, logoShape: "circle", logoRing: true,
       showName: true, showSlogan: true,
-      frame: "cream", frameColor: "#fbf5e5", accent: "#f4c850",
+      frame: "soft", frameColor: "#ffffff", accent: "#f4c850",
       barOn: true, barColor: "#0e4624", barFb: true, barWeb: true, barYt: true,
       shade: "bottom", shadeStr: 80, vignette: true
     };
@@ -525,6 +526,19 @@
       function drawFrameBg(c, W, H, u) {
       var t = S.frame;
       if (t === "none") return;
+    if (t === "soft") {
+      var sb = FRAMES.soft.b * u;
+      c.fillStyle = S.frameColor;
+      c.fillRect(0, 0, W, H);
+      c.save();
+      c.shadowColor = "rgba(20,28,22,.5)";
+      c.shadowBlur = 38 * u;
+      c.shadowOffsetY = 6 * u;
+      c.fillStyle = "#000000";
+      c.fillRect(sb, sb, W - 2 * sb, H - 2 * sb);
+      c.restore();
+      return;
+    }
     if (t === "pages") { drawPages(c, W, H, u); return; }
       if (t === "cream") {
         c.fillStyle = "#0e3e20";
@@ -771,7 +785,7 @@
         '<button type="button" class="dp-btn dp-secondary" id="dpOvLogoReset">ডিফল্ট লোগো</button></div>', false);
   
       h += group("🖼 ফ্রেম",
-        fSel("frame", "ফ্রেমের ধরন", [["cream", "ক্রিম ছবির ফ্রেম (ডিফল্ট)"], ["green", "সবুজ ফ্রেম"], ["nokshi", "নকশি বর্ডার"], ["pages", "বইয়ের পাতার স্তূপ"], ["none", "ফ্রেম নেই"]]) +
+        fSel("frame", "ফ্রেমের ধরন", [["cream", "ক্রিম ছবির ফ্রেম (ডিফল্ট)"], ["green", "সবুজ ফ্রেম"], ["nokshi", "নকশি বর্ডার"], ["pages", "বইয়ের পাতার স্তূপ"], ["soft", "নরম ছায়া (সাদা জমিন)"], ["none", "ফ্রেম নেই"]]) +
         '<div class="ov-row">' + fColor("frameColor", "ফ্রেমের রঙ") + fColor("accent", "সোনালি রেখার রঙ") + "</div>", true);
   
       h += group("🎚 পট্টি ও ছায়া",
