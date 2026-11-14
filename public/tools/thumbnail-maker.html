@@ -8757,6 +8757,17 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
     #dailyPostStudio .dp-preview {
       min-width: 0;
     }
+    @media (min-width: 721px) {
+      #dailyPostStudio .dp-preview {
+        position: sticky;
+        top: 12px;
+        align-self: start;
+      }
+      #dailyPostStudio #dailyPostCanvas {
+        max-height: calc(100vh - 110px);
+        object-fit: contain;
+      }
+    }
     #dailyPostStudio #dailyPostCanvas {
       display: block;
       width: 100%;
@@ -9054,7 +9065,8 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         <div class="dp-preview">
           <canvas id="dailyPostCanvas" width="1080" height="1080"></canvas>
-          <script src="/tools/daily-post-overlay.js?v=1"></script>
+          <script src="/tools/daily-post-overlay.js?v=2"></script>
+          <script src="/tools/tools-nav.js"></script>
           <p class="dp-note" id="dpPreviewNote">
             প্রিভিউ 1080 × 1080 px। ডাউনলোড করা ছবিতে পোস্টের
             সব তারিখ ও ব্র্যান্ডিং দেখা যাবে।
@@ -9692,11 +9704,29 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       window.openDailyPostStudio = function() {
         $("dailyPostStudio").style.display = "block";
         dpRefreshDate();
+        try {
+          if (location.hash !== "#daily-post") {
+            history.replaceState(null, "", location.pathname + location.search + "#daily-post");
+          }
+        } catch (e) {}
       };
 
       window.closeDailyPostStudio = function() {
         $("dailyPostStudio").style.display = "none";
+        try {
+          history.replaceState(null, "", location.pathname + location.search);
+        } catch (e) {}
       };
+
+      // খোলার সময় / রিফ্রেশে / মেনু থেকে #daily-post হলে অটো খুলবে
+      window.addEventListener("load", function () {
+        if (location.hash === "#daily-post") window.openDailyPostStudio();
+      });
+      window.addEventListener("hashchange", function () {
+        const st = $("dailyPostStudio");
+        if (location.hash === "#daily-post") window.openDailyPostStudio();
+        else if (st && st.style.display !== "none") st.style.display = "none";
+      });
 
       window.dpLoadImage = function(input) {
         const file = input.files && input.files[0];
@@ -9904,6 +9934,11 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
           console.error(err);
           alert("PNG তৈরি করা যায়নি। পৃষ্ঠাটি রিফ্রেশ করে আবার চেষ্টা করুন।");
         }
+      };
+
+      // নতুন ভিডিও ফাইল (daily-post-video.js) এই তথ্য পড়ে
+      window.__dpState = function () {
+        return { photo: dpPhoto, logo: dpLogo, zoom: dpZoom, ox: dpOffsetX, oy: dpOffsetY, dates: dpDates, music: dpMusicBuffer };
       };
 
       // Auto-refresh on Bangladesh date/time; no API required.
@@ -10298,5 +10333,6 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
       };
     })();
   </script>
-  </body>
+  <script src="/tools/daily-post-video.js?v=1"></script>
+</body>
 </html>

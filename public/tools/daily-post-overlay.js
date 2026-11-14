@@ -84,6 +84,17 @@
       } catch (e) {}
     }
     loadSaved();
+
+    // ভিডিওর জন্য: কোন অংশ কতটা ফুটেছে (০–১) ও লেখার মাপের গুণক
+    var RV = null, TSC = 1;
+    function ra(key) { return RV && typeof RV[key] === "number" ? RV[key] : 1; }
+    function rvIn(c, key, dy, u) {
+      var a = Math.max(0, Math.min(1, ra(key)));
+      c.save();
+      c.globalAlpha = a;
+      if (dy) c.translate(0, (1 - a) * dy * u);
+    }
+    function rvOut(c) { c.restore(); }
   
     // ───────────── ছোট সহায়ক ফাংশন ─────────────
     function dims() {
@@ -208,6 +219,8 @@
       var dy = y + (h - dh) / 2 + (oy || 0);
       dx = Math.min(x, Math.max(x + w - dw, dx));
       dy = Math.min(y, Math.max(y + h - dh, dy));
+      c.imageSmoothingEnabled = true;
+      c.imageSmoothingQuality = "high";
       c.drawImage(img, dx, dy, dw, dh);
     }
   
@@ -326,7 +339,9 @@
       var L = rx + m + padC, R = rx + rw - m - padC, maxW = R - L;
   
       // লোগো (নিচের কোণে হলে লেখার জায়গা সীমিত হবে)
+      rvIn(c, "logo", 0, u);
       var logo = drawLogo(c, env, rx, ry, rw, rh, u, m, barH);
+      rvOut(c);
   
       var al = S.align === "auto"
         ? ({ classic: "left", center: "center", card: "left", top: "left", middle: "center" }[style] || "left")
@@ -334,12 +349,12 @@
       var ax = al === "left" ? L : (al === "right" ? R : (L + R) / 2);
   
       // শিরোনাম মাপা
-      var tlines = [], tsize = S.tSize * u, tfont = "";
+      var tlines = [], tsize = S.tSize * u * TSC, tfont = "";
       var ttxt = (S.title || "").trim();
       if (ttxt) {
         var k, lines = [];
         for (k = 0; k <= 14; k++) {
-          var sz = S.tSize * u * (1 - k * 0.04);
+          var sz = S.tSize * u * TSC * (1 - k * 0.04);
           c.font = S.tWeight + " " + sz + "px " + fam();
           lines = wrapLines(c, ttxt, maxW);
           var fits = lines.length <= 5 && lines.every(function (l) { return c.measureText(l).width <= maxW + 1; });
@@ -355,17 +370,17 @@
   
       // তারিখ মাপা
       var dp = dateParts(env);
-      var capH = 70 * u, l2H = 44 * u, exH = 40 * u, plainH = 56 * u;
+      var capH = 70 * u * TSC, l2H = 44 * u * TSC, exH = 40 * u * TSC, plainH = 56 * u * TSC;
       var capFont = "", capW = 0, capPad = 30 * u, l1Font = "";
       if (dp.l1) {
         if (S.dateStyle === "capsule") {
-          capFont = fitFont(c, dp.l1, "700", 36 * u, fam(), maxW - 2 * capPad, 18 * u);
+          capFont = fitFont(c, dp.l1, "700", 36 * u * TSC, fam(), maxW - 2 * capPad, 18 * u);
           capW = c.measureText(dp.l1).width + 2 * capPad;
         } else {
-          l1Font = fitFont(c, dp.l1, "700", 40 * u, fam(), maxW, 18 * u);
+          l1Font = fitFont(c, dp.l1, "700", 40 * u * TSC, fam(), maxW, 18 * u);
         }
       }
-      var l2Font = dp.l2 ? fitFont(c, dp.l2, "400", 29 * u, fam(), maxW, 14 * u) : "";
+      var l2Font = dp.l2 ? fitFont(c, dp.l2, "400", 29 * u * TSC, fam(), maxW, 14 * u) : "";
       var dateH = (dp.l1 ? (S.dateStyle === "capsule" ? capH + 14 * u : plainH) : 0) + (dp.l2 ? l2H : 0) + dp.ex.length * exH;
   
       var gap = (titleBlockH && dateH) ? 24 * u : 0;
@@ -398,6 +413,7 @@
         var cy0 = (vp === "split" ? yT : yT) - 40 * u;
         var cy1 = yD + dateH + 40 * u;
         c.save();
+        c.globalAlpha = ra("title");
         rr(c, rx + m, cy0, rw - 2 * m, cy1 - cy0, 34 * u);
         c.fillStyle = "rgba(8,38,18,.84)";
         c.fill();
@@ -408,6 +424,7 @@
       }
   
       // শিরোনাম আঁকা
+      rvIn(c, "title", 36, u);
       var opt = { shadow: S.tShadow, outline: S.tOutline };
       var i;
       for (i = 0; i < tlines.length; i++) {
@@ -422,9 +439,11 @@
       }
   
       // তারিখ আঁকা
+      rvOut(c);
       var y = yD;
       if (dp.l1) {
         if (S.dateStyle === "capsule") {
+          rvIn(c, "l1", 24, u);
           var cxl = al === "left" ? ax : (al === "right" ? ax - capW : ax - capW / 2);
           c.save();
           rr(c, cxl, y, capW, capH, capH / 2);
@@ -435,19 +454,26 @@
           c.stroke();
           c.restore();
           drawText(c, dp.l1, cxl + capPad, y + capH / 2 + 2 * u, capFont, "#ffffff", "left", u, null);
+          rvOut(c);
           y += capH + 14 * u;
         } else {
+          rvIn(c, "l1", 24, u);
           drawText(c, dp.l1, ax, y + plainH / 2, l1Font, "#8cffa0", al, u, { shadow: true });
+          rvOut(c);
           y += plainH;
         }
       }
       if (dp.l2) {
+        rvIn(c, "l2", 24, u);
         drawText(c, dp.l2, ax, y + l2H / 2, l2Font, "#ebf5eb", al, u, { shadow: true });
+        rvOut(c);
         y += l2H;
       }
       for (i = 0; i < dp.ex.length; i++) {
-        var ef = fitFont(c, dp.ex[i], "700", 28 * u, fam(), maxW, 14 * u);
+        var ef = fitFont(c, dp.ex[i], "700", 28 * u * TSC, fam(), maxW, 14 * u);
+        rvIn(c, "ex" + i, 24, u);
         drawText(c, dp.ex[i], ax, y + exH / 2, ef, "#ffe882", al, u, { shadow: true });
+        rvOut(c);
         y += exH;
       }
   
@@ -463,6 +489,11 @@
   
     // ───────────── নিচের পট্টি ─────────────
     function drawBar(c, rx, ry, rw, rh, u, m, barH) {
+      rvIn(c, "bar", 0, u);
+      drawBar0(c, rx, ry, rw, rh, u, m, barH);
+      rvOut(c);
+    }
+    function drawBar0(c, rx, ry, rw, rh, u, m, barH) {
       if (!S.barOn) return;
       var top = ry + rh - barH;
       c.fillStyle = S.barColor;
@@ -644,7 +675,7 @@
       pc.style.objectFit = "contain";
   
       var c = pc.getContext("2d");
-      window.__dpCtx = c;
+      if (!env.offscreen) window.__dpCtx = c;
       warmFont();
   
       var W = d.w, H = d.h, u = Math.min(W, H) / 1080;
@@ -703,7 +734,25 @@
     window.DPOverlay = {
       render: render,
       download: download,
-      active: function () { return !!S.on; }
+      active: function () { return !!S.on; },
+      // ভিডিওর জন্য
+      size: function () { return dims(); },
+      parts: function (env) {
+        var k = [];
+        if (S.logoOn || S.showName || S.showSlogan) k.push("logo");
+        if ((S.title || "").trim()) k.push("title");
+        var dp = dateParts(env);
+        if (dp.l1) k.push("l1");
+        if (dp.l2) k.push("l2");
+        for (var i = 0; i < dp.ex.length; i++) k.push("ex" + i);
+        if (S.barOn) k.push("bar");
+        return k;
+      },
+      frame: function (env, rv, tsc) {
+        RV = rv || null;
+        TSC = tsc || 1;
+        try { return render(env); } finally { RV = null; TSC = 1; }
+      }
     };
   
     // ───────────── UI প্যানেল ─────────────
