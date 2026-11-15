@@ -96,6 +96,16 @@ export async function PUT(
               : undefined,
       },
     });
+    // দাম/তথ্য বদলালে user পেজ সাথে সাথে আপডেট
+    revalidatePath("/");
+    revalidatePath("/en");
+    revalidatePath("/shop");
+    revalidatePath("/en/shop");
+    if (product.slug) revalidatePath(`/shop/${product.slug}`);
+    revalidatePath(`/en/shop/${product.slugEn || product.slug}`);
+    revalidatePath("/[landing]", "page");
+    revalidatePath("/en/[landing]", "page");
+
     // IndexNow — Active থাকলে সাবমিট
     if (product.isActive && product.slug) {
       const urls = [`${siteConfig.domain.url}/shop/${product.slug}`];

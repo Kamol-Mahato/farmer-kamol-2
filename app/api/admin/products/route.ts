@@ -133,6 +133,8 @@ export async function POST(request: Request) {
     revalidatePath("/en");
     revalidatePath("/shop");
     revalidatePath("/en/shop");
+    revalidatePath("/[landing]", "page");
+    revalidatePath("/en/[landing]", "page");
 
     if (product.isActive) {
       sendPushToCustomers(
