@@ -77,9 +77,9 @@ export default function GoruPalonInvestPageEn() {
               Invest in Cattle Rearing Project
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Native and improved cattle rearing. Long-term investment opportunity based
-              on dairy and meat production. Transparent accounts, written agreement and
-              real farm partnership.
+              Native and improved cattle rearing. Long-term investment
+              opportunity based on dairy and meat production. Transparent
+              accounts, written agreement and real farm partnership.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -96,13 +96,17 @@ export default function GoruPalonInvestPageEn() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              This is not a bank deposit or fixed-interest scheme. Both profit and loss are possible.
+              This is not a bank deposit or fixed-interest scheme. Both profit
+              and loss are possible.
             </p>
           </Reveal>
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center text-green-700 font-medium">
-              <InvestPhoto name="invest-goru" alt="Cattle Rearing Project - Farmer Kamol">
+              <InvestPhoto
+                name="invest-goru"
+                alt="Cattle Rearing Project - Farmer Kamol"
+              >
                 Cattle photo coming soon
               </InvestPhoto>
             </div>
@@ -122,7 +126,9 @@ export default function GoruPalonInvestPageEn() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -142,18 +148,18 @@ export default function GoruPalonInvestPageEn() {
                 Why cattle rearing?
               </h3>
               <p>
-                Cattle rearing offers long-term and steady income. Dairy production creates
-                regular cash flow, and meat and calf sales add extra returns. Local market
-                demand is always present.
+                Cattle rearing offers long-term and steady income. Dairy
+                production creates regular cash flow, and meat and calf sales
+                add extra returns. Local market demand is always present.
               </p>
             </Reveal>
 
             <Reveal delay={80}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Plan</h3>
               <p>
-                We will start with a limited number of cattle and expand step by step.
-                Feed, healthcare, shed and breeding management — all accounts will be kept
-                transparent.
+                We will start with a limited number of cattle and expand step by
+                step. Feed, healthcare, shed and breeding management — all
+                accounts will be kept transparent.
               </p>
             </Reveal>
 
@@ -162,17 +168,19 @@ export default function GoruPalonInvestPageEn() {
                 Profit and loss sharing
               </h3>
               <p>
-                If there is profit, the farmer gets 65% and the partner gets 35% (based on
-                real income and expenses). If there is a loss, remaining capital will be
-                returned where possible — no guarantee.
+                If there is profit, the farmer gets 65% and the partner gets 35%
+                (based on real income and expenses). If there is a loss,
+                remaining capital will be returned where possible — no
+                guarantee.
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Risks</h3>
               <p>
-                Disease, rising feed prices, market price swings and natural disasters —
-                these risks may exist. All risks will be shared openly.
+                Disease, rising feed prices, market price swings and natural
+                disasters — these risks may exist. All risks will be shared
+                openly.
               </p>
             </Reveal>
           </div>
@@ -243,7 +251,10 @@ export default function GoruPalonInvestPageEn() {
           >
             Chinese Duck Project →
           </Link>
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
         </div>

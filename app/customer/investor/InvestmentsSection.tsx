@@ -279,9 +279,7 @@ export default function InvestmentsSection() {
       )}
 
       {investments.length === 0 ? (
-        <p className="text-sm text-gray-400">
-          এখনো কোনো বিনিয়োগ শুরু করেননি।
-        </p>
+        <p className="text-sm text-gray-400">এখনো কোনো বিনিয়োগ শুরু করেননি।</p>
       ) : (
         <div className="space-y-3">
           {investments.map((inv) => (

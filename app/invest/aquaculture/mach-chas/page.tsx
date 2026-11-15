@@ -79,7 +79,8 @@ export default function MachChasInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
               পরিকল্পিত পুকুর ব্যবস্থাপনায় মাছ চাষ। সঠিক ঘনত্ব, খাবার ও স্বাস্থ্যসেবা
-              নিশ্চিত করে উৎপাদন বাড়ানো এবং স্থানীয় বাজারে বিক্রি। স্বচ্ছ হিসাব ও লিখিত চুক্তি।
+              নিশ্চিত করে উৎপাদন বাড়ানো এবং স্থানীয় বাজারে বিক্রি। স্বচ্ছ হিসাব ও
+              লিখিত চুক্তি।
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -96,7 +97,8 @@ export default function MachChasInvestPage() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে
+              পারে।
             </p>
           </Reveal>
 
@@ -122,7 +124,9 @@ export default function MachChasInvestPage() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -142,9 +146,9 @@ export default function MachChasInvestPage() {
                 কেন পুকুরে মাছ চাষ?
               </h3>
               <p>
-                মাছ চাষ বাংলাদেশে দ্রুত বর্ধনশীল খাত। স্থানীয় বাজারে চাহিদা সবসময় থাকে।
-                পুকুর ভিত্তিক চাষ তুলনামূলক নিয়ন্ত্রণযোগ্য — ঘনত্ব, খাবার, পানির মান
-                ও স্বাস্থ্যসেবা ঠিক রাখলে ভালো উৎপাদন পাওয়া যায়।
+                মাছ চাষ বাংলাদেশে দ্রুত বর্ধনশীল খাত। স্থানীয় বাজারে চাহিদা সবসময়
+                থাকে। পুকুর ভিত্তিক চাষ তুলনামূলক নিয়ন্ত্রণযোগ্য — ঘনত্ব, খাবার, পানির
+                মান ও স্বাস্থ্যসেবা ঠিক রাখলে ভালো উৎপাদন পাওয়া যায়।
               </p>
             </Reveal>
 
@@ -153,8 +157,8 @@ export default function MachChasInvestPage() {
                 পরিকল্পনা
               </h3>
               <p>
-                পুকুর প্রস্তুতি, পোনা ছাড়া, খাবার ব্যবস্থাপনা, নিয়মিত পর্যবেক্ষণ
-                এবং বিক্রির সময় — সব ধাপের হিসাব আগে থেকে করা হবে। উৎপাদন শেষে
+                পুকুর প্রস্তুতি, পোনা ছাড়া, খাবার ব্যবস্থাপনা, নিয়মিত পর্যবেক্ষণ এবং
+                বিক্রির সময় — সব ধাপের হিসাব আগে থেকে করা হবে। উৎপাদন শেষে
                 লাভ-লোকসান স্বচ্ছভাবে অংশীদারদের জানানো হবে।
               </p>
             </Reveal>
@@ -164,16 +168,17 @@ export default function MachChasInvestPage() {
                 লাভ-লোকসান বণ্টন
               </h3>
               <p>
-                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী)।
-                লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।
+                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব
+                অনুযায়ী)। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো
+                গ্যারান্টি ছাড়া।
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">ঝুঁকি</h3>
               <p>
-                পানির মান, রোগবালাই, খাবারের দাম, আবহাওয়া এবং বাজার দরের ওঠানামা —
-                এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
+                পানির মান, রোগবালাই, খাবারের দাম, আবহাওয়া এবং বাজার দরের ওঠানামা
+                — এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
               </p>
             </Reveal>
           </div>
@@ -238,7 +243,10 @@ export default function MachChasInvestPage() {
           >
             ← মাছ চাষ খাত
           </Link>
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
         </div>

@@ -405,7 +405,8 @@ export default function AdminContestsPage() {
         ) : (
           <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden">
             {items.map((item) => {
-              const ended = item.endsAt && new Date(item.endsAt).getTime() < now;
+              const ended =
+                item.endsAt && new Date(item.endsAt).getTime() < now;
               return (
                 <div
                   key={item.id}

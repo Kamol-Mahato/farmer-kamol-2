@@ -23,7 +23,10 @@ export function isImageUrl(u?: string | null) {
 }
 
 export function plainText(html: string) {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function formatDhaka(d: Date, locale: "bn" | "en") {

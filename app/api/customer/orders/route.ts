@@ -21,9 +21,6 @@ export async function GET() {
     return NextResponse.json(orders);
   } catch (error) {
     console.error("CUSTOMER ORDERS API ERROR:", error);
-    return NextResponse.json(
-      { error: "অর্ডার লোড করা যায়নি" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "অর্ডার লোড করা যায়নি" }, { status: 500 });
   }
 }

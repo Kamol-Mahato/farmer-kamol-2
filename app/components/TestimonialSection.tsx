@@ -1,7 +1,11 @@
 import TestimonialSlider from "./TestimonialSlider";
 import { buildTestimonials, type RealReview } from "@/lib/placeholderReviews";
 
-export default function TestimonialSection({ reviews }: { reviews: RealReview[] }) {
+export default function TestimonialSection({
+  reviews,
+}: {
+  reviews: RealReview[];
+}) {
   const items = buildTestimonials(reviews, "bn");
   if (items.length === 0) return null;
 

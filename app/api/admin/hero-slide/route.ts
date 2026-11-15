@@ -107,10 +107,7 @@ export async function PATCH(req: Request) {
       where: { id: videoId },
     });
     if (!target || target.heroOrder === null) {
-      return NextResponse.json(
-        { error: "ভিডিও পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "ভিডিও পাওয়া যায়নি" }, { status: 404 });
     }
     const neighborOrder =
       direction === "up" ? target.heroOrder - 1 : target.heroOrder + 1;

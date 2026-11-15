@@ -23,8 +23,7 @@ export async function generateMetadata({
   const image = item.posterImage || item.image;
   return {
     title: `${item.titleEn} | Farmer Kamol`,
-    description:
-      item.summaryEn || plainText(item.contentEn).slice(0, 160),
+    description: item.summaryEn || plainText(item.contentEn).slice(0, 160),
     alternates: {
       canonical: `/en/contests/${item.slug}`,
       languages: {

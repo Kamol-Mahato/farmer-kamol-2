@@ -70,7 +70,7 @@ const projects = [
 export default function LivestockInvestPage() {
   return (
     <main className="min-h-screen bg-gray-50">
-    <InvestSubNav />
+      <InvestSubNav />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 py-3 text-sm text-gray-500 flex flex-wrap items-center gap-1.5">
@@ -94,7 +94,8 @@ export default function LivestockInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
               পশুপালন ভিত্তিক কৃষি বিনিয়োগ। চিনা হাঁস ও গরু পালন প্রকল্পে অংশীদার হয়ে
-              বাস্তব খামারের সাথে যুক্ত হোন। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং প্রকৃত লাভ-লোকসান বণ্টন।
+              বাস্তব খামারের সাথে যুক্ত হোন। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং প্রকৃত
+              লাভ-লোকসান বণ্টন।
             </p>
           </Reveal>
         </div>
@@ -115,8 +116,12 @@ export default function LivestockInvestPage() {
                   className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 h-full"
                 >
                   <div className="h-36 bg-green-100 flex items-center justify-center text-green-800 font-semibold">
-                  <InvestPhoto
-                      name={p.title.includes("হাঁস") ? "invest-china-hash" : "invest-goru"}
+                    <InvestPhoto
+                      name={
+                        p.title.includes("হাঁস")
+                          ? "invest-china-hash"
+                          : "invest-goru"
+                      }
                       alt={p.title}
                     >
                       {p.title.includes("হাঁস") ? "চিনা হাঁস" : "গরু পালন"}
@@ -159,14 +164,15 @@ export default function LivestockInvestPage() {
           <div className="space-y-5 text-gray-700 leading-relaxed">
             <Reveal>
               <p>
-                পশুপালন কৃষির একটি গুরুত্বপূর্ণ অংশ। চিনা হাঁস দ্রুত বড় হয় এবং বাজারে চাহিদা থাকে।
-                গরু পালন দীর্ঘমেয়াদে দুগ্ধ ও মাংস উৎপাদনের সুযোগ দেয়। দুটোই বাস্তব সম্পদ ভিত্তিক।
+                পশুপালন কৃষির একটি গুরুত্বপূর্ণ অংশ। চিনা হাঁস দ্রুত বড় হয় এবং বাজারে
+                চাহিদা থাকে। গরু পালন দীর্ঘমেয়াদে দুগ্ধ ও মাংস উৎপাদনের সুযোগ দেয়।
+                দুটোই বাস্তব সম্পদ ভিত্তিক।
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি প্রকল্পে
-                লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হয়।
+                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি
+                প্রকল্পে লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হয়।
               </p>
             </Reveal>
           </div>
@@ -176,13 +182,22 @@ export default function LivestockInvestPage() {
       {/* Back link */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
-          <Link href="/invest/crop" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/crop"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ফসল চাষ →
           </Link>
-          <Link href="/invest/aquaculture" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/aquaculture"
+            className="text-green-700 font-semibold hover:underline"
+          >
             মাছ চাষ →
           </Link>
         </div>

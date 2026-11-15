@@ -1,5 +1,11 @@
 "use client";
-import { useState, useEffect, useCallback, useRef, type TouchEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type TouchEvent,
+} from "react";
 
 import type { TestimonialItem } from "@/lib/placeholderReviews";
 
@@ -115,11 +121,18 @@ export default function TestimonialSlider({
                 )}
                 <div className="mt-auto flex items-center gap-3 pt-4 border-t border-green-100">
                   <span className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-700 text-white font-bold">
-                    {Array.from((review.user.name || (isEn ? "Customer" : "গ্রাহক")).trim())[0]}
+                    {
+                      Array.from(
+                        (
+                          review.user.name || (isEn ? "Customer" : "গ্রাহক")
+                        ).trim(),
+                      )[0]
+                    }
                   </span>
                   <div className="min-w-0">
                     <p className="font-bold text-green-800 truncate">
-                      {review.user.name || (isEn ? "Our Happy Customer" : "আমাদের সন্তুষ্ট গ্রাহক")}
+                      {review.user.name ||
+                        (isEn ? "Our Happy Customer" : "আমাদের সন্তুষ্ট গ্রাহক")}
                     </p>
                     {review.verified && (
                       <p className="text-[11px] font-medium text-green-700">

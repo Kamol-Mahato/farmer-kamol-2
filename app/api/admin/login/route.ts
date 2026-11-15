@@ -18,8 +18,7 @@ export async function POST(request: Request) {
     if (!ipCheck.allowed) {
       return NextResponse.json(
         {
-          error:
-            "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+          error: "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
         },
         { status: 429 },
       );

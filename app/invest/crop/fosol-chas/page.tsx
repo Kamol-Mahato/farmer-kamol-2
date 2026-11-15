@@ -24,8 +24,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: `আবাদি জমিতে ফসল চাষ প্রকল্প | Farmer Kamol`,
-    description:
-      "ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্বচ্ছ অংশীদারিত্ব, লিখিত চুক্তি।",
+    description: "ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্বচ্ছ অংশীদারিত্ব, লিখিত চুক্তি।",
     url: "https://farmerkamol.com/invest/crop/fosol-chas",
     siteName: siteConfig.brand.name,
     locale: "bn_BD",
@@ -80,7 +79,8 @@ export default function FosolChasInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
               ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। মৌসুমভিত্তিক পরিকল্পনা, আধুনিক পদ্ধতি
-              এবং স্থানীয় বাজার সংযোগ। স্বচ্ছ হিসাব ও লিখিত চুক্তির মাধ্যমে অংশীদারিত্ব।
+              এবং স্থানীয় বাজার সংযোগ। স্বচ্ছ হিসাব ও লিখিত চুক্তির মাধ্যমে
+              অংশীদারিত্ব।
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -97,7 +97,8 @@ export default function FosolChasInvestPage() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে
+              পারে।
             </p>
           </Reveal>
 
@@ -123,7 +124,9 @@ export default function FosolChasInvestPage() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -144,8 +147,8 @@ export default function FosolChasInvestPage() {
               </h3>
               <p>
                 ফসল চাষ কৃষির মূল ভিত্তি। আবাদি জমিতে সঠিক পরিকল্পনা ও আধুনিক পদ্ধতিতে
-                চাষ করলে স্থিতিশীল উৎপাদন সম্ভব। ধান ও সরিষার মতো ফসলের স্থানীয় চাহিদা সবসময় থাকে
-                এবং মৌসুম শেষে স্পষ্ট ফলন ও আয় হিসাব করা যায়।
+                চাষ করলে স্থিতিশীল উৎপাদন সম্ভব। ধান ও সরিষার মতো ফসলের স্থানীয়
+                চাহিদা সবসময় থাকে এবং মৌসুম শেষে স্পষ্ট ফলন ও আয় হিসাব করা যায়।
               </p>
             </Reveal>
 
@@ -155,8 +158,8 @@ export default function FosolChasInvestPage() {
               </h3>
               <p>
                 মৌসুম অনুযায়ী ফসল নির্বাচন, বীজ, সার, সেচ ও শ্রমিক ব্যবস্থাপনা —
-                সবকিছুর হিসাব আগে থেকে করা হবে। উৎপাদন শেষে বাজারজাতকরণ ও লাভ-লোকসান
-                স্বচ্ছভাবে অংশীদারদের জানানো হবে।
+                সবকিছুর হিসাব আগে থেকে করা হবে। উৎপাদন শেষে বাজারজাতকরণ ও
+                লাভ-লোকসান স্বচ্ছভাবে অংশীদারদের জানানো হবে।
               </p>
             </Reveal>
 
@@ -165,16 +168,17 @@ export default function FosolChasInvestPage() {
                 লাভ-লোকসান বণ্টন
               </h3>
               <p>
-                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী)।
-                লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।
+                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব
+                অনুযায়ী)। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো
+                গ্যারান্টি ছাড়া।
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">ঝুঁকি</h3>
               <p>
-                আবহাওয়া, পোকামাকড়, রোগবালাই, সার-বীজের দাম এবং বাজার দরের ওঠানামা —
-                এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
+                আবহাওয়া, পোকামাকড়, রোগবালাই, সার-বীজের দাম এবং বাজার দরের
+                ওঠানামা — এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
               </p>
             </Reveal>
           </div>
@@ -239,7 +243,10 @@ export default function FosolChasInvestPage() {
           >
             ← ফসল চাষ খাত
           </Link>
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
         </div>

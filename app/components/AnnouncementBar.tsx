@@ -116,14 +116,17 @@ export default function AnnouncementBar() {
         </div>
       )}
       <div className="flex-1 overflow-hidden">
-      <div data-nosnippet className="animate-marquee whitespace-nowrap inline-block">
+        <div
+          data-nosnippet
+          className="animate-marquee whitespace-nowrap inline-block"
+        >
           {[...Array(3)].map((_, i) => (
             <span key={i}>
               {locale === "en" ? (
                 <>
-                   Pure Honey, Pure Ghee, Pure Mustard Oil, Pure Date Palm Jaggery &
-                   Duck Chicks — straight from our farm to your door. Nomoskar / Assalamu Alaikum, Welcome
-                  &nbsp;
+                  Pure Honey, Pure Ghee, Pure Mustard Oil, Pure Date Palm
+                  Jaggery & Duck Chicks — straight from our farm to your door.
+                  Nomoskar / Assalamu Alaikum, Welcome &nbsp;
                   <a
                     href={localizeHref("/", locale)}
                     className="text-yellow-400 font-bold hover:underline"
@@ -142,8 +145,9 @@ export default function AnnouncementBar() {
                 </>
               ) : (
                 <>
-                  খাঁটি মধু - খাঁটি ঘি - খাঁটি সরিষার তেল, খেজুরের খাঁটি গুড় ও হাঁসের বাচ্চা — সরাসরি
-                  খামার থেকে আপনার দরজায়।&nbsp;নমস্কার / আসসালামুআলাইকুম,&nbsp;
+                  খাঁটি মধু - খাঁটি ঘি - খাঁটি সরিষার তেল, খেজুরের খাঁটি গুড় ও হাঁসের
+                  বাচ্চা — সরাসরি খামার থেকে আপনার দরজায়।&nbsp;নমস্কার /
+                  আসসালামুআলাইকুম,&nbsp;
                   <a
                     href={localizeHref("/", locale)}
                     className="text-yellow-400 font-bold hover:underline"
@@ -158,8 +162,8 @@ export default function AnnouncementBar() {
                   >
                     {siteConfig.contact.phoneDisplay}
                   </a>
-                  &nbsp;। ঢাকার মধ্যে হোম ডেলিভারি ২৪ ঘন্টার মধ্যে, ঢাকার বাইরে
-                  ৪৮ ঘন্টায়।&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;
+                  &nbsp;। ঢাকার মধ্যে হোম ডেলিভারি ২৪ ঘন্টার মধ্যে, ঢাকার বাইরে ৪৮
+                  ঘন্টায়।&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;
                 </>
               )}
             </span>

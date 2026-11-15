@@ -7,9 +7,33 @@ export default function InvestCalculator() {
 
   // Estimated net profit (on the investment)
   const scenarios = [
-    { label: "Year 1", note: "While the farm is being set up, so profit is lower", min: 0.07, max: 0.10, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
-    { label: "Year 2", note: "Once the farm is established", min: 0.25, max: 0.30, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
-    { label: "Year 3", note: "At a stable stage", min: 0.30, max: 0.35, color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
+    {
+      label: "Year 1",
+      note: "While the farm is being set up, so profit is lower",
+      min: 0.07,
+      max: 0.1,
+      color: "text-orange-700",
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+    },
+    {
+      label: "Year 2",
+      note: "Once the farm is established",
+      min: 0.25,
+      max: 0.3,
+      color: "text-blue-700",
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+    },
+    {
+      label: "Year 3",
+      note: "At a stable stage",
+      min: 0.3,
+      max: 0.35,
+      color: "text-green-700",
+      bg: "bg-green-50",
+      border: "border-green-200",
+    },
   ];
 
   const investorSharePercent = 0.35; // 35%
@@ -75,17 +99,17 @@ export default function InvestCalculator() {
                   <p className={`text-sm font-bold ${item.color}`}>
                     {item.label}
                   </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{item.note}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {item.note}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Farm net profit ≈ ৳{profitMin.toLocaleString("en-US")} – ৳{profitMax.toLocaleString("en-US")}
+                    Farm net profit ≈ ৳{profitMin.toLocaleString("en-US")} – ৳
+                    {profitMax.toLocaleString("en-US")}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs text-gray-500">Your possible profit</p>
                   <p className={`text-lg md:text-xl font-bold ${item.color}`}>
-                    ৳{getMin.toLocaleString("en-US")} – ৳{getMax.toLocaleString("en-US")}
+                    ৳{getMin.toLocaleString("en-US")} – ৳
+                    {getMax.toLocaleString("en-US")}
                   </p>
                 </div>
               </div>
@@ -97,7 +121,8 @@ export default function InvestCalculator() {
         <div className="rounded-2xl border border-gray-300 bg-gray-50 p-4">
           <p className="text-sm font-bold text-gray-700">If there is a loss</p>
           <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-            No profit will be paid. We will try to return the remaining capital, but there is no assurance that the full capital will be returned.
+            No profit will be paid. We will try to return the remaining capital,
+            but there is no assurance that the full capital will be returned.
           </p>
         </div>
       </div>

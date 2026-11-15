@@ -78,8 +78,8 @@ export default async function VerifyAgreementPage({
             </div>
 
             <p className="text-xs text-gray-400 mt-6">
-              সম্পূর্ণ চুক্তির বিস্তারিত তথ্য শুধুমাত্র সংশ্লিষ্ট বিনিয়োগকারী ও
-              Farmer Kamol কর্তৃপক্ষ দেখতে পারেন।
+              সম্পূর্ণ চুক্তির বিস্তারিত তথ্য শুধুমাত্র সংশ্লিষ্ট বিনিয়োগকারী ও Farmer Kamol
+              কর্তৃপক্ষ দেখতে পারেন।
             </p>
           </>
         ) : (

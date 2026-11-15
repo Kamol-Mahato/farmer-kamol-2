@@ -110,11 +110,7 @@ function DocUpload({
           </div>
         )}
         <label className="cursor-pointer bg-white border border-green-200 text-green-700 text-sm font-bold px-4 py-2 rounded-xl hover:bg-green-50 transition">
-          {uploading
-            ? "আপলোড হচ্ছে..."
-            : currentUrl
-              ? "পরিবর্তন করুন"
-              : "ছবি দিন"}
+          {uploading ? "আপলোড হচ্ছে..." : currentUrl ? "পরিবর্তন করুন" : "ছবি দিন"}
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -532,7 +528,7 @@ export default function InvestorPage() {
       {emailVerified && profile && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 flex items-start gap-4">
           <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 mb-0.5">বিনিয়োগকারী প্রোফাইল</p>
+            <p className="text-xs text-gray-500 mb-0.5">বিনিয়োগকারী প্রোফাইল</p>
             <p className="font-bold text-green-800 text-base truncate">
               {profile.user?.name || "প্রোফাইল"}
             </p>
@@ -628,9 +624,7 @@ export default function InvestorPage() {
             </div>
           )}
 
-          {editOtpMsg && (
-            <p className="text-green-700 text-sm">{editOtpMsg}</p>
-          )}
+          {editOtpMsg && <p className="text-green-700 text-sm">{editOtpMsg}</p>}
           {editOtpError && (
             <p className="text-red-500 text-sm">{editOtpError}</p>
           )}
@@ -644,7 +638,9 @@ export default function InvestorPage() {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <p className="text-[10px] text-gray-500">নাম</p>
-              <p className="font-semibold text-gray-800">{profile?.user?.name || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.user?.name || "—"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">ভেরিফাইড ইমেইল</p>
@@ -658,29 +654,41 @@ export default function InvestorPage() {
             </div>
             <div>
               <p className="text-[10px] text-gray-500">পিতার নাম</p>
-              <p className="font-semibold text-gray-800">{profile?.fatherName || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.fatherName || "—"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">মাতার নাম</p>
-              <p className="font-semibold text-gray-800">{profile?.motherName || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.motherName || "—"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">জেলা / উপজেলা</p>
               <p className="font-semibold text-gray-800">
-                {[profile?.upazila, profile?.district].filter(Boolean).join(", ") || "—"}
+                {[profile?.upazila, profile?.district]
+                  .filter(Boolean)
+                  .join(", ") || "—"}
               </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">বিস্তারিত ঠিকানা</p>
-              <p className="font-semibold text-gray-800">{profile?.address || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.address || "—"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">এনআইডি</p>
-              <p className="font-semibold text-gray-800">{profile?.nidNumber || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.nidNumber || "—"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] text-gray-500">পেমেন্ট নম্বর</p>
-              <p className="font-semibold text-gray-800">{profile?.paymentNumber || "—"}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.paymentNumber || "—"}
+              </p>
             </div>
           </div>
 
@@ -699,19 +707,35 @@ export default function InvestorPage() {
           <div className="flex flex-wrap gap-4 pt-2">
             {profile?.nidImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.nidImageUrl} alt="NID" className="w-14 h-14 rounded-lg object-cover border" />
+              <img
+                src={profile.nidImageUrl}
+                alt="NID"
+                className="w-14 h-14 rounded-lg object-cover border"
+              />
             )}
             {profile?.photoImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.photoImageUrl} alt="Photo" className="w-14 h-14 rounded-full object-cover border" />
+              <img
+                src={profile.photoImageUrl}
+                alt="Photo"
+                className="w-14 h-14 rounded-full object-cover border"
+              />
             )}
             {profile?.signatureImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.signatureImageUrl} alt="Sign" className="w-14 h-14 rounded-lg object-cover border" />
+              <img
+                src={profile.signatureImageUrl}
+                alt="Sign"
+                className="w-14 h-14 rounded-lg object-cover border"
+              />
             )}
             {profile?.nomineeImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.nomineeImageUrl} alt="Nominee" className="w-14 h-14 rounded-full object-cover border" />
+              <img
+                src={profile.nomineeImageUrl}
+                alt="Nominee"
+                className="w-14 h-14 rounded-full object-cover border"
+              />
             )}
           </div>
         </div>
@@ -784,9 +808,7 @@ export default function InvestorPage() {
           <h2 className="font-bold text-green-800 text-base">
             ধাপ ২ — প্রোফাইল সম্পূর্ণ করুন
           </h2>
-          <p className="text-xs text-gray-500 -mt-2">
-            * চিহ্নিত সব ঘর আবশ্যক
-          </p>
+          <p className="text-xs text-gray-500 -mt-2">* চিহ্নিত সব ঘর আবশ্যক</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
@@ -997,8 +1019,7 @@ export default function InvestorPage() {
               className="mt-1"
             />
             <span className="text-sm text-gray-600">
-              আমি বিনিয়োগের শর্তাবলীর সাথে সম্মত এবং এই তথ্য সঠিক বলে
-              নিশ্চিত করছি।
+              আমি বিনিয়োগের শর্তাবলীর সাথে সম্মত এবং এই তথ্য সঠিক বলে নিশ্চিত করছি।
             </span>
           </label>
 

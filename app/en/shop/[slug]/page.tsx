@@ -112,7 +112,7 @@ export default async function ProductDetailPage({
         availability: isOutOfStock
           ? "https://schema.org/OutOfStock"
           : "https://schema.org/InStock",
-          url: `https://farmerkamol.com/en/shop/${product.slug}`,
+        url: `https://farmerkamol.com/en/shop/${product.slug}`,
         hasMerchantReturnPolicy: {
           "@type": "MerchantReturnPolicy",
           applicableCountry: "BD",
@@ -336,7 +336,7 @@ export default async function ProductDetailPage({
                 >
                   <div className="flex items-center justify-between mb-1">
                     <p className="font-bold text-gray-800 text-sm">
-                      {review.user.name}
+                      {review.reviewerName || review.user?.name}
                     </p>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (

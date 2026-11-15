@@ -22,8 +22,7 @@ export async function generateMetadata({
 }) {
   const { category: catSlug } = await params;
   const cat = await getCategory(catSlug);
-  if (!cat)
-    return { title: `ক্যাটাগরি পাওয়া যায়নি | ${siteConfig.brand.name}` };
+  if (!cat) return { title: `ক্যাটাগরি পাওয়া যায়নি | ${siteConfig.brand.name}` };
 
   return {
     title: `${cat.name} | বাংলার ফসল | ${siteConfig.brand.name}`,

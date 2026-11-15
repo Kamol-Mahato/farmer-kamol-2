@@ -31,10 +31,7 @@ export async function GET(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
 
     // 🔎 statusLogs/editLogs-এ শুধু ID/role আছে, নাম নেই — যাদের ID পাওয়া গেছে তাদের নাম এক কলে বের করে বসিয়ে দিচ্ছি
@@ -68,9 +65,6 @@ export async function GET(
     return NextResponse.json(orderWithNames);
   } catch (error) {
     console.error("ORDER DETAIL FETCH ERROR ->", error);
-    return NextResponse.json(
-      { error: "অর্ডার লোড করা যায়নি" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "অর্ডার লোড করা যায়নি" }, { status: 500 });
   }
 }

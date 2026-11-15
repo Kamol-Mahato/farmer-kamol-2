@@ -324,15 +324,15 @@ export default function HeroSlider({
       >
         {thumb ? (
           <Image
-          src={thumb}
-          alt={title}
-          fill
-          priority={isPriority}
-          fetchPriority={isPriority ? "high" : "auto"}
-          quality={isPriority ? 80 : 70}
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
+            src={thumb}
+            alt={title}
+            fill
+            priority={isPriority}
+            fetchPriority={isPriority ? "high" : "auto"}
+            quality={isPriority ? 80 : 70}
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
         ) : (
           <div className="w-full h-full bg-green-800" />
         )}
@@ -348,14 +348,14 @@ export default function HeroSlider({
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
-      Farmer Kamol – কৃষক কমল | Pure honey, ghee, mustard oil, and duck chicks, delivered
-        directly from our farm in Raiganj, Sirajganj
+        Farmer Kamol – কৃষক কমল | Pure honey, ghee, mustard oil, and duck chicks,
+        delivered directly from our farm in Raiganj, Sirajganj
       </h1>
 
       {/* PC LAYOUT */}
       <div className="hidden md:grid md:grid-cols-2 h-[280px]">
         <div className="relative overflow-hidden">
-        {currentPcVideo && !pcYtId ? (
+          {currentPcVideo && !pcYtId ? (
             renderChannelLink(
               currentPcVideo.youtubeUrl,
               pcThumb,
@@ -445,60 +445,60 @@ export default function HeroSlider({
 
       {/* MOBILE LAYOUT */}
       <div className="md:hidden">
-      <div className="relative" style={{ paddingTop: "56.25%" }}>
-        <CrossfadeSwap
-          itemKey={safeMobileIndex}
-          count={mobileTotal}
-          skipPrev={mobilePlaying}
-        >
-        {currentMobileItem?.kind === "video" &&
-          currentMobileVideo &&
-          !mobileYtId ? (
-            renderChannelLink(
-              currentMobileVideo.youtubeUrl,
-              mobileThumb,
-              currentMobileVideo.titleEn ||
-                currentMobileVideo.title ||
-                "Channel",
-              safeMobileIndex === 0,
-            )
-          ) : currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
-            mobilePlaying ? (
-              <iframe
-                key={`m-${safeMobileIndex}`}
-                ref={mobileIframeRef}
-                src={mobileEmbedUrl}
-                className="absolute inset-0 w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                scrolling="no"
-                onLoad={(e) => startListening(e.currentTarget)}
-              />
-            ) : (
-              renderVideoThumbnail(
+        <div className="relative" style={{ paddingTop: "56.25%" }}>
+          <CrossfadeSwap
+            itemKey={safeMobileIndex}
+            count={mobileTotal}
+            skipPrev={mobilePlaying}
+          >
+            {currentMobileItem?.kind === "video" &&
+            currentMobileVideo &&
+            !mobileYtId ? (
+              renderChannelLink(
+                currentMobileVideo.youtubeUrl,
                 mobileThumb,
-                currentMobileVideo?.titleEn ||
-                  currentMobileVideo?.title ||
-                  "Video",
+                currentMobileVideo.titleEn ||
+                  currentMobileVideo.title ||
+                  "Channel",
+                safeMobileIndex === 0,
+              )
+            ) : currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
+              mobilePlaying ? (
+                <iframe
+                  key={`m-${safeMobileIndex}`}
+                  ref={mobileIframeRef}
+                  src={mobileEmbedUrl}
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  scrolling="no"
+                  onLoad={(e) => startListening(e.currentTarget)}
+                />
+              ) : (
+                renderVideoThumbnail(
+                  mobileThumb,
+                  currentMobileVideo?.titleEn ||
+                    currentMobileVideo?.title ||
+                    "Video",
                   () => setMobilePlaying(true),
                   safeMobileIndex === 0,
+                )
               )
-            )
-          ) : currentMobileItem?.kind === "product" &&
-            featuredProducts[currentMobileItem.productIdx] ? (
-            renderProductSlide(
-              featuredProducts[currentMobileItem.productIdx],
-              `m-${safeMobileIndex}`,
-              "opacity-100",
-              safeMobileIndex === 0,
-            )
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-green-800">
-              <p className="text-green-300 text-sm">No content available</p>
-            </div>
-          )}
+            ) : currentMobileItem?.kind === "product" &&
+              featuredProducts[currentMobileItem.productIdx] ? (
+              renderProductSlide(
+                featuredProducts[currentMobileItem.productIdx],
+                `m-${safeMobileIndex}`,
+                "opacity-100",
+                safeMobileIndex === 0,
+              )
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-green-800">
+                <p className="text-green-300 text-sm">No content available</p>
+              </div>
+            )}
           </CrossfadeSwap>
-            {mobileTotal > 1 && (
+          {mobileTotal > 1 && (
             <>
               <button
                 onClick={mobilePrev}

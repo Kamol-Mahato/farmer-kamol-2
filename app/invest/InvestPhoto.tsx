@@ -12,5 +12,12 @@ export default function InvestPhoto({
 }) {
   const src = investImage(name);
   if (!src) return <>{children}</>;
-  return <img src={src} alt={alt} loading="lazy" className="w-full h-full object-cover" />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="w-full h-full object-cover"
+    />
+  );
 }

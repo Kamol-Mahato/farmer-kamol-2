@@ -362,8 +362,7 @@ export default function EditProductPage({
               নির্দিষ্ট দাম — ওয়েবসাইটে Add to Cart/অর্ডার বাটন থাকবে
             </option>
             <option value="NEGOTIABLE">
-              শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের
-              বাচ্চা)
+              শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের বাচ্চা)
             </option>
           </select>
         </div>

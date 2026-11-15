@@ -137,11 +137,7 @@ function DocUpload({
           </div>
         )}
         <label className="cursor-pointer bg-white border border-green-200 text-green-700 text-sm font-bold px-4 py-2 rounded-xl hover:bg-green-50 transition">
-          {uploading
-            ? "Uploading..."
-            : currentUrl
-              ? "Change"
-              : "Add photo"}
+          {uploading ? "Uploading..." : currentUrl ? "Change" : "Add photo"}
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -664,9 +660,7 @@ export default function InvestorPage() {
             </div>
           )}
 
-          {editOtpMsg && (
-            <p className="text-green-700 text-sm">{editOtpMsg}</p>
-          )}
+          {editOtpMsg && <p className="text-green-700 text-sm">{editOtpMsg}</p>}
           {editOtpError && (
             <p className="text-red-500 text-sm">{editOtpError}</p>
           )}

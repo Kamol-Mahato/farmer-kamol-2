@@ -210,7 +210,9 @@ export default function InvestmentsSection() {
 
   if (loading) {
     return (
-      <p className="text-sm text-gray-400 mt-6">Loading investment details...</p>
+      <p className="text-sm text-gray-400 mt-6">
+        Loading investment details...
+      </p>
     );
   }
 

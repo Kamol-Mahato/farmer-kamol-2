@@ -196,7 +196,8 @@ export const investLandingsEn: SeoLanding[] = [
     slug: "krishite-biniyog",
     updatedAt: "2026-11-10",
     h1: "How to Invest in Agriculture (Krishi Biniyog) with Farmer Kamol: Steps to Become a Farm Partner",
-    title: "How to Invest in Agriculture in Bangladesh (Krishi Biniyog Guide) | Farmer Kamol",
+    title:
+      "How to Invest in Agriculture in Bangladesh (Krishi Biniyog Guide) | Farmer Kamol",
     description:
       "Want to start agriculture investment (krishi invest, krishite biniyog)? Steps to become a farm partner at Farmer Kamol, what you need, how payment and the agreement work.",
     keywords: [
@@ -279,8 +280,14 @@ export const investLandingsEn: SeoLanding[] = [
     ],
     related: [
       { label: "Investment Page", href: "/invest" },
-      { label: "Profit, Risk and Loss", href: "/agriculture-investment-bangladesh" },
-      { label: "Invest in Chinese Duck Farming", href: "/invest/livestock/china-hash" },
+      {
+        label: "Profit, Risk and Loss",
+        href: "/agriculture-investment-bangladesh",
+      },
+      {
+        label: "Invest in Chinese Duck Farming",
+        href: "/invest/livestock/china-hash",
+      },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -288,7 +295,8 @@ export const investLandingsEn: SeoLanding[] = [
     slug: "agriculture-investment-bangladesh",
     updatedAt: "2026-11-10",
     h1: "Agriculture Investment in Bangladesh: Profit Sharing, Risks and What Happens in a Loss",
-    title: "Agriculture Investment in Bangladesh: Profit, Risk and Loss | Farmer Kamol",
+    title:
+      "Agriculture Investment in Bangladesh: Profit, Risk and Loss | Farmer Kamol",
     description:
       "How profit is shared in agriculture investment, what the risks are and what happens if there is a loss: Farmer Kamol's rules, stated plainly. No guaranteed return.",
     keywords: [
@@ -370,7 +378,10 @@ export const investLandingsEn: SeoLanding[] = [
     related: [
       { label: "Investment Page", href: "/invest" },
       { label: "How to Get Started", href: "/krishite-biniyog" },
-      { label: "Invest in Chinese Duck Farming", href: "/invest/livestock/china-hash" },
+      {
+        label: "Invest in Chinese Duck Farming",
+        href: "/invest/livestock/china-hash",
+      },
       { label: "Contact", href: "/contact" },
     ],
   },

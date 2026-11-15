@@ -26,22 +26,22 @@ function isProfileComplete(p: {
 }) {
   return Boolean(
     p.emailVerified &&
-      p.fatherName &&
-      p.motherName &&
-      p.district &&
-      p.upazila &&
-      p.address &&
-      p.nidNumber &&
-      p.nidImageUrl &&
-      p.photoImageUrl &&
-      p.signatureImageUrl &&
-      p.paymentNumber &&
-      p.nomineeName &&
-      p.nomineePhone &&
-      p.nomineeRelation &&
-      p.nomineeNid &&
-      p.nomineeImageUrl &&
-      p.termsAcceptedAt,
+    p.fatherName &&
+    p.motherName &&
+    p.district &&
+    p.upazila &&
+    p.address &&
+    p.nidNumber &&
+    p.nidImageUrl &&
+    p.photoImageUrl &&
+    p.signatureImageUrl &&
+    p.paymentNumber &&
+    p.nomineeName &&
+    p.nomineePhone &&
+    p.nomineeRelation &&
+    p.nomineeNid &&
+    p.nomineeImageUrl &&
+    p.termsAcceptedAt,
   );
 }
 
@@ -80,7 +80,13 @@ export async function PATCH(request: Request) {
   });
   if (!existing || !existing.emailVerified) {
     return NextResponse.json(
-      { error: tr(locale, "আগে ইমেইল ভেরিফাই করুন", "Please verify your email first") },
+      {
+        error: tr(
+          locale,
+          "আগে ইমেইল ভেরিফাই করুন",
+          "Please verify your email first",
+        ),
+      },
       { status: 400 },
     );
   }
@@ -111,8 +117,7 @@ export async function PATCH(request: Request) {
   if (typeof paymentNumber === "string")
     data.paymentNumber = paymentNumber.trim();
   if (typeof nomineeName === "string") data.nomineeName = nomineeName.trim();
-  if (typeof nomineePhone === "string")
-    data.nomineePhone = nomineePhone.trim();
+  if (typeof nomineePhone === "string") data.nomineePhone = nomineePhone.trim();
   if (typeof nomineeRelation === "string")
     data.nomineeRelation = nomineeRelation.trim();
   if (typeof nomineeNid === "string") data.nomineeNid = nomineeNid.trim();

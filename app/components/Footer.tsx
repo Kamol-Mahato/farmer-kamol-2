@@ -11,7 +11,13 @@ const dict = {
       "সমন্বিত কৃষির মাধ্যমে প্রাকৃতিক ও স্বাস্থ্যকর খাদ্যপণ্য সরাসরি আপনার কাছে পৌঁছে দিচ্ছি।",
     slogan: "খামার থেকে আপনার দরজায়",
     productsHeading: "পণ্য বিভাগ",
-    products: ["খাঁটি মধু", "খাঁটি ঘি", "খাঁটি সরিষার তেল", "খেজুরের গুড়", "চীনা হাঁসের বাচ্চা"],
+    products: [
+      "খাঁটি মধু",
+      "খাঁটি ঘি",
+      "খাঁটি সরিষার তেল",
+      "খেজুরের গুড়",
+      "চীনা হাঁসের বাচ্চা",
+    ],
     serviceHeading: "কাস্টমার সেবা",
     trackOrder: "অর্ডার ট্র্যাক",
     returnPolicy: "রিটার্ন পলিসি",
@@ -23,8 +29,20 @@ const dict = {
     farmHeading: "আমাদের খামার",
     investHeading: "কৃষিতে বিনিয়োগ",
     investInfoHeading: "বিনিয়োগ সম্পর্কে",
-    investInfo: ["লাইভস্টক খাত", "ফসল চাষের খাত", "মাছ চাষের খাত", "কৃষিতে বিনিয়োগ গাইড", "যোগাযোগ"],
-    invest: ["কৃষিতে ইনভেস্ট", "চিনা হাঁস বিনিয়োগ", "গরু পালন বিনিয়োগ", "ফসল চাষ বিনিয়োগ", "মাছ চাষ বিনিয়োগ"],
+    investInfo: [
+      "লাইভস্টক খাত",
+      "ফসল চাষের খাত",
+      "মাছ চাষের খাত",
+      "কৃষিতে বিনিয়োগ গাইড",
+      "যোগাযোগ",
+    ],
+    invest: [
+      "কৃষিতে ইনভেস্ট",
+      "চিনা হাঁস বিনিয়োগ",
+      "গরু পালন বিনিয়োগ",
+      "ফসল চাষ বিনিয়োগ",
+      "মাছ চাষ বিনিয়োগ",
+    ],
     location: `${siteConfig.address.locality}, ${siteConfig.address.region}`,
     businessContact: "ব্যবসায়িক যোগাযোগ",
     copyright: `© ২০২৬ ${siteConfig.brand.name}. সর্বস্বত্ব সংরক্ষিত।`,
@@ -36,7 +54,13 @@ const dict = {
       "Delivering natural, healthy food straight from our integrated farm to your doorstep.",
     slogan: "From Our Farm To Your Door",
     productsHeading: "Products",
-    products: ["Pure Honey", "Pure Ghee", "Pure Mustard Oil", "Date Palm Jaggery", "Duck Chicks"],
+    products: [
+      "Pure Honey",
+      "Pure Ghee",
+      "Pure Mustard Oil",
+      "Date Palm Jaggery",
+      "Duck Chicks",
+    ],
     serviceHeading: "Customer Service",
     trackOrder: "Track Order",
     returnPolicy: "Return Policy",
@@ -44,12 +68,30 @@ const dict = {
     contact: "Contact",
     aboutUs: "About Us",
     paymentHeading: "Payment Methods",
-    paymentMethods: ["bKash", "Nagad", "Rocket", "Card", "Cash on Delivery (COD)"],
+    paymentMethods: [
+      "bKash",
+      "Nagad",
+      "Rocket",
+      "Card",
+      "Cash on Delivery (COD)",
+    ],
     farmHeading: "Our Farm",
     investHeading: "Agriculture Investment",
     investInfoHeading: "About Investing",
-    investInfo: ["Livestock Sector", "Crop Sector", "Fish Farming Sector", "Investment Guide", "Contact"],
-    invest: ["Agriculture Invest", "Chinese Duck Farming", "Cattle Rearing", "Crop Farming", "Fish Farming"],
+    investInfo: [
+      "Livestock Sector",
+      "Crop Sector",
+      "Fish Farming Sector",
+      "Investment Guide",
+      "Contact",
+    ],
+    invest: [
+      "Agriculture Invest",
+      "Chinese Duck Farming",
+      "Cattle Rearing",
+      "Crop Farming",
+      "Fish Farming",
+    ],
     location: `${siteConfig.address.localityEn}, ${siteConfig.address.regionEn}`,
     businessContact: "Business Inquiries",
     copyright: `© 2026 ${siteConfig.brand.name}. All rights reserved.`,
@@ -347,7 +389,7 @@ export default function Footer() {
                 {t.productsHeading}
               </h3>
               <div className="flex flex-col gap-1 text-xs text-black">
-              {t.products.map((p, i) => (
+                {t.products.map((p, i) => (
                   <Link
                     key={p}
                     href={href(`/${productSlugs[i]}`)}
@@ -452,7 +494,7 @@ export default function Footer() {
                       {p.svg}
                     </div>
                     <span className="text-xs text-black group-hover:text-green-700 font-medium leading-tight whitespace-nowrap transition-colors">
-                    {i === 4 ? (
+                      {i === 4 ? (
                         <>
                           <span className="sm:hidden">COD</span>
                           <span className="hidden sm:inline">
@@ -474,47 +516,47 @@ export default function Footer() {
           {/* ========================================== */}
           <div className="mt-5 pt-4 border-t border-green-100 flex gap-8 lg:block lg:mt-0 lg:pt-0 lg:border-t-0 lg:col-span-1">
             <div>
-            <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
-              {t.farmHeading}
-            </h3>
-            <div className="flex flex-col gap-1.5 text-xs text-black">
-              <a
-                href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
-              >
-                🏡 {t.location}
-              </a>
-              <a
-                href={`https://wa.me/${siteConfig.contact.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
-              >
-                💬 {siteConfig.contact.phoneDisplay}
-              </a>
-              <a
-                href="https://wa.me/8801521406139"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
-              >
-                💼 {t.businessContact}: 01521406139
-              </a>
-              <a
-                href={`mailto:${siteConfig.contact.email}`}
-                className="inline-block hover:text-green-700 transition break-all leading-tight py-2 -my-1"
-              >
-                ✉️ {siteConfig.contact.email}
-              </a>
-              <Link
-                href={href("/privacy-policy")}
-                className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
-              >
-                🔒 {t.privacyPolicy}
-              </Link>
-            </div>
+              <h3 className="font-bold mb-2 text-xs text-green-900 whitespace-nowrap">
+                {t.farmHeading}
+              </h3>
+              <div className="flex flex-col gap-1.5 text-xs text-black">
+                <a
+                  href="https://www.google.com/maps/place/Farmer+Kamol-+%E0%A6%95%E0%A7%83%E0%A6%B7%E0%A6%95+%E0%A6%95%E0%A6%AE%E0%A6%B2/@24.5374938,89.4060368,16.64z/data=!4m6!3m5!1s0x39fdb50ed997e315:0x6bd4f0a5545bc197!8m2!3d24.5375866!4d89.4074174!16s%2Fg%2F11nc5qlkdf?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+                >
+                  🏡 {t.location}
+                </a>
+                <a
+                  href={`https://wa.me/${siteConfig.contact.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+                >
+                  💬 {siteConfig.contact.phoneDisplay}
+                </a>
+                <a
+                  href="https://wa.me/8801521406139"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+                >
+                  💼 {t.businessContact}: 01521406139
+                </a>
+                <a
+                  href={`mailto:${siteConfig.contact.email}`}
+                  className="inline-block hover:text-green-700 transition break-all leading-tight py-2 -my-1"
+                >
+                  ✉️ {siteConfig.contact.email}
+                </a>
+                <Link
+                  href={href("/privacy-policy")}
+                  className="inline-block hover:text-green-700 transition leading-tight whitespace-nowrap py-2 -my-1"
+                >
+                  🔒 {t.privacyPolicy}
+                </Link>
+              </div>
             </div>
 
             {/* কৃষিতে বিনিয়োগ — মোবাইলে আমাদের খামারের ডানে */}
@@ -540,7 +582,7 @@ export default function Footer() {
 
       {/* কপিরাইট বার */}
       <div className="bg-green-800 text-white border-t border-green-700 py-3 mt-2">
-      <div className="max-w-7xl mx-auto px-4 sm:pr-24 flex flex-col sm:flex-row justify-between items-center text-[11px] text-green-200 gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:pr-24 flex flex-col sm:flex-row justify-between items-center text-[11px] text-green-200 gap-2">
           <p>{t.copyright}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <Link

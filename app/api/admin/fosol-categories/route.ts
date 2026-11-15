@@ -27,10 +27,7 @@ export async function POST(req: Request) {
     let slug = (body.slug || "").trim().toLowerCase();
 
     if (!name) {
-      return NextResponse.json(
-        { error: "ক্যাটাগরির নাম দিন" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "ক্যাটাগরির নাম দিন" }, { status: 400 });
     }
 
     if (!slug) {

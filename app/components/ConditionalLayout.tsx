@@ -11,18 +11,24 @@ import MobileBottomNav from "./MobileBottomNav";
 import AgentModeBanner from "./AgentModeBanner";
 
 // 🚀 প্রথম রেন্ডারে জরুরি না — আলাদা chunk + ssr:false → LCP/TBT ভালো হয়
-const FloatingWhatsAppButton = dynamic(() => import("./FloatingWhatsAppButton"), {
-  ssr: false,
-  loading: () => null,
-});
+const FloatingWhatsAppButton = dynamic(
+  () => import("./FloatingWhatsAppButton"),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 const FloatingCartButton = dynamic(() => import("./FloatingCartButton"), {
   ssr: false,
   loading: () => null,
 });
-const NotificationPermissionBanner = dynamic(() => import("./NotificationPermissionBanner"), {
-  ssr: false,
-  loading: () => null,
-});
+const NotificationPermissionBanner = dynamic(
+  () => import("./NotificationPermissionBanner"),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 const ChatWidget = dynamic(() => import("./ChatWidget"), {
   ssr: false,
   loading: () => null,

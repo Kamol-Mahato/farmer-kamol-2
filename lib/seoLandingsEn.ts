@@ -12,7 +12,8 @@ export const seoLandingsEn: SeoLanding[] = [
     slug: "khejurer-gur",
     updatedAt: "2026-10-19",
     h1: "Pure Date Palm Jaggery (Khejurer Gur) — Liquid and Granular, Delivered Across Bangladesh",
-    title: "Buy Pure Date Palm Jaggery (Khejurer Gur) – Liquid & Granular | Farmer Kamol",
+    title:
+      "Buy Pure Date Palm Jaggery (Khejurer Gur) – Liquid & Granular | Farmer Kamol",
     description:
       "Liquid (jhola) and granular (danadar) date palm jaggery made from sap collected from local tappers (gachis) in Sirajganj. 1 kg and half-kg packs delivered across Bangladesh, with process videos.",
     keywords: [
@@ -103,7 +104,8 @@ export const seoLandingsEn: SeoLanding[] = [
     slug: "khati-modhu",
     updatedAt: "2026-10-19",
     h1: "Pure Mustard Flower Honey — From Our Own Beehives, Delivered Across Bangladesh",
-    title: "Buy Pure Honey – Mustard Flower Honey from Our Own Beehives | Farmer Kamol",
+    title:
+      "Buy Pure Honey – Mustard Flower Honey from Our Own Beehives | Farmer Kamol",
     description:
       "Pure mustard flower honey from our own beehives. Collected with an extractor, no heat, nothing added, bottled as it is. 1 kg and half-kg packs delivered across Bangladesh.",
     keywords: [
@@ -326,7 +328,8 @@ export const seoLandingsEn: SeoLanding[] = [
     slug: "khati-ghee",
     updatedAt: "2026-10-19",
     h1: "Pure Cow Ghee — Made from Milk of Farms in Pabna and Sirajganj",
-    title: "Buy Pure Ghee – Cow Ghee from Pabna & Sirajganj Milk | Farmer Kamol",
+    title:
+      "Buy Pure Ghee – Cow Ghee from Pabna & Sirajganj Milk | Farmer Kamol",
     description:
       "Cow ghee made from milk collected from farms in Pabna and Sirajganj. Detailed information on how ghee is made, the technical criteria for judging pure ghee, and how to store it.",
     keywords: [
@@ -443,7 +446,8 @@ export const seoLandingsEn: SeoLanding[] = [
     slug: "hasher-bacha",
     updatedAt: "2026-10-19",
     h1: "Ducklings for Sale — All Breeds Including Chinese Ducks, 1 Day to 1 Month Old",
-    title: "Buy Ducklings – All Breeds Including Chinese Ducklings | Farmer Kamol",
+    title:
+      "Buy Ducklings – All Breeds Including Chinese Ducklings | Farmer Kamol",
     description:
       "Ducklings of all breeds including Chinese ducks, from 1 day to 1 month old. Sourced from our own farm and from hatcheries, sent in boxes. Minimum 50 pieces. Orders and bookings by phone.",
     keywords: [
@@ -538,7 +542,10 @@ export const seoLandingsEn: SeoLanding[] = [
       },
     ],
     related: [
-      { label: "Invest in Chinese Duck Farming", href: "/invest/livestock/china-hash" },
+      {
+        label: "Invest in Chinese Duck Farming",
+        href: "/invest/livestock/china-hash",
+      },
       { label: "Browse All Products", href: "/shop" },
       { label: "FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },

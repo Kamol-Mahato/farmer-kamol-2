@@ -106,7 +106,7 @@ export default function ReviewForm({ productId }: { productId: number }) {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="আপনার নাম"
+        placeholder="Your name"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 mb-2"
         maxLength={60}
       />
@@ -115,7 +115,7 @@ export default function ReviewForm({ productId }: { productId: number }) {
         inputMode="numeric"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        placeholder="মোবাইল নম্বর (কোথাও দেখানো হবে না)"
+        placeholder="Mobile number (never shown publicly)"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 mb-2"
         maxLength={15}
       />

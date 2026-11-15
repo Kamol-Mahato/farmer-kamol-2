@@ -145,7 +145,12 @@ export default function ProfileAvatarUpload({
       }
 
       if (!blob || blob.size > MAX_KB * 1024) {
-        setError(t("ছবি ২০০ কেবি-র নিচে আনা যায়নি, অন্য ছবি চেষ্টা করুন", "Could not compress the image below 200 KB. Please try a different image."));
+        setError(
+          t(
+            "ছবি ২০০ কেবি-র নিচে আনা যায়নি, অন্য ছবি চেষ্টা করুন",
+            "Could not compress the image below 200 KB. Please try a different image.",
+          ),
+        );
         setUploading(false);
         return;
       }
@@ -180,7 +185,12 @@ export default function ProfileAvatarUpload({
       window.dispatchEvent(new Event("storage"));
       onUploaded?.(data.avatarUrl);
     } catch {
-      setError(t("সমস্যা হয়েছে, আবার চেষ্টা করুন", "Something went wrong, please try again"));
+      setError(
+        t(
+          "সমস্যা হয়েছে, আবার চেষ্টা করুন",
+          "Something went wrong, please try again",
+        ),
+      );
     } finally {
       setUploading(false);
     }
@@ -222,7 +232,7 @@ export default function ProfileAvatarUpload({
           </div>
         )}
         <span className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[10px] py-0.5 text-center">
-        {t("চেঞ্জ", "Change")}
+          {t("চেঞ্জ", "Change")}
         </span>
       </button>
 
@@ -241,7 +251,7 @@ export default function ProfileAvatarUpload({
         <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4">
             <p className="font-bold text-green-800 text-center text-sm">
-            {t("রাউন্ড ক্রপ করুন", "Crop to circle")}
+              {t("রাউন্ড ক্রপ করুন", "Crop to circle")}
             </p>
 
             <div
@@ -265,7 +275,9 @@ export default function ProfileAvatarUpload({
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 block mb-1">{t("জুম", "Zoom")}</label>
+              <label className="text-xs text-gray-500 block mb-1">
+                {t("জুম", "Zoom")}
+              </label>
               <input
                 type="range"
                 min={1}
@@ -295,11 +307,16 @@ export default function ProfileAvatarUpload({
                 disabled={uploading}
                 className="flex-1 py-2.5 rounded-xl bg-green-700 text-white text-sm font-bold hover:bg-green-600 disabled:opacity-50"
               >
-                {uploading ? t("আপলোড হচ্ছে...", "Uploading...") : t("সেভ করুন", "Save")}
+                {uploading
+                  ? t("আপলোড হচ্ছে...", "Uploading...")
+                  : t("সেভ করুন", "Save")}
               </button>
             </div>
             <p className="text-[11px] text-gray-500 text-center">
-            {t("অটো কম্প্রেস · সর্বোচ্চ ২০০ কেবি", "Auto-compressed · max 200 KB")}
+              {t(
+                "অটো কম্প্রেস · সর্বোচ্চ ২০০ কেবি",
+                "Auto-compressed · max 200 KB",
+              )}
             </p>
           </div>
         </div>

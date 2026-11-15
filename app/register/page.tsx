@@ -85,9 +85,7 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-bold text-green-800">
             {siteConfig.brand.name}
           </h1>
-          <p className="text-sm text-yellow-600 mt-1">
-            খামার থেকে আপনার দরজায়
-          </p>
+          <p className="text-sm text-yellow-600 mt-1">খামার থেকে আপনার দরজায়</p>
         </div>
         <h2 className="text-xl font-bold text-gray-800 mb-6">
           নতুন অ্যাকাউন্ট খুলুন
@@ -187,9 +185,7 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              কমপক্ষে ৬ অক্ষর দিতে হবে
-            </p>
+            <p className="text-xs text-gray-500 mt-1">কমপক্ষে ৬ অক্ষর দিতে হবে</p>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">

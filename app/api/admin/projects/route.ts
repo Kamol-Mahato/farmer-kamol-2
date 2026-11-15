@@ -30,7 +30,9 @@ export async function GET() {
       .reduce((sum, i) => sum + i.amount, 0);
     const target = p.targetAmount ?? 0;
     const progressPct =
-      target > 0 ? Math.min(100, Math.round((raisedAmount / target) * 100)) : null;
+      target > 0
+        ? Math.min(100, Math.round((raisedAmount / target) * 100))
+        : null;
 
     // investments অ্যারে রেসপন্স থেকে বাদ (শুধু হিসাবের জন্য ছিল)
     const { investments, ...rest } = p;
@@ -77,10 +79,7 @@ export async function POST(request: Request) {
   } = await request.json();
 
   if (!name || typeof name !== "string" || !name.trim()) {
-    return NextResponse.json(
-      { error: "প্রজেক্টের নাম দিন" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "প্রজেক্টের নাম দিন" }, { status: 400 });
   }
 
   // ✅ একসাথে একটাই প্রজেক্ট /invest পেজে ফিচার হতে পারবে
@@ -99,16 +98,21 @@ export async function POST(request: Request) {
       isAcceptingFunds:
         typeof isAcceptingFunds === "boolean" ? isAcceptingFunds : true,
       isFeaturedOnInvestPage:
-        typeof isFeaturedOnInvestPage === "boolean" ? isFeaturedOnInvestPage : false,
+        typeof isFeaturedOnInvestPage === "boolean"
+          ? isFeaturedOnInvestPage
+          : false,
       targetAmount: typeof targetAmount === "number" ? targetAmount : null,
       ownContributionAmount:
-        typeof ownContributionAmount === "number" ? ownContributionAmount : null,
+        typeof ownContributionAmount === "number"
+          ? ownContributionAmount
+          : null,
       fundUsage: typeof fundUsage === "string" ? fundUsage.trim() : null,
       timeline: typeof timeline === "string" ? timeline.trim() : null,
       risks: typeof risks === "string" ? risks.trim() : null,
       profitShareNote:
         typeof profitShareNote === "string" ? profitShareNote.trim() : null,
-      durationMonths: typeof durationMonths === "number" ? durationMonths : null,
+      durationMonths:
+        typeof durationMonths === "number" ? durationMonths : null,
       investorProfitPct:
         typeof investorProfitPct === "number" ? investorProfitPct : null,
       totalLots: typeof totalLots === "number" ? totalLots : null,

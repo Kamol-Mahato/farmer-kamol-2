@@ -77,8 +77,9 @@ export default function FosolChasInvestPageEn() {
               Invest in Crop Farming on Arable Land
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Rice, mustard and high-value crops. Seasonal planning, modern methods and
-              local market linkage. Transparent accounts and written partnership agreement.
+              Rice, mustard and high-value crops. Seasonal planning, modern
+              methods and local market linkage. Transparent accounts and written
+              partnership agreement.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -95,7 +96,8 @@ export default function FosolChasInvestPageEn() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              This is not a bank deposit or fixed-interest scheme. Both profit and loss are possible.
+              This is not a bank deposit or fixed-interest scheme. Both profit
+              and loss are possible.
             </p>
           </Reveal>
 
@@ -121,7 +123,9 @@ export default function FosolChasInvestPageEn() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -141,19 +145,21 @@ export default function FosolChasInvestPageEn() {
                 Why crop farming on arable land?
               </h3>
               <p>
-                Crop farming is the foundation of agriculture. With proper planning and
-                modern methods on arable land, steady production is possible. Crops like
-                rice and mustard always have local demand, and yield and income can be
-                clearly calculated after each season.
+                Crop farming is the foundation of agriculture. With proper
+                planning and modern methods on arable land, steady production is
+                possible. Crops like rice and mustard always have local demand,
+                and yield and income can be clearly calculated after each
+                season.
               </p>
             </Reveal>
 
             <Reveal delay={80}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Plan</h3>
               <p>
-                Crop selection by season, seeds, fertilizer, irrigation and labour —
-                everything will be planned in advance. After harvest, marketing and
-                profit-loss will be shared transparently with partners.
+                Crop selection by season, seeds, fertilizer, irrigation and
+                labour — everything will be planned in advance. After harvest,
+                marketing and profit-loss will be shared transparently with
+                partners.
               </p>
             </Reveal>
 
@@ -162,17 +168,19 @@ export default function FosolChasInvestPageEn() {
                 Profit and loss sharing
               </h3>
               <p>
-                If there is profit, the farmer gets 65% and the partner gets 35% (based on
-                real income and expenses). If there is a loss, remaining capital will be
-                returned where possible — no guarantee.
+                If there is profit, the farmer gets 65% and the partner gets 35%
+                (based on real income and expenses). If there is a loss,
+                remaining capital will be returned where possible — no
+                guarantee.
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Risks</h3>
               <p>
-                Weather, pests, disease, seed and fertilizer prices, and market price
-                swings — these risks may exist. All risks will be shared openly.
+                Weather, pests, disease, seed and fertilizer prices, and market
+                price swings — these risks may exist. All risks will be shared
+                openly.
               </p>
             </Reveal>
           </div>
@@ -237,7 +245,10 @@ export default function FosolChasInvestPageEn() {
           >
             ← Crop Farming Sector
           </Link>
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
         </div>

@@ -54,7 +54,11 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 // ✅ Placeholder data — later just fill in youtubeUrl / imageUrl and the real content will show
-const farmVisitVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+const farmVisitVideos: {
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+}[] = [
   { title: "Farm Visit - Part 1", youtubeUrl: "" },
   { title: "Farm Visit - Part 2", youtubeUrl: "" },
   { title: "Farm Visit - Part 3", youtubeUrl: "" },
@@ -66,7 +70,11 @@ const farmVisitPhotos: { title: string; imageUrl: string }[] = [
   { title: "Farm Photo 3", imageUrl: "" },
 ];
 
-const journeyVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+const journeyVideos: {
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+}[] = [
   { title: "Partner's Experience 1", youtubeUrl: "" },
   { title: "Partner's Experience 2", youtubeUrl: "" },
   { title: "Partner's Experience 3", youtubeUrl: "" },
@@ -89,7 +97,9 @@ function YoutubeCard({
   youtubeUrl: string;
 }) {
   const ytId = youtubeUrl ? getYoutubeId(youtubeUrl) : null;
-  const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+  const thumb = ytId
+    ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+    : null;
 
   const body = (
     <>
@@ -118,9 +128,13 @@ function YoutubeCard({
         )}
       </div>
       <div className="px-0.5 pt-2">
-        <h3 className="font-bold text-green-800 text-sm line-clamp-2">{title}</h3>
+        <h3 className="font-bold text-green-800 text-sm line-clamp-2">
+          {title}
+        </h3>
         {description && (
-          <p className="text-gray-500 text-xs mt-1 line-clamp-2">{description}</p>
+          <p className="text-gray-500 text-xs mt-1 line-clamp-2">
+            {description}
+          </p>
         )}
       </div>
     </>
@@ -208,7 +222,10 @@ export default async function InvestPageEn() {
   // Lots sold — estimated from target and raised (can be made more exact later using investments)
   const soldLots =
     totalLots && targetAmount && targetAmount > 0
-      ? Math.min(totalLots, Math.round((raisedAmount / targetAmount) * totalLots))
+      ? Math.min(
+          totalLots,
+          Math.round((raisedAmount / targetAmount) * totalLots),
+        )
       : null;
 
   // ✅ English text comes from the *En admin fields; if empty, a default English text is shown
@@ -220,7 +237,6 @@ export default async function InvestPageEn() {
 
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)] text-gray-800">
-
       <InvestSubNav />
 
       {/* =========================================================
@@ -232,8 +248,8 @@ export default async function InvestPageEn() {
             <Reveal direction="up" delay={0}>
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-2 bg-white border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  A real farm, a transparent partnership
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>A
+                  real farm, a transparent partnership
                 </span>
                 {systemSettings?.farmLocationEn && (
                   <span className="inline-flex items-center bg-white border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
@@ -245,12 +261,15 @@ export default async function InvestPageEn() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
                 Farmer Kamol&apos;s Farm
                 <br />
-                <span className="text-green-700">Agricultural Investment &amp; Partnership</span>
+                <span className="text-green-700">
+                  Agricultural Investment &amp; Partnership
+                </span>
               </h1>
 
               <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mb-8">
-                First the work, then trust, then partnership.
-                Moving forward together through a real farm, transparent accounts and fair profit sharing.
+                First the work, then trust, then partnership. Moving forward
+                together through a real farm, transparent accounts and fair
+                profit sharing.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -269,8 +288,9 @@ export default async function InvestPageEn() {
               </div>
 
               <p className="mt-4 text-xs md:text-sm text-gray-500 max-w-lg leading-relaxed">
-                <span className="font-semibold text-gray-700">Risk:</span>{" "}
-                This is not a bank deposit or a fixed-interest scheme. Both profit and loss are possible.
+                <span className="font-semibold text-gray-700">Risk:</span> This
+                is not a bank deposit or a fixed-interest scheme. Both profit
+                and loss are possible.
               </p>
 
               {systemSettings?.youtubeChannelUrl && (
@@ -294,12 +314,18 @@ export default async function InvestPageEn() {
                 {/* Gradient from the bottom — the caption becomes clearer on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500 ease-out" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                  <p className="text-white font-bold text-sm md:text-base">Komol Kumar Mahato</p>
-                  <p className="text-white/80 text-xs md:text-sm">Founder, on his own farm</p>
+                  <p className="text-white font-bold text-sm md:text-base">
+                    Komol Kumar Mahato
+                  </p>
+                  <p className="text-white/80 text-xs md:text-sm">
+                    Founder, on his own farm
+                  </p>
                 </div>
               </div>
               <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-lg px-4 py-3 border border-green-100 transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-xl">
-                <p className="text-xs text-gray-500">Profit split (farm operator : partner)</p>
+                <p className="text-xs text-gray-500">
+                  Profit split (farm operator : partner)
+                </p>
                 <p className="text-sm font-bold text-green-700">65 : 35</p>
               </div>
             </Reveal>
@@ -315,24 +341,46 @@ export default async function InvestPageEn() {
           <Reveal className="text-center mb-10">
             <SectionHeading>My Farm&apos;s Journey</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-              I did not start with investment. I started with my own money.
-              Here is that true story.
+              I did not start with investment. I started with my own money. Here
+              is that true story.
             </p>
           </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "Personal project", desc: "I started the farm with my own modest capital. No outside money." },
-              { title: "Challenges", desc: "Disease, feed prices, market rates — new problems came up every day." },
-              { title: "Mistakes", desc: "I made many mistakes. I learned. Now I am putting that experience to work." },
-              { title: "Solutions", desc: "I moved forward by solving problems step by step. I started keeping accounts and records." },
-              { title: "Current status", desc: "Work is going on at a small scale. People can see that I don't just talk — I work." },
-              { title: "Future vision", desc: "First proof, then small trial steps, then growing slowly." },
+              {
+                title: "Personal project",
+                desc: "I started the farm with my own modest capital. No outside money.",
+              },
+              {
+                title: "Challenges",
+                desc: "Disease, feed prices, market rates — new problems came up every day.",
+              },
+              {
+                title: "Mistakes",
+                desc: "I made many mistakes. I learned. Now I am putting that experience to work.",
+              },
+              {
+                title: "Solutions",
+                desc: "I moved forward by solving problems step by step. I started keeping accounts and records.",
+              },
+              {
+                title: "Current status",
+                desc: "Work is going on at a small scale. People can see that I don't just talk — I work.",
+              },
+              {
+                title: "Future vision",
+                desc: "First proof, then small trial steps, then growing slowly.",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 3) * 80}>
                 <div className="bg-white border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
-                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-green-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -343,20 +391,38 @@ export default async function InvestPageEn() {
       {/* =========================================================
           FARM STATUS
       ========================================================== */}
-      <section id="farm-status" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="farm-status"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>Current Farm Status</SectionHeading>
           </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Reveal delay={0}>
-              <StatCard label="Cows" value={(systemSettings?.farmCowCount ?? 5).toLocaleString("en-US")} />
+              <StatCard
+                label="Cows"
+                value={(systemSettings?.farmCowCount ?? 5).toLocaleString(
+                  "en-US",
+                )}
+              />
             </Reveal>
             <Reveal delay={80}>
-              <StatCard label="Chinese Ducks" value={(systemSettings?.farmDuckCount ?? 15).toLocaleString("en-US")} />
+              <StatCard
+                label="Chinese Ducks"
+                value={(systemSettings?.farmDuckCount ?? 15).toLocaleString(
+                  "en-US",
+                )}
+              />
             </Reveal>
             <Reveal delay={160}>
-              <StatCard label="Goats" value={(systemSettings?.farmGoatCount ?? 4).toLocaleString("en-US")} />
+              <StatCard
+                label="Goats"
+                value={(systemSettings?.farmGoatCount ?? 4).toLocaleString(
+                  "en-US",
+                )}
+              />
             </Reveal>
             <Reveal delay={240}>
               <StatCard
@@ -371,12 +437,16 @@ export default async function InvestPageEn() {
       {/* =========================================================
           PROJECTS / CATEGORIES
       ========================================================== */}
-      <section id="projects" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="projects"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>Agriculture Investment Sectors</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-              Agriculture Invest, Farming Invest and Livestock Invest — three main sectors where our projects run and will expand.
+              Agriculture Invest, Farming Invest and Livestock Invest — three
+              main sectors where our projects run and will expand.
             </p>
           </Reveal>
 
@@ -388,7 +458,10 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
               >
                 <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
-                <InvestPhoto name={["invest-china-hash", "invest-goru"]} alt="Livestock">
+                  <InvestPhoto
+                    name={["invest-china-hash", "invest-goru"]}
+                    alt="Livestock"
+                  >
                     Livestock
                   </InvestPhoto>
                 </div>
@@ -396,9 +469,12 @@ export default async function InvestPageEn() {
                   <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     Ongoing + New
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Livestock Investment</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Livestock Investment
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    Chinese duck breeding and cattle rearing projects. Real farm, written agreement and transparent accounts.
+                    Chinese duck breeding and cattle rearing projects. Real
+                    farm, written agreement and transparent accounts.
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
                     <li>• Chinese Duck Expansion</li>
@@ -418,7 +494,7 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
               >
                 <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-                <InvestPhoto name="invest-dhan" alt="Crop Farming">
+                  <InvestPhoto name="invest-dhan" alt="Crop Farming">
                     Crop Farming
                   </InvestPhoto>
                 </div>
@@ -426,9 +502,12 @@ export default async function InvestPageEn() {
                   <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     Coming soon
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Crop Farming on Arable Land</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Crop Farming on Arable Land
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    Rice, mustard and high-value crops. Steady and sustainable production-based investment.
+                    Rice, mustard and high-value crops. Steady and sustainable
+                    production-based investment.
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
                     <li>• Crop cultivation on arable land</li>
@@ -447,7 +526,7 @@ export default async function InvestPageEn() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
               >
                 <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-                <InvestPhoto name="invest-mach" alt="Fish Farming">
+                  <InvestPhoto name="invest-mach" alt="Fish Farming">
                     Fish Farming
                   </InvestPhoto>
                 </div>
@@ -455,9 +534,12 @@ export default async function InvestPageEn() {
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     Coming soon
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Fish Farming Project</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Fish Farming Project
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    Pond-based fish farming investment. Planned production and market linkage.
+                    Pond-based fish farming investment. Planned production and
+                    market linkage.
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
                     <li>• Pond fish farming</li>
@@ -528,7 +610,10 @@ export default async function InvestPageEn() {
       {/* =========================================================
           LIVE CALCULATOR
       ========================================================== */}
-      <section id="calculator" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="calculator"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <InvestCalculator />
@@ -544,7 +629,8 @@ export default async function InvestPageEn() {
           <Reveal className="text-center mb-10">
             <SectionHeading>How Profit Is Shared</SectionHeading>
             <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
-              There is no promise of any fixed profit. Net profit is calculated from actual sales and expenses.
+              There is no promise of any fixed profit. Net profit is calculated
+              from actual sales and expenses.
             </p>
           </Reveal>
 
@@ -552,16 +638,24 @@ export default async function InvestPageEn() {
             <div className="space-y-5">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700 font-medium">Total sales</span>
-                <span className="text-lg font-bold text-green-800">৳{exampleSales.toLocaleString("en-US")}</span>
+                <span className="text-lg font-bold text-green-800">
+                  ৳{exampleSales.toLocaleString("en-US")}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 font-medium">Total expenses</span>
-                <span className="text-lg font-bold text-red-600">− ৳{exampleExpense.toLocaleString("en-US")}</span>
+                <span className="text-gray-700 font-medium">
+                  Total expenses
+                </span>
+                <span className="text-lg font-bold text-red-600">
+                  − ৳{exampleExpense.toLocaleString("en-US")}
+                </span>
               </div>
               <div className="border-t border-dashed border-gray-200 pt-5">
                 <div className="flex justify-between items-center bg-blue-50 rounded-2xl px-5 py-4">
                   <span className="font-bold text-gray-800">Net profit</span>
-                  <span className="text-2xl font-black text-blue-800">৳{exampleProfit.toLocaleString("en-US")}</span>
+                  <span className="text-2xl font-black text-blue-800">
+                    ৳{exampleProfit.toLocaleString("en-US")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -572,8 +666,12 @@ export default async function InvestPageEn() {
               <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-xs text-green-700 font-medium">Farm operator (Farmer Kamol)</p>
-                    <h3 className="text-2xl font-bold text-green-900">65% of profit</h3>
+                    <p className="text-xs text-green-700 font-medium">
+                      Farm operator (Farmer Kamol)
+                    </p>
+                    <h3 className="text-2xl font-bold text-green-900">
+                      65% of profit
+                    </h3>
                   </div>
                   <div className="text-4xl font-black text-green-700">65%</div>
                 </div>
@@ -581,7 +679,9 @@ export default async function InvestPageEn() {
                   <div className="h-full w-[65%] bg-green-600 rounded-full" />
                 </div>
                 <p className="text-sm text-gray-600">Share in this example:</p>
-                <p className="text-2xl font-bold text-green-800">৳{farmerShare.toLocaleString("en-US")}</p>
+                <p className="text-2xl font-bold text-green-800">
+                  ৳{farmerShare.toLocaleString("en-US")}
+                </p>
               </div>
             </Reveal>
 
@@ -589,8 +689,12 @@ export default async function InvestPageEn() {
               <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-xs text-blue-700 font-medium">All investors</p>
-                    <h3 className="text-2xl font-bold text-blue-900">35% of profit</h3>
+                    <p className="text-xs text-blue-700 font-medium">
+                      All investors
+                    </p>
+                    <h3 className="text-2xl font-bold text-blue-900">
+                      35% of profit
+                    </h3>
                   </div>
                   <div className="text-4xl font-black text-blue-700">35%</div>
                 </div>
@@ -598,17 +702,23 @@ export default async function InvestPageEn() {
                   <div className="h-full w-[35%] bg-blue-600 rounded-full" />
                 </div>
                 <p className="text-sm text-gray-600">Share in this example:</p>
-                <p className="text-2xl font-bold text-blue-800">৳{investorShare.toLocaleString("en-US")}</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  ৳{investorShare.toLocaleString("en-US")}
+                </p>
               </div>
             </Reveal>
           </div>
 
           {/* Risk — close to the calculator / profit sharing, more prominent */}
           <Reveal className="rounded-2xl border border-amber-200 bg-amber-50 p-6 mt-8">
-            <h3 className="font-bold text-amber-900 mb-2">⚠️ A Plain Word on Risk</h3>
+            <h3 className="font-bold text-amber-900 mb-2">
+              ⚠️ A Plain Word on Risk
+            </h3>
             <p className="text-sm text-amber-900/90 leading-relaxed">
-              Farming and livestock businesses carry risk. Losses can occur due to disease, natural disasters, falling market prices and more.
-              We do not, under any circumstances, guarantee the return of capital or any fixed profit. Please understand this well before investing.
+              Farming and livestock businesses carry risk. Losses can occur due
+              to disease, natural disasters, falling market prices and more. We
+              do not, under any circumstances, guarantee the return of capital
+              or any fixed profit. Please understand this well before investing.
             </p>
           </Reveal>
         </div>
@@ -617,7 +727,10 @@ export default async function InvestPageEn() {
       {/* =========================================================
           HOW TO PARTNER
       ========================================================== */}
-      <section id="how-to" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="how-to"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-4xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>How to Become a Partner</SectionHeading>
@@ -626,10 +739,26 @@ export default async function InvestPageEn() {
           <Reveal>
             <StepAccordion
               steps={[
-                { step: "1", title: "Create an account", text: "Open a regular account with your name, phone and email." },
-                { step: "2", title: "Complete your profile", text: "Provide your NID, photo, signature and payment details." },
-                { step: "3", title: "Choose a project and apply", text: "Choose a specific project, apply to become a partner, read the agreement and give your electronic consent." },
-                { step: "4", title: "Deposit your money", text: "Send money via bKash/bank and upload the slip. Once confirmed, you become a partner." },
+                {
+                  step: "1",
+                  title: "Create an account",
+                  text: "Open a regular account with your name, phone and email.",
+                },
+                {
+                  step: "2",
+                  title: "Complete your profile",
+                  text: "Provide your NID, photo, signature and payment details.",
+                },
+                {
+                  step: "3",
+                  title: "Choose a project and apply",
+                  text: "Choose a specific project, apply to become a partner, read the agreement and give your electronic consent.",
+                },
+                {
+                  step: "4",
+                  title: "Deposit your money",
+                  text: "Send money via bKash/bank and upload the slip. Once confirmed, you become a partner.",
+                },
               ]}
             />
           </Reveal>
@@ -648,13 +777,17 @@ export default async function InvestPageEn() {
       {/* =========================================================
           E-AGREEMENT + SETTLEMENT
       ========================================================== */}
-      <section id="agreement" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="agreement"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>Two Important Documents for You</SectionHeading>
             <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
-              Every partnership will have written proof — an agreement at the start, transparent accounts at the end.
-              Both documents are issued in Bengali.
+              Every partnership will have written proof — an agreement at the
+              start, transparent accounts at the end. Both documents are issued
+              in Bengali.
             </p>
           </Reveal>
 
@@ -664,9 +797,13 @@ export default async function InvestPageEn() {
                 <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-2xl mb-4">
                   📜
                 </div>
-                <h3 className="text-xl font-bold text-green-900 mb-3">e-Agreement Copy</h3>
+                <h3 className="text-xl font-bold text-green-900 mb-3">
+                  e-Agreement Copy
+                </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                  When your application is accepted, a separate e-Agreement will be created for each partnership — clearly stating the project, investment amount, duration and profit-sharing terms.
+                  When your application is accepted, a separate e-Agreement will
+                  be created for each partnership — clearly stating the project,
+                  investment amount, duration and profit-sharing terms.
                 </p>
                 <div className="text-xs text-gray-500 space-y-2">
                   <p>✓ Unique Agreement Number</p>
@@ -683,9 +820,13 @@ export default async function InvestPageEn() {
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl mb-4">
                   📊
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-3">Final Settlement Statement</h3>
+                <h3 className="text-xl font-bold text-blue-900 mb-3">
+                  Final Settlement Statement
+                </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                  When the project ends, the final settlement will be prepared from the actual sales and expense accounts. Any extra bonus will also be shown in the same statement.
+                  When the project ends, the final settlement will be prepared
+                  from the actual sales and expense accounts. Any extra bonus
+                  will also be shown in the same statement.
                 </p>
                 <div className="text-xs text-gray-500 space-y-2">
                   <p>✓ Total sales and total expenses</p>
@@ -711,18 +852,38 @@ export default async function InvestPageEn() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: "📄", title: "e-Agreement", text: "Every investment gets its own document with a separate agreement number." },
-              { icon: "🧾", title: "Proof of accounts", text: "Project expense amounts and necessary receipts/invoices will be kept on record." },
-              { icon: "📊", title: "Transparent Settlement", text: "At the end of the project, the final account is prepared from total sales, expenses and net profit." },
-              { icon: "⭐", title: "Extra Bonus", text: "If the actual profit is higher, an extra bonus may be given at our discretion." },
+              {
+                icon: "📄",
+                title: "e-Agreement",
+                text: "Every investment gets its own document with a separate agreement number.",
+              },
+              {
+                icon: "🧾",
+                title: "Proof of accounts",
+                text: "Project expense amounts and necessary receipts/invoices will be kept on record.",
+              },
+              {
+                icon: "📊",
+                title: "Transparent Settlement",
+                text: "At the end of the project, the final account is prepared from total sales, expenses and net profit.",
+              },
+              {
+                icon: "⭐",
+                title: "Extra Bonus",
+                text: "If the actual profit is higher, an extra bonus may be given at our discretion.",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 4) * 100}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-xl mb-3">
                     {item.icon}
                   </div>
-                  <h3 className="font-bold text-green-800 text-sm mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-xs leading-relaxed">{item.text}</p>
+                  <h3 className="font-bold text-green-800 text-sm mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs leading-relaxed">
+                    {item.text}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -733,7 +894,10 @@ export default async function InvestPageEn() {
       {/* =========================================================
           PRINCIPLES
       ========================================================== */}
-      <section id="principles" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="principles"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>Our Principles</SectionHeading>
@@ -741,17 +905,39 @@ export default async function InvestPageEn() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "No guaranteed returns", desc: "There is no fixed interest or guaranteed return. Only a partnership in actual profit." },
-              { title: "Backed by real assets", desc: "Money is spent directly on real farm assets (ducks, feed, infrastructure)." },
-              { title: "Transparent profit sharing", desc: "Profit is divided according to actual income and expense accounts. All accounts are shown." },
-              { title: "Ethical business", desc: "No deception or concealment. Everything is open." },
-              { title: "Shared risk", desc: "Both profit and loss are shared on a partnership basis." },
-              { title: "Contract-based", desc: "Every investment has a written agreement." },
+              {
+                title: "No guaranteed returns",
+                desc: "There is no fixed interest or guaranteed return. Only a partnership in actual profit.",
+              },
+              {
+                title: "Backed by real assets",
+                desc: "Money is spent directly on real farm assets (ducks, feed, infrastructure).",
+              },
+              {
+                title: "Transparent profit sharing",
+                desc: "Profit is divided according to actual income and expense accounts. All accounts are shown.",
+              },
+              {
+                title: "Ethical business",
+                desc: "No deception or concealment. Everything is open.",
+              },
+              {
+                title: "Shared risk",
+                desc: "Both profit and loss are shared on a partnership basis.",
+              },
+              {
+                title: "Contract-based",
+                desc: "Every investment has a written agreement.",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 3) * 120}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-green-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -836,7 +1022,6 @@ export default async function InvestPageEn() {
           </Link>
         </Reveal>
       </section>
-
     </div>
   );
 }

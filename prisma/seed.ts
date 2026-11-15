@@ -17,9 +17,7 @@ const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log(
-    "🔄 প্রিসমা ডাটাবেসে পুরো ই-কমার্স ইকোসিস্টেম সীড করা শুরু হচ্ছে...",
-  );
+  console.log("🔄 প্রিসমা ডাটাবেসে পুরো ই-কমার্স ইকোসিস্টেম সীড করা শুরু হচ্ছে...");
 
   // ⚠️ ডুপ্লিকেট এবং ফরেন-কী এরর এড়াতে আগের সব টেবিলের ডেটা ক্রমানুসারে ডিলিট করা
   await prisma.agentLog.deleteMany();
@@ -239,8 +237,7 @@ async function main() {
     data: {
       name: "গাওয়া ঘি (দেশি গরুর)",
       slug: "gawa-ghee-deshi-goru",
-      description:
-        "সম্পূর্ণ ঐতিহ্যবাহী নিয়মে তৈরি দেশি গরুর দুধের খাঁটি গাওয়া ঘি।",
+      description: "সম্পূর্ণ ঐতিহ্যবাহী নিয়মে তৈরি দেশি গরুর দুধের খাঁটি গাওয়া ঘি।",
       categoryId: gheeSubCat.id,
       pricePerUnit: 850,
       unit: "৫০০ গ্রাম",
@@ -294,8 +291,7 @@ async function main() {
     data: {
       name: "দেশি মুরগির ডিম",
       slug: "deshi-morgir-dim",
-      description:
-        "সম্পূর্ণ অর্গানিক উপায়ে খামারে পালিত দেশি মুরগির তাজা ডিম।",
+      description: "সম্পূর্ণ অর্গানিক উপায়ে খামারে পালিত দেশি মুরগির তাজা ডিম।",
       categoryId: dairyCat.id,
       pricePerUnit: 180,
       unit: "প্রতি ডজন",

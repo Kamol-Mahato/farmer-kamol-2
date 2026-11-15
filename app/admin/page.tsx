@@ -16,9 +16,7 @@ export default async function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-green-800">
-          অ্যাডমিন ড্যাশবোর্ড
-        </h1>
+        <h1 className="text-3xl font-bold text-green-800">অ্যাডমিন ড্যাশবোর্ড</h1>
         <div className="bg-white rounded-xl shadow px-5 py-3 border-l-4 border-emerald-600">
           <p className="text-gray-500 text-xs">লাইফটাইম মোট কালেকশন</p>
           <p className="text-2xl font-bold text-emerald-700">
@@ -61,9 +59,7 @@ export default async function AdminDashboard() {
         >
           <p className="text-2xl mb-2">📦</p>
           <p className="text-lg font-bold">পণ্য ম্যানেজমেন্ট</p>
-          <p className="text-green-200 text-sm mt-1">
-            পণ্য যোগ, সম্পাদনা ও মুছুন
-          </p>
+          <p className="text-green-200 text-sm mt-1">পণ্য যোগ, সম্পাদনা ও মুছুন</p>
         </Link>
         <Link
           href="/admin/orders"
@@ -71,9 +67,7 @@ export default async function AdminDashboard() {
         >
           <p className="text-2xl mb-2">🛒</p>
           <p className="text-lg font-bold">অর্ডার ম্যানেজমেন্ট</p>
-          <p className="text-yellow-100 text-sm mt-1">
-            অর্ডার দেখুন ও আপডেট করুন
-          </p>
+          <p className="text-yellow-100 text-sm mt-1">অর্ডার দেখুন ও আপডেট করুন</p>
         </Link>
         <Link
           href="/admin/customers"

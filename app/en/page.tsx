@@ -12,8 +12,12 @@ import dynamic from "next/dynamic";
 const NoticeModal = dynamic(() => import("@/app/en/components/NoticeModal"));
 const BlogSection = dynamic(() => import("@/app/en/components/BlogSection"));
 const VideoSection = dynamic(() => import("@/app/en/components/VideoSection"));
-const InvestSection = dynamic(() => import("@/app/en/components/InvestSection"));
-const TestimonialSection = dynamic(() => import("@/app/en/components/TestimonialSection"));
+const InvestSection = dynamic(
+  () => import("@/app/en/components/InvestSection"),
+);
+const TestimonialSection = dynamic(
+  () => import("@/app/en/components/TestimonialSection"),
+);
 
 export const revalidate = 86400;
 

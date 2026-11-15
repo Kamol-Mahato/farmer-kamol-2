@@ -75,7 +75,8 @@ export default function CropInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
               আবাদি জমিতে ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্থায়ী ও টেকসই উৎপাদন
-              ভিত্তিক কৃষি বিনিয়োগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব ফসলের সাথে অংশীদারিত্ব।
+              ভিত্তিক কৃষি বিনিয়োগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব ফসলের সাথে
+              অংশীদারিত্ব।
             </p>
           </Reveal>
         </div>
@@ -94,7 +95,7 @@ export default function CropInvestPage() {
               className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
             >
               <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-              <InvestPhoto name="invest-dhan" alt="আবাদি জমিতে ফসল চাষ">
+                <InvestPhoto name="invest-dhan" alt="আবাদি জমিতে ফসল চাষ">
                   আবাদি জমিতে ফসল চাষ
                 </InvestPhoto>
               </div>
@@ -133,13 +134,14 @@ export default function CropInvestPage() {
             <Reveal>
               <p>
                 ফসল চাষ কৃষির মূল ভিত্তি। আবাদি জমিতে সঠিক পরিকল্পনা ও আধুনিক পদ্ধতিতে
-                চাষ করলে স্থিতিশীল উৎপাদন ও আয় সম্ভব। ধান ও সরিষার মতো ফসলের স্থানীয় চাহিদা সবসময় থাকে।
+                চাষ করলে স্থিতিশীল উৎপাদন ও আয় সম্ভব। ধান ও সরিষার মতো ফসলের
+                স্থানীয় চাহিদা সবসময় থাকে।
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি প্রকল্পে
-                লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হবে।
+                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি
+                প্রকল্পে লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হবে।
               </p>
             </Reveal>
           </div>
@@ -149,13 +151,22 @@ export default function CropInvestPage() {
       {/* Back links */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
-          <Link href="/invest/livestock" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/livestock"
+            className="text-green-700 font-semibold hover:underline"
+          >
             লাইভস্টক →
           </Link>
-          <Link href="/invest/aquaculture" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/aquaculture"
+            className="text-green-700 font-semibold hover:underline"
+          >
             মাছ চাষ →
           </Link>
         </div>

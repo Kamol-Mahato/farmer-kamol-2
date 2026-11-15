@@ -82,9 +82,7 @@ export default function AdminAgentsPage() {
     name: string,
     phone: string,
   ) {
-    if (
-      !confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`)
-    )
+    if (!confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`))
       return;
     setResettingId(agentId);
     try {
@@ -114,9 +112,7 @@ export default function AdminAgentsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-2">
       <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-green-800">
-          এজেন্ট ম্যানেজমেন্ট
-        </h1>
+        <h1 className="text-3xl font-bold text-green-800">এজেন্ট ম্যানেজমেন্ট</h1>
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className="bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-800 transition shadow-sm"

@@ -59,7 +59,11 @@ function Signatory({
       <div className="h-14 flex items-end justify-center border-b border-gray-400 mb-1 px-4">
         {signature && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={signature} alt="স্বাক্ষর" className="max-h-14 object-contain" />
+          <img
+            src={signature}
+            alt="স্বাক্ষর"
+            className="max-h-14 object-contain"
+          />
         )}
       </div>
       <p className="font-bold text-gray-800 text-sm">{name}</p>
@@ -169,12 +173,12 @@ export default function AgreementPage() {
         লোড হচ্ছে...
       </div>
     );
-    const investorName = data.investorProfile.user.name || "—";
+  const investorName = data.investorProfile.user.name || "—";
 
   return (
     <div className="bg-gray-100 min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto mb-4 flex justify-end gap-3 print:hidden">
-      <button
+        <button
           onClick={printAgreement}
           className="bg-green-700 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition"
         >
@@ -197,7 +201,7 @@ export default function AgreementPage() {
                 Farmer Kamol
               </h1>
               <p className="text-xs text-yellow-600 font-semibold">
-              খামার থেকে আপনার দরজায়
+                খামার থেকে আপনার দরজায়
               </p>
             </div>
           </div>
@@ -268,8 +272,7 @@ export default function AgreementPage() {
               {new Date(data.createdAt).toLocaleDateString("bn-BD")}
             </p>
             <p>
-              মেয়াদ:{" "}
-              {data.termMonths ? `${data.termMonths} মাস` : "অনির্দিষ্ট"}
+              মেয়াদ: {data.termMonths ? `${data.termMonths} মাস` : "অনির্দিষ্ট"}
             </p>
           </div>
         </div>
@@ -281,8 +284,8 @@ export default function AgreementPage() {
           </p>
           <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
             <li>
-              এই বিনিয়োগ লাভ-ভাগাভাগি (Profit-Sharing) ভিত্তিতে সম্পাদিত —
-              কোনো নির্দিষ্ট হারে রিটার্নের নিশ্চয়তা এখানে দেওয়া হচ্ছে না।
+              এই বিনিয়োগ লাভ-ভাগাভাগি (Profit-Sharing) ভিত্তিতে সম্পাদিত — কোনো
+              নির্দিষ্ট হারে রিটার্নের নিশ্চয়তা এখানে দেওয়া হচ্ছে না।
             </li>
             <li>
               প্রকৃত লাভ খামারের বাস্তব ফলাফলের উপর নির্ভরশীল এবং তা প্রথম পক্ষ{" "}
@@ -291,35 +294,32 @@ export default function AgreementPage() {
               নির্দিষ্ট মেয়াদে প্রকৃত লাভ না হলে সেই মেয়াদে কোনো অর্থ বণ্টন হবে না।
             </li>
             <li>
-              প্রকল্পে প্রকৃত ক্ষতি হলে, সেই মুহূর্তে অবশিষ্ট মূলধন (সম্পূর্ণ
-              মূলধনের নিশ্চয়তা ছাড়াই, বাস্তবে যা অবশিষ্ট থাকে) দ্বিতীয় পক্ষকে
-              ফেরত দেওয়া হবে। উভয় পক্ষ স্বীকার করছে যে কৃষিভিত্তিক ব্যবসায়
-              ক্ষতির ঝুঁকি স্বাভাবিক এবং তা অগ্রিম নিশ্চিতভাবে এড়ানো সম্ভব নয়।
+              প্রকল্পে প্রকৃত ক্ষতি হলে, সেই মুহূর্তে অবশিষ্ট মূলধন (সম্পূর্ণ মূলধনের নিশ্চয়তা
+              ছাড়াই, বাস্তবে যা অবশিষ্ট থাকে) দ্বিতীয় পক্ষকে ফেরত দেওয়া হবে। উভয় পক্ষ
+              স্বীকার করছে যে কৃষিভিত্তিক ব্যবসায় ক্ষতির ঝুঁকি স্বাভাবিক এবং তা অগ্রিম
+              নিশ্চিতভাবে এড়ানো সম্ভব নয়।
             </li>
             <li>
-              কোনো নির্দিষ্ট মেয়াদে প্রত্যাশিত লাভের চেয়ে বাস্তব লাভ বেশি হলে,
-              প্রথম পক্ষ তার একক সিদ্ধান্তে দ্বিতীয় পক্ষকে অতিরিক্ত অংশ (বোনাস)
-              দিতে পারে — এই অতিরিক্ত অংশ সংশ্লিষ্ট Settlement Statement-এ
-              উল্লেখ থাকবে।
+              কোনো নির্দিষ্ট মেয়াদে প্রত্যাশিত লাভের চেয়ে বাস্তব লাভ বেশি হলে, প্রথম
+              পক্ষ তার একক সিদ্ধান্তে দ্বিতীয় পক্ষকে অতিরিক্ত অংশ (বোনাস) দিতে পারে —
+              এই অতিরিক্ত অংশ সংশ্লিষ্ট Settlement Statement-এ উল্লেখ থাকবে।
             </li>
             <li>
-              সকল আর্থিক লেনদেন (জমা/উত্তোলন) farmerkamol.com-এর
-              বিনিয়োগকারী প্যানেলের মাধ্যমে রেকর্ড ও নিশ্চিত করা হবে।
+              সকল আর্থিক লেনদেন (জমা/উত্তোলন) farmerkamol.com-এর বিনিয়োগকারী
+              প্যানেলের মাধ্যমে রেকর্ড ও নিশ্চিত করা হবে।
             </li>
             <li>
-              মূলধন উত্তোলনের ইচ্ছা থাকলে দ্বিতীয় পক্ষকে যুক্তিসঙ্গত সময়
-              আগে প্রথম পক্ষকে জানাতে হবে, যাতে খামারের কার্যক্রম ব্যাহত না
-              হয়।
+              মূলধন উত্তোলনের ইচ্ছা থাকলে দ্বিতীয় পক্ষকে যুক্তিসঙ্গত সময় আগে প্রথম পক্ষকে
+              জানাতে হবে, যাতে খামারের কার্যক্রম ব্যাহত না হয়।
             </li>
             <li>
-              এই চুক্তিতে উভয় পক্ষের ইলেকট্রনিক স্বাক্ষর (আপলোডকৃত স্বাক্ষরের
-              ছবি) চূড়ান্ত ও বাধ্যতামূলক হিসেবে গণ্য হবে।
+              এই চুক্তিতে উভয় পক্ষের ইলেকট্রনিক স্বাক্ষর (আপলোডকৃত স্বাক্ষরের ছবি) চূড়ান্ত
+              ও বাধ্যতামূলক হিসেবে গণ্য হবে।
             </li>
             <li>
-              কোনো মতবিরোধ দেখা দিলে তা প্রথমে উভয় পক্ষের পারস্পরিক
-              আলোচনার মাধ্যমে সমাধানের চেষ্টা করা হবে। তা সম্ভব না হলে, এই
-              চুক্তি বাংলাদেশের প্রচলিত আইন দ্বারা পরিচালিত হবে এবং এখতিয়ার
-              থাকবে সিরাজগঞ্জ জেলার আদালতে।
+              কোনো মতবিরোধ দেখা দিলে তা প্রথমে উভয় পক্ষের পারস্পরিক আলোচনার মাধ্যমে
+              সমাধানের চেষ্টা করা হবে। তা সম্ভব না হলে, এই চুক্তি বাংলাদেশের প্রচলিত
+              আইন দ্বারা পরিচালিত হবে এবং এখতিয়ার থাকবে সিরাজগঞ্জ জেলার আদালতে।
             </li>
           </ol>
         </div>
@@ -381,7 +381,11 @@ export default function AgreementPage() {
       <style>{`
         .agreement-footer { display: none; }
       `}</style>
-      <iframe ref={printIframeRef} title="print-frame" style={{ display: "none" }} />
+      <iframe
+        ref={printIframeRef}
+        title="print-frame"
+        style={{ display: "none" }}
+      />
     </div>
   );
 }

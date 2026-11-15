@@ -80,11 +80,7 @@ export default function EnablePushButton() {
         {enabled ? "🔔" : loading ? "..." : "🔔"}
       </span>
       <span className="hidden md:inline">
-        {enabled
-          ? "🔔 চালু আছে"
-          : loading
-            ? "..."
-            : "🔔 Notification চালু করুন"}
+        {enabled ? "🔔 চালু আছে" : loading ? "..." : "🔔 Notification চালু করুন"}
       </span>
     </button>
   );

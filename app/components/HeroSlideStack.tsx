@@ -56,7 +56,9 @@ export default function HeroSlideStack({
               className={`hero-slide absolute inset-0${isActive ? " is-active" : ""}${isPrev ? " is-prev" : ""}`}
               style={{
                 opacity: isActive || isPrev ? 1 : 0,
-                transition: isActive ? `opacity ${fadeMs}ms ease-in-out` : "none",
+                transition: isActive
+                  ? `opacity ${fadeMs}ms ease-in-out`
+                  : "none",
                 zIndex: isActive ? 2 : isPrev ? 1 : 0,
               }}
               aria-hidden={!isActive}

@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   },
 };
 
-const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeBFqeQZa_cC22_RuMoJ3akF9ojN30rTukTQtzmDj4P2MG_DQ/viewform?usp=publish-editor";
+const GOOGLE_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSeBFqeQZa_cC22_RuMoJ3akF9ojN30rTukTQtzmDj4P2MG_DQ/viewform?usp=publish-editor";
 
 const discussionTopics = [
   "Partnership structure & ownership",
@@ -51,16 +52,14 @@ export default function PartnershipPage() {
 
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-black tracking-tight text-gray-900">
             Partnership Discussion
-            <span className="block mt-2 text-green-700">
-              & Confirmation
-            </span>
+            <span className="block mt-2 text-green-700">& Confirmation</span>
           </h1>
 
           <p className="max-w-3xl mx-auto mt-6 text-base md:text-lg leading-8 text-gray-600">
             প্রস্তাবিত partnership structure, ownership, contribution,
-            responsibilities এবং ভবিষ্যৎ business operation নিয়ে আমাদের
-            আলোচনাকে একটি পরিষ্কার ও লিখিত কাঠামোর মধ্যে আনার উদ্দেশ্যে এই
-            questionnaire তৈরি করা হয়েছে।
+            responsibilities এবং ভবিষ্যৎ business operation নিয়ে আমাদের আলোচনাকে
+            একটি পরিষ্কার ও লিখিত কাঠামোর মধ্যে আনার উদ্দেশ্যে এই questionnaire তৈরি
+            করা হয়েছে।
           </p>
 
           <div className="mt-9 flex justify-center">
@@ -95,10 +94,10 @@ export default function PartnershipPage() {
               </h2>
 
               <p className="mt-5 text-gray-600 leading-8">
-                একটি partnership শুরু করার আগে প্রত্যেক অংশীদারের
-                প্রত্যাশা, দায়িত্ব, অধিকার ও মতামত পরিষ্কারভাবে জানা
-                গুরুত্বপূর্ণ। এই questionnaire-এর মাধ্যমে আলোচনার বিষয়গুলো
-                এক জায়গায় আনা এবং প্রত্যেকের মতামত লিখিতভাবে সংরক্ষণ করা হবে।
+                একটি partnership শুরু করার আগে প্রত্যেক অংশীদারের প্রত্যাশা, দায়িত্ব,
+                অধিকার ও মতামত পরিষ্কারভাবে জানা গুরুত্বপূর্ণ। এই questionnaire-এর
+                মাধ্যমে আলোচনার বিষয়গুলো এক জায়গায় আনা এবং প্রত্যেকের মতামত
+                লিখিতভাবে সংরক্ষণ করা হবে।
               </p>
             </div>
           </div>
@@ -158,9 +157,8 @@ export default function PartnershipPage() {
                 </p>
 
                 <p className="mt-3 text-sm md:text-base leading-7 text-gray-700">
-                  সকল বিষয় আলোচনার মাধ্যমে চূড়ান্ত করা হবে এবং প্রয়োজন
-                  অনুযায়ী পরবর্তীতে আইনজীবীর মাধ্যমে formal agreement প্রস্তুত
-                  করা হবে।
+                  সকল বিষয় আলোচনার মাধ্যমে চূড়ান্ত করা হবে এবং প্রয়োজন অনুযায়ী
+                  পরবর্তীতে আইনজীবীর মাধ্যমে formal agreement প্রস্তুত করা হবে।
                 </p>
               </div>
             </div>
@@ -175,9 +173,7 @@ export default function PartnershipPage() {
             আপনার মতামত গুরুত্বপূর্ণ
           </h2>
 
-          <p className="mt-3 text-gray-600">
-          Questionnaire-টি পূরণ করুন।
-          </p>
+          <p className="mt-3 text-gray-600">Questionnaire-টি পূরণ করুন।</p>
 
           <div className="mt-7">
             <a

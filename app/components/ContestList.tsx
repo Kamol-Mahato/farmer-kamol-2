@@ -62,7 +62,8 @@ export default function ContestList({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {items.map((item) => {
-              const title = locale === "en" ? item.titleEn || item.title : item.title;
+              const title =
+                locale === "en" ? item.titleEn || item.title : item.title;
               const summary =
                 locale === "en" ? item.summaryEn || item.summary : item.summary;
               const cover = item.image || item.posterImage;

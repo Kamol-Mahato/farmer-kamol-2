@@ -161,7 +161,7 @@ function TopSellerCard({
             </h3>
           </Link>
           <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-xs text-black font-bold">Price</span>
+            <span className="text-xs text-black font-bold">Price</span>
             <span className="text-sm md:text-xl font-extrabold text-black">
               ৳{" "}
               {savePercent !== null
@@ -276,7 +276,7 @@ export default function TopSellerSection({
 
         {/* ✅ PC — আগের মতোই পাশাপাশি গ্রিড */}
         <div className="hidden md:grid md:grid-cols-2 gap-6">
-        {products.map((product, i) => (
+          {products.map((product, i) => (
             <TopSellerCard
               key={product.id}
               product={product}

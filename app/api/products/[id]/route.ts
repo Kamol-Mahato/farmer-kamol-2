@@ -10,10 +10,7 @@ export async function GET(
     const productId = parseInt(resolvedParams.id);
 
     if (!productId) {
-      return NextResponse.json(
-        { error: "ভুল প্রোডাক্ট আইডি" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "ভুল প্রোডাক্ট আইডি" }, { status: 400 });
     }
 
     const product = await prisma.product.findUnique({
@@ -29,10 +26,7 @@ export async function GET(
     });
 
     if (!product) {
-      return NextResponse.json(
-        { error: "পণ্যটি পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "পণ্যটি পাওয়া যায়নি" }, { status: 404 });
     }
 
     return NextResponse.json(product);

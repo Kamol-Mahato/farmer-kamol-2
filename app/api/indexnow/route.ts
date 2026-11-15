@@ -130,7 +130,7 @@ export async function GET(req: Request) {
       ];
       if (item.slugEn && item.slugEn.trim() !== "") {
         pages.push(
-          `${BASE_URL}/en/banglar-fosol/${item.category.slug}/${item.slugEn}`
+          `${BASE_URL}/en/banglar-fosol/${item.category.slug}/${item.slugEn}`,
         );
       }
       return pages;
@@ -157,7 +157,7 @@ export async function GET(req: Request) {
     console.error("IndexNow full submit error:", error);
     return NextResponse.json(
       { error: "Internal error", details: error?.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

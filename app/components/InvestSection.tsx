@@ -95,7 +95,7 @@ export default function InvestSection({
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     observer.observe(node);
@@ -119,74 +119,74 @@ export default function InvestSection({
           ))}
         </div>
 
-      <div className="order-1 lg:order-2 text-center">
-        {/* হেডিং — Product সেকশনের মতো pill স্টাইল */}
-<div className="text-center mb-6">
-  <h2 className="inline-flex items-center border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2.5 rounded-full">
-    আমাদের খামারে অংশীদার হোন
-  </h2>
-</div>
+        <div className="order-1 lg:order-2 text-center">
+          {/* হেডিং — Product সেকশনের মতো pill স্টাইল */}
+          <div className="text-center mb-6">
+            <h2 className="inline-flex items-center border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2.5 rounded-full">
+              আমাদের খামারে অংশীদার হোন
+            </h2>
+          </div>
 
-        {/* হেডলাইন */}
-        <p className="text-2xl md:text-3xl font-black text-gray-900 leading-snug mb-4">
-  বিশ্বাস আর লাভের ভিত্তিতে গড়ে উঠুক আমাদের খামার
-</p>
+          {/* হেডলাইন */}
+          <p className="text-2xl md:text-3xl font-black text-gray-900 leading-snug mb-4">
+            বিশ্বাস আর লাভের ভিত্তিতে গড়ে উঠুক আমাদের খামার
+          </p>
 
-        {/* সাব-টেক্সট */}
-        <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-6 max-w-md mx-auto">
-          আপনিও হতে পারেন এই যাত্রার একজন অংশীদার — বাস্তব সম্পদ, স্বচ্ছ হিসাব।
-        </p>
+          {/* সাব-টেক্সট */}
+          <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-6 max-w-md mx-auto">
+            আপনিও হতে পারেন এই যাত্রার একজন অংশীদার — বাস্তব সম্পদ, স্বচ্ছ হিসাব।
+          </p>
 
-        {/* chips */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {chips.map((c) => (
-            <span
-              key={c}
-              className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-green-100 text-green-800 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              {c}
-            </span>
-          ))}
-        </div>
+          {/* chips */}
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {chips.map((c) => (
+              <span
+                key={c}
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-green-100 text-green-800 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
 
-        {/* স্ট্যাট কার্ড */}
-        <div className="grid grid-cols-3 gap-3 md:gap-5 mb-9 max-w-md mx-auto">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="bg-white rounded-2xl border border-green-100/80 px-3 py-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="text-xl md:text-2xl font-black text-green-700">
-                {s.value}
-              </p>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-1 font-medium">
-                {s.label}
-              </p>
+          {/* স্ট্যাট কার্ড */}
+          <div className="grid grid-cols-3 gap-3 md:gap-5 mb-9 max-w-md mx-auto">
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className="bg-white rounded-2xl border border-green-100/80 px-3 py-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+              >
+                <p className="text-xl md:text-2xl font-black text-green-700">
+                  {s.value}
+                </p>
+                <p className="text-[10px] md:text-xs text-gray-500 mt-1 font-medium">
+                  {s.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div>
+            <div className="flex items-center justify-center gap-4">
+              <Link
+                href="/invest"
+                className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold text-base md:text-lg shadow-md shadow-green-900/10 transition-all duration-300 hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+              >
+                বিনিয়োগ করুন →
+              </Link>
+              <Link
+                href="/invest"
+                className="inline-flex items-center gap-2 text-green-800 border-2 border-green-700 px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 hover:bg-green-700 hover:text-white"
+              >
+                বিস্তারিত
+              </Link>
             </div>
-          ))}
+            <p className="text-xs text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
+              গ্যারান্টিড রিটার্ন নয় — শুধু প্রকৃত লাভের অংশীদারিত্ব ও লিখিত চুক্তি।
+            </p>
+          </div>
         </div>
-
-        {/* CTA */}
-        <div>
-  <div className="flex items-center justify-center gap-4">
-    <Link
-      href="/invest"
-      className="inline-flex items-center gap-2 bg-green-700 text-white px-8 py-3.5 rounded-full font-bold text-base md:text-lg shadow-md shadow-green-900/10 transition-all duration-300 hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
-    >
-      বিনিয়োগ করুন →
-    </Link>
-    <Link
-      href="/invest"
-      className="inline-flex items-center gap-2 text-green-800 border-2 border-green-700 px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 hover:bg-green-700 hover:text-white"
-    >
-      বিস্তারিত
-    </Link>
-  </div>
-  <p className="text-xs text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
-  গ্যারান্টিড রিটার্ন নয় — শুধু প্রকৃত লাভের অংশীদারিত্ব ও লিখিত চুক্তি।
-  </p>
-</div>
-      </div>
 
         {/* ডান পাশের কার্ড */}
         <div className="order-3 grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">

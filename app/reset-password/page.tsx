@@ -60,8 +60,7 @@ export default function ResetPasswordPage() {
           নতুন পাসওয়ার্ড সেট করুন
         </h1>
         <p className="text-gray-500 text-sm text-center mb-6">
-          আমাদের টিমের দেওয়া কোড/পাসওয়ার্ড দিয়ে নিজের নতুন পাসওয়ার্ড সেট
-          করুন
+          আমাদের টিমের দেওয়া কোড/পাসওয়ার্ড দিয়ে নিজের নতুন পাসওয়ার্ড সেট করুন
         </p>
 
         {success ? (

@@ -162,8 +162,8 @@ export default function AdminSystemSettingsPage() {
       <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h2 className="text-lg font-bold text-green-700 mb-1">বড় ফিচার</h2>
         <p className="text-xs text-gray-400 mb-3">
-          এই টগলগুলো ভবিষ্যতের ফিচারের জন্য প্রস্তুত রাখা — ফিচার তৈরি হওয়ার আগ
-          পর্যন্ত অন করলেও কোনো প্রভাব পড়বে না
+          এই টগলগুলো ভবিষ্যতের ফিচারের জন্য প্রস্তুত রাখা — ফিচার তৈরি হওয়ার আগ পর্যন্ত
+          অন করলেও কোনো প্রভাব পড়বে না
         </p>
         <ToggleRow
           label="Customer Review"
@@ -385,8 +385,8 @@ export default function AdminSystemSettingsPage() {
           </div>
         </div>
         <p className="text-xs text-gray-400 mt-3">
-          টেক্সট/নাম্বার ফিল্ড থেকে বাইরে ক্লিক করলেই (blur) স্বয়ংক্রিয়ভাবে
-          সেভ হয়ে যাবে
+          টেক্সট/নাম্বার ফিল্ড থেকে বাইরে ক্লিক করলেই (blur) স্বয়ংক্রিয়ভাবে সেভ হয়ে
+          যাবে
         </p>
       </div>
 
@@ -409,7 +409,8 @@ export default function AdminSystemSettingsPage() {
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  farmCowCount: e.target.value === "" ? null : Number(e.target.value),
+                  farmCowCount:
+                    e.target.value === "" ? null : Number(e.target.value),
                 })
               }
               onBlur={(e) =>
@@ -431,7 +432,8 @@ export default function AdminSystemSettingsPage() {
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  farmDuckCount: e.target.value === "" ? null : Number(e.target.value),
+                  farmDuckCount:
+                    e.target.value === "" ? null : Number(e.target.value),
                 })
               }
               onBlur={(e) =>
@@ -453,7 +455,8 @@ export default function AdminSystemSettingsPage() {
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  farmGoatCount: e.target.value === "" ? null : Number(e.target.value),
+                  farmGoatCount:
+                    e.target.value === "" ? null : Number(e.target.value),
                 })
               }
               onBlur={(e) =>
@@ -476,7 +479,8 @@ export default function AdminSystemSettingsPage() {
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  farmLandBigha: e.target.value === "" ? null : Number(e.target.value),
+                  farmLandBigha:
+                    e.target.value === "" ? null : Number(e.target.value),
                 })
               }
               onBlur={(e) =>

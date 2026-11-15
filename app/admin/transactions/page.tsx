@@ -75,9 +75,7 @@ export default function AdminTransactionsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-2">
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-green-800">
-          বিনিয়োগ লেনদেন
-        </h1>
+        <h1 className="text-3xl font-bold text-green-800">বিনিয়োগ লেনদেন</h1>
         <div className="flex gap-2 text-sm">
           <button
             onClick={() => setFilter("PENDING")}
@@ -136,7 +134,8 @@ export default function AdminTransactionsPage() {
                   </span>
                 </p>
                 <p className="text-sm text-gray-500">
-                  {tx.investment.project.name} — ৳{tx.amount.toLocaleString("bn-BD")}
+                  {tx.investment.project.name} — ৳
+                  {tx.amount.toLocaleString("bn-BD")}
                 </p>
                 {tx.note && (
                   <p className="text-xs text-gray-400 mt-1">নোট: {tx.note}</p>

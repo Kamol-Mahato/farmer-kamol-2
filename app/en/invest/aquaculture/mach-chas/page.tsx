@@ -76,9 +76,9 @@ export default function MachChasInvestPageEn() {
               Invest in Pond Fish Farming Project
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Planned pond management for fish farming. Proper density, feed and healthcare
-              to increase production and sell in the local market. Transparent accounts and
-              written agreement.
+              Planned pond management for fish farming. Proper density, feed and
+              healthcare to increase production and sell in the local market.
+              Transparent accounts and written agreement.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -95,7 +95,8 @@ export default function MachChasInvestPageEn() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              This is not a bank deposit or fixed-interest scheme. Both profit and loss are possible.
+              This is not a bank deposit or fixed-interest scheme. Both profit
+              and loss are possible.
             </p>
           </Reveal>
 
@@ -121,7 +122,9 @@ export default function MachChasInvestPageEn() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -141,18 +144,20 @@ export default function MachChasInvestPageEn() {
                 Why pond fish farming?
               </h3>
               <p>
-                Fish farming is a fast-growing sector in Bangladesh. Local market demand
-                is always present. Pond-based farming is relatively controllable —
-                density, feed, water quality and healthcare can be managed for good production.
+                Fish farming is a fast-growing sector in Bangladesh. Local
+                market demand is always present. Pond-based farming is
+                relatively controllable — density, feed, water quality and
+                healthcare can be managed for good production.
               </p>
             </Reveal>
 
             <Reveal delay={80}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Plan</h3>
               <p>
-                Pond preparation, stocking fingerlings, feed management, regular monitoring
-                and harvest timing — every step will be planned in advance. After production,
-                profit-loss will be shared transparently with partners.
+                Pond preparation, stocking fingerlings, feed management, regular
+                monitoring and harvest timing — every step will be planned in
+                advance. After production, profit-loss will be shared
+                transparently with partners.
               </p>
             </Reveal>
 
@@ -161,17 +166,18 @@ export default function MachChasInvestPageEn() {
                 Profit and loss sharing
               </h3>
               <p>
-                If there is profit, the farmer gets 65% and the partner gets 35% (based on
-                real income and expenses). If there is a loss, remaining capital will be
-                returned where possible — no guarantee.
+                If there is profit, the farmer gets 65% and the partner gets 35%
+                (based on real income and expenses). If there is a loss,
+                remaining capital will be returned where possible — no
+                guarantee.
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">Risks</h3>
               <p>
-                Water quality, disease, feed prices, weather and market price swings —
-                these risks may exist. All risks will be shared openly.
+                Water quality, disease, feed prices, weather and market price
+                swings — these risks may exist. All risks will be shared openly.
               </p>
             </Reveal>
           </div>
@@ -236,7 +242,10 @@ export default function MachChasInvestPageEn() {
           >
             ← Fish Farming Sector
           </Link>
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
         </div>

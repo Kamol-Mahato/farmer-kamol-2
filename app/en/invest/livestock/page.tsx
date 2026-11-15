@@ -52,7 +52,11 @@ const projects = [
     statusColor: "bg-green-100 text-green-700",
     title: "Chinese Duck Expansion Project",
     desc: "Breeding and expansion of improved Chinese ducks. Fast growth, steady market demand and transparent profit sharing.",
-    points: ["Breeding and meat production", "Written e-agreement", "Real income-expense accounts"],
+    points: [
+      "Breeding and meat production",
+      "Written e-agreement",
+      "Real income-expense accounts",
+    ],
   },
   {
     href: "/en/invest/livestock/goru-palon",
@@ -60,7 +64,11 @@ const projects = [
     statusColor: "bg-amber-100 text-amber-700",
     title: "Cattle Rearing Project",
     desc: "Native and improved cattle rearing. Long-term investment opportunity based on dairy and meat production.",
-    points: ["Cattle rearing and dairy", "Long-term plan", "Transparent accounts and agreement"],
+    points: [
+      "Cattle rearing and dairy",
+      "Long-term plan",
+      "Transparent accounts and agreement",
+    ],
   },
 ];
 
@@ -91,9 +99,9 @@ export default function LivestockInvestPageEn() {
               Livestock Investment
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              Livestock-based agriculture investment. Partner in Chinese duck and cattle
-              rearing projects with a real farm. Transparent accounts, written agreement
-              and real profit-loss sharing.
+              Livestock-based agriculture investment. Partner in Chinese duck
+              and cattle rearing projects with a real farm. Transparent
+              accounts, written agreement and real profit-loss sharing.
             </p>
           </Reveal>
         </div>
@@ -114,11 +122,17 @@ export default function LivestockInvestPageEn() {
                   className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 h-full"
                 >
                   <div className="h-36 bg-green-100 flex items-center justify-center text-green-800 font-semibold">
-                  <InvestPhoto
-                      name={p.title.includes("Duck") ? "invest-china-hash" : "invest-goru"}
+                    <InvestPhoto
+                      name={
+                        p.title.includes("Duck")
+                          ? "invest-china-hash"
+                          : "invest-goru"
+                      }
                       alt={p.title}
                     >
-                      {p.title.includes("Duck") ? "Chinese Duck" : "Cattle Rearing"}
+                      {p.title.includes("Duck")
+                        ? "Chinese Duck"
+                        : "Cattle Rearing"}
                     </InvestPhoto>
                   </div>
                   <div className="p-6">
@@ -158,15 +172,16 @@ export default function LivestockInvestPageEn() {
           <div className="space-y-5 text-gray-700 leading-relaxed">
             <Reveal>
               <p>
-                Livestock is a core part of agriculture. Chinese ducks grow fast and have
-                steady market demand. Cattle rearing offers long-term income from dairy
-                and meat. Both are based on real assets.
+                Livestock is a core part of agriculture. Chinese ducks grow fast
+                and have steady market demand. Cattle rearing offers long-term
+                income from dairy and meat. Both are based on real assets.
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                Our model is: first the work, then trust, then partnership. Every project
-                comes with a written agreement, transparent accounts and regular updates.
+                Our model is: first the work, then trust, then partnership.
+                Every project comes with a written agreement, transparent
+                accounts and regular updates.
               </p>
             </Reveal>
           </div>
@@ -176,13 +191,22 @@ export default function LivestockInvestPageEn() {
       {/* Back links */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
-          <Link href="/en/invest/crop" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/crop"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Crop Farming →
           </Link>
-          <Link href="/en/invest/aquaculture" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/aquaculture"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Fish Farming →
           </Link>
         </div>

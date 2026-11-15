@@ -88,8 +88,8 @@ export default function CustomerDashboard() {
             Welcome, {customer?.name}!
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            আপনার অ্যাকাউন্টে স্বাগতম। এখান থেকে আপনার অর্ডারের লাইভ ট্র্যাকিং
-            দেখতে পারবেন।
+            আপনার অ্যাকাউন্টে স্বাগতম। এখান থেকে আপনার অর্ডারের লাইভ ট্র্যাকিং দেখতে
+            পারবেন।
           </p>
         </div>
         <div className="flex gap-2">
@@ -129,9 +129,7 @@ export default function CustomerDashboard() {
                 <th className="px-6 py-4 font-medium">পণ্য সমূহ</th>
                 <th className="px-6 py-4 font-medium">মোট বিল</th>
                 <th className="px-6 py-4 font-medium">অর্ডার স্ট্যাটাস</th>
-                <th className="px-6 py-4 font-medium">
-                  কুরিয়ার ট্র্যাকিং (3PL)
-                </th>
+                <th className="px-6 py-4 font-medium">কুরিয়ার ট্র্যাকিং (3PL)</th>
                 <th className="px-6 py-4 font-medium">তারিখ</th>
               </tr>
             </thead>

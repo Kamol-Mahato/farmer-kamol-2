@@ -198,9 +198,7 @@ export async function createPathaoOrder(params: {
   const data = await res.json();
 
   if (!res.ok || data.code !== 200) {
-    throw new Error(
-      `Pathao order বুক করা যায়নি: ${data.message || res.status}`,
-    );
+    throw new Error(`Pathao order বুক করা যায়নি: ${data.message || res.status}`);
   }
 
   return {

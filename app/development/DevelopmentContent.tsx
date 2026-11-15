@@ -236,16 +236,14 @@ function PlanCard({
   return (
     <article
       className={`relative flex flex-col h-full rounded-3xl overflow-hidden bg-white shadow-xl animate-fadeIn transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-        plan.featured
-          ? "ring-2 ring-yellow-400"
-          : "ring-1 ring-green-900/10"
+        plan.featured ? "ring-2 ring-yellow-400" : "ring-1 ring-green-900/10"
       }`}
     >
       {/* হেডার */}
       <div
         className={`px-6 pt-8 pb-6 text-center text-white ${
           plan.featured
-            ? `bg-gradient-to-br ${THEME.premiumHeader}`  
+            ? `bg-gradient-to-br ${THEME.premiumHeader}`
             : THEME.proHeader
         }`}
       >
@@ -305,7 +303,7 @@ function PlanCard({
       {/* দাম ও বাটন */}
       <div className="px-6 pb-6 pt-4 border-t border-gray-100 bg-gray-50/60">
         <p className="text-center text-2xl font-extrabold text-green-900">
-        প্রাইস :আলোচনা সাপেক্ষে
+          প্রাইস :আলোচনা সাপেক্ষে
         </p>
         <a
           href={waHref}
@@ -354,8 +352,8 @@ export default function DevelopmentContent({
               ওয়েবসাইট
             </h1>
             <p className="mt-4 text-black-100/90 text-base md:text-lg leading-relaxed">
-              ডিজাইন থেকে অর্ডার ম্যানেজমেন্ট পর্যন্ত, দ্রুত, নির্ভরযোগ্য ও
-              ব্যবহার-বান্ধব সমাধান। আমার কাজের প্রমাণ হিসেবে দেখতে পারেন{" "}
+              ডিজাইন থেকে অর্ডার ম্যানেজমেন্ট পর্যন্ত, দ্রুত, নির্ভরযোগ্য ও ব্যবহার-বান্ধব
+              সমাধান। আমার কাজের প্রমাণ হিসেবে দেখতে পারেন{" "}
               <a
                 href="/"
                 className="inline-flex items-center gap-1 font-semibold text-yellow-300 hover:text-yellow-200 underline underline-offset-4"
@@ -424,7 +422,9 @@ export default function DevelopmentContent({
                     <Icon className="w-5 h-5" />
                   </div>
                   <h3 className="font-bold text-green-900 text-lg">{title}</h3>
-                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">{text}</p>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -448,7 +448,9 @@ export default function DevelopmentContent({
                     {bn(i + 1)}
                   </div>
                   <div>
-                    <h3 className="font-bold text-green-900 text-lg">{s.title}</h3>
+                    <h3 className="font-bold text-green-900 text-lg">
+                      {s.title}
+                    </h3>
                     <p className="mt-1 text-gray-600">{s.text}</p>
                   </div>
                 </div>
@@ -472,9 +474,13 @@ export default function DevelopmentContent({
                 <details className="group bg-white rounded-xl border border-green-100 open:shadow-sm">
                   <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-5 py-4 font-semibold text-green-900">
                     {faq.q}
-                    <span className="text-green-600 group-open:rotate-45 transition text-xl leading-none">+</span>
+                    <span className="text-green-600 group-open:rotate-45 transition text-xl leading-none">
+                      +
+                    </span>
                   </summary>
-                  <p className="px-5 pb-4 text-gray-600 leading-relaxed">{faq.a}</p>
+                  <p className="px-5 pb-4 text-gray-600 leading-relaxed">
+                    {faq.a}
+                  </p>
                 </details>
               </Reveal>
             ))}
@@ -483,7 +489,9 @@ export default function DevelopmentContent({
       </section>
 
       {/* ── CTA ── */}
-      <section className={`bg-gradient-to-b ${THEME.cta} text-white py-14 md:py-16`}>
+      <section
+        className={`bg-gradient-to-b ${THEME.cta} text-white py-14 md:py-16`}
+      >
         <Reveal className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold">
             আপনার ব্যবসার জন্য কোন প্যাকেজ ঠিক হবে?

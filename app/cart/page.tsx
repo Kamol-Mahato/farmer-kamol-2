@@ -465,9 +465,7 @@ export default function CartPage() {
             </div>
             <div className="bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500">
-                  এই নম্বরে Send Money করুন
-                </p>
+                <p className="text-xs text-gray-500">এই নম্বরে Send Money করুন</p>
                 <p className="font-bold text-gray-800 text-base">
                   {siteConfig.payment.bkashNumber}
                 </p>

@@ -57,7 +57,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("INVESTOR OTP REQUEST ERROR:", error);
     return NextResponse.json(
-      { error: tr(locale, "কোড পাঠাতে সমস্যা হয়েছে", "Could not send the code") },
+      {
+        error: tr(locale, "কোড পাঠাতে সমস্যা হয়েছে", "Could not send the code"),
+      },
       { status: 500 },
     );
   }

@@ -72,9 +72,9 @@ export default function AquacultureInvestPageEn() {
               Fish Farming Investment
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              Pond-based fish farming investment. Planned production, healthy methods and
-              local market linkage. Transparent accounts, written agreement and real
-              production partnership.
+              Pond-based fish farming investment. Planned production, healthy
+              methods and local market linkage. Transparent accounts, written
+              agreement and real production partnership.
             </p>
           </Reveal>
         </div>
@@ -93,7 +93,7 @@ export default function AquacultureInvestPageEn() {
               className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
             >
               <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-              <InvestPhoto name="invest-mach" alt="Pond Fish Farming">
+                <InvestPhoto name="invest-mach" alt="Pond Fish Farming">
                   Pond Fish Farming
                 </InvestPhoto>
               </div>
@@ -105,8 +105,8 @@ export default function AquacultureInvestPageEn() {
                   Pond Fish Farming Project
                 </h2>
                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                  Planned pond management for fish farming. Proper density, feed and
-                  healthcare to increase production and sell in the market.
+                  Planned pond management for fish farming. Proper density, feed
+                  and healthcare to increase production and sell in the market.
                 </p>
                 <ul className="text-sm text-gray-600 space-y-1.5 mb-5">
                   <li>• Pond fish farming</li>
@@ -131,16 +131,17 @@ export default function AquacultureInvestPageEn() {
           <div className="space-y-5 text-gray-700 leading-relaxed">
             <Reveal>
               <p>
-                Fish farming is a fast-growing sector in Bangladesh. Local market demand
-                is always present, and with proper management good production is
-                achievable. Pond-based farming is relatively controllable and easy to
-                account for.
+                Fish farming is a fast-growing sector in Bangladesh. Local
+                market demand is always present, and with proper management good
+                production is achievable. Pond-based farming is relatively
+                controllable and easy to account for.
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                Our model is: first the work, then trust, then partnership. Every project
-                will have a written agreement, transparent accounts and regular updates.
+                Our model is: first the work, then trust, then partnership.
+                Every project will have a written agreement, transparent
+                accounts and regular updates.
               </p>
             </Reveal>
           </div>
@@ -150,13 +151,22 @@ export default function AquacultureInvestPageEn() {
       {/* Back links */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
-          <Link href="/en/invest/livestock" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/livestock"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Livestock →
           </Link>
-          <Link href="/en/invest/crop" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/crop"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Crop Farming →
           </Link>
         </div>

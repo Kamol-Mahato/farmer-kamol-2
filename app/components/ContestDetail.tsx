@@ -56,7 +56,10 @@ export default function ContestDetail({
       />
       <div className="max-w-3xl mx-auto px-4 py-6 pt-8 md:pt-6">
         <nav className="text-sm text-gray-500 mb-4">
-          <Link href={localizeHref("/", locale)} className="hover:text-green-700">
+          <Link
+            href={localizeHref("/", locale)}
+            className="hover:text-green-700"
+          >
             {t.home}
           </Link>
           <span className="mx-1.5">/</span>

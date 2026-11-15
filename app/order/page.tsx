@@ -333,9 +333,7 @@ function OrderForm() {
       return;
     }
     if (product && product.stockQty < form.quantity) {
-      setError(
-        `দুঃখিত, পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product.stockQty} টি`,
-      );
+      setError(`দুঃখিত, পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${product.stockQty} টি`);
       return;
     }
 
@@ -682,9 +680,7 @@ function OrderForm() {
 
             <div className="bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500">
-                  এই নম্বরে Send Money করুন
-                </p>
+                <p className="text-xs text-gray-500">এই নম্বরে Send Money করুন</p>
                 <p className="font-bold text-gray-800 text-base">
                   {siteConfig.payment.bkashNumber}
                 </p>

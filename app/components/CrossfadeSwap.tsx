@@ -39,7 +39,12 @@ export default function CrossfadeSwap({
   return (
     <>
       {prev !== null && (
-        <div className="absolute inset-0" style={{ zIndex: 0 }} aria-hidden inert>
+        <div
+          className="absolute inset-0"
+          style={{ zIndex: 0 }}
+          aria-hidden
+          inert
+        >
           {prev}
         </div>
       )}

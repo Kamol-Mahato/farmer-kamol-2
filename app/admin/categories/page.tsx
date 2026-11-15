@@ -191,11 +191,7 @@ export default function AdminCategoriesPage() {
             disabled={saving}
             className="bg-green-700 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-600 transition disabled:opacity-50"
           >
-            {saving
-              ? "সংরক্ষণ হচ্ছে..."
-              : editingId
-                ? "আপডেট করুন"
-                : "যোগ করুন"}
+            {saving ? "সংরক্ষণ হচ্ছে..." : editingId ? "আপডেট করুন" : "যোগ করুন"}
           </button>
           {editingId && (
             <button

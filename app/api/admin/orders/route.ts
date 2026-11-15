@@ -241,17 +241,17 @@ export async function POST(request: Request) {
             data: {
               orderStatus: status,
               ...(requiresCollectedAmount(status)
-              ? { collectedAmount: Number(collectedAmount) }
-              : {}),
-          },
-        });
-        if (requiresCollectedAmount(status)) {
-          await addToLifetimeCollected(
-            tx,
-            Number(collectedAmount),
-            currentOrder.collectedAmount,
-          );
-        }
+                ? { collectedAmount: Number(collectedAmount) }
+                : {}),
+            },
+          });
+          if (requiresCollectedAmount(status)) {
+            await addToLifetimeCollected(
+              tx,
+              Number(collectedAmount),
+              currentOrder.collectedAmount,
+            );
+          }
           await tx.orderStatusLog.create({
             data: {
               orderId: orderIdInt,
@@ -315,10 +315,7 @@ export async function DELETE(request: Request) {
       include: { orderItems: true },
     });
     if (!order) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
 
     await prisma.$transaction(async (tx) => {

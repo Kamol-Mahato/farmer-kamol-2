@@ -34,9 +34,7 @@ export async function GET() {
 
     let totalVisitors = 0;
     try {
-      const raw = await getRedis().get<number | string>(
-        "stats:total_visitors",
-      );
+      const raw = await getRedis().get<number | string>("stats:total_visitors");
       totalVisitors = raw ? Number(raw) : 0;
     } catch (err) {
       console.error("TOTAL VISITORS READ ERROR:", err);

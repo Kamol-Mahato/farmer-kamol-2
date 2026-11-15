@@ -21,14 +21,13 @@ export async function PATCH(
   if (status !== "APPROVED" && status !== "REJECTED") {
     return NextResponse.json({ error: "ভুল স্ট্যাটাস" }, { status: 400 });
   }
-  
 
   const profile = await prisma.investorProfile.update({
     where: { id: profileId },
     data: {
       verificationStatus: status,
       verifiedAt: status === "APPROVED" ? new Date() : null,
-      rejectionReason: status === "REJECTED" ? (reason || null) : null,
+      rejectionReason: status === "REJECTED" ? reason || null : null,
     },
   });
 

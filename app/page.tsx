@@ -13,7 +13,9 @@ const NoticeModal = dynamic(() => import("./components/NoticeModal"));
 const BlogSection = dynamic(() => import("./components/BlogSection"));
 const VideoSection = dynamic(() => import("./components/VideoSection"));
 const InvestSection = dynamic(() => import("./components/InvestSection"));
-const TestimonialSection = dynamic(() => import("./components/TestimonialSection"));
+const TestimonialSection = dynamic(
+  () => import("./components/TestimonialSection"),
+);
 
 export const revalidate = 86400; // ২৪ ঘণ্টা safety-net; Admin Save করলেই সাথে সাথে revalidatePath() দিয়ে আগে আপডেট হয়ে যাবে
 

@@ -48,7 +48,13 @@ export async function POST(request: Request) {
   });
   if (!profile || profile.verificationStatus !== "APPROVED") {
     return NextResponse.json(
-      { error: tr(locale, "প্রোফাইল এখনো অনুমোদিত হয়নি", "Your profile has not been approved yet") },
+      {
+        error: tr(
+          locale,
+          "প্রোফাইল এখনো অনুমোদিত হয়নি",
+          "Your profile has not been approved yet",
+        ),
+      },
       { status: 400 },
     );
   }
@@ -59,7 +65,13 @@ export async function POST(request: Request) {
 
   if (!projectIdNum || !amountNum || amountNum <= 0) {
     return NextResponse.json(
-      { error: tr(locale, "প্রজেক্ট ও সঠিক পরিমাণ দিন", "Please select a project and enter a valid amount") },
+      {
+        error: tr(
+          locale,
+          "প্রজেক্ট ও সঠিক পরিমাণ দিন",
+          "Please select a project and enter a valid amount",
+        ),
+      },
       { status: 400 },
     );
   }
@@ -69,7 +81,13 @@ export async function POST(request: Request) {
   });
   if (!project || !project.isAcceptingFunds) {
     return NextResponse.json(
-      { error: tr(locale, "এই প্রজেক্টে এখন বিনিয়োগ নেওয়া হচ্ছে না", "This project is not accepting investments right now") },
+      {
+        error: tr(
+          locale,
+          "এই প্রজেক্টে এখন বিনিয়োগ নেওয়া হচ্ছে না",
+          "This project is not accepting investments right now",
+        ),
+      },
       { status: 400 },
     );
   }

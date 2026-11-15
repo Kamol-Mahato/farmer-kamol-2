@@ -27,15 +27,17 @@ const KIND_CONFIG: Record<
     height: number;
     fit: "inside" | "cover";
     field:
-      | "nidImageUrl"
-      | "photoImageUrl"
-      | "signatureImageUrl"
-      | "nomineeImageUrl";
+      "nidImageUrl" | "photoImageUrl" | "signatureImageUrl" | "nomineeImageUrl";
   }
 > = {
   nid: { width: 1000, height: 700, fit: "inside", field: "nidImageUrl" },
   photo: { width: 300, height: 300, fit: "cover", field: "photoImageUrl" }, // পাসপোর্ট — সবসময় পুরোপুরি বর্গাকার
-  signature: { width: 600, height: 300, fit: "inside", field: "signatureImageUrl" },
+  signature: {
+    width: 600,
+    height: 300,
+    fit: "inside",
+    field: "signatureImageUrl",
+  },
   nominee: { width: 300, height: 300, fit: "cover", field: "nomineeImageUrl" },
 };
 
@@ -43,7 +45,10 @@ export async function POST(request: Request) {
   const locale = getApiLocale(request);
   const customerId = await getCustomerId();
   if (!customerId) {
-    return NextResponse.json({ error: tr(locale, "লগইন করুন", "Please log in") }, { status: 401 });
+    return NextResponse.json(
+      { error: tr(locale, "লগইন করুন", "Please log in") },
+      { status: 401 },
+    );
   }
 
   const existing = await prisma.investorProfile.findUnique({
@@ -51,7 +56,13 @@ export async function POST(request: Request) {
   });
   if (!existing || !existing.emailVerified) {
     return NextResponse.json(
-      { error: tr(locale, "আগে ইমেইল ভেরিফাই করুন", "Please verify your email first") },
+      {
+        error: tr(
+          locale,
+          "আগে ইমেইল ভেরিফাই করুন",
+          "Please verify your email first",
+        ),
+      },
       { status: 400 },
     );
   }
@@ -75,13 +86,25 @@ export async function POST(request: Request) {
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: tr(locale, "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে", "Only JPG, PNG or WEBP images can be uploaded") },
+        {
+          error: tr(
+            locale,
+            "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে",
+            "Only JPG, PNG or WEBP images can be uploaded",
+          ),
+        },
         { status: 400 },
       );
     }
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: tr(locale, "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না", "Image size cannot exceed 10 MB") },
+        {
+          error: tr(
+            locale,
+            "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না",
+            "Image size cannot exceed 10 MB",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -141,6 +164,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, url, field: config.field });
   } catch (error) {
     console.error("Investor doc upload API error:", error);
-    return NextResponse.json({ error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") }, { status: 500 });
+    return NextResponse.json(
+      { error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") },
+      { status: 500 },
+    );
   }
 }

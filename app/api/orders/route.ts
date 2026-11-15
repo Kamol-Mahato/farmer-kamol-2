@@ -200,11 +200,7 @@ export async function POST(request: Request) {
     if (!product) {
       return NextResponse.json(
         {
-          error: tr(
-            locale,
-            "পণ্যটি খুঁজে পাওয়া যায়নি",
-            "Product not found",
-          ),
+          error: tr(locale, "পণ্যটি খুঁজে পাওয়া যায়নি", "Product not found"),
         },
         { status: 404 },
       );

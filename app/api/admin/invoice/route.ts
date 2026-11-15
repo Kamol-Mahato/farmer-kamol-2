@@ -19,7 +19,6 @@ export async function GET(req: Request) {
     },
   });
 
-  if (!order)
-    return NextResponse.json({ error: "অর্ডার নেই" }, { status: 404 });
+  if (!order) return NextResponse.json({ error: "অর্ডার নেই" }, { status: 404 });
   return NextResponse.json(order);
 }

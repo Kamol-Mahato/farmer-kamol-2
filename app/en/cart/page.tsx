@@ -410,13 +410,13 @@ export default function CartPage() {
               className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
             />
             <div className="flex-1">
-            <p className="font-bold text-gray-800 text-sm">
+              <p className="font-bold text-gray-800 text-sm">
                 {namesEn[item.id] || item.name}
               </p>
               <p className="text-black font-bold text-sm">
                 ৳ {item.price}{" "}
                 <span className="text-gray-500 text-xs font-normal">
-                / {translateUnit(item.unit)}
+                  / {translateUnit(item.unit)}
                 </span>
               </p>
             </div>

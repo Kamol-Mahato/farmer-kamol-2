@@ -22,7 +22,9 @@ export function ExpandableText({
       </p>
       <div
         className={`grid transition-all duration-300 ease-in-out ${
-          open ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"
+          open
+            ? "grid-rows-[1fr] opacity-100 mt-3"
+            : "grid-rows-[0fr] opacity-0"
         }`}
       >
         <div className="overflow-hidden">
@@ -48,47 +50,51 @@ export function ExpandableText({
 /* ============================================================
    যেকোনো ব্লক (প্রজেক্ট ডিটেইল ইত্যাদি) খোলা/বন্ধ করার জেনেরিক টগল
    ============================================================ */
-   export function DetailToggle({
-    closedLabel = "বিস্তারিত দেখুন",
-    openLabel = "কম দেখুন",
-    children,
-  }: {
-    closedLabel?: string;
-    openLabel?: string;
-    children: React.ReactNode;
-  }) {
-    const [open, setOpen] = useState(false);
-  
-    return (
-      <div>
-        <div
-          className={`grid transition-all duration-300 ease-in-out ${
-            open ? "grid-rows-[1fr] opacity-100 mt-5" : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden">{children}</div>
-        </div>
-        <button
-          onClick={() => setOpen(!open)}
-          className="mt-4 inline-flex items-center gap-1 text-green-700 font-bold text-sm hover:text-green-800"
-        >
-          {open ? openLabel : closedLabel}
-          <ChevronDown
-            size={16}
-            className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          />
-        </button>
+export function DetailToggle({
+  closedLabel = "বিস্তারিত দেখুন",
+  openLabel = "কম দেখুন",
+  children,
+}: {
+  closedLabel?: string;
+  openLabel?: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          open
+            ? "grid-rows-[1fr] opacity-100 mt-5"
+            : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">{children}</div>
       </div>
-    );
-  }
-  
-  /* ============================================================
+      <button
+        onClick={() => setOpen(!open)}
+        className="mt-4 inline-flex items-center gap-1 text-green-700 font-bold text-sm hover:text-green-800"
+      >
+        {open ? openLabel : closedLabel}
+        <ChevronDown
+          size={16}
+          className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+    </div>
+  );
+}
+
+/* ============================================================
      ধাপগুলোর জন্য accordion — প্রতিটি ধাপে ক্লিক করলে বিস্তারিত দেখা যাবে
      ============================================================ */
 type Step = { step: string; title: string; text: string };
 
 export function StepAccordion({ steps }: { steps: Step[] }) {
-  const [openStep, setOpenStep] = useState<string | null>(steps[0]?.step ?? null);
+  const [openStep, setOpenStep] = useState<string | null>(
+    steps[0]?.step ?? null,
+  );
 
   return (
     <div className="space-y-3">
@@ -122,7 +128,9 @@ export function StepAccordion({ steps }: { steps: Step[] }) {
             </button>
             <div
               className={`grid transition-all duration-300 ease-in-out ${
-                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                isOpen
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
               }`}
             >
               <div className="overflow-hidden">

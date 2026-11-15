@@ -237,10 +237,10 @@ export default function AdminProjectsPage() {
           investorProfitPct: investorProfitPct
             ? Number(investorProfitPct)
             : null,
-            totalLots: totalLots ? Number(totalLots) : null,
-            lotUnitName: lotUnitName.trim() || null,
-            ...en,
-          }),
+          totalLots: totalLots ? Number(totalLots) : null,
+          lotUnitName: lotUnitName.trim() || null,
+          ...en,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -339,9 +339,7 @@ export default function AdminProjectsPage() {
         ? String(project.investorProfitPct)
         : "",
     );
-    setETotalLots(
-      project.totalLots != null ? String(project.totalLots) : "",
-    );
+    setETotalLots(project.totalLots != null ? String(project.totalLots) : "");
     setELotUnitName(project.lotUnitName || "");
     setEEn({
       nameEn: project.nameEn || "",
@@ -383,10 +381,10 @@ export default function AdminProjectsPage() {
           investorProfitPct: eInvestorProfitPct
             ? Number(eInvestorProfitPct)
             : null,
-            totalLots: eTotalLots ? Number(eTotalLots) : null,
-            lotUnitName: eLotUnitName.trim() || null,
-            ...eEn,
-          }),
+          totalLots: eTotalLots ? Number(eTotalLots) : null,
+          lotUnitName: eLotUnitName.trim() || null,
+          ...eEn,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -412,9 +410,7 @@ export default function AdminProjectsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-2">
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
-        <h1 className="text-3xl font-bold text-green-800">
-          বিনিয়োগ প্রজেক্ট
-        </h1>
+        <h1 className="text-3xl font-bold text-green-800">বিনিয়োগ প্রজেক্ট</h1>
         <button
           onClick={() => setShowForm((v) => !v)}
           className="bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition"
@@ -527,57 +523,57 @@ export default function AdminProjectsPage() {
             </label>
 
             <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">
-                মেয়াদ (মাস)
-              </label>
-              <input
-                type="number"
-                value={durationMonths}
-                onChange={(e) => setDurationMonths(e.target.value)}
-                placeholder="যেমন: ১২"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              />
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  মেয়াদ (মাস)
+                </label>
+                <input
+                  type="number"
+                  value={durationMonths}
+                  onChange={(e) => setDurationMonths(e.target.value)}
+                  placeholder="যেমন: ১২"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  অংশীদারের লাভ %
+                </label>
+                <input
+                  type="number"
+                  value={investorProfitPct}
+                  onChange={(e) => setInvestorProfitPct(e.target.value)}
+                  placeholder="যেমন: ৩৫"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">
-                অংশীদারের লাভ %
-              </label>
-              <input
-                type="number"
-                value={investorProfitPct}
-                onChange={(e) => setInvestorProfitPct(e.target.value)}
-                placeholder="যেমন: ৩৫"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  মোট লট / শেয়ার
+                </label>
+                <input
+                  type="number"
+                  value={totalLots}
+                  onChange={(e) => setTotalLots(e.target.value)}
+                  placeholder="যেমন: ২০০"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  লট ইউনিট নাম
+                </label>
+                <input
+                  type="text"
+                  value={lotUnitName}
+                  onChange={(e) => setLotUnitName(e.target.value)}
+                  placeholder="যেমন: শেয়ার / গরু"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">
-                মোট লট / শেয়ার
-              </label>
-              <input
-                type="number"
-                value={totalLots}
-                onChange={(e) => setTotalLots(e.target.value)}
-                placeholder="যেমন: ২০০"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">
-                লট ইউনিট নাম
-              </label>
-              <input
-                type="text"
-                value={lotUnitName}
-                onChange={(e) => setLotUnitName(e.target.value)}
-                placeholder="যেমন: শেয়ার / গরু"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              />
-            </div>
-          </div>
 
             <textarea
               value={profitShareNote}
@@ -602,7 +598,7 @@ export default function AdminProjectsPage() {
       <div className="bg-white rounded-xl shadow overflow-x-auto">
         <table className="w-full border-collapse text-left text-sm text-gray-500 min-w-[700px]">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700 border-b">
-          <tr>
+            <tr>
               <th className="px-6 py-4 font-medium">নাম</th>
               <th className="px-6 py-4 font-medium">বিনিয়োগকারী</th>
               <th className="px-6 py-4 font-medium">সংগ্রহ / টার্গেট</th>
@@ -682,7 +678,7 @@ export default function AdminProjectsPage() {
                       : "—"}
                   </td>
                   <td className="px-6 py-4 space-y-1.5">
-                  <button
+                    <button
                       onClick={() => setViewing(p)}
                       className="block w-full font-bold px-3 py-1.5 rounded-lg text-xs transition bg-gray-100 text-gray-700 hover:bg-gray-200"
                     >
@@ -723,7 +719,7 @@ export default function AdminProjectsPage() {
               ))
             )}
           </tbody>
-          </table>
+        </table>
       </div>
 
       {/* ========== ভিউ পপআপ ========== */}
@@ -737,7 +733,9 @@ export default function AdminProjectsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-white border-b px-5 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-bold text-green-800">প্রজেক্ট বিস্তারিত</h2>
+              <h2 className="text-lg font-bold text-green-800">
+                প্রজেক্ট বিস্তারিত
+              </h2>
               <button
                 onClick={() => setViewing(null)}
                 className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2"
@@ -749,7 +747,9 @@ export default function AdminProjectsPage() {
             <div className="p-5 space-y-4 text-sm">
               <div>
                 <p className="text-xs text-gray-500 mb-0.5">নাম</p>
-                <p className="font-bold text-gray-900 text-base">{viewing.name}</p>
+                <p className="font-bold text-gray-900 text-base">
+                  {viewing.name}
+                </p>
                 {viewing.description && (
                   <p className="text-gray-500 mt-1 text-xs leading-relaxed">
                     {viewing.description}
@@ -781,7 +781,9 @@ export default function AdminProjectsPage() {
                 <div className="bg-gray-50 rounded-xl p-3">
                   <p className="text-[10px] text-gray-500 mb-0.5">অগ্রগতি</p>
                   <p className="font-bold text-gray-800">
-                    {viewing.progressPct != null ? `${viewing.progressPct}%` : "—"}
+                    {viewing.progressPct != null
+                      ? `${viewing.progressPct}%`
+                      : "—"}
                   </p>
                 </div>
               </div>
@@ -821,13 +823,17 @@ export default function AdminProjectsPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500 mb-0.5">বিনিয়োগকারী</p>
+                  <p className="text-[10px] text-gray-500 mb-0.5">
+                    বিনিয়োগকারী
+                  </p>
                   <p className="font-semibold text-gray-800">
                     {viewing._count?.investments ?? 0} জন
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500 mb-0.5">নিজের বিনিয়োগ</p>
+                  <p className="text-[10px] text-gray-500 mb-0.5">
+                    নিজের বিনিয়োগ
+                  </p>
                   <p className="font-semibold text-gray-800">
                     {viewing.ownContributionAmount != null
                       ? `৳${viewing.ownContributionAmount.toLocaleString("bn-BD")}`
@@ -845,19 +851,28 @@ export default function AdminProjectsPage() {
 
               {viewing.fundUsage && (
                 <div className="border-t pt-3">
-                  <p className="text-[10px] text-gray-500 mb-0.5">টাকা কোথায় খরচ হবে</p>
-                  <p className="text-gray-700 text-xs leading-relaxed">{viewing.fundUsage}</p>
+                  <p className="text-[10px] text-gray-500 mb-0.5">
+                    টাকা কোথায় খরচ হবে
+                  </p>
+                  <p className="text-gray-700 text-xs leading-relaxed">
+                    {viewing.fundUsage}
+                  </p>
                 </div>
               )}
               {viewing.risks && (
                 <div>
                   <p className="text-[10px] text-gray-500 mb-0.5">ঝুঁকি</p>
-                  <p className="text-gray-700 text-xs leading-relaxed">{viewing.risks}</p>
+                  <p className="text-gray-700 text-xs leading-relaxed">
+                    {viewing.risks}
+                  </p>
                 </div>
               )}
-              {(viewing.profitShareNote || viewing.investorProfitPct != null) && (
+              {(viewing.profitShareNote ||
+                viewing.investorProfitPct != null) && (
                 <div>
-                  <p className="text-[10px] text-gray-500 mb-0.5">লাভ/ক্ষতি বণ্টন নোট</p>
+                  <p className="text-[10px] text-gray-500 mb-0.5">
+                    লাভ/ক্ষতি বণ্টন নোট
+                  </p>
                   <p className="text-gray-700 text-xs leading-relaxed">
                     {viewing.profitShareNote ||
                       `লাভ হলে খামারি ${100 - (viewing.investorProfitPct ?? 35)}% ও অংশীদার ${viewing.investorProfitPct ?? 35}%`}
@@ -1067,9 +1082,7 @@ export default function AdminProjectsPage() {
 
               <EnglishFields value={eEn} onChange={setEEn} />
 
-              {editError && (
-                <p className="text-red-500 text-sm">{editError}</p>
-              )}
+              {editError && <p className="text-red-500 text-sm">{editError}</p>}
 
               <div className="flex gap-3 pt-2">
                 <button
@@ -1091,7 +1104,6 @@ export default function AdminProjectsPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

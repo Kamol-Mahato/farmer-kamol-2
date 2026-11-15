@@ -37,9 +37,7 @@ export default async function ShopPage() {
         </div>
         {products.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">
-              এখনো কোনো পণ্য যোগ করা হয়নি
-            </p>
+            <p className="text-gray-500 text-lg">এখনো কোনো পণ্য যোগ করা হয়নি</p>
             <p className="text-gray-500 text-sm mt-2">
               Admin panel থেকে পণ্য যোগ করুন
             </p>

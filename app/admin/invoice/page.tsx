@@ -75,9 +75,7 @@ function A4Invoice({ order, qrUrl }: { order: Order; qrUrl: string }) {
               {order.orderStatus}
             </span>
           </p>
-          <p className="text-sm text-gray-600">
-            পেমেন্ট: {order.paymentMethod}
-          </p>
+          <p className="text-sm text-gray-600">পেমেন্ট: {order.paymentMethod}</p>
         </div>
       </div>
       <table className="w-full text-sm mb-6 border-collapse">

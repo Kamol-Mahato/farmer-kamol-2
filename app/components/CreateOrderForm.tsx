@@ -329,8 +329,8 @@ export default function CreateOrderForm({ basePath, products }: Props) {
               />
             </div>
             <p className="text-xs text-gray-400">
-              বিকাশ/নগদে আগেই টাকা পেয়ে থাকলে এখানে বসান — বাকি (Due) নিজে
-              থেকেই হিসেব হয়ে যাবে
+              বিকাশ/নগদে আগেই টাকা পেয়ে থাকলে এখানে বসান — বাকি (Due) নিজে থেকেই
+              হিসেব হয়ে যাবে
             </p>
             <div className="pt-2 border-t space-y-1 text-sm font-bold text-gray-700">
               <p>পণ্যমূল্য: ৳ {totalProductPrice}</p>

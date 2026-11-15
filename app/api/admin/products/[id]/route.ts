@@ -21,10 +21,7 @@ export async function GET(
       include: { images: true, category: true },
     });
     if (!product)
-      return NextResponse.json(
-        { error: "পণ্য পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "পণ্য পাওয়া যায়নি" }, { status: 404 });
     revalidatePath("/");
     revalidatePath("/en");
     revalidatePath("/shop");

@@ -139,9 +139,9 @@ export default function AdminReviewsPage() {
                     {review.product.name}
                   </Link>
                   <p className="text-xs text-gray-400">
-                  {review.reviewerName || review.user?.name || "নাম নেই"} ·{" "}
-{review.reviewerPhone || review.user?.phone} ·{" "}
-{review.hasOrder ? "✅ অর্ডার মিলেছে" : "⚠️ অর্ডার মেলেনি"} ·{" "}
+                    {review.reviewerName || review.user?.name || "নাম নেই"} ·{" "}
+                    {review.reviewerPhone || review.user?.phone} ·{" "}
+                    {review.hasOrder ? "✅ অর্ডার মিলেছে" : "⚠️ অর্ডার মেলেনি"} ·{" "}
                     {new Date(review.createdAt).toLocaleDateString("bn-BD")}
                   </p>
                 </div>

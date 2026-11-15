@@ -31,10 +31,7 @@ export async function POST(
 
     const agent = await prisma.user.findUnique({ where: { id: agentId } });
     if (!agent || agent.role !== "AGENT") {
-      return NextResponse.json(
-        { error: "এজেন্ট পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "এজেন্ট পাওয়া যায়নি" }, { status: 404 });
     }
 
     const newPassword = generateTempPassword();

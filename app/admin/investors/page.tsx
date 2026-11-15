@@ -173,11 +173,15 @@ export default function AdminInvestorsPage() {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-gray-400 text-xs">মোবাইল</p>
-                <p className="font-medium text-gray-800">{viewing.user.phone}</p>
+                <p className="font-medium text-gray-800">
+                  {viewing.user.phone}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400 text-xs">ইমেইল</p>
-                <p className="font-medium text-gray-800">{viewing.email || "—"}</p>
+                <p className="font-medium text-gray-800">
+                  {viewing.email || "—"}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400 text-xs">পিতার নাম</p>
@@ -222,7 +226,10 @@ export default function AdminInvestorsPage() {
                 </span>
               ) : viewing.verificationStatus === "REJECTED" ? (
                 <span className="bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-full text-xs">
-                  ❌ বাতিল{viewing.rejectionReason ? `: ${viewing.rejectionReason}` : ""}
+                  ❌ বাতিল
+                  {viewing.rejectionReason
+                    ? `: ${viewing.rejectionReason}`
+                    : ""}
                 </span>
               ) : (
                 <span className="bg-yellow-100 text-yellow-800 font-bold px-2.5 py-1 rounded-full text-xs">

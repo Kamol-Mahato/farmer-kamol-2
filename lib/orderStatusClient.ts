@@ -30,9 +30,7 @@ export async function updateOrderStatus(
           successfulIds.push(id);
         } else {
           const data = await res.json().catch(() => ({}));
-          bookingFailures.push(
-            `অর্ডার #${id}: ${data.error || "বুকিং ব্যর্থ"}`,
-          );
+          bookingFailures.push(`অর্ডার #${id}: ${data.error || "বুকিং ব্যর্থ"}`);
         }
       } catch {
         bookingFailures.push(`অর্ডার #${id}: নেটওয়ার্ক সমস্যা`);

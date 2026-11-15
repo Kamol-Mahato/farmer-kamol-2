@@ -83,10 +83,7 @@ export async function POST(request: Request) {
       stockQty === "" ||
       Number.isNaN(Number(stockQty))
     ) {
-      return NextResponse.json(
-        { error: "স্টক পরিমাণ আবশ্যক" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "স্টক পরিমাণ আবশ্যক" }, { status: 400 });
     }
 
     const product = await prisma.product.create({

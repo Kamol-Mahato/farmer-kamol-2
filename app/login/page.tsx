@@ -270,9 +270,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-green-800">
             {siteConfig.brand.name}
           </h1>
-          <p className="text-sm text-yellow-600 mt-1">
-            খামার থেকে আপনার দরজায়
-          </p>
+          <p className="text-sm text-yellow-600 mt-1">খামার থেকে আপনার দরজায়</p>
         </div>
 
         {/* লগইন করা থাকলে */}

@@ -28,10 +28,7 @@ export async function POST(request: Request) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
 
     if (order.paymentMethod !== "GATEWAY") {
@@ -70,9 +67,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, order: updated });
   } catch (error: any) {
     console.error("CONFIRM PAYMENT API ERROR ->", error);
-    return NextResponse.json(
-      { error: "সার্ভারে সমস্যা হয়েছে" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "সার্ভারে সমস্যা হয়েছে" }, { status: 500 });
   }
 }

@@ -15,10 +15,7 @@ export async function POST(
   const { id } = await params;
   const orderId = parseInt(id);
   if (isNaN(orderId)) {
-    return NextResponse.json(
-      { error: "সঠিক অর্ডার আইডি দিন" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "সঠিক অর্ডার আইডি দিন" }, { status: 400 });
   }
   try {
     const body = await request.json();
@@ -29,10 +26,7 @@ export async function POST(
       include: { orderItems: true },
     });
     if (!order) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
     if (order.orderStatus !== "PARTIAL_DELIVERY") {
       return NextResponse.json(

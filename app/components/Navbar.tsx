@@ -73,7 +73,7 @@ export default function Navbar() {
   const isInvestMenu = (m: Menu) => /^\/(en\/)?invest/.test(m.url);
   const toggleMobileMenu = (id: number) =>
     setMobileOpenMenus((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   const { mobileOpen, openSidebar, closeSidebar, closeSidebarForNav } =
     useMobileMenu();
@@ -263,7 +263,9 @@ export default function Navbar() {
                   type="button"
                   onClick={() => toggleMobileMenu(menu.id)}
                   aria-expanded={mobileOpenMenus.includes(menu.id)}
-                  aria-label={locale === "bn" ? "সাব-মেনু খুলুন" : "Toggle submenu"}
+                  aria-label={
+                    locale === "bn" ? "সাব-মেনু খুলুন" : "Toggle submenu"
+                  }
                   className="absolute right-1 top-0.5 w-7 h-7 flex items-center justify-center rounded-full bg-green-900 text-white text-xs"
                 >
                   <span
@@ -277,19 +279,19 @@ export default function Navbar() {
               )}
               {menu.subMenus.length > 0 &&
                 (!isInvestMenu(menu) || mobileOpenMenus.includes(menu.id)) && (
-                <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
-                  {menu.subMenus.map((sub) => (
-                    <Link
-                      key={sub.id}
-                      href={sub.url}
-                      className="block px-3 py-1.5 text-white font-bold text-sm hover:text-yellow-400 transition"
-                      onClick={() => closeSidebarForNav()}
-                    >
-                      ▸ {translateTitle(sub)}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                  <div className="ml-4 mt-1.5 flex flex-col gap-1.5">
+                    {menu.subMenus.map((sub) => (
+                      <Link
+                        key={sub.id}
+                        href={sub.url}
+                        className="block px-3 py-1.5 text-white font-bold text-sm hover:text-yellow-400 transition"
+                        onClick={() => closeSidebarForNav()}
+                      >
+                        ▸ {translateTitle(sub)}
+                      </Link>
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
         </div>
@@ -332,7 +334,7 @@ export default function Navbar() {
                 <span className="text-yellow-200 text-[8px] font-medium whitespace-nowrap">
                   {t.tagline}
                 </span>
-                </div>
+              </div>
             </Link>
             <Link
               href={href("/")}
@@ -412,7 +414,11 @@ export default function Navbar() {
 
           <div className="flex items-center gap-1.5 shrink-0">
             <Link
-              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", "")}
+              href={switchLocalePath(
+                pathname,
+                locale === "bn" ? "en" : "bn",
+                "",
+              )}
               onClick={goSwitchLang}
               className="flex lg:hidden items-center justify-center px-2 py-0.5 text-[11px] font-semibold text-white border border-white/20 rounded bg-white/10 backdrop-blur-sm active:scale-95 hover:bg-white/20 transition shrink-0"
               aria-label="Language Switch"
@@ -422,7 +428,11 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href={switchLocalePath(pathname, locale === "bn" ? "en" : "bn", "")}
+              href={switchLocalePath(
+                pathname,
+                locale === "bn" ? "en" : "bn",
+                "",
+              )}
               onClick={goSwitchLang}
               className="hidden lg:flex items-center bg-green-900 border border-green-700 rounded-lg overflow-hidden h-6 text-[11px] font-bold shrink-0 transition hover:border-yellow-400 group ml-2"
               aria-label="Language Switch"

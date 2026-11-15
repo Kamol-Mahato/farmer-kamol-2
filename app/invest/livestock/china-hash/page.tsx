@@ -75,7 +75,10 @@ export default async function ChinaHashInvestPage() {
 
   const soldLots =
     totalLots && targetAmount && targetAmount > 0
-      ? Math.min(totalLots, Math.round((raisedAmount / targetAmount) * totalLots))
+      ? Math.min(
+          totalLots,
+          Math.round((raisedAmount / targetAmount) * totalLots),
+        )
       : null;
 
   const projectName = featuredProject?.name ?? "চিনা হাঁস সম্প্রসারণ প্রকল্প";
@@ -85,7 +88,7 @@ export default async function ChinaHashInvestPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-    <InvestSubNav />
+      <InvestSubNav />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 py-3 text-sm text-gray-500 flex flex-wrap items-center gap-1.5">
@@ -111,9 +114,7 @@ export default async function ChinaHashInvestPage() {
             <h1 className="text-2xl md:text-4xl font-black text-gray-900 leading-tight mb-4">
               চিনা হাঁস সম্প্রসারণ প্রকল্পে বিনিয়োগ
             </h1>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              {projectDesc}
-            </p>
+            <p className="text-gray-600 leading-relaxed mb-6">{projectDesc}</p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/customer/dashboard"
@@ -129,13 +130,17 @@ export default async function ChinaHashInvestPage() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে
+              পারে।
             </p>
           </Reveal>
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center">
-              <InvestPhoto name="invest-china-hash" alt="চিনা হাঁস প্রকল্প - Farmer Kamol">
+              <InvestPhoto
+                name="invest-china-hash"
+                alt="চিনা হাঁস প্রকল্প - Farmer Kamol"
+              >
                 <img
                   src="/uploads/header-2nd-about.jpg"
                   alt="চিনা হাঁস প্রকল্প - Farmer Kamol"
@@ -204,8 +209,9 @@ export default async function ChinaHashInvestPage() {
                 কেন চিনা হাঁস?
               </h3>
               <p>
-                চিনা হাঁস দ্রুত বড় হয়, রোগ প্রতিরোধ ক্ষমতা ভালো এবং বাজারে চাহিদা স্থিতিশীল।
-                প্রজনন ও মাংস উৎপাদন দুটোই সম্ভব। ছোট পরিসর থেকে শুরু করে ধাপে ধাপে সম্প্রসারণ করা যায়।
+                চিনা হাঁস দ্রুত বড় হয়, রোগ প্রতিরোধ ক্ষমতা ভালো এবং বাজারে চাহিদা
+                স্থিতিশীল। প্রজনন ও মাংস উৎপাদন দুটোই সম্ভব। ছোট পরিসর থেকে শুরু করে
+                ধাপে ধাপে সম্প্রসারণ করা যায়।
               </p>
             </Reveal>
 
@@ -238,7 +244,9 @@ export default async function ChinaHashInvestPage() {
 
             {featuredProject?.timeline && (
               <Reveal delay={240}>
-                <h3 className="font-bold text-green-900 text-lg mb-2">সময়সীমা</h3>
+                <h3 className="font-bold text-green-900 text-lg mb-2">
+                  সময়সীমা
+                </h3>
                 <p>{featuredProject.timeline}</p>
               </Reveal>
             )}
@@ -263,7 +271,9 @@ export default async function ChinaHashInvestPage() {
                 </div>
                 {soldLots != null && totalLots != null && (
                   <p className="text-xs text-gray-500 mt-2">
-                    {soldLots.toLocaleString("bn-BD")} / {totalLots.toLocaleString("bn-BD")} {lotUnitName} বিক্রি হয়েছে
+                    {soldLots.toLocaleString("bn-BD")} /{" "}
+                    {totalLots.toLocaleString("bn-BD")} {lotUnitName} বিক্রি
+                    হয়েছে
                   </p>
                 )}
               </div>
@@ -329,10 +339,16 @@ export default async function ChinaHashInvestPage() {
       {/* Back links */}
       <section className="py-10 px-4 bg-white">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/invest/livestock" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/livestock"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← সব লাইভস্টক প্রকল্প
           </Link>
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
         </div>

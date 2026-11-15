@@ -439,8 +439,7 @@ export default function NewProductPage() {
               ওয়েবসাইটে সরাসরি অর্ডার (কার্ট বাটন থাকবে)
             </option>
             <option value="NEGOTIABLE">
-              শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের
-              বাচ্চা)
+              শুধু WhatsApp/ফোনে অর্ডার — কার্ট বাটন থাকবে না (যেমন: হাঁসের বাচ্চা)
             </option>
           </select>
         </div>
@@ -454,9 +453,7 @@ export default function NewProductPage() {
               onChange={handleChange}
               className="w-4 h-4 accent-green-600"
             />
-            <span className="text-sm text-gray-700">
-              হোমপেজে ফিচার্ড দেখাবে
-            </span>
+            <span className="text-sm text-gray-700">হোমপেজে ফিচার্ড দেখাবে</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input

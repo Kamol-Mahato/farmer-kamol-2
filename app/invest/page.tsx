@@ -59,7 +59,11 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 // ✅ প্লেসহোল্ডার ডেটা — পরে শুধু youtubeUrl / imageUrl বসিয়ে দিলেই আসল কন্টেন্ট দেখাবে
-const farmVisitVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+const farmVisitVideos: {
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+}[] = [
   { title: "খামার ভ্রমণ - পর্ব ১", youtubeUrl: "" },
   { title: "খামার ভ্রমণ - পর্ব ২", youtubeUrl: "" },
   { title: "খামার ভ্রমণ - পর্ব ৩", youtubeUrl: "" },
@@ -71,7 +75,11 @@ const farmVisitPhotos: { title: string; imageUrl: string }[] = [
   { title: "খামারের ছবি ৩", imageUrl: "" },
 ];
 
-const journeyVideos: { title: string; description?: string; youtubeUrl: string }[] = [
+const journeyVideos: {
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+}[] = [
   { title: "অংশীদারের অভিজ্ঞতা ১", youtubeUrl: "" },
   { title: "অংশীদারের অভিজ্ঞতা ২", youtubeUrl: "" },
   { title: "অংশীদারের অভিজ্ঞতা ৩", youtubeUrl: "" },
@@ -94,7 +102,9 @@ function YoutubeCard({
   youtubeUrl: string;
 }) {
   const ytId = youtubeUrl ? getYoutubeId(youtubeUrl) : null;
-  const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+  const thumb = ytId
+    ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+    : null;
 
   const body = (
     <>
@@ -123,9 +133,13 @@ function YoutubeCard({
         )}
       </div>
       <div className="px-0.5 pt-2">
-        <h3 className="font-bold text-green-800 text-sm line-clamp-2">{title}</h3>
+        <h3 className="font-bold text-green-800 text-sm line-clamp-2">
+          {title}
+        </h3>
         {description && (
-          <p className="text-gray-500 text-xs mt-1 line-clamp-2">{description}</p>
+          <p className="text-gray-500 text-xs mt-1 line-clamp-2">
+            {description}
+          </p>
         )}
       </div>
     </>
@@ -215,7 +229,10 @@ export default async function InvestPage() {
   // লট বিক্রি হয়েছে কত — টার্গেট ও রেইজড থেকে আনুমানিক (বা পরে investments দিয়ে আরও সঠিক করা যাবে)
   const soldLots =
     totalLots && targetAmount && targetAmount > 0
-      ? Math.min(totalLots, Math.round((raisedAmount / targetAmount) * totalLots))
+      ? Math.min(
+          totalLots,
+          Math.round((raisedAmount / targetAmount) * totalLots),
+        )
       : null;
 
   const duckProjectName = featuredProject?.name ?? "চিনা হাঁস সম্প্রসারণ প্রকল্প";
@@ -225,7 +242,6 @@ export default async function InvestPage() {
 
   return (
     <div className="font-[family-name:var(--font-hind-siliguri)] text-gray-800">
-
       <InvestSubNav />
 
       {/* =========================================================
@@ -233,8 +249,8 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="relative bg-gradient-to-b from-green-50 to-white pt-10 pb-16 md:pt-14 md:pb-20 px-4">
         <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <Reveal direction="up" delay={0}>
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <Reveal direction="up" delay={0}>
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-2 bg-white border border-green-200 text-green-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -250,20 +266,24 @@ export default async function InvestPage() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
                 কৃষক কমলের খামারে
                 <br />
-                <span className="text-green-700">কৃষিতে বিনিয়োগ ও অংশীদারিত্ব</span>
+                <span className="text-green-700">
+                  কৃষিতে বিনিয়োগ ও অংশীদারিত্ব
+                </span>
               </h1>
 
               <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mb-8">
-              কৃষিতে ইনভেস্ট (কৃষি বিনিয়োগ) করতে চাইলে এখানে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। কোনো নির্দিষ্ট সুদ বা রিটার্নের নিশ্চয়তা নেই, প্রকৃত লাভের নির্ধারিত অংশ আপনি পাবেন।
-                বাস্তব খামার, স্বচ্ছ হিসাব এবং ন্যায্য লাভ ভাগাভাগির মাধ্যমে একসাথে এগিয়ে চলা।
+                কৃষিতে ইনভেস্ট (কৃষি বিনিয়োগ) করতে চাইলে এখানে প্রথমে কাজ, তারপর
+                বিশ্বাস, তারপর অংশীদারিত্ব। কোনো নির্দিষ্ট সুদ বা রিটার্নের নিশ্চয়তা
+                নেই, প্রকৃত লাভের নির্ধারিত অংশ আপনি পাবেন। বাস্তব খামার, স্বচ্ছ হিসাব
+                এবং ন্যায্য লাভ ভাগাভাগির মাধ্যমে একসাথে এগিয়ে চলা।
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
-              <Link
+                <Link
                   href="#projects"
                   className="inline-flex items-center justify-center gap-2 bg-green-700 text-white px-7 py-3.5 rounded-full font-bold text-sm md:text-base shadow-md hover:bg-green-800 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] transition-all duration-300 ease-out"
                 >
-                                    প্রকল্পসমূহ দেখুন →
+                  প্রকল্পসমূহ দেখুন →
                 </Link>
                 <Link
                   href="/customer/dashboard"
@@ -274,8 +294,8 @@ export default async function InvestPage() {
               </div>
 
               <p className="mt-4 text-xs md:text-sm text-gray-500 max-w-lg leading-relaxed">
-                <span className="font-semibold text-gray-700">ঝুঁকি:</span>{" "}
-                এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+                <span className="font-semibold text-gray-700">ঝুঁকি:</span> এটি
+                ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
               </p>
 
               {systemSettings?.youtubeChannelUrl && (
@@ -289,7 +309,7 @@ export default async function InvestPage() {
               )}
             </Reveal>
 
-            <Reveal  className="relative group">
+            <Reveal className="relative group">
               <div className="relative rounded-3xl overflow-hidden shadow-xl border border-green-100 aspect-[4/3] transition-all duration-500 ease-out group-hover:shadow-2xl group-hover:border-green-300">
                 <img
                   src="/uploads/header-2nd-about.jpg"
@@ -299,13 +319,19 @@ export default async function InvestPage() {
                 {/* নিচ থেকে গ্র্যাডিয়েন্ট — hover করলে ক্যাপশন স্পষ্ট হয়ে ভেসে ওঠে */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500 ease-out" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                  <p className="text-white font-bold text-sm md:text-base">কমল কুমার মাহাতো</p>
-                  <p className="text-white/80 text-xs md:text-sm">প্রতিষ্ঠাতা, নিজের খামারে</p>
+                  <p className="text-white font-bold text-sm md:text-base">
+                    কমল কুমার মাহাতো
+                  </p>
+                  <p className="text-white/80 text-xs md:text-sm">
+                    প্রতিষ্ঠাতা, নিজের খামারে
+                  </p>
                 </div>
               </div>
               <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-lg px-4 py-3 border border-green-100 transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-xl">
-              <p className="text-xs text-gray-500">লাভ বণ্টন (খামারি : অংশীদার)</p>
-              <p className="text-sm font-bold text-green-700">৬৫ : ৩৫</p>
+                <p className="text-xs text-gray-500">
+                  লাভ বণ্টন (খামারি : অংশীদার)
+                </p>
+                <p className="text-sm font-bold text-green-700">৬৫ : ৩৫</p>
               </div>
             </Reveal>
           </div>
@@ -317,27 +343,49 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="py-14 md:py-16 px-4 bg-green-50">
         <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <SectionHeading>আমার খামারের যাত্রা</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-            বিনিয়োগ  দিয়ে শুরু করিনি। নিজের টাকা দিয়ে কাজ শুরু করেছি।
-              নিচে সেই সত্য গল্প।
+              বিনিয়োগ দিয়ে শুরু করিনি। নিজের টাকা দিয়ে কাজ শুরু করেছি। নিচে সেই সত্য
+              গল্প।
             </p>
           </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "ব্যক্তিগত প্রকল্প", desc: "নিজের সামান্য পুঁজি দিয়ে খামার শুরু করেছি। কোনো বাইরের টাকা নেই।" },
-              { title: "চ্যালেঞ্জসমূহ", desc: "রোগবালাই, খাবারের দাম, বাজার দর — প্রতিদিন নতুন সমস্যা এসেছে।" },
-              { title: "ভুলগুলো", desc: "অনেক ভুল করেছি। শিখেছি। এখন সেই অভিজ্ঞতা কাজে লাগাচ্ছি।" },
-              { title: "সমাধান", desc: "ধাপে ধাপে সমস্যা সমাধান করে এগিয়েছি। হিসাব ও রেকর্ড রাখা শুরু করেছি।" },
-              { title: "বর্তমান অবস্থা", desc: "ছোট পরিসরে কাজ চলছে। মানুষ দেখছে আমি শুধু কথা বলি না, কাজও করি।" },
-              { title: "ভবিষ্যৎ ভিশন", desc: "প্রথমে প্রমাণ, তারপর ছোট পরীক্ষামূলক ধাপ, তারপর ধীরে ধীরে বড় করা।" },
+              {
+                title: "ব্যক্তিগত প্রকল্প",
+                desc: "নিজের সামান্য পুঁজি দিয়ে খামার শুরু করেছি। কোনো বাইরের টাকা নেই।",
+              },
+              {
+                title: "চ্যালেঞ্জসমূহ",
+                desc: "রোগবালাই, খাবারের দাম, বাজার দর — প্রতিদিন নতুন সমস্যা এসেছে।",
+              },
+              {
+                title: "ভুলগুলো",
+                desc: "অনেক ভুল করেছি। শিখেছি। এখন সেই অভিজ্ঞতা কাজে লাগাচ্ছি।",
+              },
+              {
+                title: "সমাধান",
+                desc: "ধাপে ধাপে সমস্যা সমাধান করে এগিয়েছি। হিসাব ও রেকর্ড রাখা শুরু করেছি।",
+              },
+              {
+                title: "বর্তমান অবস্থা",
+                desc: "ছোট পরিসরে কাজ চলছে। মানুষ দেখছে আমি শুধু কথা বলি না, কাজও করি।",
+              },
+              {
+                title: "ভবিষ্যৎ ভিশন",
+                desc: "প্রথমে প্রমাণ, তারপর ছোট পরীক্ষামূলক ধাপ, তারপর ধীরে ধীরে বড় করা।",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 3) * 80}>
                 <div className="bg-white border border-green-100 rounded-2xl p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
-                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-green-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -348,44 +396,61 @@ export default async function InvestPage() {
       {/* =========================================================
           কৃষিতে ইনভেস্ট কেন — SEO + AI বান্ধব কনটেন্ট
       ========================================================== */}
-      <section id="why-invest" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="why-invest"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-8">
             <SectionHeading>কৃষিতে ইনভেস্ট কেন করবেন?</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-              Agricultural Invest, Farming Invest ও Livestock Invest — তিনটি বিষয় একসাথে বুঝে নিন।
+              Agricultural Invest, Farming Invest ও Livestock Invest — তিনটি
+              বিষয় একসাথে বুঝে নিন।
             </p>
           </Reveal>
 
           <Reveal>
             <div className="prose prose-green max-w-none text-gray-700 leading-relaxed space-y-4 text-sm md:text-base">
               <p>
-                <strong>কৃষিতে ইনভেস্ট</strong> (Agricultural Invest) মানে শুধু টাকা রাখা নয় — বাস্তব খামার, পশু, ফসল বা মাছ চাষের সঙ্গে যুক্ত হওয়া।
-                বাংলাদেশে অনেকেই <strong>কৃষি বিনিয়োগ</strong>, <strong>খামারে বিনিয়োগ</strong> বা <strong>Livestock Invest</strong> খুঁজে থাকেন,
-                কিন্তু নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্নের প্রতিশ্রুতি দিয়ে অনেক স্কিম চলে। Farmer Kamol সেই পথে যায় না।
+                <strong>কৃষিতে ইনভেস্ট</strong> (Agricultural Invest) মানে শুধু টাকা
+                রাখা নয় — বাস্তব খামার, পশু, ফসল বা মাছ চাষের সঙ্গে যুক্ত হওয়া।
+                বাংলাদেশে অনেকেই <strong>কৃষি বিনিয়োগ</strong>,{" "}
+                <strong>খামারে বিনিয়োগ</strong> বা{" "}
+                <strong>Livestock Invest</strong> খুঁজে থাকেন, কিন্তু নির্দিষ্ট সুদ বা
+                গ্যারান্টিড রিটার্নের প্রতিশ্রুতি দিয়ে অনেক স্কিম চলে। Farmer Kamol সেই
+                পথে যায় না।
               </p>
               <p>
-                এখানে <strong>কৃষিতে বিনিয়োগ</strong> মানে অংশীদারিত্ব। আপনি খামারের প্রকৃত লাভের নির্ধারিত অংশ পাবেন।
-                কোনো নির্দিষ্ট সুদের নিশ্চয়তা নেই। লাভ হলে ভাগ পাবেন, লোকসান হলে সেটাও বুঝে নিতে হবে —
-                এটাই সৎ কৃষি বিনিয়োগের বাস্তবতা।
+                এখানে <strong>কৃষিতে বিনিয়োগ</strong> মানে অংশীদারিত্ব। আপনি
+                খামারের প্রকৃত লাভের নির্ধারিত অংশ পাবেন। কোনো নির্দিষ্ট সুদের নিশ্চয়তা
+                নেই। লাভ হলে ভাগ পাবেন, লোকসান হলে সেটাও বুঝে নিতে হবে — এটাই সৎ
+                কৃষি বিনিয়োগের বাস্তবতা।
               </p>
               <p>
-                আমাদের মডেল সহজ: <strong>৬৫% খামারি, ৩৫% অংশীদার</strong>। প্রকল্প শেষে প্রকৃত বিক্রয় ও খরচের হিসাব থেকে নিট লাভ বের করা হয়,
-                তারপর সেই অনুপাতে ভাগ। প্রতিটি বিনিয়োগের জন্য আলাদা <strong>e-Agreement</strong> ও শেষে <strong>Final Settlement</strong> স্টেটমেন্ট থাকে।
+                আমাদের মডেল সহজ: <strong>৬৫% খামারি, ৩৫% অংশীদার</strong>। প্রকল্প
+                শেষে প্রকৃত বিক্রয় ও খরচের হিসাব থেকে নিট লাভ বের করা হয়, তারপর সেই
+                অনুপাতে ভাগ। প্রতিটি বিনিয়োগের জন্য আলাদা{" "}
+                <strong>e-Agreement</strong> ও শেষে{" "}
+                <strong>Final Settlement</strong> স্টেটমেন্ট থাকে।
               </p>
               <p>
-                বর্তমানে মূল ফোকাস <strong>Livestock Invest</strong> — বিশেষ করে চিনা হাঁস সম্প্রসারণ ও গরু পালন।
-                পরে ফসল চাষ (Crop) ও মাছ চাষ (Aquaculture) খাতেও ধাপে ধাপে প্রকল্প খোলা হবে।
-                সব প্রকল্পই বাস্তব সম্পদভিত্তিক: হাঁস, গরু, জমি বা পুকুর — কোনো কাগুজে স্কিম নয়।
+                বর্তমানে মূল ফোকাস <strong>Livestock Invest</strong> — বিশেষ করে
+                চিনা হাঁস সম্প্রসারণ ও গরু পালন। পরে ফসল চাষ (Crop) ও মাছ চাষ
+                (Aquaculture) খাতেও ধাপে ধাপে প্রকল্প খোলা হবে। সব প্রকল্পই বাস্তব
+                সম্পদভিত্তিক: হাঁস, গরু, জমি বা পুকুর — কোনো কাগুজে স্কিম নয়।
               </p>
               <p>
-                কেন Farmer Kamol? কারণ আমরা নিজের টাকা দিয়ে খামার শুরু করেছি, ভুল করে শিখেছি এবং এখন সেই অভিজ্ঞতা নিয়ে অংশীদারিত্ব করছি।
-                প্রথমে কাজ, তারপর বিশ্বাস, তারপর টাকা — এই ক্রম আমরা ভাঙি না।
-                আপনি চাইলে খামার পরিদর্শন করতে পারেন, ভিডিও দেখতে পারেন এবং প্রশ্ন করে নিশ্চিত হয়ে তারপর এগোতে পারেন।
+                কেন Farmer Kamol? কারণ আমরা নিজের টাকা দিয়ে খামার শুরু করেছি, ভুল
+                করে শিখেছি এবং এখন সেই অভিজ্ঞতা নিয়ে অংশীদারিত্ব করছি। প্রথমে কাজ,
+                তারপর বিশ্বাস, তারপর টাকা — এই ক্রম আমরা ভাঙি না। আপনি চাইলে খামার
+                পরিদর্শন করতে পারেন, ভিডিও দেখতে পারেন এবং প্রশ্ন করে নিশ্চিত হয়ে
+                তারপর এগোতে পারেন।
               </p>
               <p className="text-gray-600 text-sm border-l-4 border-green-600 pl-4 bg-green-50 py-3 rounded-r-lg">
-                <strong>ঝুঁকি সতর্কতা:</strong> এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়।
-                কৃষিতে প্রাকৃতিক দুর্যোগ, রোগবালাই, বাজারদরের ওঠানামা — সবই ঝুঁকি। শুধু সেই অর্থই বিনিয়োগ করুন যা হারালে আপনার দৈনন্দিন জীবন বিপদে পড়বে না।
+                <strong>ঝুঁকি সতর্কতা:</strong> এটি ব্যাংক আমানত বা নির্ধারিত সুদের
+                স্কিম নয়। কৃষিতে প্রাকৃতিক দুর্যোগ, রোগবালাই, বাজারদরের ওঠানামা — সবই
+                ঝুঁকি। শুধু সেই অর্থই বিনিয়োগ করুন যা হারালে আপনার দৈনন্দিন জীবন বিপদে
+                পড়বে না।
               </p>
             </div>
           </Reveal>
@@ -395,20 +460,32 @@ export default async function InvestPage() {
       {/* =========================================================
           FARM STATUS (নতুন সেকশন)
       ========================================================== */}
-        <section id="farm-status" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="farm-status"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <SectionHeading>খামারের বর্তমান অবস্থা</SectionHeading>
           </Reveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Reveal delay={0}>
-              <StatCard label="গরু" value={`${(systemSettings?.farmCowCount ?? 5).toLocaleString("bn-BD")}টি`} />
+            <Reveal delay={0}>
+              <StatCard
+                label="গরু"
+                value={`${(systemSettings?.farmCowCount ?? 5).toLocaleString("bn-BD")}টি`}
+              />
             </Reveal>
             <Reveal delay={80}>
-              <StatCard label="চীনা হাঁস"value={`${(systemSettings?.farmDuckCount ?? 15).toLocaleString("bn-BD")}টি`} />
+              <StatCard
+                label="চীনা হাঁস"
+                value={`${(systemSettings?.farmDuckCount ?? 15).toLocaleString("bn-BD")}টি`}
+              />
             </Reveal>
             <Reveal delay={160}>
-              <StatCard label="ছাগল" value={`${(systemSettings?.farmGoatCount ?? 4).toLocaleString("bn-BD")}টি`} />
+              <StatCard
+                label="ছাগল"
+                value={`${(systemSettings?.farmGoatCount ?? 4).toLocaleString("bn-BD")}টি`}
+              />
             </Reveal>
             <Reveal delay={240}>
               <StatCard
@@ -423,12 +500,16 @@ export default async function InvestPage() {
       {/* =========================================================
           PROJECTS / CATEGORIES
       ========================================================== */}
-      <section id="projects" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="projects"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>কৃষি বিনিয়োগের খাতসমূহ</SectionHeading>
             <p className="text-gray-500 text-sm mt-3 max-w-2xl mx-auto">
-              Agriculture Invest, Farming Invest ও Livestock Invest — তিনটি মূল খাতে আমাদের প্রকল্প চলছে ও চলবে।
+              Agriculture Invest, Farming Invest ও Livestock Invest — তিনটি মূল
+              খাতে আমাদের প্রকল্প চলছে ও চলবে।
             </p>
           </Reveal>
 
@@ -440,7 +521,10 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300"
               >
                 <div className="h-40 bg-green-100 flex items-center justify-center text-green-800 font-semibold text-lg">
-                <InvestPhoto name={["invest-china-hash", "invest-goru"]} alt="পশুপালন / Livestock">
+                  <InvestPhoto
+                    name={["invest-china-hash", "invest-goru"]}
+                    alt="পশুপালন / Livestock"
+                  >
                     পশুপালন / Livestock
                   </InvestPhoto>
                 </div>
@@ -448,9 +532,12 @@ export default async function InvestPage() {
                   <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     চলমান + নতুন
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">লাইভস্টক বিনিয়োগ</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    লাইভস্টক বিনিয়োগ
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    চিনা হাঁস প্রজনন ও গরু পালন প্রকল্প। বাস্তব খামার, লিখিত চুক্তি ও স্বচ্ছ হিসাব।
+                    চিনা হাঁস প্রজনন ও গরু পালন প্রকল্প। বাস্তব খামার, লিখিত চুক্তি ও
+                    স্বচ্ছ হিসাব।
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
                     <li>• চিনা হাঁস সম্প্রসারণ</li>
@@ -470,7 +557,7 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
               >
                 <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-                <InvestPhoto name="invest-dhan" alt="ফসল চাষ / Crop">
+                  <InvestPhoto name="invest-dhan" alt="ফসল চাষ / Crop">
                     ফসল চাষ / Crop
                   </InvestPhoto>
                 </div>
@@ -478,9 +565,12 @@ export default async function InvestPage() {
                   <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     শীঘ্রই
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">আবাদি জমিতে ফসল চাষ</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    আবাদি জমিতে ফসল চাষ
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্থায়ী ও টেকসই উৎপাদন ভিত্তিক বিনিয়োগ।
+                    ধান, সরিষা ও উচ্চমূল্যের ফসল চাষ। স্থায়ী ও টেকসই উৎপাদন ভিত্তিক
+                    বিনিয়োগ।
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1.5 mb-4">
                     <li>• আবাদি জমিতে ফসল চাষ</li>
@@ -499,7 +589,7 @@ export default async function InvestPage() {
                 className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
               >
                 <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-                <InvestPhoto name="invest-mach" alt="মাছ চাষ / Aquaculture">
+                  <InvestPhoto name="invest-mach" alt="মাছ চাষ / Aquaculture">
                     মাছ চাষ / Aquaculture
                   </InvestPhoto>
                 </div>
@@ -507,7 +597,9 @@ export default async function InvestPage() {
                   <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     শীঘ্রই
                   </span>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">মাছ চাষ প্রকল্প</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    মাছ চাষ প্রকল্প
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                     পুকুরে মাছ চাষ ভিত্তিক বিনিয়োগ। পরিকল্পিত উৎপাদন ও বাজার সংযোগ।
                   </p>
@@ -580,7 +672,10 @@ export default async function InvestPage() {
       {/* =========================================================
           LIVE CALCULATOR
       ========================================================== */}
-      <section id="calculator" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="calculator"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <InvestCalculator />
@@ -593,10 +688,11 @@ export default async function InvestPage() {
       ========================================================== */}
       <section className="py-14 md:py-16 px-4 bg-green-50">
         <div className="max-w-4xl mx-auto">
-        <Reveal className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <SectionHeading>লাভ কীভাবে ভাগ হবে</SectionHeading>
             <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
-              কোনো নির্দিষ্ট লাভের প্রতিশ্রুতি নেই। প্রকৃত বিক্রয় ও খরচের হিসাব করে নিট লাভ বের করা হবে।
+              কোনো নির্দিষ্ট লাভের প্রতিশ্রুতি নেই। প্রকৃত বিক্রয় ও খরচের হিসাব করে নিট
+              লাভ বের করা হবে।
             </p>
           </Reveal>
 
@@ -604,28 +700,38 @@ export default async function InvestPage() {
             <div className="space-y-5">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700 font-medium">মোট বিক্রয়</span>
-                <span className="text-lg font-bold text-green-800">৳{exampleSales.toLocaleString("bn-BD")}</span>
+                <span className="text-lg font-bold text-green-800">
+                  ৳{exampleSales.toLocaleString("bn-BD")}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700 font-medium">মোট খরচ</span>
-                <span className="text-lg font-bold text-red-600">− ৳{exampleExpense.toLocaleString("bn-BD")}</span>
+                <span className="text-lg font-bold text-red-600">
+                  − ৳{exampleExpense.toLocaleString("bn-BD")}
+                </span>
               </div>
               <div className="border-t border-dashed border-gray-200 pt-5">
                 <div className="flex justify-between items-center bg-blue-50 rounded-2xl px-5 py-4">
                   <span className="font-bold text-gray-800">নিট লাভ</span>
-                  <span className="text-2xl font-black text-blue-800">৳{exampleProfit.toLocaleString("bn-BD")}</span>
+                  <span className="text-2xl font-black text-blue-800">
+                    ৳{exampleProfit.toLocaleString("bn-BD")}
+                  </span>
                 </div>
               </div>
             </div>
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-          <Reveal  delay={0}>
+            <Reveal delay={0}>
               <div className="rounded-3xl bg-green-50 border border-green-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-xs text-green-700 font-medium">খামারি (Farmer Kamol)</p>
-                    <h3 className="text-2xl font-bold text-green-900">৬৫% লাভ</h3>
+                    <p className="text-xs text-green-700 font-medium">
+                      খামারি (Farmer Kamol)
+                    </p>
+                    <h3 className="text-2xl font-bold text-green-900">
+                      ৬৫% লাভ
+                    </h3>
                   </div>
                   <div className="text-4xl font-black text-green-700">৬৫%</div>
                 </div>
@@ -633,16 +739,22 @@ export default async function InvestPage() {
                   <div className="h-full w-[65%] bg-green-600 rounded-full" />
                 </div>
                 <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
-                <p className="text-2xl font-bold text-green-800">৳{farmerShare.toLocaleString("bn-BD")}</p>
+                <p className="text-2xl font-bold text-green-800">
+                  ৳{farmerShare.toLocaleString("bn-BD")}
+                </p>
               </div>
             </Reveal>
 
-            <Reveal >
+            <Reveal>
               <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <p className="text-xs text-blue-700 font-medium">সকল বিনিয়োগকারী</p>
-                    <h3 className="text-2xl font-bold text-blue-900">৩৫% লাভ</h3>
+                    <p className="text-xs text-blue-700 font-medium">
+                      সকল বিনিয়োগকারী
+                    </p>
+                    <h3 className="text-2xl font-bold text-blue-900">
+                      ৩৫% লাভ
+                    </h3>
                   </div>
                   <div className="text-4xl font-black text-blue-700">৩৫%</div>
                 </div>
@@ -650,7 +762,9 @@ export default async function InvestPage() {
                   <div className="h-full w-[35%] bg-blue-600 rounded-full" />
                 </div>
                 <p className="text-sm text-gray-600">উদাহরণে প্রাপ্য:</p>
-                <p className="text-2xl font-bold text-blue-800">৳{investorShare.toLocaleString("bn-BD")}</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  ৳{investorShare.toLocaleString("bn-BD")}
+                </p>
               </div>
             </Reveal>
           </div>
@@ -659,8 +773,9 @@ export default async function InvestPage() {
           <Reveal className="rounded-2xl border border-amber-200 bg-amber-50 p-6 mt-8">
             <h3 className="font-bold text-amber-900 mb-2">⚠️ ঝুঁকির স্পষ্ট কথা</h3>
             <p className="text-sm text-amber-900/90 leading-relaxed">
-              কৃষি ও খামার ব্যবসায় ঝুঁকি আছে। রোগবালাই, প্রাকৃতিক দুর্যোগ, বাজার মূল্য কমে যাওয়া ইত্যাদি কারণে লোকসান হতে পারে।
-              আমরা কোনোভাবেই পুঁজি ফেরত বা নির্দিষ্ট লাভের গ্যারান্টি দিই না। বিনিয়োগ করার আগে ভালো করে বুঝে নিন।
+              কৃষি ও খামার ব্যবসায় ঝুঁকি আছে। রোগবালাই, প্রাকৃতিক দুর্যোগ, বাজার মূল্য কমে
+              যাওয়া ইত্যাদি কারণে লোকসান হতে পারে। আমরা কোনোভাবেই পুঁজি ফেরত বা
+              নির্দিষ্ট লাভের গ্যারান্টি দিই না। বিনিয়োগ করার আগে ভালো করে বুঝে নিন।
             </p>
           </Reveal>
         </div>
@@ -669,19 +784,38 @@ export default async function InvestPage() {
       {/* =========================================================
           HOW TO PARTNER
       ========================================================== */}
-      <section id="how-to" className="py-14 md:py-16 px-4 bg-white scroll-mt-16">
+      <section
+        id="how-to"
+        className="py-14 md:py-16 px-4 bg-white scroll-mt-16"
+      >
         <div className="max-w-4xl mx-auto">
-        <Reveal className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <SectionHeading>কীভাবে অংশীদার হবেন</SectionHeading>
           </Reveal>
 
           <Reveal>
             <StepAccordion
               steps={[
-                { step: "১", title: "অ্যাকাউন্ট তৈরি", text: "নাম, ফোন ও ইমেইল দিয়ে সাধারণ অ্যাকাউন্ট খুলুন।" },
-                { step: "২", title: "প্রোফাইল সম্পূর্ণ", text: "NID, ছবি, স্বাক্ষর ও পেমেন্ট তথ্য দিন।" },
-                { step: "৩", title: "প্রকল্প বেছে নিন ও আবেদন করুন", text: "নির্দিষ্ট প্রকল্প বেছে নিয়ে অংশীদার হওয়ার আবেদন করুন, চুক্তিপত্র পড়ে ইলেকট্রনিক সম্মতি দিন।" },
-                { step: "৪", title: "টাকা জমা দিন", text: "বিকাশ/ব্যাংকে টাকা পাঠিয়ে স্লিপ আপলোড করুন। নিশ্চিত হলে আপনি অংশীদার হয়ে যাবেন।" },
+                {
+                  step: "১",
+                  title: "অ্যাকাউন্ট তৈরি",
+                  text: "নাম, ফোন ও ইমেইল দিয়ে সাধারণ অ্যাকাউন্ট খুলুন।",
+                },
+                {
+                  step: "২",
+                  title: "প্রোফাইল সম্পূর্ণ",
+                  text: "NID, ছবি, স্বাক্ষর ও পেমেন্ট তথ্য দিন।",
+                },
+                {
+                  step: "৩",
+                  title: "প্রকল্প বেছে নিন ও আবেদন করুন",
+                  text: "নির্দিষ্ট প্রকল্প বেছে নিয়ে অংশীদার হওয়ার আবেদন করুন, চুক্তিপত্র পড়ে ইলেকট্রনিক সম্মতি দিন।",
+                },
+                {
+                  step: "৪",
+                  title: "টাকা জমা দিন",
+                  text: "বিকাশ/ব্যাংকে টাকা পাঠিয়ে স্লিপ আপলোড করুন। নিশ্চিত হলে আপনি অংশীদার হয়ে যাবেন।",
+                },
               ]}
             />
           </Reveal>
@@ -694,30 +828,38 @@ export default async function InvestPage() {
               অংশীদার হওয়ার আবেদন করুন →
             </Link>
           </Reveal>
-          </div>
+        </div>
       </section>
 
       {/* =========================================================
           E-AGREEMENT + SETTLEMENT
       ========================================================== */}
-      <section id="agreement" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="agreement"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <SectionHeading>আপনার জন্য দুইটি গুরুত্বপূর্ণ ডকুমেন্ট</SectionHeading>
             <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto">
-              প্রতিটি অংশীদারিত্বের জন্য লিখিত প্রমাণ থাকবে — শুরুতে চুক্তি, শেষে স্বচ্ছ হিসাব।
+              প্রতিটি অংশীদারিত্বের জন্য লিখিত প্রমাণ থাকবে — শুরুতে চুক্তি, শেষে স্বচ্ছ
+              হিসাব।
             </p>
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
-            <Reveal >
+            <Reveal>
               <div className="bg-white rounded-3xl border border-green-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-green-300">
                 <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-2xl mb-4">
                   📜
                 </div>
-                <h3 className="text-xl font-bold text-green-900 mb-3">e-Agreement কপি</h3>
+                <h3 className="text-xl font-bold text-green-900 mb-3">
+                  e-Agreement কপি
+                </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                  আবেদন গৃহীত হলে প্রতিটি অংশীদারিত্বের জন্য একটি স্বতন্ত্র e-Agreement তৈরি হবে — প্রকল্প, বিনিয়োগের পরিমাণ, সময়কাল ও লাভ বণ্টনের শর্ত স্পষ্টভাবে উল্লেখ থাকবে।
+                  আবেদন গৃহীত হলে প্রতিটি অংশীদারিত্বের জন্য একটি স্বতন্ত্র e-Agreement
+                  তৈরি হবে — প্রকল্প, বিনিয়োগের পরিমাণ, সময়কাল ও লাভ বণ্টনের শর্ত
+                  স্পষ্টভাবে উল্লেখ থাকবে।
                 </p>
                 <div className="text-xs text-gray-500 space-y-2">
                   <p>✓ স্বতন্ত্র Agreement Number</p>
@@ -729,14 +871,17 @@ export default async function InvestPage() {
               </div>
             </Reveal>
 
-            <Reveal >
+            <Reveal>
               <div className="bg-white rounded-3xl border border-blue-200 p-6 md:p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-blue-300">
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl mb-4">
                   📊
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-3">Final Settlement স্টেটমেন্ট</h3>
+                <h3 className="text-xl font-bold text-blue-900 mb-3">
+                  Final Settlement স্টেটমেন্ট
+                </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                  প্রকল্প শেষ হলে প্রকৃত বিক্রয় ও খরচের হিসাব থেকে চূড়ান্ত সেটেলমেন্ট তৈরি হবে। অতিরিক্ত বোনাস থাকলে সেটিও একই স্টেটমেন্টে দেখানো হবে।
+                  প্রকল্প শেষ হলে প্রকৃত বিক্রয় ও খরচের হিসাব থেকে চূড়ান্ত সেটেলমেন্ট
+                  তৈরি হবে। অতিরিক্ত বোনাস থাকলে সেটিও একই স্টেটমেন্টে দেখানো হবে।
                 </p>
                 <div className="text-xs text-gray-500 space-y-2">
                   <p>✓ মোট বিক্রয় ও মোট খরচ</p>
@@ -747,7 +892,7 @@ export default async function InvestPage() {
                 </div>
               </div>
             </Reveal>
-            </div>
+          </div>
         </div>
       </section>
 
@@ -762,18 +907,38 @@ export default async function InvestPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: "📄", title: "e-Agreement", text: "প্রতিটি বিনিয়োগের জন্য আলাদা agreement number সহ ডকুমেন্ট থাকবে।" },
-              { icon: "🧾", title: "হিসাবের প্রমাণ", text: "প্রকল্পের খরচের পরিমাণ ও প্রয়োজনীয় রসিদ/ইনভয়েস সংরক্ষণ করা হবে।" },
-              { icon: "📊", title: "স্বচ্ছ Settlement", text: "প্রকল্প শেষে মোট বিক্রয়, খরচ ও নিট লাভ থেকে চূড়ান্ত হিসাব তৈরি হবে।" },
-              { icon: "⭐", title: "Extra Bonus", text: "প্রকৃত লাভ বেশি হলে চাইলে অতিরিক্ত বোনাস দেওয়া হতে পারে।" },
+              {
+                icon: "📄",
+                title: "e-Agreement",
+                text: "প্রতিটি বিনিয়োগের জন্য আলাদা agreement number সহ ডকুমেন্ট থাকবে।",
+              },
+              {
+                icon: "🧾",
+                title: "হিসাবের প্রমাণ",
+                text: "প্রকল্পের খরচের পরিমাণ ও প্রয়োজনীয় রসিদ/ইনভয়েস সংরক্ষণ করা হবে।",
+              },
+              {
+                icon: "📊",
+                title: "স্বচ্ছ Settlement",
+                text: "প্রকল্প শেষে মোট বিক্রয়, খরচ ও নিট লাভ থেকে চূড়ান্ত হিসাব তৈরি হবে।",
+              },
+              {
+                icon: "⭐",
+                title: "Extra Bonus",
+                text: "প্রকৃত লাভ বেশি হলে চাইলে অতিরিক্ত বোনাস দেওয়া হতে পারে।",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 4) * 100}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md hover:border-green-200">
                   <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-xl mb-3">
                     {item.icon}
                   </div>
-                  <h3 className="font-bold text-green-800 text-sm mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-xs leading-relaxed">{item.text}</p>
+                  <h3 className="font-bold text-green-800 text-sm mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs leading-relaxed">
+                    {item.text}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -784,25 +949,50 @@ export default async function InvestPage() {
       {/* =========================================================
           PRINCIPLES
       ========================================================== */}
-      <section id="principles" className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16">
+      <section
+        id="principles"
+        className="py-14 md:py-16 px-4 bg-green-50 scroll-mt-16"
+      >
         <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <SectionHeading>আমাদের নীতিমালা</SectionHeading>
           </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "নির্দিষ্ট রিটার্নের গ্যারান্টি নেই", desc: "কোনো নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্ন নেই। শুধু প্রকৃত লাভের অংশীদারিত্ব।" },
-              { title: "বাস্তব সম্পদভিত্তিক", desc: "টাকা সরাসরি খামারের বাস্তব সম্পদে (হাঁস, খাবার, অবকাঠামো) ব্যয় হয়।" },
-              { title: "স্বচ্ছ লাভ বণ্টন", desc: "প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী লাভ ভাগ করা হয়। সব হিসাব দেখানো হয়।" },
-              { title: "নৈতিক ব্যবসা", desc: "কোনো প্রতারণা বা লুকোচুরি নেই। সবকিছু খোলাখুলি।" },
-              { title: "ঝুঁকি ভাগাভাগি", desc: "লাভ-লোকসান দুটোই অংশীদারিত্বের ভিত্তিতে ভাগ হয়।" },
-              { title: "চুক্তিভিত্তিক", desc: "প্রতিটি বিনিয়োগের জন্য লিখিত চুক্তি থাকে।" },
+              {
+                title: "নির্দিষ্ট রিটার্নের গ্যারান্টি নেই",
+                desc: "কোনো নির্দিষ্ট সুদ বা গ্যারান্টিড রিটার্ন নেই। শুধু প্রকৃত লাভের অংশীদারিত্ব।",
+              },
+              {
+                title: "বাস্তব সম্পদভিত্তিক",
+                desc: "টাকা সরাসরি খামারের বাস্তব সম্পদে (হাঁস, খাবার, অবকাঠামো) ব্যয় হয়।",
+              },
+              {
+                title: "স্বচ্ছ লাভ বণ্টন",
+                desc: "প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী লাভ ভাগ করা হয়। সব হিসাব দেখানো হয়।",
+              },
+              {
+                title: "নৈতিক ব্যবসা",
+                desc: "কোনো প্রতারণা বা লুকোচুরি নেই। সবকিছু খোলাখুলি।",
+              },
+              {
+                title: "ঝুঁকি ভাগাভাগি",
+                desc: "লাভ-লোকসান দুটোই অংশীদারিত্বের ভিত্তিতে ভাগ হয়।",
+              },
+              {
+                title: "চুক্তিভিত্তিক",
+                desc: "প্রতিটি বিনিয়োগের জন্য লিখিত চুক্তি থাকে।",
+              },
             ].map((item, i) => (
               <Reveal key={item.title} delay={(i % 3) * 120}>
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <h3 className="font-bold text-green-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-green-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -876,22 +1066,21 @@ export default async function InvestPage() {
           FINAL CTA
       ========================================================== */}
       <section className="py-16 px-4 bg-green-200 text-center">
-  <Reveal className="max-w-2xl mx-auto">
-    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-green-950">
-      একসাথে এগিয়ে চলুন
-    </h2>
-    <p className="text-green-850 mb-8 font-medium">
-      বাস্তব কাজ, স্বচ্ছ হিসাব এবং ন্যায্য অংশীদারিত্বের ভিত্তিতে।
-    </p>
-    <Link
-      href="/customer/dashboard"
-      className="inline-flex items-center gap-2 bg-green-900 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
-    >
-      অংশীদার হওয়ার আবেদন করুন →
-    </Link>
-  </Reveal>
-</section>
-
-      </div>
+        <Reveal className="max-w-2xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-green-950">
+            একসাথে এগিয়ে চলুন
+          </h2>
+          <p className="text-green-850 mb-8 font-medium">
+            বাস্তব কাজ, স্বচ্ছ হিসাব এবং ন্যায্য অংশীদারিত্বের ভিত্তিতে।
+          </p>
+          <Link
+            href="/customer/dashboard"
+            className="inline-flex items-center gap-2 bg-green-900 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-green-800 transition"
+          >
+            অংশীদার হওয়ার আবেদন করুন →
+          </Link>
+        </Reveal>
+      </section>
+    </div>
   );
 }

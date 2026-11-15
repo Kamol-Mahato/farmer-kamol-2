@@ -28,9 +28,7 @@ async function getData(terms: string[]) {
     return {
       products,
       deliveryMode: (settings?.deliveryChargeMode ?? "NORMAL") as
-        | "NORMAL"
-        | "FREE"
-        | "HALF",
+        "NORMAL" | "FREE" | "HALF",
     };
   } catch {
     return { products: [], deliveryMode: "NORMAL" as const };
@@ -139,7 +137,7 @@ export default async function LandingPage({
         {products.length > 0 && (
           <section className="mb-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-              {products.map((product) => (
+              {products.map((product) =>
                 isEn ? (
                   <ProductCardEn
                     key={product.id}
@@ -152,15 +150,17 @@ export default async function LandingPage({
                     product={product}
                     deliveryMode={deliveryMode}
                   />
-                )
-              ))}
+                ),
+              )}
             </div>
           </section>
         )}
 
         {landing.sections.map((s) => (
           <section key={s.heading} className="mb-6">
-            <h2 className="text-xl font-bold text-green-800 mb-2">{s.heading}</h2>
+            <h2 className="text-xl font-bold text-green-800 mb-2">
+              {s.heading}
+            </h2>
             {s.body.map((p, i) => (
               <p key={i} className="text-gray-700 leading-relaxed mb-2">
                 {p}
@@ -171,7 +171,7 @@ export default async function LandingPage({
 
         <section className="mb-8">
           <h2 className="text-xl font-bold text-green-800 mb-3">
-          {isEn ? "Frequently Asked Questions" : "সাধারণ প্রশ্ন ও উত্তর"}
+            {isEn ? "Frequently Asked Questions" : "সাধারণ প্রশ্ন ও উত্তর"}
           </h2>
           <div className="space-y-2">
             {landing.faqs.map((f) => (
@@ -195,7 +195,8 @@ export default async function LandingPage({
             rel="noopener noreferrer"
             className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
           >
-            {landing.whatsappLabel ?? (isEn ? "Order on WhatsApp" : "WhatsApp-এ অর্ডার করুন")}
+            {landing.whatsappLabel ??
+              (isEn ? "Order on WhatsApp" : "WhatsApp-এ অর্ডার করুন")}
           </a>
           <a
             href={`tel:${siteConfig.contact.phone}`}

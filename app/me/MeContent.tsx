@@ -96,7 +96,10 @@ function GmailIcon() {
       <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
       <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
       <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92" />
-      <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
+      <path
+        fill="#c5221f"
+        d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2"
+      />
     </svg>
   );
 }
@@ -244,7 +247,7 @@ export default function MeContent() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-white/5 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-        <HeaderClock />
+          <HeaderClock />
 
           <nav className="hidden md:flex gap-8 text-sm text-slate-300">
             <a href="#home" className="hover:text-white transition">
@@ -295,7 +298,7 @@ export default function MeContent() {
             </p>
 
             <div className="flex flex-wrap gap-3">
-            <a
+              <a
                 href={cvUrl}
                 download="Kamol-Kumar-Mahato-CV.pdf"
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition text-white text-sm font-medium px-5 py-2.5 rounded-lg"
@@ -315,7 +318,7 @@ export default function MeContent() {
             <div className="relative w-64 h-64 md:w-72 md:h-72">
               {/* Spinning colorful border */}
               <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_100deg,transparent_0deg,#0af525_70deg,transparent_120deg)] animate-[spin_10s_linear_infinite]"></div>
-              
+
               {/* Inner image container */}
               <div className="absolute inset-[4px] rounded-full overflow-hidden bg-[#0b0f2a] shadow-2xl shadow-indigo-900/40">
                 <img

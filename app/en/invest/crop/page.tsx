@@ -72,9 +72,10 @@ export default function CropInvestPageEn() {
               Crop Farming Investment
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              Crop cultivation on arable land — rice, mustard and high-value crops.
-              Steady and sustainable production-based agriculture investment. Transparent
-              accounts, written agreement and real harvest partnership.
+              Crop cultivation on arable land — rice, mustard and high-value
+              crops. Steady and sustainable production-based agriculture
+              investment. Transparent accounts, written agreement and real
+              harvest partnership.
             </p>
           </Reveal>
         </div>
@@ -93,7 +94,10 @@ export default function CropInvestPageEn() {
               className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-300"
             >
               <div className="h-40 bg-amber-50 flex items-center justify-center text-amber-800 font-semibold text-lg">
-              <InvestPhoto name="invest-dhan" alt="Crop Farming on Arable Land">
+                <InvestPhoto
+                  name="invest-dhan"
+                  alt="Crop Farming on Arable Land"
+                >
                   Crop Farming on Arable Land
                 </InvestPhoto>
               </div>
@@ -105,8 +109,8 @@ export default function CropInvestPageEn() {
                   Crop Farming on Arable Land
                 </h2>
                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                  Rice, mustard and other high-value crops. Seasonal planning, modern
-                  methods and local market linkage.
+                  Rice, mustard and other high-value crops. Seasonal planning,
+                  modern methods and local market linkage.
                 </p>
                 <ul className="text-sm text-gray-600 space-y-1.5 mb-5">
                   <li>• Rice and mustard cultivation</li>
@@ -131,15 +135,17 @@ export default function CropInvestPageEn() {
           <div className="space-y-5 text-gray-700 leading-relaxed">
             <Reveal>
               <p>
-                Crop farming is the foundation of agriculture. With proper planning and
-                modern methods on arable land, steady production and income are possible.
-                Crops like rice and mustard always have local demand.
+                Crop farming is the foundation of agriculture. With proper
+                planning and modern methods on arable land, steady production
+                and income are possible. Crops like rice and mustard always have
+                local demand.
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                Our model is: first the work, then trust, then partnership. Every project
-                will have a written agreement, transparent accounts and regular updates.
+                Our model is: first the work, then trust, then partnership.
+                Every project will have a written agreement, transparent
+                accounts and regular updates.
               </p>
             </Reveal>
           </div>
@@ -149,13 +155,22 @@ export default function CropInvestPageEn() {
       {/* Back links */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
-          <Link href="/en/invest/livestock" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/livestock"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Livestock →
           </Link>
-          <Link href="/en/invest/aquaculture" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest/aquaculture"
+            className="text-green-700 font-semibold hover:underline"
+          >
             Fish Farming →
           </Link>
         </div>

@@ -34,9 +34,7 @@ export default async function AdminProductsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-6 py-4 text-gray-600">
-                  পণ্যের নাম
-                </th>
+                <th className="text-left px-6 py-4 text-gray-600">পণ্যের নাম</th>
                 <th className="text-left px-6 py-4 text-gray-600">দাম</th>
                 <th className="text-left px-6 py-4 text-gray-600">স্টক</th>
                 <th className="text-left px-6 py-4 text-gray-600">স্ট্যাটাস</th>

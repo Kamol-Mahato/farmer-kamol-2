@@ -20,10 +20,7 @@ export async function GET(
       include: { images: { orderBy: { displayOrder: "asc" } } },
     });
     if (!item) {
-      return NextResponse.json(
-        { error: "আইটেম পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "আইটেম পাওয়া যায়নি" }, { status: 404 });
     }
     return NextResponse.json(item);
   } catch (error: any) {

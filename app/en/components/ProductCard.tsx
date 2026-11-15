@@ -215,7 +215,7 @@ export default function ProductCard({
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                Out of Stock
+                  Out of Stock
                 </span>
               </div>
             )}
@@ -265,7 +265,7 @@ export default function ProductCard({
             </span>
           )}
           <Link href={`/en/shop/${product.slug}`}>
-          <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
+            <h2 className="text-sm md:text-base font-bold text-gray-800 mt-1 mb-0.5 line-clamp-1 hover:text-green-700 transition">
               {displayName}
             </h2>
           </Link>
@@ -274,8 +274,8 @@ export default function ProductCard({
               Per {translateUnit(product.unit)}
             </span>
             <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-xs text-black font-bold">Price</span>
-            <span className="text-lg md:text-xl font-extrabold text-black">
+              <span className="text-xs text-black font-bold">Price</span>
+              <span className="text-lg md:text-xl font-extrabold text-black">
                 ৳{" "}
                 {savePercent !== null
                   ? product.discountPrice
@@ -294,14 +294,14 @@ export default function ProductCard({
         {product.priceType === "NEGOTIABLE" ? (
           // ✅ Direct WhatsApp button for negotiable-price products
           <a
-          href={buildWhatsAppLink(displayName)}
-          onClick={() =>
-            sendGAEvent({
-              event: "whatsapp_product_click",
-              value: product.name,
-            })
-          }
-          target="_blank"
+            href={buildWhatsAppLink(displayName)}
+            onClick={() =>
+              sendGAEvent({
+                event: "whatsapp_product_click",
+                value: product.name,
+              })
+            }
+            target="_blank"
             rel="noopener noreferrer"
             className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-green-700 text-white hover:bg-green-600 active:scale-95 transition"
           >

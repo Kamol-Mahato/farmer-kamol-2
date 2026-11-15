@@ -66,10 +66,7 @@ export async function PUT(
       include: { orderItems: true },
     });
     if (!existingOrder) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
 
     // 🔒 Agent টার্মিনাল status-এ (Delivered/Cancelled/Returned ইত্যাদি) এডিট করতে পারবে না
@@ -79,8 +76,7 @@ export async function PUT(
     ) {
       return NextResponse.json(
         {
-          error:
-            "এই অর্ডার ফাইনাল স্ট্যাটাসে আছে — শুধু Admin এখন এডিট করতে পারবে",
+          error: "এই অর্ডার ফাইনাল স্ট্যাটাসে আছে — শুধু Admin এখন এডিট করতে পারবে",
         },
         { status: 403 },
       );

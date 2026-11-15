@@ -72,7 +72,10 @@ export default async function ChinaHashInvestPageEn() {
 
   const soldLots =
     totalLots && targetAmount && targetAmount > 0
-      ? Math.min(totalLots, Math.round((raisedAmount / targetAmount) * totalLots))
+      ? Math.min(
+          totalLots,
+          Math.round((raisedAmount / targetAmount) * totalLots),
+        )
       : null;
 
   const projectDesc =
@@ -108,9 +111,7 @@ export default async function ChinaHashInvestPageEn() {
             <h1 className="text-2xl md:text-4xl font-black text-gray-900 leading-tight mb-4">
               Invest in Chinese Duck Expansion
             </h1>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              {projectDesc}
-            </p>
+            <p className="text-gray-600 leading-relaxed mb-6">{projectDesc}</p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/en/customer/dashboard"
@@ -126,13 +127,17 @@ export default async function ChinaHashInvestPageEn() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              This is not a bank deposit or fixed-interest scheme. Both profit and loss are possible.
+              This is not a bank deposit or fixed-interest scheme. Both profit
+              and loss are possible.
             </p>
           </Reveal>
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center">
-              <InvestPhoto name="invest-china-hash" alt="Chinese Duck Project - Farmer Kamol">
+              <InvestPhoto
+                name="invest-china-hash"
+                alt="Chinese Duck Project - Farmer Kamol"
+              >
                 <img
                   src="/uploads/header-2nd-about.jpg"
                   alt="Chinese Duck Project - Farmer Kamol"
@@ -201,9 +206,9 @@ export default async function ChinaHashInvestPageEn() {
                 Why Chinese ducks?
               </h3>
               <p>
-                Chinese ducks grow fast, have good disease resistance and steady market
-                demand. Both breeding and meat production are possible. You can start
-                small and expand step by step.
+                Chinese ducks grow fast, have good disease resistance and steady
+                market demand. Both breeding and meat production are possible.
+                You can start small and expand step by step.
               </p>
             </Reveal>
 
@@ -236,7 +241,9 @@ export default async function ChinaHashInvestPageEn() {
 
             {featuredProject?.timeline && (
               <Reveal delay={240}>
-                <h3 className="font-bold text-green-900 text-lg mb-2">Timeline</h3>
+                <h3 className="font-bold text-green-900 text-lg mb-2">
+                  Timeline
+                </h3>
                 <p>{featuredProject.timeline}</p>
               </Reveal>
             )}
@@ -260,7 +267,8 @@ export default async function ChinaHashInvestPageEn() {
                 </div>
                 {soldLots != null && totalLots != null && (
                   <p className="text-xs text-gray-500 mt-2">
-                    {soldLots.toLocaleString("en-US")} / {totalLots.toLocaleString("en-US")} {lotUnitName} sold
+                    {soldLots.toLocaleString("en-US")} /{" "}
+                    {totalLots.toLocaleString("en-US")} {lotUnitName} sold
                   </p>
                 )}
               </div>
@@ -332,7 +340,10 @@ export default async function ChinaHashInvestPageEn() {
           >
             ← All Livestock Projects
           </Link>
-          <Link href="/en/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/en/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← Agriculture Invest Home
           </Link>
         </div>

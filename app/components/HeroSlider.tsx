@@ -324,7 +324,7 @@ export default function HeroSlider({
     thumb: string | null,
     title: string,
     onPlay: () => void,
-    isPriority: boolean = false
+    isPriority: boolean = false,
   ) {
     return (
       <button
@@ -332,18 +332,18 @@ export default function HeroSlider({
         onClick={onPlay}
         aria-label={`প্লে করুন: ${title}`}
         className="absolute inset-0 w-full h-full group"
-      > 
+      >
         {thumb ? (
           <Image
-          src={thumb}
-          alt={title}
-          fill
-          priority={isPriority}
-          fetchPriority={isPriority ? "high" : "auto"}
-          quality={isPriority ? 80 : 70}
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
+            src={thumb}
+            alt={title}
+            fill
+            priority={isPriority}
+            fetchPriority={isPriority ? "high" : "auto"}
+            quality={isPriority ? 80 : 70}
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
         ) : (
           <div className="w-full h-full bg-green-800" />
         )}
@@ -359,15 +359,15 @@ export default function HeroSlider({
   return (
     <div className="bg-green-900">
       <h1 className="sr-only">
-      Farmer Kamol – কৃষক কমল | সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার তেল
-        ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
+        Farmer Kamol – কৃষক কমল | সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার
+        তেল ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
       </h1>
 
       {/* ── PC LAYOUT ── */}
       <div className="hidden md:grid md:grid-cols-2 h-[280px]">
         {/* বাম — ভিডিও (থাম্বনেইল ঘুরবে, ক্লিক করলে play হবে) */}
         <div className="relative overflow-hidden">
-        {currentPcVideo && !pcYtId ? (
+          {currentPcVideo && !pcYtId ? (
             renderChannelLink(
               currentPcVideo.youtubeUrl,
               pcThumb,
@@ -391,7 +391,7 @@ export default function HeroSlider({
                 pcThumb,
                 currentPcVideo?.title || "ভিডিও",
                 () => setPcPlaying(true),
-                pcVideoIndex === 0
+                pcVideoIndex === 0,
               )
             )
           ) : (
@@ -458,7 +458,7 @@ export default function HeroSlider({
 
       {/* ── MOBILE LAYOUT — ভিডিও ও প্রোডাক্ট একই queue-তে, ‹ › দিয়ে পুরো queue-তে ঘোরা যাবে ── */}
       <div className="md:hidden">
-      <div
+        <div
           className="relative overflow-hidden"
           style={{ paddingTop: "56.25%" }}
           onTouchStart={(e) => {
@@ -478,55 +478,55 @@ export default function HeroSlider({
             else mobilePrev();
           }}
         >
-        <CrossfadeSwap
-          itemKey={safeMobileIndex}
-          count={mobileTotal}
-          skipPrev={mobilePlaying}
-        >
-        {currentMobileItem?.kind === "video" &&
-          currentMobileVideo &&
-          !mobileYtId ? (
-            renderChannelLink(
-              currentMobileVideo.youtubeUrl,
-              mobileThumb,
-              currentMobileVideo.title || "চ্যানেল",
-              safeMobileIndex === 0,
-            )
-          ) : currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
-            mobilePlaying ? (
-              <iframe
-                key={`m-${safeMobileIndex}`}
-                ref={mobileIframeRef}
-                src={mobileEmbedUrl}
-                className="absolute inset-0 w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                scrolling="no"
-                onLoad={(e) => startListening(e.currentTarget)}
-              />
-            ) : (
-              renderVideoThumbnail(
+          <CrossfadeSwap
+            itemKey={safeMobileIndex}
+            count={mobileTotal}
+            skipPrev={mobilePlaying}
+          >
+            {currentMobileItem?.kind === "video" &&
+            currentMobileVideo &&
+            !mobileYtId ? (
+              renderChannelLink(
+                currentMobileVideo.youtubeUrl,
                 mobileThumb,
-                currentMobileVideo?.title || "ভিডিও",
-                () => setMobilePlaying(true),
-                safeMobileIndex === 0
+                currentMobileVideo.title || "চ্যানেল",
+                safeMobileIndex === 0,
               )
-            )
-          ) : currentMobileItem?.kind === "product" &&
-            featuredProducts[currentMobileItem.productIdx] ? (
-            renderProductSlide(
-              featuredProducts[currentMobileItem.productIdx],
-              `m-${safeMobileIndex}`,
-              "opacity-100",
-              safeMobileIndex === 0,
-            )
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-green-800">
-              <p className="text-green-300 text-sm">কোনো কনটেন্ট নেই</p>
-            </div>
-          )}
+            ) : currentMobileItem?.kind === "video" && mobileEmbedUrl ? (
+              mobilePlaying ? (
+                <iframe
+                  key={`m-${safeMobileIndex}`}
+                  ref={mobileIframeRef}
+                  src={mobileEmbedUrl}
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  scrolling="no"
+                  onLoad={(e) => startListening(e.currentTarget)}
+                />
+              ) : (
+                renderVideoThumbnail(
+                  mobileThumb,
+                  currentMobileVideo?.title || "ভিডিও",
+                  () => setMobilePlaying(true),
+                  safeMobileIndex === 0,
+                )
+              )
+            ) : currentMobileItem?.kind === "product" &&
+              featuredProducts[currentMobileItem.productIdx] ? (
+              renderProductSlide(
+                featuredProducts[currentMobileItem.productIdx],
+                `m-${safeMobileIndex}`,
+                "opacity-100",
+                safeMobileIndex === 0,
+              )
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-green-800">
+                <p className="text-green-300 text-sm">কোনো কনটেন্ট নেই</p>
+              </div>
+            )}
           </CrossfadeSwap>
-            {mobileTotal > 1 && (
+          {mobileTotal > 1 && (
             <>
               <button
                 onClick={mobilePrev}

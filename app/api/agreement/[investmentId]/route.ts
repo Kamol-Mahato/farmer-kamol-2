@@ -39,7 +39,8 @@ export async function GET(
   // ownership check — নিজের চুক্তি অথবা admin/agent হলে দেখা যাবে
   const customerId = await getCustomerId();
   const admin = await verifyAdminOrAgent();
-  const isOwner = customerId && customerId === investment.investorProfile.userId;
+  const isOwner =
+    customerId && customerId === investment.investorProfile.userId;
 
   if (!isOwner && !admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

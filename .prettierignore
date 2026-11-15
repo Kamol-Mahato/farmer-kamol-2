@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+public
+progyadhara_assets
+assets
+prisma/migrations
+package-lock.json
+*.md
+*.html
+*.py
+*.sh
+*.txt

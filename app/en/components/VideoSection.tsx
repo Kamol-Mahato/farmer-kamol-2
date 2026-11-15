@@ -30,7 +30,7 @@ export default function VideoSection({
   return (
     <div className="bg-green-50 pt-2 pb-6 px-4">
       <div className="max-w-7xl mx-auto">
-      <div className="text-center mb-6">
+        <div className="text-center mb-6">
           <h2 className="text-green-800 text-2xl font-bold border-2 rounded-full border-green-700 inline-block px-4 py-1">
             Our Videos
           </h2>

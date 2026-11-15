@@ -47,14 +47,26 @@ export async function POST(request: Request) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: tr(locale, "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে", "Only JPG, PNG or WEBP images can be uploaded") },
+        {
+          error: tr(
+            locale,
+            "শুধুমাত্র JPG, PNG বা WEBP ছবি আপলোড করা যাবে",
+            "Only JPG, PNG or WEBP images can be uploaded",
+          ),
+        },
         { status: 400 },
       );
     }
 
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: tr(locale, "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না", "Image size cannot exceed 10 MB") },
+        {
+          error: tr(
+            locale,
+            "ছবির সাইজ ১০ এমবি-র বেশি হতে পারবে না",
+            "Image size cannot exceed 10 MB",
+          ),
+        },
         { status: 400 },
       );
     }
@@ -132,7 +144,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ avatarUrl });
   } catch (error) {
     console.error("Avatar API Error:", error);
-    return NextResponse.json({ error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") }, { status: 500 });
+    return NextResponse.json(
+      { error: tr(locale, "সমস্যা হয়েছে", "Something went wrong") },
+      { status: 500 },
+    );
   }
 }
 

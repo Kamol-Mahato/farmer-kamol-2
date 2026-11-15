@@ -23,10 +23,7 @@ export async function POST(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "অর্ডার পাওয়া যায়নি" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
     }
 
     if (order.courierTrackingId) {

@@ -9,7 +9,8 @@ export default function InvestSubNav() {
     { href: "/en/invest/aquaculture", label: "Fish Farming" },
     { href: "/en/invest#calculator", label: "Profit Share" },
     { href: "/en/invest#how-to", label: "How to Join" },
-    { href: "/en/krishite-biniyog", label: "Guide" },,
+    { href: "/en/krishite-biniyog", label: "Guide" },
+    ,
     { href: "/en/contact", label: "Contact" },
   ];
 
@@ -69,7 +70,8 @@ export default function InvestSubNav() {
         >
           Invest
           <span className="hidden sm:inline" aria-hidden>
-            {" "}Now →
+            {" "}
+            Now →
           </span>
         </Link>
       </div>

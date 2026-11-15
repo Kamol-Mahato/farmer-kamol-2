@@ -75,7 +75,8 @@ export default function AquacultureInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
               পুকুরে মাছ চাষ ভিত্তিক কৃষি বিনিয়োগ। পরিকল্পিত উৎপাদন, স্বাস্থ্যকর পদ্ধতি
-              এবং স্থানীয় বাজার সংযোগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব উৎপাদনের সাথে অংশীদারিত্ব।
+              এবং স্থানীয় বাজার সংযোগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব উৎপাদনের
+              সাথে অংশীদারিত্ব।
             </p>
           </Reveal>
         </div>
@@ -94,7 +95,7 @@ export default function AquacultureInvestPage() {
               className="block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-300"
             >
               <div className="h-40 bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-lg">
-              <InvestPhoto name="invest-mach" alt="পুকুরে মাছ চাষ">
+                <InvestPhoto name="invest-mach" alt="পুকুরে মাছ চাষ">
                   পুকুরে মাছ চাষ
                 </InvestPhoto>
               </div>
@@ -132,15 +133,15 @@ export default function AquacultureInvestPage() {
           <div className="space-y-5 text-gray-700 leading-relaxed">
             <Reveal>
               <p>
-                মাছ চাষ বাংলাদেশে দ্রুত বর্ধনশীল খাত। স্থানীয় বাজারে চাহিদা সবসময় থাকে
-                এবং সঠিক ব্যবস্থাপনায় ভালো উৎপাদন পাওয়া যায়। পুকুর ভিত্তিক চাষ তুলনামূলক
-                নিয়ন্ত্রণযোগ্য এবং হিসাব রাখা সহজ।
+                মাছ চাষ বাংলাদেশে দ্রুত বর্ধনশীল খাত। স্থানীয় বাজারে চাহিদা সবসময়
+                থাকে এবং সঠিক ব্যবস্থাপনায় ভালো উৎপাদন পাওয়া যায়। পুকুর ভিত্তিক চাষ
+                তুলনামূলক নিয়ন্ত্রণযোগ্য এবং হিসাব রাখা সহজ।
               </p>
             </Reveal>
             <Reveal delay={80}>
               <p>
-                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি প্রকল্পে
-                লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হবে।
+                আমাদের মডেলে প্রথমে কাজ, তারপর বিশ্বাস, তারপর অংশীদারিত্ব। প্রতিটি
+                প্রকল্পে লিখিত চুক্তি, স্বচ্ছ হিসাব এবং নিয়মিত আপডেট দেওয়া হবে।
               </p>
             </Reveal>
           </div>
@@ -150,13 +151,22 @@ export default function AquacultureInvestPage() {
       {/* Back links */}
       <section className="py-10 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center text-sm">
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
-          <Link href="/invest/livestock" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/livestock"
+            className="text-green-700 font-semibold hover:underline"
+          >
             লাইভস্টক →
           </Link>
-          <Link href="/invest/crop" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest/crop"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ফসল চাষ →
           </Link>
         </div>

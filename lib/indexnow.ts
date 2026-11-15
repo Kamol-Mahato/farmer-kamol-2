@@ -24,10 +24,8 @@ export async function submitToIndexNow(urls: string[]): Promise<{
   const uniqueUrls = [
     ...new Set(
       urls.filter(
-        (u) =>
-          typeof u === "string" &&
-          u.startsWith(`https://${HOST}`)
-      )
+        (u) => typeof u === "string" && u.startsWith(`https://${HOST}`),
+      ),
     ),
   ];
 
@@ -61,7 +59,7 @@ export async function submitToIndexNow(urls: string[]): Promise<{
         const text = await res.text().catch(() => "");
         console.error(
           `IndexNow batch failed (${res.status}):`,
-          text.slice(0, 200)
+          text.slice(0, 200),
         );
         return {
           success: false,

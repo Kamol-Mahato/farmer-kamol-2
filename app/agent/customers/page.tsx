@@ -88,9 +88,7 @@ export default function AdminCustomersPage() {
     name: string,
     phone: string,
   ) {
-    if (
-      !confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`)
-    )
+    if (!confirm(`${name} (${phone}) এর জন্য নতুন পাসওয়ার্ড জেনারেট করতে চান?`))
       return;
     setResettingId(customerId);
     try {

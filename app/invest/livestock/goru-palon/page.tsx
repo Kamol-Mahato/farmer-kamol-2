@@ -79,7 +79,8 @@ export default function GoruPalonInvestPage() {
             </h1>
             <p className="text-gray-600 leading-relaxed mb-6">
               দেশি ও উন্নত জাতের গরু পালন। দুগ্ধ ও মাংস উৎপাদন ভিত্তিক দীর্ঘমেয়াদী
-              বিনিয়োগ সুযোগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব খামারের সাথে অংশীদারিত্ব।
+              বিনিয়োগ সুযোগ। স্বচ্ছ হিসাব, লিখিত চুক্তি এবং বাস্তব খামারের সাথে
+              অংশীদারিত্ব।
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -96,13 +97,17 @@ export default function GoruPalonInvestPage() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-gray-500">
-              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে পারে।
+              এটি ব্যাংক আমানত বা নির্ধারিত সুদের স্কিম নয়। লাভ-লোকসান দুটোই হতে
+              পারে।
             </p>
           </Reveal>
 
           <Reveal>
             <div className="rounded-3xl overflow-hidden border border-green-100 shadow-lg aspect-[4/3] bg-green-50 flex items-center justify-center text-green-700 font-medium">
-            <InvestPhoto name="invest-goru" alt="গরু পালন প্রকল্প - Farmer Kamol">
+              <InvestPhoto
+                name="invest-goru"
+                alt="গরু পালন প্রকল্প - Farmer Kamol"
+              >
                 গরুর ছবি শীঘ্রই যোগ হবে
               </InvestPhoto>
             </div>
@@ -122,7 +127,9 @@ export default function GoruPalonInvestPage() {
             <Reveal key={item.label} delay={i * 60}>
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">{item.label}</p>
-                <p className="text-xl font-black text-green-700">{item.value}</p>
+                <p className="text-xl font-black text-green-700">
+                  {item.value}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -142,8 +149,9 @@ export default function GoruPalonInvestPage() {
                 কেন গরু পালন?
               </h3>
               <p>
-                গরু পালন দীর্ঘমেয়াদী ও স্থিতিশীল আয়ের সুযোগ দেয়। দুগ্ধ উৎপাদন নিয়মিত নগদ প্রবাহ
-                তৈরি করে এবং মাংস ও বাচ্চা বিক্রি থেকে অতিরিক্ত আয় হয়। স্থানীয় বাজারে চাহিদা সবসময় থাকে।
+                গরু পালন দীর্ঘমেয়াদী ও স্থিতিশীল আয়ের সুযোগ দেয়। দুগ্ধ উৎপাদন নিয়মিত
+                নগদ প্রবাহ তৈরি করে এবং মাংস ও বাচ্চা বিক্রি থেকে অতিরিক্ত আয় হয়।
+                স্থানীয় বাজারে চাহিদা সবসময় থাকে।
               </p>
             </Reveal>
 
@@ -153,7 +161,8 @@ export default function GoruPalonInvestPage() {
               </h3>
               <p>
                 প্রথমে সীমিত সংখ্যক গরু দিয়ে শুরু করে ধাপে ধাপে সম্প্রসারণ করা হবে।
-                খাবার, স্বাস্থ্যসেবা, শেড এবং প্রজনন ব্যবস্থাপনা — সবকিছুর হিসাব স্বচ্ছভাবে রাখা হবে।
+                খাবার, স্বাস্থ্যসেবা, শেড এবং প্রজনন ব্যবস্থাপনা — সবকিছুর হিসাব
+                স্বচ্ছভাবে রাখা হবে।
               </p>
             </Reveal>
 
@@ -162,16 +171,17 @@ export default function GoruPalonInvestPage() {
                 লাভ-লোকসান বণ্টন
               </h3>
               <p>
-                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব অনুযায়ী)।
-                লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো গ্যারান্টি ছাড়া।
+                লাভ হলে খামারি ৬৫% এবং অংশীদার ৩৫% পাবেন (প্রকৃত আয়-ব্যয়ের হিসাব
+                অনুযায়ী)। লোকসান হলে অবশিষ্ট মূলধন ফেরত দেওয়ার চেষ্টা করা হবে, কোনো
+                গ্যারান্টি ছাড়া।
               </p>
             </Reveal>
 
             <Reveal delay={200}>
               <h3 className="font-bold text-green-900 text-lg mb-2">ঝুঁকি</h3>
               <p>
-                রোগবালাই, খাবারের দাম বৃদ্ধি, বাজার দরের ওঠানামা এবং প্রাকৃতিক দুর্যোগ —
-                এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
+                রোগবালাই, খাবারের দাম বৃদ্ধি, বাজার দরের ওঠানামা এবং প্রাকৃতিক দুর্যোগ
+                — এসব ঝুঁকি থাকতে পারে। সব ঝুঁকি খোলাখুলি জানানো হবে।
               </p>
             </Reveal>
           </div>
@@ -242,7 +252,10 @@ export default function GoruPalonInvestPage() {
           >
             চিনা হাঁস প্রকল্প →
           </Link>
-          <Link href="/invest" className="text-green-700 font-semibold hover:underline">
+          <Link
+            href="/invest"
+            className="text-green-700 font-semibold hover:underline"
+          >
             ← কৃষি বিনিয়োগ হোম
           </Link>
         </div>
