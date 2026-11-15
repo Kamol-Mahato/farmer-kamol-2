@@ -24,6 +24,8 @@ export async function PATCH(
 
     revalidatePath("/");
     revalidatePath("/en");
+    revalidatePath("/shop/[slug]", "page");
+    revalidatePath("/en/shop/[slug]", "page");
     return NextResponse.json(review);
   } catch (error) {
     console.error("ADMIN REVIEW PATCH ERROR:", error);
@@ -45,6 +47,8 @@ export async function DELETE(
     await prisma.productReview.delete({ where: { id: Number(id) } });
     revalidatePath("/");
     revalidatePath("/en");
+    revalidatePath("/shop/[slug]", "page");
+    revalidatePath("/en/shop/[slug]", "page");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("ADMIN REVIEW DELETE ERROR:", error);

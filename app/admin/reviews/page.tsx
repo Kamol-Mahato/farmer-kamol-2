@@ -9,7 +9,10 @@ type Review = {
   isApproved: boolean;
   createdAt: string;
   product: { id: number; name: string; slug: string };
-  user: { id: number; name: string | null; phone: string };
+  user: { id: number; name: string | null; phone: string } | null;
+  reviewerName?: string | null;
+  reviewerPhone?: string | null;
+  hasOrder?: boolean;
 };
 
 export default function AdminReviewsPage() {
@@ -136,7 +139,9 @@ export default function AdminReviewsPage() {
                     {review.product.name}
                   </Link>
                   <p className="text-xs text-gray-400">
-                    {review.user.name || "নাম নেই"} · {review.user.phone} ·{" "}
+                  {review.reviewerName || review.user?.name || "নাম নেই"} ·{" "}
+{review.reviewerPhone || review.user?.phone} ·{" "}
+{review.hasOrder ? "✅ অর্ডার মিলেছে" : "⚠️ অর্ডার মেলেনি"} ·{" "}
                     {new Date(review.createdAt).toLocaleDateString("bn-BD")}
                   </p>
                 </div>

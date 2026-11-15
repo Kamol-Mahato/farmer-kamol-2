@@ -15,7 +15,8 @@ export type TestimonialItem = {
     id: number;
     rating: number;
     comment: string | null;
-    user: { name: string | null };
+    user?: { name: string | null } | null;
+    reviewerName?: string | null;
     product?: { name: string; nameEn: string | null } | null;
   };
   
@@ -101,13 +102,13 @@ export type TestimonialItem = {
       id: r.id,
       rating: r.rating,
       comment: r.comment,
-      user: r.user,
+      user: { name: r.reviewerName || r.user?.name || null },
       productLabel: r.product
         ? isEn
           ? r.product.nameEn || r.product.name
           : r.product.name
         : null,
-      verified: true,
+        verified: false,
     }));
   
     const needed = Math.max(0, TARGET_COUNT - realItems.length);

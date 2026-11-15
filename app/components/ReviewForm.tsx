@@ -11,6 +11,8 @@ export default function ReviewForm({ productId }: { productId: number }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -27,13 +29,17 @@ export default function ReviewForm({ productId }: { productId: number }) {
       setError("দয়া করে একটা রেটিং দিন");
       return;
     }
+    if (!name.trim() || phone.replace(/\D/g, "").length < 11) {
+      setError("আপনার নাম ও সঠিক মোবাইল নম্বর দিন");
+      return;
+    }
     setSubmitting(true);
     setError("");
     try {
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, rating, comment }),
+        body: JSON.stringify({ productId, rating, comment, name, phone }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -99,6 +105,23 @@ export default function ReviewForm({ productId }: { productId: number }) {
           </button>
         ))}
       </div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="আপনার নাম"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 mb-2"
+        maxLength={60}
+      />
+      <input
+        type="tel"
+        inputMode="numeric"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="মোবাইল নম্বর (কোথাও দেখানো হবে না)"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 mb-2"
+        maxLength={15}
+      />
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}

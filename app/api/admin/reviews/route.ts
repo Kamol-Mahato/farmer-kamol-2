@@ -19,7 +19,23 @@ export async function GET() {
         { createdAt: "desc" },
       ],
     });
-    return NextResponse.json(reviews);
+    // রিভিউয়ের নম্বর দিয়ে এই পণ্যের কোনো অর্ডার আছে কি না মিলিয়ে দেখা (শুধু admin-এর জন্য)
+    const withMatch = await Promise.all(
+      reviews.map(async (r) => {
+        const phone = r.reviewerPhone || r.user?.phone;
+        const hasOrder = phone
+          ? !!(await prisma.orderItem.findFirst({
+              where: {
+                productId: r.productId,
+                order: { customer: { phone } },
+              },
+              select: { id: true },
+            }))
+          : false;
+        return { ...r, hasOrder };
+      }),
+    );
+    return NextResponse.json(withMatch);
   } catch (error) {
     console.error("ADMIN REVIEWS GET ERROR:", error);
     return NextResponse.json({ error: "লোড করা যায়নি" }, { status: 500 });

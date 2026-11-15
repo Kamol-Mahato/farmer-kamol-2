@@ -2,74 +2,25 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCustomerId } from "@/lib/customerAuth";
 import { getApiLocale, tr } from "@/lib/apiLocale";
+import { normalizePhone, isValidBDPhone } from "@/lib/phone";
 
-// ✅ এই কাস্টমার এই প্রোডাক্টে রিভিউ দেওয়ার যোগ্য কিনা চেক করা
-// (শর্ত: এই প্রোডাক্টের একটা DELIVERED অর্ডার আছে, এবং এখনো রিভিউ দেয়নি)
-export async function GET(request: Request) {
-  const customerId = await getCustomerId();
-  const { searchParams } = new URL(request.url);
-  const productId = Number(searchParams.get("productId"));
-
-  if (!customerId) {
-    return NextResponse.json({ eligible: false, reason: "NOT_LOGGED_IN" });
-  }
-  if (!productId) {
-    return NextResponse.json({ error: "productId প্রয়োজন" }, { status: 400 });
-  }
-
-  /* 🔒 LOCKED — ভবিষ্যতে "শুধু অর্ডার করা কাস্টমার review দিতে পারবে" চালু করতে চাইলে
-     নিচের কমেন্ট সরিয়ে দাও:
-
-  const orderItem = await prisma.orderItem.findFirst({
-    where: {
-      productId,
-      order: { customerId },
-    },
-  })
-
-  if (!orderItem) {
-    return NextResponse.json({ eligible: false, reason: "NOT_ORDERED" })
-  }
-
-  */
-
-  // ইতিমধ্যে রিভিউ দিয়ে থাকলে আর দিতে পারবে না
-  const existingReview = await prisma.productReview.findFirst({
-    where: { productId, userId: customerId },
-  });
-
-  if (existingReview) {
-    return NextResponse.json({
-      eligible: false,
-      reason: "ALREADY_REVIEWED",
-      existingReview,
-    });
-  }
-
+// এখন যে কেউ রিভিউ দিতে পারবে (অ্যাকাউন্ট লাগবে না) — নাম ও নম্বর বাধ্যতামূলক
+export async function GET() {
   return NextResponse.json({ eligible: true });
 }
 
-// ✅ রিভিউ সাবমিট করা — সার্ভারে আবার eligibility চেক করা হচ্ছে (client-side bypass ঠেকাতে)
 export async function POST(request: Request) {
   const locale = getApiLocale(request);
-  const customerId = await getCustomerId();
-  if (!customerId) {
-    return NextResponse.json(
-      {
-        error: tr(
-          locale,
-          "রিভিউ দিতে লগইন করুন",
-          "Please log in to leave a review",
-        ),
-      },
-      { status: 401 },
-    );
-  }
+  const customerId = await getCustomerId(); // লগইন থাকলে যুক্ত হবে, না থাকলে null
 
   try {
     const body = await request.json();
     const productId = Number(body.productId);
     const rating = Number(body.rating);
+    const name =
+      typeof body.name === "string" ? body.name.trim().slice(0, 60) : "";
+    const phone =
+      typeof body.phone === "string" ? normalizePhone(body.phone) : "";
     const comment =
       typeof body.comment === "string"
         ? body.comment.trim().slice(0, 1000)
@@ -77,76 +28,91 @@ export async function POST(request: Request) {
 
     if (!productId || !rating || rating < 1 || rating > 5) {
       return NextResponse.json(
+        { error: tr(locale, "সঠিক তথ্য দিন", "Please provide valid details") },
+        { status: 400 },
+      );
+    }
+    if (!name || !isValidBDPhone(phone)) {
+      return NextResponse.json(
         {
-          error: tr(locale, "সঠিক তথ্য দিন", "Please provide valid details"),
+          error: tr(
+            locale,
+            "আপনার নাম ও সঠিক মোবাইল নম্বর দিন",
+            "Please enter your name and a valid mobile number",
+          ),
         },
         { status: 400 },
       );
     }
 
-    /* 🔒 LOCKED — ভবিষ্যতে "শুধু অর্ডার করা কাস্টমার review দিতে পারবে" চালু করতে চাইলে
-         নিচের কমেন্ট সরিয়ে দাও:
-  
-      const orderItem = await prisma.orderItem.findFirst({
-        where: {
-          productId,
-          order: { customerId },
-        },
-      })
-      if (!orderItem) {
-        return NextResponse.json({ error: "শুধুমাত্র অর্ডার করা পণ্যেই রিভিউ দেওয়া যাবে" }, { status: 403 })
-      }
-  
-      */
-
-    // 🔒 সার্ভার-সাইড ফের যাচাই — কাস্টমার এই প্রোডাক্ট অন্তত একবার অর্ডার করেছে কিনা (যেকোনো status)
-    const orderItem = await prisma.orderItem.findFirst({
-      where: {
-        productId,
-        order: { customerId },
-      },
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
     });
-    if (!orderItem) {
+    if (!product) {
       return NextResponse.json(
-        {
-          error: tr(
-            locale,
-            "শুধুমাত্র অর্ডার করা পণ্যেই রিভিউ দেওয়া যাবে",
-            "You can only review products you have ordered",
-          ),
-        },
-        { status: 403 },
+        { error: tr(locale, "পণ্য পাওয়া যায়নি", "Product not found") },
+        { status: 404 },
       );
     }
 
+    // একই নম্বর থেকে একই পণ্যে একটির বেশি রিভিউ নয়
     const existingReview = await prisma.productReview.findFirst({
-      where: { productId, userId: customerId },
+      where: {
+        productId,
+        OR: [
+          { reviewerPhone: phone },
+          ...(customerId ? [{ userId: customerId }] : []),
+        ],
+      },
     });
     if (existingReview) {
       return NextResponse.json(
         {
           error: tr(
             locale,
-            "আপনি ইতিমধ্যে এই পণ্যে রিভিউ দিয়েছেন",
-            "You have already reviewed this product",
+            "এই নম্বর থেকে ইতিমধ্যে এই পণ্যে রিভিউ দেওয়া হয়েছে",
+            "A review has already been submitted for this product from this number",
           ),
         },
         { status: 409 },
       );
     }
 
-    // ✅ isApproved সবসময় false দিয়ে শুরু — admin approve না করা পর্যন্ত public-এ দেখাবে না
+    // স্প্যাম ঠেকাতে: এক নম্বর থেকে ১ ঘণ্টায় ৩টির বেশি রিভিউ নয়
+    const recentCount = await prisma.productReview.count({
+      where: {
+        reviewerPhone: phone,
+        createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+      },
+    });
+    if (recentCount >= 3) {
+      return NextResponse.json(
+        {
+          error: tr(
+            locale,
+            "অনেকবার চেষ্টা হয়েছে, কিছুক্ষণ পরে আবার চেষ্টা করুন",
+            "Too many attempts, please try again later",
+          ),
+        },
+        { status: 429 },
+      );
+    }
+
+    // ✅ isApproved সবসময় false — admin approve না করা পর্যন্ত public-এ দেখাবে না
     const review = await prisma.productReview.create({
       data: {
         productId,
-        userId: customerId,
+        userId: customerId ?? null,
+        reviewerName: name,
+        reviewerPhone: phone,
         rating,
         comment,
         isApproved: false,
       },
     });
 
-    return NextResponse.json({ success: true, review });
+    return NextResponse.json({ success: true, id: review.id });
   } catch (error) {
     console.error("REVIEW SUBMIT ERROR:", error);
     return NextResponse.json(

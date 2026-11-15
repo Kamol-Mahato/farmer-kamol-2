@@ -331,7 +331,7 @@ export default async function ProductDetailPage({
                 >
                   <div className="flex items-center justify-between mb-1">
                     <p className="font-bold text-gray-800 text-sm">
-                      {review.user.name}
+                    {review.reviewerName || review.user?.name}
                     </p>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
