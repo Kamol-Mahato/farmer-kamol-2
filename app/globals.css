@@ -354,3 +354,45 @@ div.overflow-x-auto > table {
     animation: none !important;
   }
 }
+
+/* ===== ফুটার লিংক hover (শুধু মাউসওয়ালা ডিভাইসে) ===== */
+@media (hover: hover) {
+  /* ওপরের লিংক-তালিকা: লেখা ডানে সরবে + রঙ গাঢ় + → ফুটবে */
+  .footer-links .flex-col.text-xs > a {
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .footer-links .flex-col.text-xs > a::after {
+    content: "→";
+    display: inline-block;
+    flex: none;
+    width: 0;
+    overflow: visible;
+    margin-left: 0.3rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .footer-links .flex-col.text-xs > a:hover {
+    transform: translateX(4px);
+    color: #166534; /* green-800 */
+  }
+  .footer-links .flex-col.text-xs > a:hover::after {
+    opacity: 1;
+  }
+
+  /* নিচের সবুজ কপিরাইট বার: লেখা জুম হয়ে একটু বড় হবে */
+  .footer-bottom-links a {
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .footer-bottom-links a:hover {
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-links .flex-col.text-xs > a,
+  .footer-bottom-links a {
+    transition: none;
+  }
+}

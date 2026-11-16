@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react"; // ট্রেড লাইসেন্স ছবি বড় করে দেখানোর জন্য
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n";
@@ -48,6 +49,9 @@ const dict = {
     copyright: `© ২০২৬ ${siteConfig.brand.name}. সর্বস্বত্ব সংরক্ষিত।`,
     privacyPolicy: "গোপনীয়তা নীতি",
     terms: "শর্তাবলী",
+    tradeLicense: "ট্রেড লাইসেন্স",
+    tradeLicenseOpen: "ট্রেড লাইসেন্স বড় করে দেখুন",
+    close: "বন্ধ করুন",
   },
   en: {
     description:
@@ -97,8 +101,14 @@ const dict = {
     copyright: `© 2026 ${siteConfig.brand.name}. All rights reserved.`,
     privacyPolicy: "Privacy Policy",
     terms: "Terms & Conditions",
+    tradeLicense: "Trade License",
+    tradeLicenseOpen: "View trade license in full size",
+    close: "Close",
   },
 };
+
+// ট্রেড লাইসেন্স ছবির পথ। ছবির নাম বা ফরম্যাট (.png/.webp) বদলালে শুধু এখানে বদলাবেন।
+const TRADE_LICENSE_SRC = "/uploads/trade-license.jpg";
 
 const investPaths = [
   "/invest",
@@ -226,9 +236,30 @@ export default function Footer() {
   const t = dict[locale];
   const href = (path: string) => localizeHref(path, locale);
 
+  // ===== ট্রেড লাইসেন্স ছবি =====
+  // licenseOk: ছবির ফাইল না পাওয়া গেলে false হয়, তখন পুরো অংশ লুকিয়ে যায়
+  // licenseOpen: true হলে ছবি পর্দা জুড়ে বড় হয়ে খোলে
+  const [licenseOk, setLicenseOk] = useState(true);
+  const [licenseOpen, setLicenseOpen] = useState(false);
+
+  // বড় ছবি খোলা থাকলে Esc চাপলে বন্ধ হবে, আর পেছনের পেজ স্ক্রল হবে না
+  useEffect(() => {
+    if (!licenseOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLicenseOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [licenseOpen]);
+
   return (
     <footer className="bg-green-50 text-gray-700 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-6">
+      <div className="footer-links max-w-7xl mx-auto px-4 pt-6 pb-6">
         {/* ========================================== */}
         {/* ১. ব্র্যান্ড এবং সোশ্যাল সেকশন (মোবাইলে ফুল উইডথ, পিসিতে ১ম কলাম) */}
         {/* ========================================== */}
@@ -372,8 +403,33 @@ export default function Footer() {
                 >
                   <path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
-              </a>
+                </a>
             </div>
+
+            {/* ট্রেড লাইসেন্স — সোশ্যাল আইকনের নিচে, ক্লিক করলে বড় হয় */}
+            {/* ছবি না থাকলে (licenseOk=false) এই অংশ নিজে থেকেই লুকিয়ে যায় */}
+            {licenseOk && (
+              <button
+                type="button"
+                onClick={() => setLicenseOpen(true)}
+                aria-label={t.tradeLicenseOpen}
+                className="group mt-3 block w-full max-w-[160px] text-left cursor-zoom-in"
+              >
+                <Image
+                  src={TRADE_LICENSE_SRC}
+                  alt={t.tradeLicense}
+                  width={0}
+                  height={0}
+                  sizes="160px"
+                  style={{ width: "100%", height: "auto" }}
+                  className="rounded border border-green-200 bg-white shadow-sm transition group-hover:shadow-md"
+                  onError={() => setLicenseOk(false)}
+                />
+                <span className="mt-1 block text-[11px] font-semibold text-green-900">
+                  {t.tradeLicense}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* সেপারেটর লাইন (শুধুমাত্র মোবাইলেই দেখাবে) */}
@@ -584,7 +640,7 @@ export default function Footer() {
       <div className="bg-green-800 text-white border-t border-green-700 py-3 mt-2">
         <div className="max-w-7xl mx-auto px-4 sm:pr-24 flex flex-col sm:flex-row justify-between items-center text-[11px] text-green-200 gap-2">
           <p>{t.copyright}</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+          <div className="footer-bottom-links flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <Link
               href={href("/privacy-policy")}
               className="relative hover:text-yellow-400 transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-['']"
@@ -617,6 +673,37 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      {/* ট্রেড লাইসেন্সের বড় ছবি (পপআপ) — বাইরে বা ✕ এ ক্লিক করলে বন্ধ হবে */}
+      {licenseOk && licenseOpen && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLicenseOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t.tradeLicense}
+        >
+          <button
+            type="button"
+            onClick={() => setLicenseOpen(false)}
+            aria-label={t.close}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl font-bold text-gray-800 hover:bg-gray-200"
+          >
+            ✕
+          </button>
+          {/* unoptimized: লেখা যেন একদম পরিষ্কার পড়া যায়, তাই আসল ছবিই দেখানো হয় */}
+          <Image
+            src={TRADE_LICENSE_SRC}
+            alt={t.tradeLicense}
+            width={0}
+            height={0}
+            sizes="100vw"
+            unoptimized
+            style={{ width: "auto", height: "auto" }}
+            className="max-h-[90vh] max-w-full rounded bg-white object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </footer>
   );
 }
