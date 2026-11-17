@@ -42,8 +42,10 @@ export default async function AdminDashboard() {
     totalOrders > 0 ? Math.round((deliveredCount / totalOrders) * 100) : 0;
   const cancelledPct =
     totalOrders > 0 ? Math.round((cancelledCount / totalOrders) * 100) : 0;
-  const othersPct =
+    const othersPct =
     totalOrders > 0 ? Math.round((othersCount / totalOrders) * 100) : 0;
+  const activePct =
+    totalOrders > 0 ? Math.round((activeOrders / totalOrders) * 100) : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
@@ -58,11 +60,11 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-10">
         {/* মোট অর্ডার */}
-        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl shadow p-3 sm:p-5 border-l-4 border-green-500">
           <p className="text-gray-500 text-sm">মোট অর্ডার</p>
-          <p className="text-3xl font-bold text-green-800 mt-1">{totalOrders}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-green-800 mt-1">{totalOrders}</p>
 
           {/* Progress Bar */}
           <div className="w-full h-2.5 bg-gray-100 rounded-full mt-3 overflow-hidden flex">
@@ -78,9 +80,13 @@ export default async function AdminDashboard() {
               className="h-full bg-yellow-400"
               style={{ width: `${othersPct}%` }}
             />
+            <div
+              className="h-full bg-blue-400"
+              style={{ width: `${activePct}%` }}
+            />
           </div>
 
-          <div className="mt-3 space-y-1 text-sm">
+          <div className="mt-3 space-y-1 text-xs sm:text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">ডেলিভার্ড</span>
               <span className="font-medium">
@@ -98,21 +104,28 @@ export default async function AdminDashboard() {
             <div className="flex justify-between">
               <span className="text-gray-600">অন্যান্য</span>
               <span className="font-medium">
-                {othersCount}{" "}
+              {othersCount}{" "}
                 <span className="text-gray-400">({othersPct}%)</span>
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">চলমান</span>
+              <span className="font-medium">
+                {activeOrders}{" "}
+                <span className="text-gray-400">({activePct}%)</span>
               </span>
             </div>
           </div>
         </div>
 
         {/* অ্যাকটিভ অর্ডার */}
-        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
+        <div className="bg-white rounded-xl shadow p-3 sm:p-5 border-l-4 border-yellow-500">
           <p className="text-gray-500 text-sm">অ্যাকটিভ অর্ডার</p>
-          <p className="text-3xl font-bold text-yellow-600 mt-1">
+          <p className="text-2xl sm:text-3xl font-bold text-yellow-600 mt-1">
             {activeOrders}
           </p>
 
-          <div className="mt-4 border-t border-gray-100 pt-3 space-y-1.5 text-sm">
+          <div className="mt-4 border-t border-gray-100 pt-3 space-y-1.5 text-xs sm:text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Pending</span>
               <span className="font-medium">{pendingCount}</span>
@@ -129,17 +142,17 @@ export default async function AdminDashboard() {
         </div>
 
         {/* মোট পণ্য */}
-        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
+        <div className="bg-white rounded-xl shadow p-3 sm:p-5 border-l-4 border-blue-500">
           <p className="text-gray-500 text-sm">মোট পণ্য</p>
-          <p className="text-3xl font-bold text-blue-600 mt-1">
+          <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">
             {totalProducts}
           </p>
         </div>
 
         {/* মোট কাস্টমার */}
-        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-purple-500">
+        <div className="bg-white rounded-xl shadow p-3 sm:p-5 border-l-4 border-purple-500">
           <p className="text-gray-500 text-sm">মোট কাস্টমার</p>
-          <p className="text-3xl font-bold text-purple-600 mt-1">
+          <p className="text-2xl sm:text-3xl font-bold text-purple-600 mt-1">
             {totalCustomers}
           </p>
         </div>
