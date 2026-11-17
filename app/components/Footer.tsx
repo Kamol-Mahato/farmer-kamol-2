@@ -108,7 +108,7 @@ const dict = {
 };
 
 // ট্রেড লাইসেন্স ছবির পথ। ছবির নাম বা ফরম্যাট (.png/.webp) বদলালে শুধু এখানে বদলাবেন।
-const TRADE_LICENSE_SRC = "/uploads/trade-license.jpg";
+const TRADE_LICENSE_SRC = "/uploads/trade-license.jpg?v=2";
 
 const investPaths = [
   "/invest",
@@ -418,8 +418,8 @@ export default function Footer() {
                 <Image
                   src={TRADE_LICENSE_SRC}
                   alt={t.tradeLicense}
-                  width={0}
-                  height={0}
+                  width={1241}
+                  height={1754}
                   sizes="160px"
                   style={{ width: "100%", height: "auto" }}
                   className="rounded border border-green-200 bg-white shadow-sm transition group-hover:shadow-md"
