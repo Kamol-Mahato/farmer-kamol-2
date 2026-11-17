@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react"; // ট্রেড লাইসেন্স ছবি বড় করে দেখানোর জন্য
+import { useEffect, useState } from "react"; // ট্রেড লাইসেন্স খসড়া  ছবি বড় করে দেখানোর জন্য
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getLocaleFromPath, localizeHref } from "@/lib/i18n";
@@ -49,8 +49,8 @@ const dict = {
     copyright: `© ২০২৬ ${siteConfig.brand.name}. সর্বস্বত্ব সংরক্ষিত।`,
     privacyPolicy: "গোপনীয়তা নীতি",
     terms: "শর্তাবলী",
-    tradeLicense: "ট্রেড লাইসেন্স",
-    tradeLicenseOpen: "ট্রেড লাইসেন্স বড় করে দেখুন",
+    tradeLicense: "ট্রেড লাইসেন্স খসড়া ",
+    tradeLicenseOpen: "ট্রেড লাইসেন্স খসড়া  বড় করে দেখুন",
     close: "বন্ধ করুন",
   },
   en: {
@@ -107,7 +107,7 @@ const dict = {
   },
 };
 
-// ট্রেড লাইসেন্স ছবির পথ। ছবির নাম বা ফরম্যাট (.png/.webp) বদলালে শুধু এখানে বদলাবেন।
+// ট্রেড লাইসেন্স খসড়া  ছবির পথ। ছবির নাম বা ফরম্যাট (.png/.webp) বদলালে শুধু এখানে বদলাবেন।
 const TRADE_LICENSE_SRC = "/uploads/trade-license.jpg?v=2";
 
 const investPaths = [
@@ -236,7 +236,7 @@ export default function Footer() {
   const t = dict[locale];
   const href = (path: string) => localizeHref(path, locale);
 
-  // ===== ট্রেড লাইসেন্স ছবি =====
+  // ===== ট্রেড লাইসেন্স খসড়া  ছবি =====
   // licenseOk: ছবির ফাইল না পাওয়া গেলে false হয়, তখন পুরো অংশ লুকিয়ে যায়
   // licenseOpen: true হলে ছবি পর্দা জুড়ে বড় হয়ে খোলে
   const [licenseOk, setLicenseOk] = useState(true);
@@ -406,7 +406,7 @@ export default function Footer() {
                 </a>
             </div>
 
-            {/* ট্রেড লাইসেন্স — সোশ্যাল আইকনের নিচে, ক্লিক করলে বড় হয় */}
+            {/* ট্রেড লাইসেন্স খসড়া  — সোশ্যাল আইকনের নিচে, ক্লিক করলে বড় হয় */}
             {/* ছবি না থাকলে (licenseOk=false) এই অংশ নিজে থেকেই লুকিয়ে যায় */}
             {licenseOk && (
               <button
@@ -673,7 +673,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      {/* ট্রেড লাইসেন্সের বড় ছবি (পপআপ) — বাইরে বা ✕ এ ক্লিক করলে বন্ধ হবে */}
+      {/* ট্রেড লাইসেন্স খসড়া ের বড় ছবি (পপআপ) — বাইরে বা ✕ এ ক্লিক করলে বন্ধ হবে */}
       {licenseOk && licenseOpen && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
