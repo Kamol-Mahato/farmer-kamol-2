@@ -159,10 +159,12 @@ function OrderForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(
     null,
   );
   const [copied, setCopied] = useState(false);
+  const [orderIdCopied, setOrderIdCopied] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [deliverySettings, setDeliverySettings] = useState({
     dhakaBaseCharge: 75,
@@ -301,7 +303,7 @@ function OrderForm() {
           🔐 Set an account password
         </p>
         <p className="text-gray-500 text-xs mb-3">
-          Set a password to track your order later (optional)
+          Set a password to track your order
         </p>
         <input
           type="password"
@@ -414,6 +416,7 @@ function OrderForm() {
         setLoading(false);
         return;
       }
+      setOrderId(data.orderId ?? null);
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -438,6 +441,26 @@ function OrderForm() {
             <p className="font-bold text-green-800 text-sm mb-1">
               Order Summary
             </p>
+
+            {orderId && (
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 text-sm font-medium">
+                  Order ID: <span className="font-bold">#{orderId}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(String(orderId));
+                    setOrderIdCopied(true);
+                    setTimeout(() => setOrderIdCopied(false), 2000);
+                  }}
+                  className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2.5 py-1 rounded-md font-medium transition"
+                >
+                  {orderIdCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+            )}
+
             <p className="text-gray-600 text-sm">
               {product?.nameEn || product?.name}
             </p>

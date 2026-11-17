@@ -26,10 +26,12 @@ function OrderForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(
     null,
   );
   const [copied, setCopied] = useState(false);
+  const [orderIdCopied, setOrderIdCopied] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [deliverySettings, setDeliverySettings] = useState({
     dhakaBaseCharge: 75,
@@ -191,7 +193,7 @@ function OrderForm() {
           🔐 অ্যাকাউন্ট পাসওয়ার্ড সেট করুন
         </p>
         <p className="text-gray-500 text-xs mb-3">
-          পরবর্তীতে অর্ডার ট্র্যাক করতে পাসওয়ার্ড দিন (ঐচ্ছিক)
+          অর্ডার ট্র্যাক করতে পাসওয়ার্ড সেট করুন
         </p>
         <div className="relative mb-2">
           <input
@@ -400,6 +402,7 @@ function OrderForm() {
         });
       }
 
+      setOrderId(data.orderId ?? null);
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -425,6 +428,26 @@ function OrderForm() {
             <p className="font-bold text-green-800 text-sm mb-1">
               অর্ডারের বিবরণ
             </p>
+
+            {orderId && (
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 text-sm font-medium">
+                  অর্ডার আইডি: <span className="font-bold">#{orderId}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(String(orderId));
+                    setOrderIdCopied(true);
+                    setTimeout(() => setOrderIdCopied(false), 2000);
+                  }}
+                  className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2.5 py-1 rounded-md font-medium transition"
+                >
+                  {orderIdCopied ? "কপি হয়েছে!" : "কপি"}
+                </button>
+              </div>
+            )}
+
             <p className="text-gray-600 text-sm">{product?.name}</p>
             <p className="text-gray-500 text-xs">
               পরিমাণ: {form.quantity} × ৳ {product?.pricePerUnit}

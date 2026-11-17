@@ -1,18 +1,50 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 export default async function AdminDashboard() {
-  const totalOrders = await prisma.order.count();
-  const totalProducts = await prisma.product.count();
-  const totalCustomers = await prisma.user.count({
-    where: { role: "CUSTOMER" },
-  });
-  const pendingOrders = await prisma.order.count({
-    where: { orderStatus: "PENDING" },
-  });
-  const lifetimeStats = await prisma.lifetimeStats.findUnique({
-    where: { id: 1 },
-  });
+  const [
+    totalOrders,
+    totalProducts,
+    totalCustomers,
+    deliveredCount,
+    cancelledCount,
+    othersCount,
+    pendingCount,
+    confirmedCount,
+    ongoingCount,
+    lifetimeStats,
+  ] = await Promise.all([
+    prisma.order.count(),
+    prisma.product.count(),
+    prisma.user.count({ where: { role: "CUSTOMER" } }),
+    prisma.order.count({
+      where: { orderStatus: { in: ["DELIVERED", "PARTIAL_DELIVERY"] } },
+    }),
+    prisma.order.count({
+      where: {
+        orderStatus: { in: ["CANCELLED", "RETURNED", "PAID_RETURN"] },
+      },
+    }),
+    prisma.order.count({
+      where: {
+        orderStatus: { in: ["REFUNDED", "LOST", "DAMAGED"] },
+      },
+    }),
+    prisma.order.count({ where: { orderStatus: "PENDING" } }),
+    prisma.order.count({ where: { orderStatus: "CONFIRMED" } }),
+    prisma.order.count({ where: { orderStatus: "DELIVERY_ONGOING" } }),
+    prisma.lifetimeStats.findUnique({ where: { id: 1 } }),
+  ]);
+
+  const activeOrders = pendingCount + confirmedCount + ongoingCount;
   const lifetimeCollected = lifetimeStats?.totalCollected ?? 0;
+
+  const deliveredPct =
+    totalOrders > 0 ? Math.round((deliveredCount / totalOrders) * 100) : 0;
+  const cancelledPct =
+    totalOrders > 0 ? Math.round((cancelledCount / totalOrders) * 100) : 0;
+  const othersPct =
+    totalOrders > 0 ? Math.round((othersCount / totalOrders) * 100) : 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -24,27 +56,88 @@ export default async function AdminDashboard() {
           </p>
         </div>
       </div>
+
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-10">
-        <div className="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-10">
+        {/* মোট অর্ডার */}
+        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-green-500">
           <p className="text-gray-500 text-sm">মোট অর্ডার</p>
-          <p className="text-3xl font-bold text-green-800 mt-1">
-            {totalOrders}
-          </p>
+          <p className="text-3xl font-bold text-green-800 mt-1">{totalOrders}</p>
+
+          {/* Progress Bar */}
+          <div className="w-full h-2.5 bg-gray-100 rounded-full mt-3 overflow-hidden flex">
+            <div
+              className="h-full bg-green-500"
+              style={{ width: `${deliveredPct}%` }}
+            />
+            <div
+              className="h-full bg-red-500"
+              style={{ width: `${cancelledPct}%` }}
+            />
+            <div
+              className="h-full bg-yellow-400"
+              style={{ width: `${othersPct}%` }}
+            />
+          </div>
+
+          <div className="mt-3 space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">ডেলিভার্ড</span>
+              <span className="font-medium">
+                {deliveredCount}{" "}
+                <span className="text-gray-400">({deliveredPct}%)</span>
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">ক্যানসেল</span>
+              <span className="font-medium">
+                {cancelledCount}{" "}
+                <span className="text-gray-400">({cancelledPct}%)</span>
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">অন্যান্য</span>
+              <span className="font-medium">
+                {othersCount}{" "}
+                <span className="text-gray-400">({othersPct}%)</span>
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow p-6 border-l-4 border-yellow-500">
-          <p className="text-gray-500 text-sm">পেন্ডিং অর্ডার</p>
+
+        {/* অ্যাকটিভ অর্ডার */}
+        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
+          <p className="text-gray-500 text-sm">অ্যাকটিভ অর্ডার</p>
           <p className="text-3xl font-bold text-yellow-600 mt-1">
-            {pendingOrders}
+            {activeOrders}
           </p>
+
+          <div className="mt-4 border-t border-gray-100 pt-3 space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Pending</span>
+              <span className="font-medium">{pendingCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Confirmed</span>
+              <span className="font-medium">{confirmedCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">পাঠানো</span>
+              <span className="font-medium">{ongoingCount}</span>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
+
+        {/* মোট পণ্য */}
+        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
           <p className="text-gray-500 text-sm">মোট পণ্য</p>
           <p className="text-3xl font-bold text-blue-600 mt-1">
             {totalProducts}
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow p-6 border-l-4 border-purple-500">
+
+        {/* মোট কাস্টমার */}
+        <div className="bg-white rounded-xl shadow p-5 border-l-4 border-purple-500">
           <p className="text-gray-500 text-sm">মোট কাস্টমার</p>
           <p className="text-3xl font-bold text-purple-600 mt-1">
             {totalCustomers}
