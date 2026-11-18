@@ -105,6 +105,8 @@ export default async function HomePage() {
       {/* Hero Slider */}
       <HomeCategoryNav
         items={categoryGroups.map((g) => ({ id: g.id, label: g.labelBn }))}
+        allLabel="সব পণ্য"
+        allHref="/shop"
       />
       <HeroSlider featuredProducts={featuredProducts} heroVideos={heroVideos} />
 

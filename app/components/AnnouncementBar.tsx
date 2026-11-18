@@ -87,7 +87,7 @@ export default function AnnouncementBar() {
   const itemsMobile = locale === "en" ? itemsMobileEn : itemsMobileBn;
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-xs md:text-sm font-bold z-[60] flex items-center h-8">
+    <div className="fixed top-0 left-0 w-full bg-green-950 text-white text-sm md:text-sm font-bold z-[60] flex items-center h-8">
       {mounted && (
         <div className="shrink-0 px-1.5 md:px-3 overflow-hidden w-[70px] md:w-[190px] text-left md:text-center flex items-center justify-center h-full">
           {rotateIndex === 0 ? (

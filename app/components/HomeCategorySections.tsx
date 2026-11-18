@@ -26,7 +26,7 @@ export default function HomeCategorySections({
           <section
             key={g.id}
             id={g.id}
-            className="bg-green-50 py-3 px-4 scroll-mt-24"
+            className="bg-green-50 py-3 px-4 scroll-mt-32"
           >
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-4">

@@ -1,11 +1,23 @@
 "use client";
 
+import Link from "next/link";
+
 type Item = { id: string; label: string };
 
-// শুধু মোবাইলে — হিরো স্লাইডারের উপরের ক্যাটাগরি বার
-export default function HomeCategoryNav({ items }: { items: Item[] }) {
-  if (items.length === 0) return null;
+type Props = {
+  items: Item[];
+  allLabel: string;
+  allHref: string;
+};
 
+// শুধু মোবাইলে — নেভবারের নিচে আটকে থাকা (sticky) ক্যাটাগরি বার
+//
+// ✏️ ব্যাকগ্রাউন্ড রঙ: নিচে "bg-green-50"
+//    সংখ্যা: 50 (সবচেয়ে হালকা) → 100 → 200 → ... → 900 (সবচেয়ে গাঢ়)
+//    অস্বচ্ছতা: "bg-green-50/90" = ৯০% (সংখ্যা কমালে আরও স্বচ্ছ)
+// ✏️ বারের উচ্চতা: "pt-1.5 pb-1.5" (উপর-নিচ ফাঁক) আর চিপের "py-1"
+// ✏️ চিপের লেখার সাইজ: "text-[12px]"
+export default function HomeCategoryNav({ items, allLabel, allHref }: Props) {
   function go(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -13,23 +25,31 @@ export default function HomeCategoryNav({ items }: { items: Item[] }) {
     el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  const chip =
+  "block w-full whitespace-nowrap text-center rounded-full border text-[11px] min-[360px]:text-[12px] font-bold px-1 py-1 active:scale-95 transition";
+
   return (
-    <div className="md:hidden -mt-1 bg-green-900 border-b border-green-700 px-3 pb-2 pt-3">
+    <div className="md:hidden sticky top-[72px] z-40 -mt-1 bg-green-800 -mb-px shadow-sm px-2 pt-1.5 pb-1.5">
       <div
         className="grid gap-1.5"
-        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${items.length + 1}, minmax(0, 1fr))` }}
       >
         {items.map((item) => (
-          
           <a
             key={item.id}
             href={`#${item.id}`}
             onClick={(e) => go(e, item.id)}
-            className="block text-center whitespace-nowrap rounded-full bg-green-50 text-green-800 border border-green-600 text-[13px] font-bold py-1.5 px-1 active:scale-95 hover:bg-yellow-400 hover:text-green-900 transition"
+            className={`${chip} bg-white text-green-800 border-green-600 hover:bg-yellow-400 hover:text-green-900`}
           >
             {item.label}
           </a>
         ))}
+        <Link
+          href={allHref}
+          className={`${chip} bg-yellow-400 text-green-900 border-yellow-500`}
+        >
+          {allLabel}
+        </Link>
       </div>
     </div>
   );
