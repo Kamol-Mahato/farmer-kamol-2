@@ -145,6 +145,14 @@ export default async function HomePageEn() {
       />
       <HeroSlider featuredProducts={featuredProducts} heroVideos={heroVideos} />
 
+      <div className="bg-green-50 pt-3 pb-1 px-4">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-10 text-green-900 text-xs md:text-sm font-bold">
+          <span>✅ 100% Pure</span>
+          <span>🚚 Fast Delivery</span>
+          <span>💳 Cash on Delivery</span>
+        </div>
+      </div>
+
       <TopSellerSection products={topSellerProducts} />
 
       <HomeCategorySections
@@ -155,12 +163,7 @@ export default async function HomePageEn() {
 
       <div className="bg-green-50 py-3 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-4 md:gap-10 text-green-900 text-xs md:text-sm font-bold mb-3">
-            <span>✅ 100% Pure</span>
-            <span>🚚 Fast Delivery</span>
-            <span>💳 Cash on Delivery</span>
-          </div>
-          <div className="text-center mb-5">
+        <div className="text-center mb-5">
             <h2 className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2 rounded-full hover:bg-green-700 hover:text-white transition cursor-default">
               Our Products
             </h2>
