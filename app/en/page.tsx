@@ -3,6 +3,9 @@ import HeroSlider from "@/app/en/components/HeroSlider";
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/app/en/components/ProductCard";
 import TopSellerSection from "@/app/en/components/TopSellerSection";
+import HomeCategoryNav from "@/app/components/HomeCategoryNav";
+import HomeCategorySections from "@/app/components/HomeCategorySections";
+import { getHomeCategoryGroups } from "@/lib/homeCategories";
 import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
@@ -68,6 +71,7 @@ export default async function HomePageEn() {
     videos,
     heroVideos,
     reviews,
+    categoryGroups,
   ] = await Promise.all([
     getHomeProducts(),
     prisma.systemControlCenter.findUnique({ where: { id: 1 } }),
@@ -122,6 +126,7 @@ export default async function HomePageEn() {
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
+    getHomeCategoryGroups(),
   ]);
 
   const deliveryMode = (systemSettings?.deliveryChargeMode ?? "NORMAL") as
@@ -135,9 +140,18 @@ export default async function HomePageEn() {
     <div className="font-[family-name:var(--font-hind-siliguri)]">
       <NoticeModal />
 
+      <HomeCategoryNav
+        items={categoryGroups.map((g) => ({ id: g.id, label: g.labelEn }))}
+      />
       <HeroSlider featuredProducts={featuredProducts} heroVideos={heroVideos} />
 
       <TopSellerSection products={topSellerProducts} />
+
+      <HomeCategorySections
+        groups={categoryGroups}
+        deliveryMode={deliveryMode}
+        locale="en"
+      />
 
       <div className="bg-green-50 py-3 px-4">
         <div className="max-w-7xl mx-auto">

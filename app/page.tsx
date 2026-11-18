@@ -4,6 +4,9 @@ import HeroSlider from "./components/HeroSlider";
 import { prisma } from "@/lib/prisma";
 import ProductCard from "./components/ProductCard";
 import TopSellerSection from "./components/TopSellerSection";
+import HomeCategoryNav from "./components/HomeCategoryNav";
+import HomeCategorySections from "./components/HomeCategorySections";
+import { getHomeCategoryGroups } from "@/lib/homeCategories";
 import { getHomeProducts, getHomeBlogs } from "@/lib/homeSections";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
@@ -41,6 +44,7 @@ export default async function HomePage() {
     videos,
     heroVideos,
     reviews,
+    categoryGroups,
   ] = await Promise.all([
     getHomeProducts(),
     prisma.systemControlCenter.findUnique({ where: { id: 1 } }),
@@ -88,6 +92,7 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
+    getHomeCategoryGroups(),
   ]);
 
   const deliveryMode = (systemSettings?.deliveryChargeMode ?? "NORMAL") as
@@ -98,10 +103,19 @@ export default async function HomePage() {
       <NoticeModal />
 
       {/* Hero Slider */}
+      <HomeCategoryNav
+        items={categoryGroups.map((g) => ({ id: g.id, label: g.labelBn }))}
+      />
       <HeroSlider featuredProducts={featuredProducts} heroVideos={heroVideos} />
 
       {/* Top Seller Section */}
       <TopSellerSection products={topSellerProducts} />
+
+      {/* ক্যাটাগরি সেকশন: ঘী, মধু, সরিষা তেল, গুড় */}
+      <HomeCategorySections
+        groups={categoryGroups}
+        deliveryMode={deliveryMode}
+      />
 
       {/* Featured Products */}
       <div className="bg-green-50 py-3 px-4">
