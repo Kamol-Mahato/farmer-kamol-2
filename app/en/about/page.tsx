@@ -209,6 +209,26 @@ export default function AboutPageEn() {
   // See More state for "Why Integrated Farming?"
   const [showMore, setShowMore] = useState(false);
 
+  // ===== Trade license (draft) — same image as the footer =====
+  const TRADE_LICENSE_SRC = "/uploads/trade-license.jpg?v=2";
+  const [licenseOk, setLicenseOk] = useState(true);
+  const [licenseOpen, setLicenseOpen] = useState(false);
+
+  // While the big image is open: Esc closes it and the page behind won't scroll
+  useEffect(() => {
+    if (!licenseOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLicenseOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [licenseOpen]);
+
   // Separate expand/collapse for each ecosystem card
   const [expandedSections, setExpandedSections] = useState<
     Record<number, boolean>
@@ -607,6 +627,32 @@ export default function AboutPageEn() {
               Photo Gallery
             </Link>
           </Reveal>
+
+          {/* Trade license (draft) — click to enlarge; hides itself if the image is missing */}
+          {licenseOk && (
+            <Reveal delay={200} className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setLicenseOpen(true)}
+                aria-label="View trade license in full size"
+                className="group block w-full max-w-[180px] text-left cursor-zoom-in"
+              >
+                <Image
+                  src={TRADE_LICENSE_SRC}
+                  alt="Trade License"
+                  width={1241}
+                  height={1754}
+                  sizes="180px"
+                  style={{ width: "100%", height: "auto" }}
+                  className="rounded border border-green-200 bg-white shadow-sm transition group-hover:shadow-md"
+                  onError={() => setLicenseOk(false)}
+                />
+                <span className="mt-2 block text-center text-xs font-semibold text-green-900">
+                  Trade License
+                </span>
+              </button>
+            </Reveal>
+          )}
         </div>
       </section>
 
@@ -635,6 +681,36 @@ export default function AboutPageEn() {
           </div>
         </Reveal>
       </section>
+      {/* Trade license full-size popup — closes on outside click or ✕ */}
+      {licenseOk && licenseOpen && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLicenseOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Trade License"
+        >
+          <button
+            type="button"
+            onClick={() => setLicenseOpen(false)}
+            aria-label="Close"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl font-bold text-gray-800 hover:bg-gray-200"
+          >
+            ✕
+          </button>
+          <Image
+            src={TRADE_LICENSE_SRC}
+            alt="Trade License"
+            width={0}
+            height={0}
+            sizes="100vw"
+            unoptimized
+            style={{ width: "auto", height: "auto" }}
+            className="max-h-[90vh] max-w-full rounded bg-white object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </main>
   );
 }
