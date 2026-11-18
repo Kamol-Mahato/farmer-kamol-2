@@ -20,6 +20,7 @@ export default function HomeCategoryNav({ items }: { items: Item[] }) {
         style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
       >
         {items.map((item) => (
+          
           <a
             key={item.id}
             href={`#${item.id}`}
