@@ -4,7 +4,7 @@ import { getLocaleFromPath } from "@/lib/i18n";
 import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
 
-const WA_MIN_KEY = "fk_wa_min_at";
+const WA_MIN_KEY = "fk_wa_exp_at"; // খোলা (expanded) অবস্থার শুরুর সময়
 const WA_MIN_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
 
 export default function FloatingWhatsAppButton() {
@@ -15,27 +15,27 @@ export default function FloatingWhatsAppButton() {
   const restore = () => {
     setMinimized(false);
     try {
-      localStorage.removeItem(WA_MIN_KEY);
+      localStorage.setItem(WA_MIN_KEY, Date.now().toString());
     } catch {}
   };
 
   const minimize = () => {
     setMinimized(true);
     try {
-      localStorage.setItem(WA_MIN_KEY, Date.now().toString());
+      localStorage.removeItem(WA_MIN_KEY);
     } catch {}
   };
 
   useEffect(() => {
-    let initial = false;
+    let initial = true; // ডিফল্ট: মিনিমাইজ
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const saved = localStorage.getItem(WA_MIN_KEY);
       if (saved) {
         const left = WA_MIN_MS - (Date.now() - parseInt(saved, 10));
         if (left > 0) {
-          initial = true;
-          timer = setTimeout(restore, left);
+          initial = false;
+          timer = setTimeout(() => setMinimized(true), left);
         } else {
           localStorage.removeItem(WA_MIN_KEY);
         }
@@ -93,6 +93,10 @@ export default function FloatingWhatsAppButton() {
           </svg>
         </span>
       </button>
+      <span
+        aria-hidden
+        className="pointer-events-none fixed right-[13px] bottom-[77px] md:bottom-[21px] z-[59] h-[50px] w-[50px] md:h-[54px] md:w-[54px] rounded-full bg-[conic-gradient(from_0deg,rgba(251,191,36,0.18)_0deg,#f024fb_70deg,rgba(251,191,36,0.18)_130deg,rgba(251,191,36,0.18)_360deg)] animate-[spin_5.5s_linear_infinite] motion-reduce:animate-none"
+      />
       <a
         href="https://wa.me/8801737939688"
         target="_blank"
@@ -100,7 +104,7 @@ export default function FloatingWhatsAppButton() {
         aria-label={
           locale === "en" ? "Contact us on WhatsApp" : "WhatsApp-এ যোগাযোগ করুন"
         }
-        className="wa-float-btn fixed right-4 bottom-20 md:bottom-6 z-[60] bg-[#25D366] hover:bg-[#1ebe57] hover:scale-110 text-white w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200"
+        className="fixed right-4 bottom-20 md:bottom-6 z-[60] bg-[#25D366] hover:bg-[#1ebe57] hover:scale-110 text-white w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200"
         onClick={() =>
           sendGAEvent({ event: "whatsapp_click", value: "floating_button" })
         }

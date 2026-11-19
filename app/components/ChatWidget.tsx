@@ -94,8 +94,8 @@ function YoutubeIcon() {
   );
 }
 
-const CHAT_MIN_KEY = "fk_chat_min_at";
-const CHAT_MIN_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+const CHAT_EXP_KEY = "fk_chat_exp_at"; // খোলা (expanded) অবস্থার শুরুর সময়
+const CHAT_EXP_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
 
 export default function ChatWidget() {
   const pathname = usePathname();
@@ -111,8 +111,7 @@ export default function ChatWidget() {
   const minimizedRef = useRef(false);
   const [live, setLive] = useState(false);
   const [unread, setUnread] = useState(0);
-  const bubbleVisible =
-    (showTooltip || unread > 0) && !isOpen && minimized !== true;
+  const bubbleVisible = (showTooltip || unread > 0) && !isOpen;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -141,10 +140,6 @@ export default function ChatWidget() {
 
     const run = () => {
       if (!alive || isOff() || isOpenRef.current) return;
-      if (minimizedRef.current) {
-        timers.push(setTimeout(run, 30000));
-        return;
-      }
       setTyping(true);
       setShowTooltip(true);
       timers.push(setTimeout(() => setTyping(false), 1300));
@@ -201,15 +196,14 @@ export default function ChatWidget() {
     setTyping(false);
     setMinimized(true);
     try {
-      localStorage.setItem(CHAT_MIN_KEY, Date.now().toString());
-      sessionStorage.setItem("fk_chat_bubble_off", "1");
+      localStorage.removeItem(CHAT_EXP_KEY);
     } catch {}
   };
 
   const restoreChat = () => {
     setMinimized(false);
     try {
-      localStorage.removeItem(CHAT_MIN_KEY);
+      localStorage.setItem(CHAT_EXP_KEY, Date.now().toString());
     } catch {}
   };
 
@@ -218,17 +212,19 @@ export default function ChatWidget() {
   }, [minimized]);
 
   useEffect(() => {
-    let initial = false;
+    let initial = true; // ডিফল্ট: মিনিমাইজ
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const saved = localStorage.getItem(CHAT_MIN_KEY);
+      const saved = localStorage.getItem(CHAT_EXP_KEY);
       if (saved) {
-        const left = CHAT_MIN_MS - (Date.now() - parseInt(saved, 10));
+        const left = CHAT_EXP_MS - (Date.now() - parseInt(saved, 10));
         if (left > 0) {
-          initial = true;
-          timer = setTimeout(restoreChat, left);
+          initial = false;
+          timer = setTimeout(() => {
+            if (!isOpenRef.current) setMinimized(true);
+          }, left);
         } else {
-          localStorage.removeItem(CHAT_MIN_KEY);
+          localStorage.removeItem(CHAT_EXP_KEY);
         }
       }
     } catch {}
@@ -456,24 +452,66 @@ export default function ChatWidget() {
 
   if (minimized) {
     return (
-      <button
-        type="button"
-        onClick={restoreChat}
-        aria-label={isEn ? "Show live chat" : "লাইভ চ্যাট দেখান"}
-        className="fixed right-0 bottom-36 md:bottom-20 z-[60] flex h-11 w-7 md:h-12 items-center justify-center rounded-l-full bg-[#055a36] text-white shadow-lg cursor-pointer transition-all duration-200 hover:w-9 motion-reduce:transition-none"
-      >
-        <svg
-          className="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <div className="fixed right-0 bottom-36 md:bottom-20 z-[60] flex items-center justify-end">
+        {/* 💬 মিনিমাইজ থাকলেও বাবল দেখাবে; চাপলে চ্যাট খুলে যাবে */}
+        <button
+          type="button"
+          onClick={() => {
+            restoreChat();
+            toggleChat();
+          }}
+          aria-hidden={!bubbleVisible}
+          tabIndex={bubbleVisible ? 0 : -1}
+          className={`absolute right-full mr-3 whitespace-nowrap bg-gray-900 text-white text-[11px] sm:text-xs py-2 px-3 rounded-2xl shadow-lg flex items-center gap-1.5 border border-gray-700 cursor-pointer transition-all duration-500 motion-reduce:transition-none ${
+            bubbleVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-4 pointer-events-none"
+          }`}
         >
-          <path d="M15 5l-7 7 7 7" />
-        </svg>
-      </button>
+          {typing && unread === 0 ? (
+            <span className="flex items-center gap-1 px-1 py-0.5" aria-label="typing">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce motion-reduce:animate-none" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce [animation-delay:150ms] motion-reduce:animate-none" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce [animation-delay:300ms] motion-reduce:animate-none" />
+            </span>
+          ) : unread > 0 ? (
+            <span>
+              {isEn
+                ? `💬 New reply (${unread})`
+                : `💬 নতুন রিপ্লাই এসেছে (${unread})`}
+            </span>
+          ) : (
+            <>
+              <span className="hidden sm:inline">
+                {isEn ? "💬 Live Chat – Need any help?" : "💬 লাইভ চ্যাট – কিছু জানতে চান?"}
+              </span>
+              <span className="sm:hidden">
+                {isEn ? "Live Chat 💬" : "লাইভ চ্যাট 💬"}
+              </span>
+            </>
+          )}
+          <div className="absolute right-[-5px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-gray-900" />
+        </button>
+
+        <button
+          type="button"
+          onClick={restoreChat}
+          aria-label={isEn ? "Show live chat" : "লাইভ চ্যাট দেখান"}
+          className="flex h-11 w-7 md:h-12 items-center justify-center rounded-l-full bg-[#055a36] text-white shadow-lg cursor-pointer transition-all duration-200 hover:w-9 motion-reduce:transition-none"
+        >
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+      </div>
     );
   }
 
@@ -588,18 +626,12 @@ export default function ChatWidget() {
       )}
 
       <div className="relative flex items-center justify-end">
-        {/* 🌊 Pulse ring (বাটনের পেছনে নরম ঢেউ) */}
+        {/* ✨ ঘুরন্ত সোনালি রিং */}
         {!isOpen && (
-          <>
-            <span
-              aria-hidden
-              className="pointer-events-none absolute right-0 h-11 w-11 md:h-12 md:w-12 rounded-full bg-[#055a36]/40 animate-ping [animation-duration:2.4s] motion-reduce:hidden"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute right-0 h-11 w-11 md:h-12 md:w-12 rounded-full bg-[#055a36]/30 animate-ping [animation-duration:2.4s] [animation-delay:1.2s] motion-reduce:hidden"
-            />
-          </>
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-[3px] h-[50px] w-[50px] md:h-[54px] md:w-[54px] rounded-full bg-[conic-gradient(from_0deg,rgba(251,191,36,0.18)_0deg,#fbbf24_70deg,rgba(251,191,36,0.18)_130deg,rgba(251,191,36,0.18)_360deg)] animate-[spin_4s_linear_infinite] motion-reduce:animate-none"
+          />
         )}
 
         {/* 💬 স্পিচ বাবল */}
