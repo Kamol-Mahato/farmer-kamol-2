@@ -61,7 +61,12 @@ function startListening(iframe: HTMLIFrameElement | null) {
 type MobileQueueItem =
   { kind: "video"; videoIdx: number } | { kind: "product"; productIdx: number };
 
-const THUMBNAIL_ADVANCE_MS = 3500;
+  const THUMBNAIL_ADVANCE_MS = 3500;
+
+  // ⏱ সময় বদলাতে চাইলে শুধু নিচের ৩টা সংখ্যা বদলান (১০০০ = ১ সেকেন্ড)
+  const PC_PRODUCT_MS = 5000; // PC: প্রতিটা প্রোডাক্ট কতক্ষণ থাকবে
+  const MOBILE_PRODUCT_MS = 4500; // মোবাইল: প্রতিটা প্রোডাক্ট কতক্ষণ থাকবে
+  const FADE_MS = 1300; // এক ছবি থেকে আরেক ছবিতে মিশে যাওয়ার সময়
 
 export default function HeroSlider({
   featuredProducts = [],
@@ -103,7 +108,7 @@ export default function HeroSlider({
     if (featuredProducts.length === 0) return;
     const timer = setInterval(() => {
       setPcProductIndex((prev) => (prev + 1) % featuredProducts.length);
-    }, 3500);
+    }, PC_PRODUCT_MS);
     return () => clearInterval(timer);
   }, [featuredProducts.length]);
 
@@ -128,7 +133,7 @@ export default function HeroSlider({
     if (currentMobileKind === "product") {
       const timer = setTimeout(() => {
         setMobileQueueIndex((prev) => (prev + 1) % mobileTotal);
-      }, 3000);
+      }, MOBILE_PRODUCT_MS);
       return () => clearTimeout(timer);
     }
     if (currentMobileKind === "video" && !mobilePlaying) {
@@ -346,16 +351,16 @@ export default function HeroSlider({
   }
 
   return (
-    <div className="bg-green-900">
+    <div className="bg-gradient-to-b from-green-900 to-green-50 px-3 md:px-6 pt-3 md:pt-5 pb-4 md:pb-6">
       <h1 className="sr-only">
         Farmer Kamol – কৃষক কমল | Pure honey, ghee, mustard oil, and duck chicks,
         delivered directly from our farm in Raiganj, Sirajganj
       </h1>
 
       {/* PC LAYOUT */}
-      <div className="hidden md:grid md:grid-cols-2 h-[280px]">
-        <div className="relative overflow-hidden">
-          {currentPcVideo && !pcYtId ? (
+      <div className="hidden md:grid md:grid-cols-2 gap-4 h-[300px] max-w-7xl mx-auto">
+      <div className="relative isolate overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 bg-green-900">
+      {currentPcVideo && !pcYtId ? (
             renderChannelLink(
               currentPcVideo.youtubeUrl,
               pcThumb,
@@ -405,7 +410,24 @@ export default function HeroSlider({
           )}
         </div>
 
-        <div className="relative overflow-hidden">
+        <div className="relative isolate overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 bg-green-900">
+          {featuredProducts.length > 1 && (
+            <div
+              className="absolute bottom-3 left-4 z-10 flex items-center gap-1.5 drop-shadow"
+              aria-hidden
+            >
+              {featuredProducts.map((item, i) => (
+                <span
+                  key={item.id}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    i === pcProductIndex % featuredProducts.length
+                      ? "w-5 bg-white"
+                      : "w-1.5 bg-white/55"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
           {featuredProducts.length === 0 ? (
             <div className="w-full h-full flex items-center justify-center bg-green-800">
               <p className="text-green-300 text-sm">No featured products</p>
@@ -414,6 +436,7 @@ export default function HeroSlider({
             <HeroSlideStack
               count={featuredProducts.length}
               index={pcProductIndex}
+              fadeMs={FADE_MS}
               renderSlide={(i) =>
                 renderProductSlide(
                   featuredProducts[i],
@@ -445,11 +468,14 @@ export default function HeroSlider({
 
       {/* MOBILE LAYOUT */}
       <div className="md:hidden">
-        <div className="relative" style={{ paddingTop: "56.25%" }}>
+      <div
+          className="relative isolate overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5"
+          style={{ paddingTop: "56.25%" }}>
           <CrossfadeSwap
             itemKey={safeMobileIndex}
             count={mobileTotal}
             skipPrev={mobilePlaying}
+            fadeMs={FADE_MS}
           >
             {currentMobileItem?.kind === "video" &&
             currentMobileVideo &&
@@ -498,6 +524,21 @@ export default function HeroSlider({
               </div>
             )}
           </CrossfadeSwap>
+          {mobileTotal > 1 && (
+            <div
+              className="absolute bottom-2.5 left-3 z-10 flex items-center gap-1.5 drop-shadow"
+              aria-hidden
+            >
+              {Array.from({ length: mobileTotal }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    i === safeMobileIndex ? "w-4 bg-white" : "w-1.5 bg-white/55"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
           {mobileTotal > 1 && (
             <>
               <button

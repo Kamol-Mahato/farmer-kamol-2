@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { siteConfig } from "@/lib/siteConfig";
 import { connectChatSocket } from "@/lib/chatSocket";
 import {
   CHAT_WELCOME_TEXT,
@@ -94,8 +96,8 @@ function YoutubeIcon() {
   );
 }
 
-const CHAT_EXP_KEY = "fk_chat_exp_at"; // খোলা (expanded) অবস্থার শুরুর সময়
-const CHAT_EXP_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+const CHAT_MIN_KEY = "fk_chat_min_at"; // মিনিমাইজ করার সময়
+const CHAT_MIN_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
 
 export default function ChatWidget() {
   const pathname = usePathname();
@@ -196,14 +198,14 @@ export default function ChatWidget() {
     setTyping(false);
     setMinimized(true);
     try {
-      localStorage.removeItem(CHAT_EXP_KEY);
+      localStorage.setItem(CHAT_MIN_KEY, Date.now().toString());
     } catch {}
   };
 
   const restoreChat = () => {
     setMinimized(false);
     try {
-      localStorage.setItem(CHAT_EXP_KEY, Date.now().toString());
+      localStorage.removeItem(CHAT_MIN_KEY);
     } catch {}
   };
 
@@ -212,19 +214,17 @@ export default function ChatWidget() {
   }, [minimized]);
 
   useEffect(() => {
-    let initial = true; // ডিফল্ট: মিনিমাইজ
+    let initial = false; // ডিফল্ট: খোলা
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const saved = localStorage.getItem(CHAT_EXP_KEY);
+      const saved = localStorage.getItem(CHAT_MIN_KEY);
       if (saved) {
-        const left = CHAT_EXP_MS - (Date.now() - parseInt(saved, 10));
+        const left = CHAT_MIN_MS - (Date.now() - parseInt(saved, 10));
         if (left > 0) {
-          initial = false;
-          timer = setTimeout(() => {
-            if (!isOpenRef.current) setMinimized(true);
-          }, left);
+          initial = true;
+          timer = setTimeout(restoreChat, left);
         } else {
-          localStorage.removeItem(CHAT_EXP_KEY);
+          localStorage.removeItem(CHAT_MIN_KEY);
         }
       }
     } catch {}
@@ -518,21 +518,32 @@ export default function ChatWidget() {
   return (
     <div className="fixed right-4 bottom-36 md:bottom-20 z-[60]">
       {isOpen && (
-        <div className="bg-white w-[300px] sm:w-[340px] h-[430px] rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden mb-3 transition-all duration-300">
-          <div className="bg-[#055a36] text-white p-3 flex justify-between items-center shadow-md">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2.5 h-2.5 rounded-full ${live ? "bg-green-400 animate-pulse" : "bg-yellow-300"}`}
-              />
+        <div className="bg-white w-[calc(100vw-2rem)] max-w-[360px] h-[min(470px,72vh)] rounded-3xl shadow-2xl flex flex-col border border-gray-100 overflow-hidden mb-3 transition-all duration-300">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#055a36] to-[#034026] text-white px-4 py-3.5 flex justify-between items-center shadow-md">
+            <span aria-hidden className="pointer-events-none absolute -top-8 -right-6 h-24 w-24 rounded-full bg-white/10" />
+            <span aria-hidden className="pointer-events-none absolute -bottom-10 left-16 h-20 w-20 rounded-full bg-white/5" />
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="relative">
+                <Image
+                  src={siteConfig.domain.logo}
+                  alt={siteConfig.brand.name}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-full object-cover border-2 border-white/80 shadow"
+                />
+                <span
+                  className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#055a36] ${live ? "bg-green-400" : "bg-yellow-300 animate-pulse"}`}
+                />
+              </div>
               <div>
-                <h3 className="font-bold text-xs sm:text-sm tracking-wide">
-                  Farmer Kamol Support
+                <h3 className="font-bold text-sm sm:text-[15px] tracking-wide leading-tight">
+                  Farmer Kamol
                 </h3>
-                <p className="text-[9px] sm:text-[10px] text-emerald-100">
+                <p className="text-[10px] sm:text-[11px] text-emerald-100">
                   {live
                     ? isEn
-                      ? "Live · WebSocket"
-                      : "লাইভ · WebSocket"
+                      ? "Support · Online"
+                      : "সাপোর্ট · অনলাইন"
                     : isEn
                       ? "Connecting..."
                       : "সংযোগ হচ্ছে..."}
@@ -541,7 +552,7 @@ export default function ChatWidget() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
+              className="relative z-10 text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/15 transition cursor-pointer"
             >
               <svg
                 className="w-4 h-4 sm:w-5 sm:h-5"
@@ -559,19 +570,28 @@ export default function ChatWidget() {
             </button>
           </div>
 
-          <div className="flex-1 p-3 overflow-y-auto bg-gray-50 space-y-2.5 text-xs sm:text-sm">
+          <div className="flex-1 p-3.5 overflow-y-auto bg-gradient-to-b from-[#f2faf5] to-white space-y-3 text-xs sm:text-sm">
             {messages.map((msg) => {
               const isCustomer = msg.senderType === "CUSTOMER";
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
+                  className={`flex items-end gap-1.5 ${isCustomer ? "justify-end" : "justify-start"}`}
                 >
+                  {!isCustomer && (
+                    <Image
+                      src={siteConfig.domain.logo}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 shrink-0 rounded-full object-cover border border-gray-200"
+                    />
+                  )}
                   <div
-                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-[12px] sm:text-[12.5px] leading-relaxed ${
+                    className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-[12px] sm:text-[13px] leading-relaxed ${
                       isCustomer
-                        ? "bg-[#055a36] text-white rounded-br-none shadow-sm"
-                        : "bg-white text-gray-800 border border-gray-200 rounded-bl-none shadow-sm"
+                        ? "bg-gradient-to-br from-[#055a36] to-[#034026] text-white rounded-br-md shadow-md"
+                        : "bg-white text-gray-800 border border-emerald-100 rounded-bl-md shadow-sm"
                     }`}
                   >
                     {(msg.senderType === "ADMIN" ||
@@ -597,7 +617,7 @@ export default function ChatWidget() {
 
           <form
             onSubmit={handleSendMessage}
-            className="p-2 bg-white border-t border-gray-100 flex gap-2"
+            className="p-3 bg-white border-t border-gray-100 flex items-center gap-2"
           >
             <input
               type="text"
@@ -606,12 +626,12 @@ export default function ChatWidget() {
               placeholder={
                 isEn ? "Type your question..." : "আপনার প্রশ্নটি লিখুন..."
               }
-              className="flex-1 border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#055a36] text-gray-800 transition"
+              className="flex-1 border border-gray-200 bg-gray-50 rounded-full px-4 py-2 text-xs sm:text-[13px] focus:outline-none focus:bg-white focus:border-[#055a36] text-gray-800 transition"
             />
             <button
               type="submit"
               disabled={!inputText.trim() || loading}
-              className="bg-[#055a36] text-white p-2 rounded-xl hover:bg-[#034026] disabled:opacity-50 transition cursor-pointer hover:scale-105 active:scale-95"
+              className="bg-gradient-to-br from-[#055a36] to-[#034026] text-white p-2.5 rounded-full shadow-md hover:brightness-110 disabled:opacity-50 transition cursor-pointer hover:scale-105 active:scale-95"
             >
               <svg
                 className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform rotate-90"
