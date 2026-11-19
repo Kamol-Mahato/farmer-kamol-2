@@ -94,6 +94,9 @@ function YoutubeIcon() {
   );
 }
 
+const CHAT_MIN_KEY = "fk_chat_min_at";
+const CHAT_MIN_MS = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+
 export default function ChatWidget() {
   const pathname = usePathname();
   const isEn = pathname?.startsWith("/en") ?? false;
@@ -103,8 +106,13 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [minimized, setMinimized] = useState<boolean | null>(null);
+  const minimizedRef = useRef(false);
   const [live, setLive] = useState(false);
   const [unread, setUnread] = useState(0);
+  const bubbleVisible =
+    (showTooltip || unread > 0) && !isOpen && minimized !== true;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -116,12 +124,38 @@ export default function ChatWidget() {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
+  // 💬 স্পিচ বাবল: ৩.৫ সেকেন্ড পর আসবে, টাইপিং "..." তারপর লেখা, ৭ সেকেন্ডে মিলিয়ে যাবে,
+  // প্রতি ৩০ সেকেন্ডে আবার। চ্যাট খুললে/বাবলে ক্লিক করলে এই সেশনে আর আসবে না।
   useEffect(() => {
-    const timerShow = setTimeout(() => setShowTooltip(true), 1500);
-    const timerHide = setTimeout(() => setShowTooltip(false), 6500);
+    const isOff = () => {
+      try {
+        return sessionStorage.getItem("fk_chat_bubble_off") === "1";
+      } catch {
+        return false;
+      }
+    };
+    if (isOff()) return;
+
+    let alive = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const run = () => {
+      if (!alive || isOff() || isOpenRef.current) return;
+      if (minimizedRef.current) {
+        timers.push(setTimeout(run, 30000));
+        return;
+      }
+      setTyping(true);
+      setShowTooltip(true);
+      timers.push(setTimeout(() => setTyping(false), 1300));
+      timers.push(setTimeout(() => setShowTooltip(false), 7500));
+      timers.push(setTimeout(run, 30000));
+    };
+
+    timers.push(setTimeout(run, 3500));
     return () => {
-      clearTimeout(timerShow);
-      clearTimeout(timerHide);
+      alive = false;
+      timers.forEach(clearTimeout);
     };
   }, []);
 
@@ -147,6 +181,10 @@ export default function ChatWidget() {
     void unlockVisitorAudio();
     if (!isOpen) {
       setShowTooltip(false);
+      setTyping(false);
+      try {
+        sessionStorage.setItem("fk_chat_bubble_off", "1");
+      } catch {}
       setUnread(0);
       // ⏱️ ৩ সেকেন্ডের deferred timer শেষ হওয়ার আগেই user চ্যাট খুললে সাথে সাথে init করা
       if (!initialized) {
@@ -155,6 +193,50 @@ export default function ChatWidget() {
     }
     setIsOpen(!isOpen);
   };
+
+  // ➖ মিনিমাইজ: ✕ চাপলে ২৪ ঘণ্টার জন্য ডান কিনারায় ছোট ট্যাব হয়ে থাকবে
+  const minimizeChat = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowTooltip(false);
+    setTyping(false);
+    setMinimized(true);
+    try {
+      localStorage.setItem(CHAT_MIN_KEY, Date.now().toString());
+      sessionStorage.setItem("fk_chat_bubble_off", "1");
+    } catch {}
+  };
+
+  const restoreChat = () => {
+    setMinimized(false);
+    try {
+      localStorage.removeItem(CHAT_MIN_KEY);
+    } catch {}
+  };
+
+  useEffect(() => {
+    minimizedRef.current = minimized === true;
+  }, [minimized]);
+
+  useEffect(() => {
+    let initial = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const saved = localStorage.getItem(CHAT_MIN_KEY);
+      if (saved) {
+        const left = CHAT_MIN_MS - (Date.now() - parseInt(saved, 10));
+        if (left > 0) {
+          initial = true;
+          timer = setTimeout(restoreChat, left);
+        } else {
+          localStorage.removeItem(CHAT_MIN_KEY);
+        }
+      }
+    } catch {}
+    setMinimized(initial);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -254,6 +336,7 @@ export default function ChatWidget() {
             setUnread((n) => n + 1);
             playVisitorNotify();
             setShowTooltip(true);
+            restoreChat();
           }
         },
         onError: () => setLive(false),
@@ -369,6 +452,31 @@ export default function ChatWidget() {
     ));
   };
 
+  if (minimized === null) return null;
+
+  if (minimized) {
+    return (
+      <button
+        type="button"
+        onClick={restoreChat}
+        aria-label={isEn ? "Show live chat" : "লাইভ চ্যাট দেখান"}
+        className="fixed right-0 bottom-36 md:bottom-20 z-[60] flex h-11 w-7 md:h-12 items-center justify-center rounded-l-full bg-[#055a36] text-white shadow-lg cursor-pointer transition-all duration-200 hover:w-9 motion-reduce:transition-none"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
+      </button>
+    );
+  }
+
   return (
     <div className="fixed right-4 bottom-36 md:bottom-20 z-[60]">
       {isOpen && (
@@ -480,24 +588,60 @@ export default function ChatWidget() {
       )}
 
       <div className="relative flex items-center justify-end">
-        {showTooltip && !isOpen && (
-          <div className="absolute right-14 whitespace-nowrap bg-gray-900 text-white text-[11px] sm:text-xs py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-1.5 animate-bounce transition-all duration-300 border border-gray-700">
-            <span>
-              {unread > 0
-                ? isEn
-                  ? `💬 New reply (${unread})`
-                  : `💬 নতুন রিপ্লাই এসেছে (${unread})`
-                : isEn
-                  ? "👋 We're online now, ask us anything!"
-                  : "👋 আমরা এখন অনলাইনে আছি, যেকোনো কিছু জিজ্ঞাসা করুন!"}
-            </span>
-            <div className="absolute right-[-5px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-gray-900" />
-          </div>
+        {/* 🌊 Pulse ring (বাটনের পেছনে নরম ঢেউ) */}
+        {!isOpen && (
+          <>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute right-0 h-11 w-11 md:h-12 md:w-12 rounded-full bg-[#055a36]/40 animate-ping [animation-duration:2.4s] motion-reduce:hidden"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute right-0 h-11 w-11 md:h-12 md:w-12 rounded-full bg-[#055a36]/30 animate-ping [animation-duration:2.4s] [animation-delay:1.2s] motion-reduce:hidden"
+            />
+          </>
         )}
+
+        {/* 💬 স্পিচ বাবল */}
+        <button
+          type="button"
+          onClick={toggleChat}
+          aria-hidden={!bubbleVisible}
+          tabIndex={bubbleVisible ? 0 : -1}
+          className={`absolute right-full mr-3 whitespace-nowrap bg-gray-900 text-white text-[11px] sm:text-xs py-2 px-3 rounded-2xl shadow-lg flex items-center gap-1.5 border border-gray-700 cursor-pointer transition-all duration-500 motion-reduce:transition-none ${
+            bubbleVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-4 pointer-events-none"
+          }`}
+        >
+          {typing && unread === 0 ? (
+            <span className="flex items-center gap-1 px-1 py-0.5" aria-label="typing">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce motion-reduce:animate-none" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce [animation-delay:150ms] motion-reduce:animate-none" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-bounce [animation-delay:300ms] motion-reduce:animate-none" />
+            </span>
+          ) : unread > 0 ? (
+            <span>
+              {isEn
+                ? `💬 New reply (${unread})`
+                : `💬 নতুন রিপ্লাই এসেছে (${unread})`}
+            </span>
+          ) : (
+            <>
+              <span className="hidden sm:inline">
+                {isEn ? "💬 Live Chat – Need any help?" : "💬 লাইভ চ্যাট – কিছু জানতে চান?"}
+              </span>
+              <span className="sm:hidden">
+                {isEn ? "Live Chat 💬" : "লাইভ চ্যাট 💬"}
+              </span>
+            </>
+          )}
+          <div className="absolute right-[-5px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-gray-900" />
+        </button>
 
         <button
           onClick={toggleChat}
-          className="relative bg-[#055a36] hover:bg-[#034026] text-white w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-transform duration-200 cursor-pointer"
+          className="group relative bg-[#055a36] hover:bg-[#034026] text-white h-11 min-w-11 md:h-12 md:min-w-12 md:hover:px-4 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
           aria-label="Toggle Chat"
         >
           {isOpen ? (
@@ -527,13 +671,47 @@ export default function ChatWidget() {
               />
             </svg>
           )}
+          {!isOpen && (
+            <span className="hidden md:block max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold opacity-0 transition-all duration-300 group-hover:max-w-[110px] group-hover:ml-2 group-hover:opacity-100">
+              {isEn ? "Live Chat" : "লাইভ চ্যাট"}
+            </span>
+          )}
+          {!isOpen && (
+            <span
+              aria-hidden
+              className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 border-2 border-white"
+            />
+          )}
           {!isOpen && unread > 0 && (
             <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center border-2 border-white shadow">
               {unread > 99 ? "99+" : unread}
             </span>
           )}
         </button>
-      </div>
-    </div>
-  );
+
+{/* ✕ মিনিমাইজ বাটন (ছোট দেখায়, কিন্তু টাচ এরিয়া বড়) */}
+{!isOpen && (
+  <button
+    type="button"
+    onClick={minimizeChat}
+    aria-label={isEn ? "Minimize chat" : "চ্যাট ছোট করুন"}
+    className="absolute -top-2.5 right-6 md:right-7 z-10 flex h-7 w-7 items-center justify-center cursor-pointer"
+  >
+    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-700/90 text-white shadow">
+      <svg
+        className="h-2.5 w-2.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      >
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </span>
+  </button>
+)}
+</div>
+</div>
+);
 }
