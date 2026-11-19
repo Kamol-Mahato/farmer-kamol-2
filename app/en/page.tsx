@@ -147,13 +147,19 @@ export default async function HomePageEn() {
       />
       <HeroSlider featuredProducts={featuredProducts} heroVideos={heroVideos} />
 
-      <div className="bg-green-50 pt-3 pb-1 px-4">
-        <div className="flex flex-wrap justify-center gap-4 md:gap-10 text-green-900 text-xs md:text-sm font-bold">
-          <span>✅ 100% Pure</span>
-          <span>🚚 Fast Delivery</span>
-          <span>💳 Cash on Delivery</span>
-        </div>
-      </div>
+      <div className="bg-green-50 pt-3 pb-2 px-4">
+  <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+    <span className="inline-flex items-center gap-1.5 bg-white border border-green-200 text-green-800 text-xs md:text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-sm">
+      ✅ 100% Pure
+    </span>
+    <span className="inline-flex items-center gap-1.5 bg-white border border-green-200 text-green-800 text-xs md:text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-sm">
+      🚚 Fast Delivery
+    </span>
+    <span className="inline-flex items-center gap-1.5 bg-white border border-green-200 text-green-800 text-xs md:text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-sm">
+      💳 Cash on Delivery
+    </span>
+  </div>
+</div>
 
       <TopSellerSection products={topSellerProducts} />
 

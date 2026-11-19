@@ -362,7 +362,7 @@ export default function HeroSlider({
   }
 
   return (
-    <div className="bg-gradient-to-b from-green-900 to-green-50 px-3 md:px-6 pt-3 md:pt-5 pb-4 md:pb-6">
+    <div className="bg-green-50 pt-3 pb-1 px-4 px-3 md:px-6 pt-3 md:pt-5 pb-4 md:pb-6">
       <h1 className="sr-only">
         Farmer Kamol – কৃষক কমল | সিরাজগঞ্জের রায়গঞ্জ থেকে খাঁটি মধু, দেশি ঘি, সরিষার
         তেল ও চীন হাঁসের বাচ্চা, সরাসরি খামার থেকে আপনার দরজায়
