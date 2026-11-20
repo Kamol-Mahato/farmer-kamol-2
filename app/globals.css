@@ -396,3 +396,74 @@ div.overflow-x-auto > table {
     transition: none;
   }
 }
+
+/* >>> pill-capsules (auto) >>> */
+/* সব ক্যাপসুল: ডিফল্টভাবেই ভরাট সবুজ (PC + মোবাইল), একই লুক */
+.pill-title,
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-green-700);
+  color: #fff;
+  border: 2px solid var(--color-green-700);
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 2px 6px rgb(21 128 61 / 0.25);
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+/* শিরোনাম: ক্লিক হয় না */
+.pill-title {
+  cursor: default;
+}
+
+/* লিংক: মাউস নিলে/চাপলে বোঝা যায় ক্লিক করা যায় */
+.pill-link:hover {
+  background: var(--color-green-800);
+  border-color: var(--color-green-800);
+  box-shadow: 0 6px 14px rgb(21 128 61 / 0.4);
+}
+.pill-link:active {
+  transform: scale(0.96);
+}
+
+/* লিংক-বাটনের শেষে তীর */
+.pill-arrow::after {
+  content: "\2192";
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.pill-arrow:hover::after {
+  transform: translateX(4px);
+}
+
+/* ট্রাস্ট ব্যাজ: হালকা সবুজ, ছোট, বাটন নয় */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--color-green-100);
+  color: var(--color-green-800);
+  border: 1px solid var(--color-green-300);
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  padding: 0.375rem 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .pill-title,
+  .pill-link {
+    font-size: 1.25rem;
+  }
+  .pill-badge {
+    font-size: 0.875rem;
+  }
+}
+/* <<< pill-capsules (auto) <<< */

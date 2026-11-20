@@ -269,7 +269,7 @@ export default function TopSellerSection({
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-5">
-          <h2 className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2 rounded-full hover:bg-green-700 hover:text-white transition cursor-default">
+          <h2 className="pill-title">
             Top Selling
           </h2>
         </div>

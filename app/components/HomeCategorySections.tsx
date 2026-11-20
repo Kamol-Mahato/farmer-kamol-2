@@ -33,7 +33,7 @@ export default function HomeCategorySections({
                 <h2 className="inline-block">
                   <Link
                     href={href}
-                    className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 text-lg md:text-xl font-bold px-6 py-2 rounded-full hover:bg-green-700 hover:text-white transition"
+                    className="pill-link"
                   >
                     {isEn ? g.titleEn : g.titleBn}
                   </Link>

@@ -93,9 +93,9 @@ export default function VideoSection({
         <div className="text-center mt-8">
           <Link
             href="/en/media/video"
-            className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 px-6 py-2 rounded-full font-bold hover:bg-green-700 hover:text-white transition"
+            className="pill-link pill-arrow"
           >
-            View All Videos →
+            View All Videos
           </Link>
         </div>
       </div>

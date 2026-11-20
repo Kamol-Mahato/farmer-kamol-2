@@ -178,7 +178,7 @@ export default function InvestSection({
               </Link>
               <Link
                 href="/en/invest"
-                className="inline-flex items-center gap-2 text-green-800 border-2 border-green-700 px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 hover:bg-green-700 hover:text-white"
+                className="pill-link pill-arrow"
               >
                 Learn More
               </Link>
