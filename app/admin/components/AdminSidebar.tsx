@@ -45,6 +45,7 @@ const navItems = [
   { label: "প্রতিযোগিতা ও অফার", href: "/admin/contests", agentVisible: false },
   { label: "বাংলার ফসল", href: "/admin/banglar-fosol", agentVisible: false },
   { label: "ভিডিও ম্যানেজমেন্ট", href: "/admin/videos", agentVisible: false },
+  { label: "হাঁসের বাচ্চার দাম", href: "/admin/duck-prices", agentVisible: false },
   {
     label: "গ্যালারি ম্যানেজমেন্ট",
     href: "/admin/images",

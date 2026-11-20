@@ -444,7 +444,7 @@ export const seoLandingsEn: SeoLanding[] = [
   },
   {
     slug: "hasher-bacha",
-    updatedAt: "2026-10-19",
+    updatedAt: "2026-11-20",
     h1: "Ducklings for Sale — All Breeds Including Chinese Ducks, 1 Day to 1 Month Old",
     title:
       "Buy Ducklings – All Breeds Including Chinese Ducklings | Farmer Kamol",
@@ -461,6 +461,33 @@ export const seoLandingsEn: SeoLanding[] = [
       "duckling price Bangladesh",
     ],
     productMatch: ["হাঁস"],
+    showDuckPrices: true,
+    useProductImages: true,
+    steps: {
+      heading: "From Booking to Delivery: Step by Step",
+      items: [
+        {
+          title: "Tell us by phone or WhatsApp",
+          text: "Let us know the breed, the age, how many, and where they need to be delivered.",
+        },
+        {
+          title: "Settle the price and supply date",
+          text: "We confirm the current price and agree the supply date with you over the phone.",
+        },
+        {
+          title: "Confirm the booking with an advance",
+          text: "The booking is confirmed only after an advance payment of at least 40 percent.",
+        },
+        {
+          title: "Delivery in a special box",
+          text: "The ducklings are packed in special boxes. Across Bangladesh, we or our own people deliver them ourselves.",
+        },
+        {
+          title: "Start their first care on arrival",
+          text: "Open the box without delay and keep the ducklings in a warm, dry place. Details are in the care section below.",
+        },
+      ],
+    },
     intro:
       "You can get ducklings of all breeds from Farmer Kamol, including Chinese ducks. Ducklings from 1 day to 1 month old are sent in special boxes. The ducklings are sourced from our own farm and from other hatcheries. Orders and all details are settled over the phone, so please read the rules below before you buy.",
     sections: [
@@ -485,14 +512,14 @@ export const seoLandingsEn: SeoLanding[] = [
       {
         heading: "Booking and Payment",
         body: [
-          "To confirm a booking for ducklings, you need to pay at least 60-70 percent in advance. A booking is considered confirmed only after the advance payment.",
+          "To confirm a booking for ducklings, you need to pay at least 40 percent in advance. A booking is considered confirmed only after the advance payment.",
         ],
       },
       {
         heading: "Ordering and Delivery Rules",
         body: [
           "All details of a duckling order are settled over the phone: which breed, what age, how many, and where they need to be delivered. Next-day delivery is not available, so you cannot order today and receive the ducklings tomorrow. The supply date is decided by discussion over the phone.",
-          "The ducklings are packed and sent in special boxes. In most cases, we or our own person deliver the ducklings.",
+          "The ducklings are packed in special boxes. Across Bangladesh, we or our own people deliver the ducklings ourselves.",
         ],
       },
       {
@@ -522,7 +549,7 @@ export const seoLandingsEn: SeoLanding[] = [
       },
       {
         q: "How much advance payment is needed to book ducklings?",
-        a: "To confirm a booking, you need to pay at least 60-70 percent in advance.",
+        a: "To confirm a booking, you need to pay at least 40 percent in advance.",
       },
       {
         q: "If I order today, can I get the ducklings tomorrow?",
@@ -530,7 +557,7 @@ export const seoLandingsEn: SeoLanding[] = [
       },
       {
         q: "How are the ducklings sent?",
-        a: "They are packed and sent in special boxes. In most cases, we or our own person deliver the ducklings.",
+        a: "They are packed in special boxes. Across Bangladesh, we or our own people deliver the ducklings ourselves.",
       },
       {
         q: "Where do you get the ducklings from?",
@@ -538,7 +565,7 @@ export const seoLandingsEn: SeoLanding[] = [
       },
       {
         q: "What is the price of ducklings?",
-        a: "The price depends on breed, age and quantity, and is told over the phone.",
+        a: "Prices by breed and age are shown in the price table on this page. Prices may change, so please confirm the current price by phone before booking.",
       },
     ],
     related: [

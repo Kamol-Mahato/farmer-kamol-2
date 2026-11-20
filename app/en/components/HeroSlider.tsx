@@ -281,7 +281,9 @@ export default function HeroSlider({
     isPriority: boolean = false,
   ) {
     const label = /facebook\.com|fb\.watch/.test(url)
-      ? "Visit our Facebook page"
+    ? "Visit our Facebook page"
+    : extractYoutubeId(url)
+      ? "Watch on YouTube"
       : "Visit our YouTube channel";
     return (
       <a
@@ -360,7 +362,7 @@ export default function HeroSlider({
       {/* PC LAYOUT */}
       <div className="hidden md:grid md:grid-cols-2 gap-4 h-[300px] max-w-7xl mx-auto">
       <div className="relative isolate overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 bg-green-900">
-      {currentPcVideo && !pcYtId ? (
+      {currentPcVideo ? (
             renderChannelLink(
               currentPcVideo.youtubeUrl,
               pcThumb,
@@ -478,8 +480,7 @@ export default function HeroSlider({
             fadeMs={FADE_MS}
           >
             {currentMobileItem?.kind === "video" &&
-            currentMobileVideo &&
-            !mobileYtId ? (
+            currentMobileVideo ? (
               renderChannelLink(
                 currentMobileVideo.youtubeUrl,
                 mobileThumb,
