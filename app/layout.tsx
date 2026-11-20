@@ -8,6 +8,7 @@ import TopLoadingBar from "./components/TopLoadingBar";
 import "./globals.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { siteConfig } from "@/lib/siteConfig";
+import Script from "next/script";
 
 const hindSiliguri = Hind_Siliguri({
   weight: ["400", "600", "700"],
@@ -78,6 +79,17 @@ export default function RootLayout({
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* GA — lazyOnload দিয়ে প্রথম লোডে ব্লক করবে না */}
         <GoogleAnalytics gaId="G-8ZRHT134HL" />
+
+        {/* Microsoft Clarity */}
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "zgo65o5zfw");
+          `}
+        </Script>
       </body>
     </html>
   );
