@@ -6,7 +6,7 @@ import { getLanding, seoLandings } from "@/lib/seoLandings";
 import { siteConfig } from "@/lib/siteConfig";
 
 export const revalidate = 3600;
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return seoLandings.map((l) => ({ landing: l.slug }));
