@@ -4,12 +4,12 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com ${isDev ? "'unsafe-eval'" : ""};
-  script-src-elem 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com;
+  script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://www.clarity.ms https://scripts.clarity.ms ${isDev ? "'unsafe-eval'" : ""};
+  script-src-elem 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://www.clarity.ms https://scripts.clarity.ms;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl https://*.google-analytics.com https://*.googletagmanager.com;
+  img-src 'self' data: blob: https://pvixtqqcegfbxkhxogww.supabase.co https://images.weserv.nl https://*.google-analytics.com https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com;
   font-src 'self' data:;
-  connect-src 'self' ws: wss: https://pvixtqqcegfbxkhxogww.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://doubleclick.net ${isDev ? "ws://localhost:*" : ""};
+  connect-src 'self' ws: wss: https://pvixtqqcegfbxkhxogww.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://doubleclick.net https://*.clarity.ms https://c.bing.com ${isDev ? "ws://localhost:*" : ""};
   frame-src 'self' https://youtube.com https://youtube.com;
   media-src 'self' blob:;
   worker-src 'self' blob:;
