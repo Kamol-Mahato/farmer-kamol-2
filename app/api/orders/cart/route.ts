@@ -6,7 +6,8 @@ import {
   calculateDeliveryCharge,
   getUnitToKgMultiplier,
 } from "@/lib/orderUtils";
-import { sendTelegramAlert } from "@/lib/telegram";
+import { sendTelegramAlert, escapeHtml } from "@/lib/telegram";
+import { generateCustomId } from "@/lib/orderIdUtils";
 import { sendPushToAdmin } from "@/lib/webpush";
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
 import { signOrderPhoneToken } from "@/lib/orderPhoneToken";
@@ -287,9 +288,27 @@ export async function POST(request: Request) {
           `💳 মাধ্যম: ${gatewayName}\n` +
           `🔢 TrxID: ${trxId}\n` +
           `💰 মোট বিল: ৳ ${finalCodAmount}\n\n` +
-          `অর্ডার #${result.id} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`,
+          `অর্ডার ${generateCustomId(result.createdAt, result.dailySeq)} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`,
       );
     }
+    // ✅ COD অর্ডারেও Telegram অ্যালার্ট — /admin/settings-এর টগল অন থাকলে
+    if (paymentMethod !== "GATEWAY") {
+      const tgSettings = await prisma.systemControlCenter.findUnique({
+        where: { id: 1 },
+      });
+      if (tgSettings?.notifyAllOrdersTelegram ?? true) {
+        await sendTelegramAlert(
+          `🟢 <b>নতুন অর্ডার (COD, কার্ট)</b>\n\n` +
+            `🆔 ${generateCustomId(result.createdAt, result.dailySeq)}\n` +
+            `👤 কাস্টমার: ${escapeHtml(finalName)}\n` +
+            `📞 ফোন: ${phone}\n` +
+            `📍 ঠিকানা: ${escapeHtml(finalAddress)}\n` +
+            `📦 পণ্য: ${items.length} ধরনের, মোট ${totalQuantity} টি\n` +
+            `💰 মোট বিল: ৳ ${finalCodAmount}`,
+        );
+      }
+    }
+
     // ✅ Admin-এর ফোনে push notification
     await sendPushToAdmin(
       "🛒 নতুন অর্ডার এসেছে!",

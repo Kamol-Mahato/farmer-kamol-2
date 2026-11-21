@@ -44,6 +44,8 @@ model SystemControlCenter {
   facebookPageUrl           String  @default("https://www.facebook.com/farmerkamol")
   youtubeChannelUrl         String  @default("https://www.youtube.com/@FarmerKamol")
   enableInvestmentProgram   Boolean @default(false)
+  // সব অর্ডারে (COD সহ) Telegram নোটিফিকেশন — /admin/settings থেকে অন/অফ
+  notifyAllOrdersTelegram   Boolean @default(true)
   // হাঁসের বাচ্চার দাম (JSON টেক্সট) — /admin/duck-prices থেকে বদলায়
   duckChickPrices           String?
 }

@@ -55,6 +55,7 @@ export async function PUT(request: Request) {
       "enableWishlist",
       "enablePaymentGateway",
       "enableInvestmentProgram",
+      "notifyAllOrdersTelegram",
       "farmCowCount",
       "farmDuckCount",
       "farmGoatCount",

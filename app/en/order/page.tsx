@@ -160,6 +160,7 @@ function OrderForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [customId, setCustomId] = useState<string | null>(null);
   const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(
     null,
   );
@@ -417,6 +418,7 @@ function OrderForm() {
         return;
       }
       setOrderId(data.orderId ?? null);
+      setCustomId(data.customId ?? null);
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -445,12 +447,12 @@ function OrderForm() {
             {orderId && (
               <div className="flex items-center justify-between mb-2">
                 <p className="text-gray-700 text-sm font-medium">
-                  Order ID: <span className="font-bold">#{orderId}</span>
+                Order ID: <span className="font-bold">{customId ?? orderId}</span>
                 </p>
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(String(orderId));
+                    navigator.clipboard.writeText(String(customId ?? orderId));
                     setOrderIdCopied(true);
                     setTimeout(() => setOrderIdCopied(false), 2000);
                   }}

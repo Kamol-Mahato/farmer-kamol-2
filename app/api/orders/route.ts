@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
-import { sendTelegramAlert } from "@/lib/telegram";
+import { sendTelegramAlert, escapeHtml } from "@/lib/telegram";
 import { sendPushToAdmin } from "@/lib/webpush";
 import {
   getBangladeshDayBoundaries,
@@ -12,6 +12,7 @@ import {
 import { checkRateLimit, recordFailedAttempt } from "@/lib/rateLimiter";
 import { signOrderPhoneToken } from "@/lib/orderPhoneToken";
 import { getApiLocale, tr } from "@/lib/apiLocale";
+import { generateCustomId } from "@/lib/orderIdUtils";
 
 // ✅ agent_session কুকি থাকলে (এবং valid AGENT হলে) সেই agent-এর ID রিটার্ন করে
 async function resolveAgentId(): Promise<number | null> {
@@ -293,8 +294,26 @@ export async function POST(request: Request) {
           `💳 মাধ্যম: ${gatewayName}\n` +
           `🔢 TrxID: ${trxId}\n` +
           `💰 মোট বিল: ৳ ${finalCodAmount}\n\n` +
-          `অর্ডার #${result.id} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`,
+          `অর্ডার ${generateCustomId(result.createdAt, result.dailySeq)} — পেমেন্ট কনফার্ম করতে অ্যাডমিন প্যানেলে যান।`,
       );
+    }
+
+    // ✅ COD অর্ডারেও Telegram অ্যালার্ট — /admin/settings-এর টগল অন থাকলে
+    if (paymentMethod !== "GATEWAY") {
+      const tgSettings = await prisma.systemControlCenter.findUnique({
+        where: { id: 1 },
+      });
+      if (tgSettings?.notifyAllOrdersTelegram ?? true) {
+        await sendTelegramAlert(
+          `🟢 <b>নতুন অর্ডার (COD)</b>\n\n` +
+            `🆔 ${generateCustomId(result.createdAt, result.dailySeq)}\n` +
+            `👤 কাস্টমার: ${escapeHtml(finalName)}\n` +
+            `📞 ফোন: ${phone}\n` +
+            `📍 ঠিকানা: ${escapeHtml(finalAddress)}\n` +
+            `📦 পণ্য: ${escapeHtml(product.name)} × ${quantity}\n` +
+            `💰 মোট বিল: ৳ ${finalCodAmount}`,
+        );
+      }
     }
 
     // ✅ Admin-এর ফোনে push notification
@@ -316,6 +335,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       orderId: result.id,
+      customId: generateCustomId(result.createdAt, result.dailySeq),
     });
   } catch (error: any) {
     // ✅ Race condition এ একই সময়ে দুজন একই TrxID দিলে DB unique constraint ধরবে

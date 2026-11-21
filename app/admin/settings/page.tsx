@@ -22,6 +22,7 @@ type Settings = {
   enableWishlist: boolean;
   enablePaymentGateway: boolean;
   enableInvestmentProgram: boolean;
+  notifyAllOrdersTelegram: boolean;
   farmCowCount: number | null;
   farmDuckCount: number | null;
   farmGoatCount: number | null;
@@ -217,7 +218,14 @@ export default function AdminSystemSettingsPage() {
 
       {/* গ্রুপ ২ — অপারেশনাল সেটিংস */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">
-        <h2 className="text-lg font-bold text-green-700 mb-3">সাধারণ সেটিংস</h2>
+      <h2 className="text-lg font-bold text-green-700 mb-3">সাধারণ সেটিংস</h2>
+        <ToggleRow
+          label="সব অর্ডারের Telegram নোটিফিকেশন"
+          description="অন থাকলে COD সহ প্রতিটি নতুন অর্ডারের তথ্য Telegram-এ আসবে। অফ করলে শুধু বিকাশ/নগদ পেমেন্টের অ্যালার্ট আসবে"
+          checked={settings.notifyAllOrdersTelegram}
+          onChange={(v) => updateField("notifyAllOrdersTelegram", v)}
+          disabled={savingField === "notifyAllOrdersTelegram"}
+        />
         <ToggleRow
           label="Guest Checkout-এ OTP বাধ্যতামূলক"
           description="লগইন ছাড়া অর্ডার করলেও ফোন নম্বর OTP দিয়ে ভেরিফাই করতে হবে"
