@@ -9040,6 +9040,14 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
             <input type="text" id="dpBrandFooter" value="খামার থেকে আপনার দরজায়  •  কৃষিই প্রাণ" oninput="dpRender()">
           </label>
 
+          <label>
+            ফ্রেমের স্টাইল
+            <select id="dpFrameStyle" onchange="dpRender()">
+              <option value="soft" selected>নরম ছায়া ফ্রেম (সাদা জমিন)</option>
+              <option value="classic">পুরনো ফ্রেম (সবুজ জমিন)</option>
+            </select>
+          </label>
+
           <label style="display:flex;align-items:center;gap:8px;font-weight:600">
             <input type="checkbox" id="dpShowLogo" checked onchange="dpRender()" style="width:auto">
             লোগো দেখাও
@@ -9065,7 +9073,7 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         <div class="dp-preview">
           <canvas id="dailyPostCanvas" width="1080" height="1080"></canvas>
-          <script src="/tools/daily-post-overlay.js?v=2"></script>
+          <script src="/tools/daily-post-overlay.js?v=3"></script>
           <script src="/tools/tools-nav.js"></script>
           <p class="dp-note" id="dpPreviewNote">
             প্রিভিউ 1080 × 1080 px। ডাউনলোড করা ছবিতে পোস্টের
@@ -9552,13 +9560,25 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const s = u;
 
         ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#f0fbf3";
+        const softFrame = !$("dpFrameStyle") || $("dpFrameStyle").value !== "classic";
+        ctx.fillStyle = softFrame ? "#ffffff" : "#f0fbf3";
         ctx.fillRect(0, 0, W, H);
 
         // ── ১. ছবি ──
+        if (softFrame) {
+          ctx.save();
+          ctx.shadowColor = "rgba(20,60,35,0.22)";
+          ctx.shadowBlur = 26 * u;
+          ctx.shadowOffsetY = 8 * u;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(pad, pad, W - pad * 2, photoH, 18 * u);
+          ctx.fill();
+          ctx.restore();
+        }
         ctx.save();
         ctx.beginPath();
-        ctx.roundRect(pad, pad, W - pad * 2, photoH, 12 * u);
+        ctx.roundRect(pad, pad, W - pad * 2, photoH, softFrame ? 18 * u : 12 * u);
         ctx.clip();
         if (dpPhoto) {
           dpCover(dpPhoto, pad, pad, W - pad * 2, photoH);
@@ -9589,10 +9609,17 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         cardItems.forEach(card => {
           const cx = pad + card.c * (cardW + 14 * u);
           const cy = cardsY + card.r * (cardH + 14 * u);
+          ctx.save();
+          if (softFrame) {
+            ctx.shadowColor = "rgba(20,60,35,0.16)";
+            ctx.shadowBlur = 18 * u;
+            ctx.shadowOffsetY = 5 * u;
+          }
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
           ctx.roundRect(cx, cy, cardW, cardH, 12 * u);
           ctx.fill();
+          ctx.restore();
           ctx.fillStyle = "#000000";
           ctx.font = `700 ${30 * u}px 'Noto Sans Bengali', sans-serif`;  // লেখা বড় (আগে ২২)
           ctx.textAlign = "center";
@@ -9601,10 +9628,17 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
 
         // ── ৪. এক্সট্রা নোট ──
         if (hasExtra) {
+          ctx.save();
+          if (softFrame) {
+            ctx.shadowColor = "rgba(20,60,35,0.16)";
+            ctx.shadowBlur = 18 * u;
+            ctx.shadowOffsetY = 5 * u;
+          }
           ctx.fillStyle = "#ffffff";
           ctx.beginPath();
           ctx.roundRect(pad, extraY, W - pad * 2, extraH, 12 * u);
           ctx.fill();
+          ctx.restore();
           ctx.fillStyle = "#000000";
           ctx.font = `700 ${28 * u}px 'Noto Sans Bengali', sans-serif`;
           ctx.textAlign = "left";
@@ -9620,8 +9654,20 @@ ${el.shape === "rect" ? `<div class="mob-row"><span class="mob-lbl">Radius</span
         const showLogo     = !$("dpShowLogo") || $("dpShowLogo").checked;
         const showSocial   = !$("dpShowSocial") || $("dpShowSocial").checked;
 
-        ctx.fillStyle = "#e1f3e6";
-        ctx.fillRect(0, brandY, W, H - brandY);
+        if (softFrame) {
+          ctx.save();
+          ctx.shadowColor = "rgba(20,60,35,0.16)";
+          ctx.shadowBlur = 18 * u;
+          ctx.shadowOffsetY = 5 * u;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(pad, brandY, W - pad * 2, H - brandY - pad, 18 * u);
+          ctx.fill();
+          ctx.restore();
+        } else {
+          ctx.fillStyle = "#e1f3e6";
+          ctx.fillRect(0, brandY, W, H - brandY);
+        }
 
         const logoY = brandY + 14 * u;
         const textBase = brandY + 32 * u;

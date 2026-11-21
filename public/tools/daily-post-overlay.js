@@ -18,7 +18,7 @@
   
     // সেটিং ভার্সন: নিচের DEF এর কাঠামো বদলালে এই সংখ্যা বাড়ান।
     // তাহলে ব্রাউজারে জমে থাকা পুরনো সেটিং নিজে থেকেই বাদ পড়বে।
-    var VER = 2;
+    var VER = 3;
     var KEY = "fk_dp_overlay";
   
     var $ = function (id) { return document.getElementById(id); };
@@ -44,7 +44,7 @@
     var DEF = {
       ratio: "4x5", cw: 1080, ch: 1350,
       style: "classic", vpos: "auto", align: "auto",
-      tFont: "Hind Siliguri", tWeight: "700", tSize: 104,
+      tFont: "Hind Siliguri", tWeight: "700", tSize: 80, dSize: 85,
       tColor1: "#ffffff", tColor2: "#ffe882",
       tShadow: true, tOutline: false, divider: true,
       dateOn: true, dateStyle: "capsule", capColor: "#126434",
@@ -353,12 +353,12 @@
       var ttxt = (S.title || "").trim();
       if (ttxt) {
         var k, lines = [];
-        for (k = 0; k <= 14; k++) {
+        for (k = 0; k <= 18; k++) {
           var sz = S.tSize * u * TSC * (1 - k * 0.04);
           c.font = S.tWeight + " " + sz + "px " + fam();
           lines = wrapLines(c, ttxt, maxW);
-          var fits = lines.length <= 5 && lines.every(function (l) { return c.measureText(l).width <= maxW + 1; });
-          if (fits || k === 14) { tsize = sz; break; }
+          var fits = lines.length <= 5 && lines.every(function (l) { return c.measureText(l).width <= maxW + 1; }) && (lines.length * sz * 1.2 <= rh * 0.34);
+          if (fits || k === 18) { tsize = sz; break; }
         }
         tlines = lines.slice(0, 5);
         tfont = S.tWeight + " " + tsize + "px " + fam();
@@ -370,17 +370,18 @@
   
       // তারিখ মাপা
       var dp = dateParts(env);
-      var capH = 70 * u * TSC, l2H = 44 * u * TSC, exH = 40 * u * TSC, plainH = 56 * u * TSC;
+      var DS = (S.dSize || 85) / 100;
+      var capH = 70 * u * TSC * DS, l2H = 44 * u * TSC * DS, exH = 40 * u * TSC * DS, plainH = 56 * u * TSC * DS;
       var capFont = "", capW = 0, capPad = 30 * u, l1Font = "";
       if (dp.l1) {
         if (S.dateStyle === "capsule") {
-          capFont = fitFont(c, dp.l1, "700", 36 * u * TSC, fam(), maxW - 2 * capPad, 18 * u);
+          capFont = fitFont(c, dp.l1, "700", 36 * u * TSC * DS,fam(), maxW - 2 * capPad, 18 * u);
           capW = c.measureText(dp.l1).width + 2 * capPad;
         } else {
-          l1Font = fitFont(c, dp.l1, "700", 40 * u * TSC, fam(), maxW, 18 * u);
+          l1Font = fitFont(c, dp.l1, "700", 40 * u * TSC * DS, fam(), maxW, 18 * u);
         }
       }
-      var l2Font = dp.l2 ? fitFont(c, dp.l2, "400", 29 * u * TSC, fam(), maxW, 14 * u) : "";
+      var l2Font = dp.l2 ? fitFont(c, dp.l2, "400", 29 * u * TSC * DS,fam(), maxW, 14 * u) : "";
       var dateH = (dp.l1 ? (S.dateStyle === "capsule" ? capH + 14 * u : plainH) : 0) + (dp.l2 ? l2H : 0) + dp.ex.length * exH;
   
       var gap = (titleBlockH && dateH) ? 24 * u : 0;
@@ -470,7 +471,7 @@
         y += l2H;
       }
       for (i = 0; i < dp.ex.length; i++) {
-        var ef = fitFont(c, dp.ex[i], "700", 28 * u * TSC, fam(), maxW, 14 * u);
+        var ef = fitFont(c, dp.ex[i], "700", 28 * u * TSC * DS,fam(), maxW, 14 * u);
         rvIn(c, "ex" + i, 24, u);
         drawText(c, dp.ex[i], ax, y + exH / 2, ef, "#ffe882", al, u, { shadow: true });
         rvOut(c);
@@ -816,6 +817,7 @@
   
       h += group("📅 তারিখ",
         fChk("dateOn", "তারিখ দেখাও") +
+        fRange("dSize", "তারিখ ও অন্য লেখার আকার (%)", 50, 120, 5) +
         fSel("dateStyle", "তারিখের ধরন", [["capsule", "ক্যাপসুল"], ["plain", "খোলা লেখা"]]) +
         fColor("capColor", "ক্যাপসুলের জমিনের রঙ") +
         '<div class="ov-hint">তারিখের লেখা আগের মতোই উপরের ঘর (বার, বাংলা, ইংরেজি, হিজরি) থেকে আসে। হাতে বদলালে এখানেও বদলাবে।</div>' +
