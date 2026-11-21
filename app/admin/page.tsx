@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+
+// অ্যাডমিন ড্যাশবোর্ডের সংখ্যা প্রতিবার লাইভ DB থেকে আসবে (build-time এ আটকে থাকবে না)
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   const [
     totalOrders,
