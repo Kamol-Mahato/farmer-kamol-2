@@ -234,6 +234,57 @@ export default function ChatWidget() {
     };
   }, []);
 
+  // ⏱️ অটো-লুকানো: প্রথম ভিজিটে ১ মিনিট, রিলোড/অন্য পেজে গেলে আবার ৩০ সেকেন্ড
+  const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoHiddenRef = useRef(false);
+  const firstPathRef = useRef(true);
+
+  const userMinimized = () => {
+    try {
+      return !!localStorage.getItem(CHAT_MIN_KEY);
+    } catch {
+      return false;
+    }
+  };
+
+  const scheduleAutoHide = useCallback((ms: number) => {
+    if (autoHideTimer.current) clearTimeout(autoHideTimer.current);
+    autoHideTimer.current = setTimeout(function check() {
+      // চ্যাট খোলা থাকলে (কথা চলছে) লুকাবে না, ১০ সেকেন্ড পর আবার দেখবে
+      if (isOpenRef.current) {
+        autoHideTimer.current = setTimeout(check, 10000);
+        return;
+      }
+      autoHiddenRef.current = true;
+      setMinimized(true); // localStorage এ লেখা হয় না, তাই রিলোডে ফিরে আসবে
+    }, ms);
+  }, []);
+
+  useEffect(() => {
+    if (userMinimized()) return; // ইউজার নিজে ✕ দিয়ে থাকলে ২৪ ঘণ্টার নিয়মই চলবে
+    let first = true;
+    try {
+      first = sessionStorage.getItem("fk_chat_seen") !== "1";
+      sessionStorage.setItem("fk_chat_seen", "1");
+    } catch {}
+    scheduleAutoHide(first ? 60000 : 30000);
+    return () => {
+      if (autoHideTimer.current) clearTimeout(autoHideTimer.current);
+    };
+  }, [scheduleAutoHide]);
+
+  // অন্য পেজে গেলে (রিলোড ছাড়া) অটো-লুকানো চ্যাট আবার ৩০ সেকেন্ডের জন্য আসবে
+  useEffect(() => {
+    if (firstPathRef.current) {
+      firstPathRef.current = false;
+      return;
+    }
+    if (userMinimized() || !autoHiddenRef.current) return;
+    autoHiddenRef.current = false;
+    setMinimized(false);
+    scheduleAutoHide(30000);
+  }, [pathname, scheduleAutoHide]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };

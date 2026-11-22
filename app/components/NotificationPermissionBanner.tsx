@@ -17,6 +17,9 @@ function urlBase64ToUint8Array(base64String: string) {
 
 const DISMISS_KEY = "notification_dismissed_at";
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+const SHOW_AFTER_MS = 2 * 60 * 1000; // সাইটে ২ মিনিট থাকলে দেখাবে
+const SHOW_FOR_MS = 15 * 1000; // ১৫ সেকেন্ড পর নিজে চলে যাবে
+const VISIT_KEY = "fk_visit_started_at";
 
 export default function NotificationPermissionBanner() {
   const [visible, setVisible] = useState(false);
@@ -40,9 +43,26 @@ export default function NotificationPermissionBanner() {
       if (elapsed < TWENTY_FOUR_HOURS) return;
     }
 
-    // ✅ ইউজার আসার ২-৩ সেকেন্ড পর ব্যানার দেখাবে
-    const timer = setTimeout(() => setVisible(true), 2500);
-    return () => clearTimeout(timer);
+    // ✅ সাইটে আসার সময় মনে রাখো (রিলোড/পেজ বদলালেও গোনা চলবে)
+    let started = Date.now();
+    try {
+      const s = sessionStorage.getItem(VISIT_KEY);
+      if (s) started = parseInt(s, 10);
+      else sessionStorage.setItem(VISIT_KEY, started.toString());
+    } catch {}
+    const delay = Math.max(0, SHOW_AFTER_MS - (Date.now() - started));
+
+    // ✅ ২ মিনিট পর দেখাবে, ১৫ সেকেন্ড পর নিজে সরে যাবে, ২৪ ঘণ্টায় একবারই
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    const showTimer = setTimeout(() => {
+      localStorage.setItem(DISMISS_KEY, Date.now().toString());
+      setVisible(true);
+      hideTimer = setTimeout(() => setVisible(false), SHOW_FOR_MS);
+    }, delay);
+    return () => {
+      clearTimeout(showTimer);
+      if (hideTimer) clearTimeout(hideTimer);
+    };
   }, []);
 
   function markDismissed() {
