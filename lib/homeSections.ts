@@ -1,21 +1,26 @@
 import { prisma } from "@/lib/prisma";
 
-const HOME_SLOTS = 6;
+const HOME_SLOTS = 6; // ব্লগের জন্য
+const HOME_PRODUCT_SLOTS = 10; // আমাদের পণ্য সমূহ: ৫ + ৫
 
 // PIN করা আইটেম আগে তার নির্দিষ্ট পজিশনে বসানো হয়, বাকি খালি স্লট filler দিয়ে ভরাট হয়
-function fillHomeSlots(pinned: any[], filler: any[]) {
-  const slots: any[] = new Array(HOME_SLOTS).fill(null);
+function fillHomeSlots(
+  pinned: any[],
+  filler: any[],
+  slotCount: number = HOME_SLOTS,
+) {
+  const slots: any[] = new Array(slotCount).fill(null);
   for (const item of pinned) {
     if (
       item.homeOrder >= 1 &&
-      item.homeOrder <= HOME_SLOTS &&
+      item.homeOrder <= slotCount &&
       !slots[item.homeOrder - 1]
     ) {
       slots[item.homeOrder - 1] = item;
     }
   }
   let fi = 0;
-  for (let i = 0; i < HOME_SLOTS; i++) {
+  for (let i = 0; i < slotCount; i++) {
     if (!slots[i] && fi < filler.length) {
       slots[i] = filler[fi];
       fi++;
@@ -36,10 +41,10 @@ export async function getHomeProducts() {
       where: { isActive: true, homeOrder: null },
       include: { images: true, category: true },
       orderBy: { createdAt: "desc" },
-      take: HOME_SLOTS,
+      take: HOME_PRODUCT_SLOTS,
     }),
   ]);
-  return fillHomeSlots(pinned, filler);
+  return fillHomeSlots(pinned, filler, HOME_PRODUCT_SLOTS);
 }
 
 // আমাদের কৃষি বিষয়ক ব্লগ — lang="en" দিলে যেসব ব্লগের ইংরেজি অনুবাদ নেই সেগুলো বাদ পড়বে

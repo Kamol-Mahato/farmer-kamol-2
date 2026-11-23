@@ -402,13 +402,16 @@ export default function NewProductPage() {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 bg-white"
             >
               <option value="কেজি">কেজি</option>
+              <option value="৫০০ গ্রাম">৫০০ গ্রাম</option>
+              <option value="২৫০ গ্রাম">২৫০ গ্রাম</option>
               <option value="গ্রাম">গ্রাম</option>
               <option value="লিটার">লিটার</option>
               <option value="মিলি">মিলি</option>
               <option value="পিস">পিস</option>
+              <option value="ডজন">ডজন</option>
               <option value="প্যাকেট">প্যাকেট</option>
               <option value="বোতল">বোতল</option>
-              <option value="কোটি">কোটি</option>
+              <option value="কোটি">কৌটা</option>
             </select>
           </div>
           <div>
@@ -491,12 +494,12 @@ export default function NewProductPage() {
 
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Home Page PIN (1–6) — খালি রাখলে auto
+          Home Page PIN (1–10) — খালি রাখলে auto
           </label>
           <input
             type="number"
             min={1}
-            max={6}
+            max={10}
             name="homeOrder"
             value={form.homeOrder}
             onChange={handleChange}
