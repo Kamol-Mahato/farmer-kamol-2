@@ -10,7 +10,9 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import {
   CHAT_WELCOME_TEXT,
   CHAT_WELCOME_TEXT_EN,
+  buildAutoReplyText,
 } from "@/lib/chatWelcomeMessage";
+import { siteConfig } from "@/lib/siteConfig";
 import { getApiLocale } from "@/lib/apiLocale";
 
 export const dynamic = "force-dynamic";
@@ -161,6 +163,36 @@ export async function POST(req: Request) {
         createdAt: messagePayload.createdAt,
       },
     });
+
+    // 🤖 প্রথম মেসেজের সাথে সাথে স্বয়ংক্রিয় বার্তা (শুধু নতুন কনভারসেশনে একবার)
+    if (isNewConversation) {
+      try {
+        const autoReply = await prisma.chatMessage.create({
+          data: {
+            conversationId: conversation.id,
+            senderType: "SYSTEM",
+            text: buildAutoReplyText(
+              siteConfig.contact.whatsapp,
+              siteConfig.contact.phoneDisplay,
+              trimmed,
+              getApiLocale(req) === "en",
+            ),
+            isRead: false,
+          },
+        });
+        chatEvents.emitMessage({
+          id: autoReply.id,
+          conversationId: conversation.id,
+          senderType: "SYSTEM" as const,
+          senderId: null,
+          text: autoReply.text,
+          isRead: false,
+          createdAt: autoReply.createdAt.toISOString(),
+        });
+      } catch (err) {
+        console.error("CHAT AUTO REPLY ERROR:", err);
+      }
+    }
 
     void sendTelegramAlert(
       `💬 <b>নতুন চ্যাট মেসেজ</b>\n` +

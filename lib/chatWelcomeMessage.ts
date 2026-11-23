@@ -6,3 +6,27 @@ export const CHAT_WELCOME_TEXT =
 // ইংরেজি (/en) ভিজিটরদের জন্য একই বার্তা
 export const CHAT_WELCOME_TEXT_EN =
   "Welcome to Farmer Kamol 🌿\n\nWe deliver pure, quality local (desi) products straight from Raiganj, Sirajganj to your doorstep.\n\nHow can we help you? Type your question below and our representative will join you shortly.\n\n📞 For a quick reply, call or WhatsApp: 01737939688\n\n🌐 You can also visit our Facebook page and YouTube channel:\n- [Facebook](https://www.facebook.com/farmerkamol)\n- [YouTube](https://www.youtube.com/@FarmerKamol)";
+
+// 🤖 প্রথম মেসেজ পাঠানোর সাথে সাথে স্বয়ংক্রিয় বার্তা (WhatsApp লিংকসহ)
+function buildWhatsAppUrl(whatsapp: string, question: string) {
+  const short = question.length > 150 ? question.slice(0, 150) + "…" : question;
+  const message = `আমি ওয়েবসাইট চ্যাটে জিজ্ঞেস করেছিলাম: ${short}`;
+  // ( ) এনকোড না হলে মার্কডাউন লিংক ভেঙে যায়, তাই হাতে এনকোড করা হলো
+  const encoded = encodeURIComponent(message)
+    .replace(/\(/g, "%28")
+    .replace(/\)/g, "%29");
+  return `https://wa.me/${whatsapp}?text=${encoded}`;
+}
+
+export function buildAutoReplyText(
+  whatsapp: string,
+  phoneDisplay: string,
+  question: string,
+  isEn: boolean,
+) {
+  const url = buildWhatsAppUrl(whatsapp, question);
+  if (isEn) {
+    return `✅ Thank you! Your message has been forwarded to our representative.\n\nFor a faster reply, message us directly on WhatsApp or call ${phoneDisplay}:\n- [Reply on WhatsApp](${url})`;
+  }
+  return `✅ ধন্যবাদ! আপনার বার্তা আমাদের প্রতিনিধির কাছে পাঠানো হয়েছে।\n\nদ্রুত উত্তর পেতে সরাসরি হোয়াটসঅ্যাপ করুন অথবা কল করুন ${phoneDisplay} নম্বরে:\n- [WhatsApp-এ উত্তর পান](${url})`;
+}
