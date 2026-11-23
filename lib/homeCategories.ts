@@ -50,7 +50,7 @@ export const HOME_CATEGORY_DEFS: Def[] = [
   {
     id: "gur",
     slugs: ["khejur-gur"],
-    words: ["গুড়", "jaggery", "khejur"],
+    words: ["\u0997\u09C1\u09DC", "\u0997\u09C1\u09A1\u09BC", "jaggery", "khejur"],
     labelBn: "গুড়",
     labelEn: "Jaggery",
     titleBn: "Farmer Kamol এর গুড়",

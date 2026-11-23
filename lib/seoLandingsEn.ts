@@ -26,7 +26,7 @@ export const seoLandingsEn: SeoLanding[] = [
       "Sirajganj date palm jaggery",
       "date palm jaggery online Bangladesh",
     ],
-    productMatch: ["গুড়"],
+    productMatch: ["\u0997\u09C1\u09DC", "\u0997\u09C1\u09A1\u09BC", "খেজুর", "gur", "khejur"],
     intro:
       "Date palm jaggery is one of the most loved flavours of a Bengali winter. At Farmer Kamol, we collect date palm sap from the tappers (gachis) of our own area, Sirajganj, and supply liquid (jhola) and granular (danadar) jaggery made from that sap. You can watch the whole process, from collection to preparation, in the videos on our YouTube channel. We deliver in 1 kg and half-kg packs across Bangladesh.",
     sections: [
