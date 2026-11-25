@@ -5,6 +5,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { verifyAdminOrAgent } from "@/lib/adminAuth";
 import { submitUrls } from "@/lib/indexnow";
 import { siteConfig } from "@/lib/siteConfig";
+import { normalizeSizes } from "@/lib/productSizes";
 
 export async function GET(
   req: NextRequest,
@@ -18,7 +19,11 @@ export async function GET(
     const { id } = await params;
     const product = await prisma.product.findUnique({
       where: { id: parseInt(id) },
-      include: { images: true, category: true },
+      include: {
+        images: true,
+        category: true,
+        sizes: { orderBy: { sortOrder: "asc" } },
+      },
     });
     if (!product)
       return NextResponse.json({ error: "পণ্য পাওয়া যায়নি" }, { status: 404 });
@@ -45,6 +50,11 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
+    const sizeResult = normalizeSizes(body.sizes);
+    if (sizeResult.ok === false) {
+      return NextResponse.json({ error: sizeResult.error }, { status: 400 });
+    }
+
     const product = await prisma.product.update({
       where: { id: parseInt(id) },
       data: {
@@ -69,6 +79,10 @@ export async function PUT(
         isActive: body.isActive,
         isOutOfStockVisible: body.isOutOfStockVisible,
         priceType: body.priceType || "FIXED",
+        // ✅ sizes পাঠানো হলে পুরনো সব মুছে নতুন তালিকা সেভ (না পাঠালে অপরিবর্তিত)
+        ...(Array.isArray(body.sizes)
+          ? { sizes: { deleteMany: {}, create: sizeResult.sizes } }
+          : {}),
         homeOrder:
           body.homeOrder === "" ||
           body.homeOrder === null ||

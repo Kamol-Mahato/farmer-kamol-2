@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 import { translateUnit } from "@/lib/unitTranslate";
 import { getSavePercent } from "@/lib/pricing";
+import { buildSizeChoices, type PublicSize } from "@/lib/sizeChoices";
+import SizeChips from "@/app/components/SizeChips";
 import { sendGAEvent } from "@next/third-parties/google";
 
 type Product = {
@@ -18,6 +20,7 @@ type Product = {
   priceType: "FIXED" | "NEGOTIABLE";
   images: { imageUrl: string }[];
   category: { name: string; nameEn?: string | null } | null;
+  sizes?: PublicSize[];
 };
 
 type DeliveryChargeMode = "NORMAL" | "FREE" | "HALF";
@@ -88,11 +91,18 @@ export default function ProductCard({
   const [added, setAdded] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
   const [imgVisible, setImgVisible] = useState(false);
-  const isOutOfStock = product.stockQty <= 0;
-  const savePercent = getSavePercent(
-    product.pricePerUnit,
-    product.discountPrice,
-  );
+  const choices = buildSizeChoices(product, "en");
+  const hasSizes = choices.length > 1;
+  const [selIdx, setSelIdx] = useState(() => {
+    const i = choices.findIndex((c) => !c.outOfStock);
+    return i < 0 ? 0 : i;
+  });
+  const choice = choices[Math.min(selIdx, choices.length - 1)];
+  const isOutOfStock = choice.outOfStock;
+  const allOutOfStock = choices.every((c) => c.outOfStock);
+  const savePercent = getSavePercent(choice.price, choice.discountPrice);
+  const shownPrice =
+    savePercent !== null ? (choice.discountPrice as number) : choice.price;
   const images =
     product.images?.length > 0
       ? product.images
@@ -140,7 +150,10 @@ export default function ProductCard({
   function handleAddToCart() {
     // ✅ key: "farmer_kamol_cart" — same key everywhere so bn/en share one cart
     const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]");
-    const existing = cart.find((i: { id: number }) => i.id === product.id);
+    const existing = cart.find(
+      (i: { id: number; sizeId?: number | null }) =>
+        i.id === product.id && (i.sizeId ?? null) === choice.sizeId,
+    );
 
     if (existing) {
       existing.quantity += 1;
@@ -148,11 +161,10 @@ export default function ProductCard({
       cart.push({
         id: product.id,
         name: product.name,
-        price:
-          savePercent !== null
-            ? (product.discountPrice as number)
-            : product.pricePerUnit,
-        unit: product.unit,
+        price: shownPrice,
+        unit: choice.sizeId ? choice.label : product.unit,
+        sizeId: choice.sizeId,
+        sizeLabel: choice.sizeId ? choice.label : null,
         image: mainImage,
         quantity: 1,
       });
@@ -171,10 +183,7 @@ export default function ProductCard({
           {
             item_id: String(product.id),
             item_name: product.name,
-            price:
-              savePercent !== null
-                ? product.discountPrice
-                : product.pricePerUnit,
+            price: shownPrice,
             quantity: 1,
           },
         ],
@@ -212,7 +221,7 @@ export default function ProductCard({
                 {savePercent}% Save
               </span>
             )}
-            {isOutOfStock && (
+            {allOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                   Out of Stock
@@ -269,6 +278,29 @@ export default function ProductCard({
               {displayName}
             </h2>
           </Link>
+          {hasSizes ? (
+            <div>
+              <div className="flex items-baseline gap-1 flex-wrap">
+                <span className="text-xs text-black font-bold">Price</span>
+                <span className="text-lg md:text-xl font-extrabold text-black">
+                  ৳ {shownPrice}
+                </span>
+                {savePercent !== null && (
+                  <span className="text-xs md:text-sm text-gray-500 line-through">
+                    ৳ {choice.price}
+                  </span>
+                )}
+              </div>
+              <SizeChips
+                choices={choices}
+                selected={selIdx}
+                onSelect={setSelIdx}
+                maxVisible={3}
+                compact
+                ariaLabel="Pack size"
+              />
+            </div>
+          ) : (
           <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
             <span className="text-xs md:text-sm bg-green-800 font-bold text-white font-bold text-white px-2 py-1 md:px-2.5 md:py-2 rounded-full whitespace-nowrap w-fit">
               Per {translateUnit(product.unit)}
@@ -287,7 +319,8 @@ export default function ProductCard({
                 </span>
               )}
             </div>
-          </div>
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-2 pt-2 border-t border-gray-100 px-1 pb-2">
@@ -324,7 +357,11 @@ export default function ProductCard({
             </button>
             <Link
               ref={btnRef}
-              href={isOutOfStock ? "#" : `/en/order?productId=${product.id}`}
+              href={
+                isOutOfStock
+                  ? "#"
+                  : `/en/order?productId=${product.id}${choice.sizeId ? `&sizeId=${choice.sizeId}` : ""}`
+              }
               onClick={() =>
                 sendGAEvent({
                   event: "begin_checkout_click",

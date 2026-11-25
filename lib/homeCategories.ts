@@ -74,7 +74,7 @@ function matches(
 export async function getHomeCategoryGroups() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    include: { images: true, category: true },
+    include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
     orderBy: { createdAt: "desc" },
   });
 

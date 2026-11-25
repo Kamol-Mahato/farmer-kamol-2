@@ -34,12 +34,12 @@ export async function getHomeProducts() {
   const [pinned, filler] = await Promise.all([
     prisma.product.findMany({
       where: { isActive: true, homeOrder: { not: null } },
-      include: { images: true, category: true },
+      include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
       orderBy: { homeOrder: "asc" },
     }),
     prisma.product.findMany({
       where: { isActive: true, homeOrder: null },
-      include: { images: true, category: true },
+      include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
       orderBy: { createdAt: "desc" },
       take: HOME_PRODUCT_SLOTS,
     }),

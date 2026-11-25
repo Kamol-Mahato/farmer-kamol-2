@@ -22,7 +22,7 @@ async function getData(terms: string[]) {
             { nameBanglish: { contains: t } },
           ]),
         },
-        include: { images: true, category: true },
+        include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
         orderBy: { createdAt: "desc" },
       }),
       prisma.systemControlCenter.findUnique({ where: { id: 1 } }),

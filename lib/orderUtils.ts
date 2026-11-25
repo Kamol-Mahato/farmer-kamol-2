@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/siteConfig";
+import { getUnitToKgMultiplier } from "@/lib/unitKg";
 // ✅ Server-side delivery charge calculation — client থেকে আসা সংখ্যা trust করা হয় না
 // এখন charge গুলো DB (SystemControlCenter) থেকে আসে, hardcode না
 export async function calculateDeliveryCharge(
@@ -158,17 +159,5 @@ export async function resolveOrderIdFromCustomId(
   return order?.id ?? null;
 }
 
-// ✅ পণ্যের একক (unit) অনুযায়ী কত KG-এর সমান, তা বের করার জন্য
-export function getUnitToKgMultiplier(unit: string): number {
-  const map: Record<string, number> = {
-    কেজি: 1,
-    "৫০০ গ্রাম": 0.5,
-    "২৫০ গ্রাম": 0.25,
-    গ্রাম: 0.001,
-    লিটার: 1,
-    মিলি: 0.001,
-    পিস: 1,
-    ডজন: 1,
-  };
-  return map[unit] ?? 1;
-}
+// ✅ unit → KG হিসাব এখন lib/unitKg.ts-এ, আগের মতোই এখান থেকে import করা যাবে
+export { getUnitToKgMultiplier };

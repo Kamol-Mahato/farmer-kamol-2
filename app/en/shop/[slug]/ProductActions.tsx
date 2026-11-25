@@ -1,6 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { getSavePercent } from "@/lib/pricing";
+import { buildSizeChoices, type PublicSize } from "@/lib/sizeChoices";
+import SizeChips from "@/app/components/SizeChips";
 
 type Product = {
   id: number;
@@ -10,6 +13,9 @@ type Product = {
   unit: string;
   stockQty: number;
   priceType: "FIXED" | "NEGOTIABLE";
+  basePrice?: number;
+  baseDiscountPrice?: number | null;
+  sizes?: PublicSize[];
 };
 
 // ✅ same toast logic as ProductCard, English version
@@ -66,25 +72,51 @@ function buildWhatsAppLink(productName: string) {
 export default function ProductActions({
   product,
   mainImage,
+  children,
 }: {
   product: Product;
   mainImage: string;
+  children?: React.ReactNode;
 }) {
   const [added, setAdded] = useState(false);
-  const isOutOfStock = product.stockQty <= 0;
+  const choices = buildSizeChoices(
+    {
+      unit: product.unit,
+      pricePerUnit: product.basePrice ?? product.pricePerUnit,
+      discountPrice: product.baseDiscountPrice ?? null,
+      stockQty: product.stockQty,
+      sizes: product.sizes,
+    },
+    "en",
+  );
+  const hasSizes = choices.length > 1;
+  const [selIdx, setSelIdx] = useState(() => {
+    const i = choices.findIndex((c) => !c.outOfStock);
+    return i < 0 ? 0 : i;
+  });
+  const choice = choices[Math.min(selIdx, choices.length - 1)];
+  const isOutOfStock = choice.outOfStock;
+  const savePercent = getSavePercent(choice.price, choice.discountPrice);
+  const shownPrice =
+    savePercent !== null ? (choice.discountPrice as number) : choice.price;
   const displayName = product.nameEn || product.name;
 
   function handleAddToCart() {
     const cart = JSON.parse(localStorage.getItem("farmer_kamol_cart") || "[]");
-    const existing = cart.find((i: { id: number }) => i.id === product.id);
+    const existing = cart.find(
+      (i: { id: number; sizeId?: number | null }) =>
+        i.id === product.id && (i.sizeId ?? null) === choice.sizeId,
+    );
     if (existing) {
       existing.quantity += 1;
     } else {
       cart.push({
         id: product.id,
         name: product.name,
-        price: product.pricePerUnit,
-        unit: product.unit,
+        price: shownPrice,
+        unit: choice.sizeId ? choice.label : product.unit,
+        sizeId: choice.sizeId,
+        sizeLabel: choice.sizeId ? choice.label : null,
         image: mainImage,
         quantity: 1,
       });
@@ -110,6 +142,39 @@ export default function ProductActions({
   }
 
   return (
+    <div>
+      {hasSizes && (
+        <>
+          <div className="mb-4 flex items-baseline gap-2 flex-wrap">
+            <span className="text-3xl font-extrabold text-black">
+              ৳ {shownPrice}
+            </span>
+            <span className="text-sm text-gray-500">/ {choice.label}</span>
+            {savePercent !== null && (
+              <>
+                <span className="text-lg text-gray-500 line-through">
+                  ৳ {choice.price}
+                </span>
+                <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {savePercent}% Save
+                </span>
+              </>
+            )}
+          </div>
+          <div className="mb-5">
+            <p className="text-sm font-semibold text-gray-700 mb-2">
+              Choose pack size:
+            </p>
+            <SizeChips
+              choices={choices}
+              selected={selIdx}
+              onSelect={setSelIdx}
+              ariaLabel="Pack size"
+            />
+          </div>
+          {children}
+        </>
+      )}
     <div className="flex gap-3">
       <button
         onClick={handleAddToCart}
@@ -125,7 +190,11 @@ export default function ProductActions({
         {added ? "✓ Added" : "🛒 Add to Cart"}
       </button>
       <Link
-        href={isOutOfStock ? "#" : `/en/order?productId=${product.id}`}
+        href={
+          isOutOfStock
+            ? "#"
+            : `/en/order?productId=${product.id}${choice.sizeId ? `&sizeId=${choice.sizeId}` : ""}`
+        }
         className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center text-center transition ${
           isOutOfStock
             ? "bg-gray-100 text-gray-500 cursor-not-allowed pointer-events-none"
@@ -133,7 +202,8 @@ export default function ProductActions({
         }`}
       >
         Order Now
-      </Link>
+        </Link>
+    </div>
     </div>
   );
 }

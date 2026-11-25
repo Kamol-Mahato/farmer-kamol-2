@@ -18,7 +18,7 @@ export default async function ShopPage() {
   const [products, systemSettings] = await Promise.all([
     prisma.product.findMany({
       where: { isActive: true },
-      include: { images: true, category: true },
+      include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.systemControlCenter.findUnique({ where: { id: 1 } }),

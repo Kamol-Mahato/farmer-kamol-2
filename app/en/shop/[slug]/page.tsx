@@ -17,6 +17,7 @@ const getProduct = cache((slug: string) =>
     include: {
       images: true,
       category: true,
+      sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
       reviews: {
         where: { isApproved: true },
         include: { user: true },
@@ -70,12 +71,14 @@ export default async function ProductDetailPage({
           isActive: true,
           id: { not: product.id },
         },
-        include: { images: true, category: true },
+        include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
         take: 4,
       })
     : [];
   const mainImage = product.images?.[0]?.imageUrl || "/placeholder.jpg";
   const isOutOfStock = product.stockQty <= 0;
+  // ✅ সাইজ থাকলে দাম/চিপ/বিবরণ ProductActions-এর ভেতরে দেখানো হবে
+  const sizeUi = product.priceType === "FIXED" && product.sizes.length > 0;
   const displayName = product.nameEn || product.name;
   const displayDescription = product.descriptionEn || product.description;
   const displayCategory = product.category?.nameEn || product.category?.name;
@@ -257,6 +260,7 @@ export default async function ProductDetailPage({
                 </span>
               </div>
             )}
+            {!sizeUi && (
             <div className="mb-4">
               {product.priceType === "NEGOTIABLE" ? (
                 <p className="text-lg font-bold text-green-700">
@@ -295,8 +299,9 @@ export default async function ProductDetailPage({
                   )}
                 </div>
               )}
-            </div>
-            {displayDescription && (
+              </div>
+              )}
+              {!sizeUi && displayDescription && (
               <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">
                 {displayDescription}
               </p>
@@ -313,12 +318,21 @@ export default async function ProductDetailPage({
                   ) !== null
                     ? (product.discountPrice as number)
                     : product.pricePerUnit,
-                unit: product.unit,
-                stockQty: product.stockQty,
-                priceType: product.priceType,
-              }}
-              mainImage={mainImage}
-            />
+                    unit: product.unit,
+                    stockQty: product.stockQty,
+                    priceType: product.priceType,
+                    basePrice: product.pricePerUnit,
+                    baseDiscountPrice: product.discountPrice,
+                    sizes: product.sizes,
+                  }}
+                  mainImage={mainImage}
+                >
+                  {sizeUi && displayDescription && (
+                    <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">
+                      {displayDescription}
+                    </p>
+                  )}
+                </ProductActions>
           </div>
         </div>
         {/* Reviews */}

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default async function ShopPage() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    include: { images: true, category: true },
+    include: { images: true, category: true, sizes: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
     orderBy: { createdAt: "desc" },
   });
   const systemSettings = await prisma.systemControlCenter.findUnique({

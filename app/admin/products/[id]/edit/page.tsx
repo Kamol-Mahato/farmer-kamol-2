@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import SizeEditor, { type SizeRow } from "@/app/admin/products/SizeEditor";
 
 type Category = { id: number; name: string; nameEn: string | null };
 
@@ -15,6 +16,7 @@ export default function EditProductPage({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [sizes, setSizes] = useState<SizeRow[]>([]);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -50,6 +52,28 @@ export default function EditProductPage({
     fetch(`/api/admin/products/${id}`)
       .then((res) => res.json())
       .then((data) => {
+        setSizes(
+          Array.isArray(data.sizes)
+            ? data.sizes.map(
+                (s: {
+                  label: string;
+                  labelEn: string | null;
+                  stockKg: number;
+                  price: number;
+                  discountPrice: number | null;
+                  isActive: boolean;
+                }) => ({
+                  label: s.label || "",
+                  labelEn: s.labelEn || "",
+                  stockKg: String(s.stockKg),
+                  price: String(s.price),
+                  discountPrice:
+                    s.discountPrice != null ? String(s.discountPrice) : "",
+                  isActive: s.isActive ?? true,
+                }),
+              )
+            : [],
+        );
         setForm({
           name: data.name || "",
           slug: data.slug || "",
@@ -141,6 +165,7 @@ export default function EditProductPage({
             : null,
           stockQty: parseFloat(form.stockQty),
           imageUrls: form.imageUrls,
+          sizes,
         }),
       });
       const data = await res.json();
@@ -426,6 +451,8 @@ export default function EditProductPage({
             className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500 w-40"
           />
         </div>
+        <SizeEditor sizes={sizes} onChange={setSizes} />
+
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <div className="flex gap-4">
           <button

@@ -6,6 +6,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { sendPushToCustomers } from "@/lib/webpush";
 import { submitUrls } from "@/lib/indexnow";
 import { siteConfig } from "@/lib/siteConfig";
+import { normalizeSizes } from "@/lib/productSizes";
 
 export async function GET() {
   const isAuthorized = await verifyAdminOrAgent();
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
       isOutOfStockVisible,
       priceType,
       homeOrder,
+      sizes,
     } = body;
 
     if (!name || !String(name).trim()) {
@@ -86,6 +88,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "স্টক পরিমাণ আবশ্যক" }, { status: 400 });
     }
 
+    const sizeResult = normalizeSizes(sizes);
+
+    if (sizeResult.ok === false) {
+      return NextResponse.json(
+        { error: sizeResult.error },
+        { status: 400 },
+      );
+    }
+
     const product = await prisma.product.create({
       data: {
         name,
@@ -105,6 +116,9 @@ export async function POST(request: Request) {
         isActive: isActive ?? true,
         isOutOfStockVisible: isOutOfStockVisible ?? true,
         priceType: priceType || "FIXED",
+        sizes: sizeResult.sizes.length
+          ? { create: sizeResult.sizes }
+          : undefined,
         homeOrder: homeOrder ? Number(homeOrder) : null, // Fix: homeOrder যুক্ত করা হয়েছে
         images:
           imageUrls && imageUrls.length > 0

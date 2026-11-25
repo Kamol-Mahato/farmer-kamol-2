@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import SizeEditor, { type SizeRow } from "@/app/admin/products/SizeEditor";
 
 type Category = { id: number; name: string; nameEn: string | null };
 
@@ -11,6 +12,7 @@ export default function NewProductPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [sizes, setSizes] = useState<SizeRow[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/categories")
@@ -175,6 +177,7 @@ export default function NewProductPage() {
             : null,
           stockQty: parseFloat(form.stockQty),
           imageUrls: form.imageUrls,
+          sizes,
         }),
       });
 
@@ -507,6 +510,8 @@ export default function NewProductPage() {
             className="border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-green-500 w-40"
           />
         </div>
+
+        <SizeEditor sizes={sizes} onChange={setSizes} />
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
